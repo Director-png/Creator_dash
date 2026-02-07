@@ -11,7 +11,7 @@ st.set_page_config(page_title="Creator Strategy Suite", layout="wide", page_icon
 USER_DATABASE = {
     "client_fashion_01": "Ananya Sharma",
     "client_tech_02": "Rahul Verma",
-    "void_admin": "Deepak (Admin)"
+    "void_admin": "Director (Admin)"
 }
 
 # --- 2. AUTHENTICATION LOGIC ---
@@ -132,3 +132,4 @@ if check_password():
         st.caption(f"Live Server Sync: {now} IST | Build v4.5 (Research Mode)")
     else:
         st.warning("Please select or search a keyword to begin.")
+
