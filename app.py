@@ -17,20 +17,19 @@ def get_real_trends(keyword):
     
     try:
         response = requests.post(url, headers=headers, data=payload)
+        response.raise_for_status() # This will catch if the API key is bad
         data = response.json()
         
-        # Pulling different data points for a better score
         related = len(data.get('relatedSearches', []))
         questions = len(data.get('peopleAlsoAsk', []))
         organic = len(data.get('organic', []))
         
-        # Math: Base 40 + weighted points
         score = 40 + (related * 5) + (questions * 3) + (organic * 1)
         return min(score, 100)
     except Exception as e:
-        # If the API fails, this prevents the whole app from crashing
-        return 50 
-
+        # This will show the actual error on your website so we can fix it!
+        st.error(f"Error fetching {keyword}: {e}")
+        return 50
 # --- DASHBOARD LOGIC ---
 # These are the keywords your client cares about
 keywords = ["Cotton Kurti", "Sunscreen", "Travel Vlogs"]
@@ -52,3 +51,4 @@ df['Status'] = df['Velocity'].apply(lambda x: "🔥 Hot" if x > 70 else "🚀 Ri
 st.table(df)
 
 st.info("💡 **Pro-Tip:** Keywords with a velocity over 70 are perfect for immediate Reel content.")
+
