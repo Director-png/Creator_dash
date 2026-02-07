@@ -10,10 +10,7 @@ API_KEY = "cfe3d0828971dc09543b2eaa2abc4b67d29d21a0"
 
 st.title("📈 Live Market Pulse (India)")
 
-import streamlit as st
-import pandas as pd
-import requests
-import json
+
 
 
 
@@ -66,7 +63,8 @@ st.bar_chart(df.set_index('Trend Name'))
 # Adding a nice status column for the table
 df['Status'] = df['Velocity'].apply(lambda x: "🔥 Hot" if x > 70 else "🚀 Rising" if x > 50 else "Stable")
 st.table(df)
-
+import datetime
+st.caption(f"Last sync with Google India: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}")
 st.info("💡 **Pro-Tip:** Keywords with a velocity over 70 are perfect for immediate Reel content.")
 
 # --- DASHBOARD LOGIC ---
@@ -90,5 +88,6 @@ df['Status'] = df['Velocity'].apply(lambda x: "🔥 Hot" if x > 70 else "🚀 Ri
 st.table(df)
 
 st.info("💡 **Pro-Tip:** Keywords with a velocity over 70 are perfect for immediate Reel content.")
+
 
 
