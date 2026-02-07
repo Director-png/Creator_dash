@@ -7,32 +7,53 @@ import datetime
 # --- CONFIG ---
 st.set_page_config(page_title="Creator Strategy Suite", layout="wide", page_icon="🚀")
 
-# --- 1. MULTI-CLIENT DATABASE ---
-USER_DATABASE = {
-    "client_fashion_01": "Ananya Sharma",
-    "client_tech_02": "Rahul Verma",
-    "void_admin": "Director (Admin)"
-}
+# --- 1. USER DATABASE ---
+# We start with your Master Admin key.
+if "user_db" not in st.session_state:
+    st.session_state["user_db"] = {
+        "void_admin": "Deepak (Admin)",
+        "creator_test": "Beta Tester"
+    }
 
-# --- 2. AUTHENTICATION LOGIC ---
-def check_password():
+# --- 2. AUTHENTICATION & REGISTRATION ---
+def login_system():
     if "authenticated" not in st.session_state:
         st.session_state["authenticated"] = False
         st.session_state["client_name"] = ""
 
     if not st.session_state["authenticated"]:
-        st.title("🔒 Private Strategy Portal")
-        st.write("Welcome. Please enter your unique access key.")
+        st.title("🔐 Creator Intelligence Portal")
         
-        pwd_input = st.text_input("Access Key:", type="password")
+        tab1, tab2 = st.tabs(["Login", "Create Account"])
         
-        if st.button("Unlock Dashboard"):
-            if pwd_input in USER_DATABASE:
-                st.session_state["authenticated"] = True
-                st.session_state["client_name"] = USER_DATABASE[pwd_input]
-                st.rerun()
-            else:
-                st.error("❌ Invalid Key. Access Denied.")
+        with tab1:
+            st.subheader("Existing User")
+            pwd_input = st.text_input("Enter your Access Key:", type="password", key="login_pwd")
+            if st.button("Unlock Dashboard"):
+                if pwd_input in st.session_state["user_db"]:
+                    st.session_state["authenticated"] = True
+                    st.session_state["client_name"] = st.session_state["user_db"][pwd_input]
+                    st.rerun()
+                else:
+                    st.error("Key not found. Please register first.")
+        
+        with tab2:
+            st.subheader("New Joiner")
+            new_name = st.text_input("Your Name/Brand Name:")
+            new_key = st.text_input("Choose your unique Access Key:", type="password", help="This is what you will use to log in.")
+            
+            if st.button("Register & Login"):
+                if new_key and new_name:
+                    if new_key in st.session_state["user_db"]:
+                        st.error("This key is already taken! Try another one.")
+                    else:
+                        st.session_state["user_db"][new_key] = new_name
+                        st.session_state["authenticated"] = True
+                        st.session_state["client_name"] = new_name
+                        st.success("Account Created!")
+                        st.rerun()
+                else:
+                    st.warning("Please fill in both fields.")
         return False
     return True
 
@@ -46,76 +67,63 @@ def get_real_trends(keyword):
     try:
         response = requests.post(url, headers=headers, data=payload)
         data = response.json()
-        
         related = len(data.get('relatedSearches', []))
         questions = len(data.get('peopleAlsoAsk', []))
         organic = data.get('organic', [])
-        
-        # Calculate snippet density for movement
         snippet_text = " ".join([obj.get('snippet', '').lower() for obj in organic])
         mention_count = snippet_text.count(keyword.lower())
-        
-        # Sensitivity Math: Base 35 + weighted points
         score = 35 + (related * 6) + (questions * 4) + (mention_count * 1.5)
         return min(round(score), 100)
     except:
         return 50 
 
 # --- MAIN APP EXECUTION ---
-if check_password():
-    # --- SIDEBAR & SEARCH ---
+if login_system():
+    # --- SIDEBAR ---
     st.sidebar.title("Navigation")
-    st.sidebar.success(f"User: {st.session_state['client_name']}")
+    st.sidebar.success(f"Welcome, {st.session_state['client_name']}!")
     
     if st.sidebar.button("Logout"):
         st.session_state["authenticated"] = False
         st.rerun()
 
     st.sidebar.divider()
-    
     st.sidebar.header("🔍 Custom Research")
     user_search = st.sidebar.text_input("Analyze new trend:", placeholder="e.g. Linen Pants")
     
-    st.sidebar.header("Preset Trackers")
     presets = st.sidebar.multiselect(
         "Quick Select", 
         ["Cotton Kurti", "Sunscreen", "Travel Vlogs", "Indo-Western", "Skincare", "Home Decor"],
         default=["Cotton Kurti", "Sunscreen"]
     )
 
-    # Merge presets with manual search
     active_keywords = presets.copy()
     if user_search:
         active_keywords.append(user_search)
 
     # --- MAIN UI ---
     st.title("📈 Creator Intelligence Dashboard")
-    st.write(f"Tailored insights for **{st.session_state['client_name']}**")
     
-    # Strategy Section
     with st.expander("🔮 STRATEGIST'S WEEKLY FORECAST", expanded=True):
-        st.info("**Advice:** High interaction on 'Indo-Western' fusion. Use trending Bollywood audio for 20% better reach.")
+        st.info(f"Hey {st.session_state['client_name']}, based on current data, we recommend focusing on 'Transition Reels' this week.")
 
-    # Data Processing
     if active_keywords:
         real_data = []
-        with st.spinner('Analyzing market velocity...'):
+        with st.spinner('Calculating market velocity...'):
             for kw in active_keywords:
                 score = get_real_trends(kw)
                 real_data.append({"Trend": kw, "Velocity": score})
 
         df = pd.DataFrame(real_data)
         
-        # Feedback for custom search
         if user_search:
             search_score = df[df['Trend'] == user_search]['Velocity'].values[0]
             if search_score > 70:
                 st.balloons()
-                st.success(f"🔥 **Hot Opportunity!** '{user_search}' has massive search density right now.")
+                st.success(f"🔥 **Hot Opportunity!** '{user_search}' is peaking.")
             else:
-                st.warning(f"⚖️ **Steady.** '{user_search}' is consistent, but not viral yet.")
+                st.warning(f"⚖️ **Steady.** '{user_search}' has consistent volume.")
 
-        # Visuals
         col1, col2 = st.columns([2, 1])
         with col1:
             st.subheader("Velocity Index")
@@ -128,8 +136,5 @@ if check_password():
             st.dataframe(df.set_index('Trend'), use_container_width=True)
 
         st.divider()
-        now = datetime.datetime.now().strftime('%Y-%m-%d %I:%M %p')
-        st.caption(f"Live Server Sync: {now} IST | Build v4.5 (Research Mode)")
-    else:
-        st.warning("Please select or search a keyword to begin.")
-
+        now = datetime.datetime.now().strftime('%d %b, %Y | %I:%M %p')
+        st.caption(f"Sync: {now} IST | Build v5.0 (User Self-Service)")
