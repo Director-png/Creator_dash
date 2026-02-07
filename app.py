@@ -26,7 +26,16 @@ def get_real_trends(keyword):
         # New Formula: Base 40 + (Weights for different data points)
         # This ensures the bars aren't all the same height.
         score = 40 + (related * 5) + (questions * 3) + (organic * 1)
-        
+       # --- DASHBOARD LOGIC ---
+keywords = ["Cotton Kurti", "Sunscreen", "Travel Vlogs"]
+real_data = []
+
+for kw in keywords:
+    # Now get_real_trends(kw) returns the final score (e.g., 75)
+    score = get_real_trends(kw) 
+    real_data.append({"Trend Name": kw, "Velocity": score})
+
+df = pd.DataFrame(real_data) 
         # Cap it at 100
         return min(score, 100)
     except:
@@ -37,20 +46,11 @@ def get_real_trends(keyword):
     data = response.json()
     return data.get('relatedSearches', [])
 
-# --- DASHBOARD LOGIC ---
-keywords = ["Cotton Kurti", "Sunscreen", "Travel Vlogs"]
-real_data = []
 
-for kw in keywords:
-    results = get_real_trends(kw)
-    # We count how many people are searching related terms to get a 'velocity' score
-    score = len(results) * 10 + 50 
-    real_data.append({"Trend Name": kw, "Velocity": score})
-
-df = pd.DataFrame(real_data)
 
 # --- UI ---
 st.subheader("Real-Time Trends: India Market")
 st.bar_chart(df.set_index('Trend Name'))
 st.table(df)
+
 
