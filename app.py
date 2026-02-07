@@ -9,7 +9,7 @@ st.set_page_config(page_title="Creator Strategy Suite", layout="wide", page_icon
 
 # --- 1. USER & CATEGORY DATABASE ---
 if "user_db" not in st.session_state:
-    st.session_state["user_db"] = {"void_admin": "Deepak (Admin)"}
+    st.session_state["user_db"] = {"void_admin": "Director (Admin)"}
 
 if "my_categories" not in st.session_state:
     st.session_state["my_categories"] = ["Cotton Kurti", "Sunscreen"]
@@ -122,3 +122,4 @@ if login_system():
             if v_score > 70: 
                 st.balloons()
         st.divider()
+
