@@ -31,27 +31,36 @@ def get_real_trends(keyword):
         response = requests.post(url, headers=headers, data=payload)
         data = response.json()
         
-        # Pulling different data points for a better score
-        related = len(data.get('relatedSearches', []))
-        questions = len(data.get('peopleAlsoAsk', []))
-        organic = len(data.get('organic', []))
+        # --- NEW SENSITIVITY LOGIC ---
+        related_count = len(data.get('relatedSearches', []))
+        questions_count = len(data.get('peopleAlsoAsk', []))
+        organic_results = data.get('organic', [])
         
-        # Math: Base 40 + weighted points
-        score = 40 + (related * 5) + (questions * 3) + (organic * 1)
+        # Let's count how many times the keyword appears in the top snippets
+        # This shows how "dense" the topic is right now
+        snippet_text = " ".join([obj.get('snippet', '').lower() for obj in organic_results])
+        mention_count = snippet_text.count(keyword.lower())
+
+        # New Score Formula
+        # Base 30 + Related(x5) + Questions(x5) + Mentions(x2)
+        score = 30 + (related_count * 5) + (questions_count * 5) + (mention_count * 2)
+        
         return min(score, 100)
     except Exception as e:
-        # If the API fails, this prevents the whole app from crashing
         return 50 
 
 # --- DASHBOARD LOGIC ---
-# These are the keywords your client cares about
 keywords = ["Cotton Kurti", "Sunscreen", "Travel Vlogs"]
 real_data = []
 
+# Optional: Add a checkbox to see the raw data (Great for debugging!)
+show_debug = st.checkbox("Show Debug Info")
+
 for kw in keywords:
-    # We call the function and get the score directly
-    velocity_score = get_real_trends(kw)
-    real_data.append({"Trend Name": kw, "Velocity": velocity_score})
+    score = get_real_trends(kw)
+    real_data.append({"Trend Name": kw, "Velocity": score})
+    if show_debug:
+        st.write(f"Debug: {kw} calculated score is {score}")
 
 df = pd.DataFrame(real_data)
 
@@ -86,3 +95,4 @@ df['Status'] = df['Velocity'].apply(lambda x: "🔥 Hot" if x > 70 else "🚀 Ri
 st.table(df)
 
 st.info("💡 **Pro-Tip:** Keywords with a velocity over 70 are perfect for immediate Reel content.")
+
