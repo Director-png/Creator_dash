@@ -5,13 +5,12 @@ import json
 import datetime
 
 # --- CONFIG ---
-st.set_page_config(page_title="Creator Strategy Suite", layout="wide", page_icon="🎯")
+st.set_page_config(page_title="Creator Strategy Suite", layout="wide", page_icon="⚡")
 
 # --- 1. USER & CATEGORY DATABASE ---
 if "user_db" not in st.session_state:
     st.session_state["user_db"] = {"void_admin": "Deepak (Admin)"}
 
-# Initialize personal categories if not exists
 if "my_categories" not in st.session_state:
     st.session_state["my_categories"] = ["Cotton Kurti", "Sunscreen", "Travel Vlogs"]
 
@@ -24,7 +23,6 @@ def login_system():
     if not st.session_state["authenticated"]:
         st.title("🔐 Creator Intelligence Portal")
         tab1, tab2 = st.tabs(["Login", "Create Account"])
-        
         with tab1:
             pwd_input = st.text_input("Access Key:", type="password", key="l_pwd")
             if st.button("Unlock Dashboard"):
@@ -34,7 +32,6 @@ def login_system():
                     st.rerun()
                 else:
                     st.error("Key not found.")
-        
         with tab2:
             new_name = st.text_input("Your Name:")
             new_key = st.text_input("Choose Access Key:", type="password")
@@ -69,28 +66,25 @@ def get_real_trends(keyword):
 
 # --- MAIN APP ---
 if login_system():
-    # --- SIDEBAR: PERSONALIZATION ---
+    # --- SIDEBAR ---
     st.sidebar.title(f"👋 {st.session_state['client_name']}")
     
-    # Feature: Manage Quick Searches
-    st.sidebar.subheader("🛠 My Categories")
-    new_cat = st.sidebar.text_input("Add new quick category:", placeholder="e.g. AI Tools")
-    if st.sidebar.button("Add to Quick Select"):
-        if new_cat and new_cat not in st.session_state["my_categories"]:
-            st.session_state["my_categories"].append(new_cat)
-            st.sidebar.success(f"Added {new_cat}!")
-            st.rerun()
-
-    if st.sidebar.button("Clear My Categories"):
-        st.session_state["my_categories"] = []
-        st.rerun()
+    # 1. THE INSTANT SEARCH (Fixing your problem here)
+    st.sidebar.header("🔍 Quick Trend Search")
+    instant_query = st.sidebar.text_input("Search any keyword:", key="instant_search", placeholder="Type and hit Enter...")
 
     st.sidebar.divider()
-    
-    # Feature: Select from the custom list
-    st.sidebar.subheader("🚀 Active Trackers")
+
+    # 2. THE SAVED LIST MANAGEMENT
+    st.sidebar.header("📌 My Saved Trackers")
+    new_cat = st.sidebar.text_input("Save a new category to list:", placeholder="e.g. AI Tools")
+    if st.sidebar.button("Save to List"):
+        if new_cat and new_cat not in st.session_state["my_categories"]:
+            st.session_state["my_categories"].append(new_cat)
+            st.rerun()
+
     presets = st.sidebar.multiselect(
-        "Enable for Dashboard:", 
+        "Monitor these saved trends:", 
         options=st.session_state["my_categories"],
         default=st.session_state["my_categories"][:2] if st.session_state["my_categories"] else []
     )
@@ -101,13 +95,28 @@ if login_system():
 
     # --- MAIN UI ---
     st.title("📈 Creator Intelligence Dashboard")
-    
-    with st.expander("🔮 STRATEGIST'S WEEKLY FORECAST", expanded=True):
-        st.info(f"Welcome back {st.session_state['client_name']}! Your personalized trackers are ready.")
 
+    # SECTION A: INSTANT SEARCH RESULTS (The "Spotlight")
+    if instant_query:
+        st.subheader(f"⚡ Instant Insight: {instant_query}")
+        with st.spinner(f"Analyzing '{instant_query}'..."):
+            v_score = get_real_trends(instant_query)
+            
+            # Big Metric Display
+            c1, c2, c3 = st.columns(3)
+            status = "🔥 EXPLODING" if v_score > 75 else "🚀 RISING" if v_score > 55 else "⚖️ STABLE"
+            c1.metric("Velocity Score", f"{v_score}%")
+            c2.metric("Market Status", status)
+            c3.button("Add to My Saved Trackers", on_click=lambda: st.session_state["my_categories"].append(instant_query) if instant_query not in st.session_state["my_categories"] else None)
+            
+            if v_score > 70: st.balloons()
+        st.divider()
+
+    # SECTION B: SAVED TRACKERS (The Comparison Chart)
     if presets:
+        st.subheader("📊 Comparison Overview")
         real_data = []
-        with st.spinner('Updating your personalized data...'):
+        with st.spinner('Updating comparison data...'):
             for kw in presets:
                 score = get_real_trends(kw)
                 real_data.append({"Trend": kw, "Velocity": score})
@@ -116,16 +125,12 @@ if login_system():
         
         col1, col2 = st.columns([2, 1])
         with col1:
-            st.subheader("Personalized Velocity Index")
             st.bar_chart(df.set_index('Trend'))
         with col2:
-            st.subheader("Live Status")
-            df['Status'] = df['Velocity'].apply(
-                lambda x: "🔥 EXPLODING" if x > 75 else "🚀 RISING" if x > 55 else "STABLE"
-            )
+            df['Status'] = df['Velocity'].apply(lambda x: "🔥" if x > 75 else "🚀" if x > 55 else "⚖️")
             st.dataframe(df.set_index('Trend'), use_container_width=True)
-
-        st.divider()
-        st.caption(f"Last Sync: {datetime.datetime.now().strftime('%I:%M %p')} | Build v6.0 (Custom Presets)")
     else:
-        st.warning("Your Quick Select list is empty. Add some categories in the sidebar!")
+        if not instant_query:
+            st.info("👈 Use the sidebar to search for a trend or select your saved trackers.")
+
+    st.caption(f"Build v7.0 | Verified Sync: {datetime.datetime.now().strftime('%I:%M %p')}")
