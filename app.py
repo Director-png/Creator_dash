@@ -5,7 +5,8 @@ import json
 
 # --- CONFIG ---
 st.set_page_config(page_title="Creator Strategy Suite", layout="wide")
-API_KEY = "cfe3d0828971dc09543b2eaa2abc4b67d29d21a0" # <--- PASTE YOUR KEY HERE
+# Tip: Move this to Streamlit Secrets later for safety!
+API_KEY = "cfe3d0828971dc09543b2eaa2abc4b67d29d21a0" 
 
 st.title("📈 Live Market Pulse (India)")
 
@@ -18,39 +19,36 @@ def get_real_trends(keyword):
         response = requests.post(url, headers=headers, data=payload)
         data = response.json()
         
-        # Calculate score based on total data points found
+        # Pulling different data points for a better score
         related = len(data.get('relatedSearches', []))
         questions = len(data.get('peopleAlsoAsk', []))
         organic = len(data.get('organic', []))
         
-        # New Formula: Base 40 + (Weights for different data points)
-        # This ensures the bars aren't all the same height.
+        # Math: Base 40 + weighted points
         score = 40 + (related * 5) + (questions * 3) + (organic * 1)
-       # --- DASHBOARD LOGIC ---
+        return min(score, 100)
+    except Exception as e:
+        # If the API fails, this prevents the whole app from crashing
+        return 50 
+
+# --- DASHBOARD LOGIC ---
+# These are the keywords your client cares about
 keywords = ["Cotton Kurti", "Sunscreen", "Travel Vlogs"]
 real_data = []
 
 for kw in keywords:
-    # Now get_real_trends(kw) returns the final score (e.g., 75)
-    score = get_real_trends(kw) 
-    real_data.append({"Trend Name": kw, "Velocity": score})
+    # We call the function and get the score directly
+    velocity_score = get_real_trends(kw)
+    real_data.append({"Trend Name": kw, "Velocity": velocity_score})
 
-df = pd.DataFrame(real_data) 
-        # Cap it at 100
-        return min(score, 100)
-    except:
-        return 50 # Fallback if API fails
-    
-    response = requests.post(url, headers=headers, data=payload)
-    # This pulls 'related searches' which is a great proxy for trending velocity
-    data = response.json()
-    return data.get('relatedSearches', [])
-
-
+df = pd.DataFrame(real_data)
 
 # --- UI ---
 st.subheader("Real-Time Trends: India Market")
 st.bar_chart(df.set_index('Trend Name'))
+
+# Adding a nice status column for the table
+df['Status'] = df['Velocity'].apply(lambda x: "🔥 Hot" if x > 70 else "🚀 Rising" if x > 50 else "Stable")
 st.table(df)
 
-
+st.info("💡 **Pro-Tip:** Keywords with a velocity over 70 are perfect for immediate Reel content.")
