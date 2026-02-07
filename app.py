@@ -16,10 +16,7 @@ def get_real_trends(keyword):
     headers = {'X-API-KEY': API_KEY, 'Content-Type': 'application/json'}
     
     try:
-        response = requests.post(url, headers=headers, data=payload)
-        response.raise_for_status() # This will catch if the API key is bad
-        data = response.json()
-
+       
         response = search.run("your query")
 st.write("Debug - Raw Response:", response) # This will show you exactly what the API sent back
 
@@ -54,5 +51,6 @@ df['Status'] = df['Velocity'].apply(lambda x: "🔥 Hot" if x > 70 else "🚀 Ri
 st.table(df)
 
 st.info("💡 **Pro-Tip:** Keywords with a velocity over 70 are perfect for immediate Reel content.")
+
 
 
