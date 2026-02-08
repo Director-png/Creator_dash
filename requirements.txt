@@ -1,6 +1,7 @@
-streamlite
+
 pandas
 requests
 plotly
+
 
 
