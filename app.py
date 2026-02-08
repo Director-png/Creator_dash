@@ -16,7 +16,7 @@ WRITE_URL = "https://script.google.com/macros/s/AKfycbwR8tBqMc4XtfMfJBrjeZbzcgjI
 # ==========================================
 st.set_page_config(page_title="Executive Intelligence", layout="wide")
 
-# Initialize Session State for Persistence
+# Initialize Session State
 if "history" not in st.session_state:
     st.session_state["history"] = []
 if "search_val" not in st.session_state:
@@ -56,7 +56,8 @@ with tab1:
         'Sector': sectors, 
         'Heat Index': sorted([random.randint(75, 99) for _ in range(5)], reverse=True)
     })
-    fig = px.bar(chart_data, x='Heat Index', y='Sector', orientation='h', color='Heat Index', color_continuous_scale='Reds')
+    fig = px.bar(chart_data, x='Heat Index', y='Sector', orientation='h', 
+                 color='Heat Index', color_continuous_scale='Reds')
     st.plotly_chart(fig, use_container_width=True)
 
 with tab2:
@@ -71,7 +72,7 @@ with tab2:
         with c1:
             # Trend Graph
             dates = [(datetime.now() - timedelta(days=i)).strftime("%b %d") for i in range(7)]
-            line_df = pd.DataFrame({"Date": reversed(dates), "Interest": [random.randint(60, 100) for _ in range(7)]})
+            line_df = pd.DataFrame({"Date": list(reversed(dates)), "Interest": [random.randint(60, 100) for _ in range(7)]})
             st.plotly_chart(px.line(line_df, x="Date", y="Interest", title=f"Trend Velocity: {query}"), use_container_width=True)
         
         with c2:
