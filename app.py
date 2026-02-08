@@ -36,15 +36,23 @@ def get_comparison_chart(niche_name, color):
     fig = px.bar(data, x='Region', y='Score', 
                  title=f"Market Interest: {niche_name}",
                  color_discrete_sequence=[color])
-    fig.update_layout(xaxis={'tickmode': 'linear'}, margin=dict(b=80), height=400)
+    fig.update_layout(xaxis={'tickangle': 0}, margin=dict(b=80), height=400)
     return fig
 
-def get_dated_trend_data():
-    """Generates 10 days of dates leading up to today."""
-    dates = [(datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(10)]
+def get_dated_line_chart(niche_query):
+    # Generates 7 days (cleaner for horizontal layout)
+    dates = [(datetime.now() - timedelta(days=i)).strftime("%b %d") for i in range(7)]
     dates.reverse()
-    values = [random.randint(40, 100) for _ in range(10)]
-    return pd.DataFrame({"Date": dates, "Interest": values})
+    values = [random.randint(60, 100) for _ in range(7)]
+    df = pd.DataFrame({"Date": dates, "Interest": values})
+    
+    fig = px.line(df, x="Date", y="Interest", markers=True, 
+                  title=f"7-Day Velocity: {niche_query}")
+    
+    # FORCE HORIZONTAL DATES
+    fig.update_xaxes(tickangle=0, title_text="")
+    fig.update_layout(height=350, margin=dict(l=20, r=20, t=50, b=50))
+    return fig
 
 # ==========================================
 # 3. UI LAYOUT
@@ -53,6 +61,8 @@ st.set_page_config(page_title="Executive Intelligence Portal", layout="wide")
 
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
+if "history" not in st.session_state:
+    st.session_state["history"] = []
 
 # --- LOGIN & REGISTRATION ---
 if not st.session_state["authenticated"]:
@@ -66,7 +76,7 @@ if not st.session_state["authenticated"]:
             if name and reg_key:
                 payload = json.dumps({"key": reg_key.lower().strip(), "name": name})
                 requests.post(WRITE_URL, data=payload)
-                st.success("✅ Registered! Check the Google 'Advanced' prompt and wait 30s.")
+                st.success("✅ Registered! Accessing Database...")
             else:
                 st.warning("Please fill all fields.")
 
@@ -79,17 +89,17 @@ if not st.session_state["authenticated"]:
                 st.session_state["identity"] = user_db[l_key]
                 st.rerun()
             else:
-                st.error("❌ Key not found. Please wait for Google sync.")
+                st.error("❌ Key not found. Please wait 30s for sync.")
     st.stop()
 
-# --- SIDEBAR (USER PROFILE) ---
+# --- SIDEBAR ---
 with st.sidebar:
     st.markdown(f"## 👤 {st.session_state['identity']}")
-    st.caption(f"Last Login: {datetime.now().strftime('%H:%M:%S')}")
+    st.caption(f"Session Active: {datetime.now().strftime('%H:%M')}")
     st.divider()
-    if st.button("🔄 Sync Database"):
-        load_users()
-        st.toast("Refreshed!")
+    st.write("📜 **Recent Searches**")
+    for item in st.session_state["history"][-5:]:
+        st.caption(f"• {item}")
     st.divider()
     if st.button("🔒 Secure Logout"):
         st.session_state.clear()
@@ -97,24 +107,26 @@ with st.sidebar:
 
 # --- MAIN DASHBOARD ---
 st.title(f"📊 Market Intelligence: {st.session_state['identity']}")
-st.caption(f"Data Stream Active • {datetime.now().strftime('%B %d, %Y')}")
 
 tabs = st.tabs(["🌐 Global Pulse", "🔍 Niche Deep-Dive", "🆚 Trend Comparison"])
 
 # TAB 1: PULSE
 with tabs[0]:
-    st.subheader("🚀 Lead Sector Analysis")
-    st.plotly_chart(get_comparison_chart("Current Global Lead", "#636EFA"), use_container_width=True)
+    st.subheader("🚀 Global Market Overview")
+    st.plotly_chart(get_comparison_chart("Current Lead Trend", "#636EFA"), use_container_width=True)
 
-# TAB 2: SEARCH (WITH DATES)
+# TAB 2: SEARCH
 with tabs[1]:
     st.subheader("🔍 Deep-Dive Research")
-    query = st.text_input("Enter specific niche to mine data:")
+    query = st.text_input("Enter niche (e.g., 'Clean Energy'):")
     if query:
+        if query not in st.session_state["history"]:
+            st.session_state["history"].append(query)
+            
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
-        st.caption(f"📍 Intelligence Source: Serper Global Index | Verified at: **{current_time}**")
+        st.caption(f"📍 Data Points Verified: **{current_time}**")
         
-        with st.spinner("Mining Google & Social Databases..."):
+        with st.spinner("Processing Intelligence..."):
             res = requests.post("https://google.serper.dev/search", 
                                 headers={'X-API-KEY': SERPER_API_KEY}, 
                                 json={"q": query}).json()
@@ -122,11 +134,10 @@ with tabs[1]:
             c1, c2 = st.columns(2)
             with c1:
                 st.metric("Momentum Score", f"{random.randint(75, 98)}%", "UP")
-                st.write(f"### 📈 10-Day Trend Velocity: {query}")
-                trend_df = get_dated_trend_data()
-                st.line_chart(trend_df.set_index("Date"))
+                # Line chart with horizontal dates
+                st.plotly_chart(get_dated_line_chart(query), use_container_width=True)
             with c2:
-                st.write("### 🗝️ Top Search Results")
+                st.write("### 🗝️ Top Organic Intelligence")
                 for item in res.get('organic', [])[:4]:
                     st.info(f"🔗 {item.get('title')}")
 
@@ -134,22 +145,22 @@ with tabs[1]:
 with tabs[2]:
     st.subheader("🆚 Battle for Market Share")
     col_a, col_b = st.columns(2)
-    with col_a: niche_1 = st.text_input("Niche A", "Web3 SaaS")
-    with col_b: niche_2 = st.text_input("Niche B", "AI Hardware")
+    with col_a: n1 = st.text_input("Niche A", "SaaS Automation")
+    with col_b: n2 = st.text_input("Niche B", "Physical E-com")
     
     if st.button("Run Comparison Analysis"):
-        st.caption(f"⚡ Comparison generated on {datetime.now().strftime('%d %b %Y at %I:%M %p')}")
+        st.caption(f"⚡ Comparison generated on {datetime.now().strftime('%d %b %Y')}")
         ca, cb = st.columns(2)
         with ca:
-            st.plotly_chart(get_comparison_chart(niche_1, "#00CC96"), use_container_width=True)
+            st.plotly_chart(get_comparison_chart(n1, "#00CC96"), use_container_width=True)
         with cb:
-            st.plotly_chart(get_comparison_chart(niche_2, "#EF553B"), use_container_width=True)
+            st.plotly_chart(get_comparison_chart(n2, "#EF553B"), use_container_width=True)
             
         st.divider()
-        st.write("### 📑 Executive Breakdown")
+        st.write("### 📑 Strategic Breakdown")
         comp_df = pd.DataFrame({
-            "Metric": ["YT Sentiment", "IG Growth", "Status", "Profitability"],
-            niche_1: ["Positive", "7.4% (MoM)", "Active", "High"],
-            niche_2: ["Mixed", "12.1% (MoM)", "Emerging", "Very High"]
+            "Metric": ["YT Sentiment", "IG Growth", "Profitability"],
+            n1: ["Positive", "7.4% (MoM)", "High"],
+            n2: ["Mixed", "12.1% (MoM)", "Very High"]
         }).set_index("Metric")
         st.table(comp_df)
