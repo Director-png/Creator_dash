@@ -104,27 +104,4 @@ with tabs[1]:
 with tabs[2]:
 
 
-   # ... (rest of your code above remains the same)
-
-with t_reg:
-    name = st.text_input("Full Name")
-    key = st.text_input("Create Access Key", type="password")
-    if st.button("Submit Registration"):
-        if name and key:
-            try:
-                # We add a timeout so the app doesn't hang if the script is slow
-                payload = json.dumps({"key": key.lower().strip(), "name": name})
-                response = requests.post(WRITE_URL, data=payload, timeout=10)
-                
-                if response.status_code == 200:
-                    st.success("✅ Success! Your identity is being synced to the Global Database.")
-                    st.balloons()
-                else:
-                    st.error(f"⚠️ Script Error: Received Status {response.status_code}. Check your Web App URL.")
-            except Exception as e:
-                st.error(f"📡 Connection Error: {e}")
-        else:
-            st.warning("Please fill out both fields.")
-            
-# ... (rest of your code remains the same)
-
+  
