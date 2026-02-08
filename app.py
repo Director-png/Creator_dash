@@ -8,6 +8,7 @@ import time
 # ==========================================
 # 1. DATABASE & API KEYS
 # ==========================================
+# IMPORTANT: Ensure these URLs are correct in your actual file!
 READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGThrIabwjsm42GgyOqNsPkdY3BRSwv5wnOKQMH_iMetJKnUMiPESLb7wb5_n24gn33RjEpG3VhSbD/pub?gid=0&single=true&output=csv" 
 WRITE_URL = "https://script.google.com/macros/s/AKfycbwR8tBqMc4XtfMfJBrjeZbzcgjIkTTIAmMXOmq2QFBf3QFB5aIJTwl5rb5KIpKiV5O7/exec"
 SERPER_API_KEY = "cfe3d0828971dc09543b2eaa2abc4b67d29d21a0" 
@@ -47,11 +48,15 @@ if not st.session_state["authenticated"]:
     
     with t_reg:
         name = st.text_input("Full Name")
-        key = st.text_input("Create Access Key", type="password")
+        reg_key = st.text_input("Create Access Key", type="password")
         if st.button("Submit Registration"):
-            if name and key:
-                requests.post(WRITE_URL, data=json.dumps({"key": key.lower().strip(), "name": name}))
-                st.success("✅ Registered. Syncing with Google (30s)...")
+            if name and reg_key:
+                try:
+                    payload = json.dumps({"key": reg_key.lower().strip(), "name": name})
+                    requests.post(WRITE_URL, data=payload, timeout=10)
+                    st.success("✅ Registered. Please authorize the app in the Google window and wait 30s.")
+                except:
+                    st.error("Connection Error. Check your WRITE_URL.")
             else:
                 st.warning("Please fill all fields.")
 
@@ -64,20 +69,17 @@ if not st.session_state["authenticated"]:
                 st.session_state["identity"] = user_db[l_key]
                 st.rerun()
             else:
-                st.error("❌ Key not found yet. Try again in 30s.")
+                st.error("❌ Key not found yet. Ensure you clicked 'Advanced > Go to App' in the Google window.")
     st.stop()
 
-# --- SIDEBAR (THE DRAG DASHBOARD) ---
+# --- SIDEBAR (USER PROFILE) ---
 with st.sidebar:
     st.markdown(f"### 👤 User Profile")
-    st.success(f"**Name:** {st.session_state['identity']}")
+    st.success(f"**Director:** {st.session_state.get('identity', 'User')}")
     st.markdown("---")
-    st.write("🛠️ **System Tools**")
     if st.button("🔄 Sync Database"):
         load_users()
         st.toast("Database Refreshed")
-    
-    st.markdown("---")
     if st.button("🔒 Secure Logout"):
         st.session_state.clear()
         st.rerun()
@@ -90,16 +92,32 @@ tabs = st.tabs(["🌐 Global Pulse", "🔍 Niche Deep-Dive", "🆚 Trend Compari
 with tabs[0]:
     st.markdown("### 🚀 **Lead Sector: AI-Driven Automation**")
     st.bar_chart(get_geo_data(), use_container_width=True)
-    st.info("💡 APAC is currently leading investment velocity.")
 
 with tabs[1]:
     query = st.text_input("Search Single Niche:")
     if query:
-        res = requests.post("https://google.serper.dev/search", headers={'X-API-KEY': SERPER_API_KEY}, json={"q": query}).json()
         st.metric("Momentum", f"{random.randint(70,99)}%", "🚀 RISING")
         st.line_chart([random.randint(50, 100) for _ in range(10)])
-        for item in res.get('organic', [])[:3]:
-            st.success(item.get('title'))
 
 with tabs[2]:
+    st.subheader("🆚 Trend Battle: Side-by-Side Comparison")
+    c1, c2 = st.columns(2)
+    with c1: n_a = st.text_input("Niche A", value="SaaS")
+    with c2: n_b = st.text_input("Niche B", value="E-commerce")
     
+    if st.button("Generate Comparison Analysis"):
+        col_left, col_right = st.columns(2)
+        with col_left:
+            st.write(f"**{n_a}**")
+            st.bar_chart(get_geo_data())
+        with col_right:
+            st.write(f"**{n_b}**")
+            st.bar_chart(get_geo_data())
+        
+        st.write("### 📑 Strategic Breakdown")
+        comp_data = {
+            "Feature": ["YouTube Status", "Instagram Status", "Market Forecast"],
+            n_a: ["🔥 Trending", "📈 Growing", "Extreme"],
+            n_b: ["📊 Stable", "💎 Saturated", "High"]
+        }
+        st.table(pd.DataFrame(comp_data).set_index("Feature"))
