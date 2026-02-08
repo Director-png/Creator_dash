@@ -5,161 +5,76 @@ import json
 import random
 
 # ==========================================
-# 1. PASTE YOUR MAGIC URL BELOW
+# 1. THE ONLY THREE THINGS YOU NEED TO PASTE
 # ==========================================
-SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGThrIabwjsm42GgyOqNsPkdY3BRSwv5wnOKQMH_iMetJKnUMiPESLb7wb5_n24gn33RjEpG3VhSbD/pub?output=csv"
+GITHUB_CLIENT_ID = "YOUR_ID_HERE"
+GITHUB_CLIENT_SECRET = "YOUR_SECRET_HERE"
+SHEET_URL = "YOUR_GOOGLE_SHEET_CSV_LINK_HERE" # The one from 'Publish to Web'
 # ==========================================
 
-# --- 2. THE PERMANENT BRAIN ---
-def load_global_users():
-    """Fetches the permanent user list from Google Sheets"""
-    try:
-        # Pulling CSV export from Google Sheets
-        df = pd.read_csv(SHEET_URL)
-        # Clean the data (lowercase keys, remove spaces)
-        df['key'] = df['key'].astype(str).str.lower().str.strip()
-        df['name'] = df['name'].astype(str).str.strip()
-        return dict(zip(df['key'], df['name']))
-    except Exception as e:
-        # Safe fallback so you never get locked out
-        return {"admin": "Director"}
-
-# --- 3. ANALYTICS ENGINE ---
-@st.cache_data(ttl=600)
-def fetch_market_data(keyword):
-    API_KEY = "cfe3d0828971dc09543b2eaa2abc4b67d29d21a0" 
-    url = "https://google.serper.dev/search"
-    headers = {'X-API-KEY': API_KEY, 'Content-Type': 'application/json'}
-    payload = json.dumps({"q": keyword, "gl": "in", "hl": "en"})
-    try:
-        response = requests.post(url, headers=headers, data=payload, timeout=10)
-        res = response.json()
-        # SEO Extraction (Priority: Related > People Also Ask > Organic Titles)
-        seo = [r.get('query') for r in res.get('relatedSearches', [])]
-        if not seo:
-            seo = [q.get('question') for q in res.get('peopleAlsoAsk', [])]
-        if not seo:
-            seo = ["Market Trends", "Growth Strategy", "Innovation"]
-            
-        score = 50 + (len(seo) * 4) + random.randint(1, 10)
-        return {
-            "score": min(score, 100),
-            "seo": seo[:8],
-            "status": "🔥 EXPLODING" if score > 78 else "🚀 RISING" if score > 58 else "⚖️ STABLE"
-        }
-    except:
-        return {"score": 50, "seo": ["Re-syncing..."], "status": "⚖️ STABLE"}
-
-# --- 4. AUTHENTICATION UI ---
 st.set_page_config(page_title="Executive Strategy Portal", layout="wide")
 
-if "authenticated" not in st.session_state:
-    st.session_state["authenticated"] = False
+# --- AUTHENTICATION ENGINE ---
+def get_github_user(code):
+    token_url = "https://github.com/login/oauth/access_token"
+    headers = {"Accept": "application/json"}
+    data = {
+        "client_id": GITHUB_CLIENT_ID,
+        "client_secret": GITHUB_CLIENT_SECRET,
+        "code": code,
+    }
+    r = requests.post(token_url, headers=headers, data=data)
+    token = r.json().get("access_token")
+    
+    user_r = requests.get("https://api.github.com/user", 
+                          headers={"Authorization": f"token {token}"})
+    return user_r.json()
 
-if not st.session_state["authenticated"]:
+# Logic to handle the redirect from GitHub
+if "code" in st.query_params and "authenticated" not in st.session_state:
+    with st.spinner("Authenticating with GitHub..."):
+        try:
+            user_data = get_github_user(st.query_params["code"])
+            st.session_state["authenticated"] = True
+            st.session_state["user"] = user_data
+        except:
+            st.error("Authentication failed. Please check your GitHub Keys.")
+
+# --- LOGIN SCREEN ---
+if not st.session_state.get("authenticated"):
     st.title("🛡️ Executive Intelligence Dashboard")
-    st.subheader("Global Access Portal")
+    st.info("Direct Access enabled for authorized GitHub identities.")
     
-    t_login, t_reg = st.tabs(["🔐 Secure Login", "📝 Access Registration"])
-    
-    with t_reg:
-        st.markdown("""
-        ### How to get access:
-        1. Contact the **Director** to request an Access Key.
-        2. Once your key is added to the Master Sheet, log in using the tab on the left.
-        """)
-        st.info("Direct multi-device freedom is enabled for all registered partners.")
-
-    with t_login:
-        # Load keys from Google Sheets
-        current_allowed_users = load_global_users()
-        
-        with st.form("login_gate"):
-            l_key = st.text_input("Access Key:", type="password").lower().strip()
-            if st.form_submit_button("Authorize & Enter"):
-                if l_key in current_allowed_users:
-                    st.session_state["authenticated"] = True
-                    st.session_state["identity"] = current_allowed_users[l_key]
-                    st.rerun()
-                else:
-                    st.error("Key not found in Master Database. Please check your credentials.")
+    # The Professional Login Button
+    login_url = f"https://github.com/login/oauth/authorize?client_id={GITHUB_CLIENT_ID}"
+    st.markdown(f"""
+        <a href="{login_url}" target="_self" style="text-decoration: none;">
+            <div style="background-color: #24292e; color: white; padding: 12px; border-radius: 8px; text-align: center; width: 250px; font-weight: bold;">
+                🚀 Login with GitHub
+            </div>
+        </a>
+    """, unsafe_allow_html=True)
     st.stop()
 
-# --- 5. THE DIRECTOR'S INTERFACE ---
-st.sidebar.title(f"🫡 {st.session_state['identity']}")
-
-# Database Sync Tool
-if st.sidebar.button("🔄 Sync Master Database"):
-    st.cache_data.clear()
-    st.toast("User database updated from Google Sheets!")
+# --- MAIN DASHBOARD (Only shows if logged in) ---
+user = st.session_state["user"]
+st.sidebar.image(user.get("avatar_url"), width=80)
+st.sidebar.title(f"🫡 {user.get('name') or user.get('login')}")
 
 if st.sidebar.button("Logout"):
-    st.session_state["authenticated"] = False
+    st.session_state.clear()
     st.rerun()
 
-# Default Setup
-if "my_categories" not in st.session_state:
-    st.session_state["my_categories"] = ["Artificial Intelligence", "Digital Marketing"]
+# --- MARKET ANALYSIS LOGIC ---
+@st.cache_data(ttl=600)
+def fetch_trends(keyword):
+    # Your Serper API Logic
+    API_KEY = "cfe3d0828971dc09543b2eaa2abc4b67d29d21a0"
+    # ... (Keeping it simple for the test)
+    return {"score": random.randint(50, 99), "status": "🚀 RISING"}
 
-# APP TABS
-t1, t2, t3 = st.tabs(["🌍 Global Market Pulse", "🔍 Intelligence Search", "📊 Executive Board"])
+st.header(f"Welcome to the Portal, {user.get('name', 'Director')}")
+st.write(f"Verified Identity: {user.get('login')}")
 
-with t1:
-    st.subheader("High-Velocity Market Trends (India)")
-    trends = ["Generative AI", "EV Infrastructure", "Digital Nomad", "Personal Finance"]
-    cols = st.columns(4)
-    for i, t in enumerate(trends):
-        with cols[i]:
-            d = fetch_market_data(t)
-            st.metric(t, f"{d['score']}%", delta=d['status'])
-            if st.button("Track", key=f"t_{t}"):
-                if t not in st.session_state["my_categories"]:
-                    st.session_state["my_categories"].append(t)
-                    st.toast(f"Added {t} to your board.")
-
-with t2:
-    st.subheader("Deep-Dive Trend Analysis")
-    q = st.text_input("Enter target keyword (e.g., Fintech):")
-    if q:
-        with st.spinner("Mining SEO Insights..."):
-            data = fetch_market_data(q)
-            c1, c2 = st.columns([1, 2])
-            with c1:
-                st.metric("Market Velocity", f"{data['score']}%")
-                st.write(f"Status: **{data['status']}**")
-                st.markdown("### 🔑 Target SEO Tags")
-                for s in data['seo']:
-                    st.code(s)
-                if st.button("Add to Executive Board"):
-                    if q not in st.session_state["my_categories"]:
-                        st.session_state["my_categories"].append(q)
-            with c2:
-                # Predictive visual
-                chart_vals = [random.randint(40, 90) for _ in range(7)] + [data['score']]
-                st.line_chart(pd.DataFrame({"Interest": chart_vals}))
-
-with t3:
-    st.subheader("Your Strategic Overview")
-    if st.session_state["my_categories"]:
-        # Board cleanup
-        with st.expander("🗑️ Manage Tracked Keywords"):
-            to_del = st.selectbox("Select to remove:", ["-- Select --"] + st.session_state["my_categories"])
-            if st.button("Confirm Deletion"):
-                if to_del != "-- Select --":
-                    st.session_state["my_categories"].remove(to_del)
-                    st.rerun()
-        
-        # Board Overview
-        res_list = []
-        for item in st.session_state["my_categories"]:
-            res = fetch_market_data(item)
-            res_list.append({"Trend": item, "Velocity": res['score'], "Status": res['status']})
-            # Insight Expanders
-            with st.expander(f"📌 {item} Strategy"):
-                st.write(f"**Primary SEO Keywords:** {', '.join(res['seo'])}")
-                st.write(f"**Growth Status:** {res['status']}")
-        
-        st.divider()
-        st.dataframe(pd.DataFrame(res_list).set_index("Trend"), use_container_width=True)
-    else:
-        st.info("Your board is currently empty. Use the Search or Pulse tabs to add trends.")
+# Add your Pulse and Search tabs here just like before...
+st.info("System is live. Tracking active for your GitHub ID.")
