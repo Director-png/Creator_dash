@@ -4,6 +4,7 @@ import requests
 import json
 import random
 import time
+import plotly.express as px  # New library for professional chart control
 
 # ==========================================
 # 1. DATABASE & API KEYS
@@ -17,7 +18,6 @@ SERPER_API_KEY = "cfe3d0828971dc09543b2eaa2abc4b67d29d21a0"
 # ==========================================
 
 def load_users():
-    """Fetches users while bypassing Google's cache."""
     try:
         timestamp_url = f"{READ_URL}&cb={int(time.time())}"
         df = pd.read_csv(timestamp_url)
@@ -27,18 +27,24 @@ def load_users():
     except:
         return {"admin": "Director"}
 
-def get_full_geo_data():
-    """Generates data with full professional region names."""
-    return pd.DataFrame({
-        'Region': [
-            'North America', 
-            'European Union', 
-            'Asia-Pacific', 
-            'Middle East & Africa', 
-            'Latin America'
-        ],
-        'Market Interest': [random.randint(45, 98) for _ in range(5)]
-    }).set_index('Region')
+def create_pro_chart(data, color_hex="#636EFA"):
+    """Creates a vertical bar chart with guaranteed horizontal labels."""
+    fig = px.bar(
+        data, 
+        x='Region', 
+        y='Interest', 
+        text='Interest',
+        color_discrete_sequence=[color_hex]
+    )
+    fig.update_layout(
+        xaxis={'categoryorder':'total descending', 'tickangle': 0}, # 0 angle = Horizontal
+        yaxis_title="Market Interest %",
+        xaxis_title=None,
+        margin=dict(l=20, r=20, t=20, b=20),
+        height=400
+    )
+    fig.update_traces(texttemplate='%{text}%', textposition='outside')
+    return fig
 
 # ==========================================
 # 3. UI LAYOUT
@@ -61,12 +67,10 @@ if not st.session_state["authenticated"]:
                 try:
                     payload = json.dumps({"key": reg_key.lower().strip(), "name": name})
                     requests.post(WRITE_URL, data=payload, timeout=10)
-                    st.success("✅ Registered. If Google asks for verification, click 'Advanced' -> 'Go to App'.")
+                    st.success("✅ Registered. Please wait 30s for database sync.")
                 except:
                     st.error("Connection Error. Check your Apps Script URL.")
-            else:
-                st.warning("Please fill all fields.")
-
+    
     with t_login:
         l_key = st.text_input("Enter Key", type="password").lower().strip()
         if st.button("Enter Dashboard"):
@@ -76,21 +80,17 @@ if not st.session_state["authenticated"]:
                 st.session_state["identity"] = user_db[l_key]
                 st.rerun()
             else:
-                st.error("❌ Key not recognized. Wait 30s for Google to sync if you just registered.")
+                st.error("❌ Key not recognized. Wait 30s for sync.")
     st.stop()
 
-# --- SIDEBAR (THE DRAG DASHBOARD) ---
+# --- SIDEBAR ---
 with st.sidebar:
     st.markdown(f"### 👤 User Profile")
-    # Displays the user's name directly in the sidebar
     st.success(f"**Director:** {st.session_state['identity']}")
     st.markdown("---")
-    st.write("🛠️ **System Tools**")
     if st.button("🔄 Sync Database"):
         load_users()
         st.toast("Database Refreshed")
-    
-    st.markdown("---")
     if st.button("🔒 Secure Logout"):
         st.session_state.clear()
         st.rerun()
@@ -100,11 +100,16 @@ st.title(f"📊 Market Intelligence: {st.session_state['identity']}")
 
 tabs = st.tabs(["🌐 Global Pulse", "🔍 Niche Deep-Dive", "🆚 Trend Comparison"])
 
+# Sample Region Data
+geo_df = pd.DataFrame({
+    'Region': ['North America', 'Europe', 'Asia-Pacific', 'Middle East', 'Latin America'],
+    'Interest': [random.randint(50, 95) for _ in range(5)]
+})
+
 with tabs[0]:
     st.markdown("### 🚀 **Lead Sector: AI-Driven Automation**")
-    # Vertical Bar Chart with Full Names
-    st.bar_chart(get_full_geo_data(), use_container_width=True)
-    st.info("💡 Strategic Note: Market velocity is peaking in the Asia-Pacific region.")
+    st.plotly_chart(create_pro_chart(geo_df), use_container_width=True)
+    st.info("💡 Strategic Note: All labels are now locked in horizontal orientation for readability.")
 
 with tabs[1]:
     query = st.text_input("Search Single Niche:")
@@ -122,16 +127,16 @@ with tabs[2]:
         col_left, col_right = st.columns(2)
         with col_left:
             st.write(f"**{n_a}** Performance")
-            st.bar_chart(get_full_geo_data(), color="#29b5e8")
+            st.plotly_chart(create_pro_chart(geo_df, "#29b5e8"), use_container_width=True)
         with col_right:
             st.write(f"**{n_b}** Performance")
-            st.bar_chart(get_full_geo_data(), color="#FF4B4B")
+            st.plotly_chart(create_pro_chart(geo_df, "#FF4B4B"), use_container_width=True)
         
         st.divider()
         st.write("### 📑 Strategic Breakdown")
         comp_data = {
-            "Comparison Point": ["Pros", "Cons", "YouTube Status", "Instagram Status", "Market Forecast"],
-            n_a: ["Scalability", "Churn Rate", "🔥 Trending Tutorials", "📈 B2B Growth", "Extreme"],
-            n_b: ["Physical Goods", "Logistics", "📊 Review Heavy", "💎 Visual Saturated", "High"]
+            "Point": ["Pros", "Cons", "YouTube", "Instagram", "Forecast"],
+            n_a: ["Scalability", "Churn", "🔥 Trending", "📈 Growing", "Extreme"],
+            n_b: ["Low Barrier", "Logistics", "📊 Stable", "💎 Saturated", "High"]
         }
-        st.table(pd.DataFrame(comp_data).set_index("Comparison Point"))
+        st.table(pd.DataFrame(comp_data).set_index("Point"))
