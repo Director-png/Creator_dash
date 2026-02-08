@@ -116,4 +116,36 @@ with tabs[1]:
             
             c1, c2 = st.columns(2)
             with c1:
-                st.metric("Momentum Score", f"{random.randint(75
+                st.metric("Momentum Score", f"{random.randint(75, 98)}%", "UP")
+                st.write("### 📈 Interest Over Time")
+                st.line_chart([random.randint(40, 100) for _ in range(10)])
+            with c2:
+                st.write("### 🗝️ Top Search Results")
+                for item in res.get('organic', [])[:4]:
+                    st.info(f"🔗 {item.get('title')}")
+
+# TAB 3: COMPARISON
+with tabs[2]:
+    st.subheader("🆚 Battle for Market Share")
+    col_a, col_b = st.columns(2)
+    with col_a:
+        niche_1 = st.text_input("Niche A", "Web3 SaaS")
+    with col_b:
+        niche_2 = st.text_input("Niche B", "AI Hardware")
+    
+    if st.button("Run Comparison Analysis"):
+        ca, cb = st.columns(2)
+        with ca:
+            st.plotly_chart(get_comparison_chart(niche_1, "#00CC96"), use_container_width=True)
+        with cb:
+            st.plotly_chart(get_comparison_chart(niche_2, "#EF553B"), use_container_width=True)
+            
+        st.divider()
+        st.write("### 📑 Executive Breakdown")
+        comp_df = pd.DataFrame({
+            "Metric": ["YouTube Growth", "Instagram Presence", "Competition Level", "Profitability"],
+            niche_1: ["🔥 High", "📈 Expanding", "Medium", "High"],
+            niche_2: ["📊 Moderate", "💎 Established", "High", "Very High"]
+        }).set_index("Metric")
+        st.table(comp_df)
+
