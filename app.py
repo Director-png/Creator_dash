@@ -102,6 +102,3 @@ with tabs[1]:
             st.success(item.get('title'))
 
 with tabs[2]:
-
-
-  
