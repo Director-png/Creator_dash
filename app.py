@@ -4,20 +4,20 @@ import requests
 import json
 import random
 
-# --- 1. SETTINGS & ACCESS ---
+# --- 1. THE PERMANENT GUEST LIST (Global Access) ---
+# Add your users here. They can now log in from any device, anywhere.
+MASTER_USER_DB = {
+    "admin": "Director",
+    "vip777": "Lead Strategist",
+    "client01": "Executive Partner"
+}
+
+# --- 2. CONFIG & THEME ---
 st.set_page_config(page_title="Executive Strategy Portal", layout="wide")
 
-if "user_db" not in st.session_state:
-    # UPDATED: Key is 'admin', Identity is 'Director'
-    st.session_state["user_db"] = {"admin": "Director"}
-
-if "my_categories" not in st.session_state:
-    # REMOVED: Cotton Kurti and Sunscreen
-    st.session_state["my_categories"] = ["Artificial Intelligence", "Digital Marketing"]
-
-# --- 2. THE ENGINE (Fixed SEO & Global Logic) ---
-@st.cache_data(ttl=3600) # Cache for 1 hour to prevent freezing
-def fetch_all_data(keyword):
+# --- 3. THE RELIABLE SEO ENGINE ---
+@st.cache_data(ttl=3600)
+def fetch_executive_data(keyword):
     API_KEY = "cfe3d0828971dc09543b2eaa2abc4b67d29d21a0" 
     url = "https://google.serper.dev/search"
     headers = {'X-API-KEY': API_KEY, 'Content-Type': 'application/json'}
@@ -27,131 +27,134 @@ def fetch_all_data(keyword):
         response = requests.post(url, headers=headers, data=payload, timeout=15)
         res_data = response.json()
         
-        # Robust SEO Extraction
+        # Priority 1: Related Searches
         seo = [r.get('query') for r in res_data.get('relatedSearches', [])]
+        # Priority 2: Questions
         if not seo:
             seo = [q.get('question') for q in res_data.get('peopleAlsoAsk', [])]
-        if not seo: # Final fallback if API is thin on data
-            seo = ["Trend Analysis", f"{keyword} News", f"Future of {keyword}"]
+        # Priority 3: Organic Context
+        if not seo:
+            seo = [o.get('title')[:40] for o in res_data.get('organic', [])[:4]]
             
-        score = 45 + (len(seo) * 4) + random.randint(1, 10)
+        score = 50 + (len(seo) * 3) + random.randint(1, 10)
         return {
             "score": min(score, 100),
-            "seo": seo[:6],
-            "status": "🔥 EXPLODING" if score > 75 else "🚀 RISING" if score > 55 else "⚖️ STABLE"
+            "seo": seo if seo else ["Market Analysis", "Growth Trends", "Strategic Planning"],
+            "status": "🔥 EXPLODING" if score > 78 else "🚀 RISING" if score > 58 else "⚖️ STABLE"
         }
     except:
-        return {"score": 50, "seo": ["Data Unavailable"], "status": "⚖️ STABLE"}
+        return {"score": 50, "seo": ["Data Syncing..."], "status": "⚖️ STABLE"}
 
-# --- 3. AUTHENTICATION ---
+# --- 4. PERSISTENT LOGIN SYSTEM ---
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 
 if not st.session_state["authenticated"]:
     st.title("🛡️ Executive Intelligence Dashboard")
-    input_key = st.text_input("Director Access Key:", type="password").lower().strip()
-    if st.button("Authorize"):
-        if input_key in st.session_state["user_db"]:
-            st.session_state["authenticated"] = True
-            st.session_state["identity"] = st.session_state["user_db"][input_key]
-            st.rerun()
-        else:
-            st.error("Unauthorized Access.")
+    st.subheader("Multi-Device Access Enabled")
+    
+    # Using a form helps with "Enter" key submission on mobile/tablets
+    with st.form("login_form"):
+        input_key = st.text_input("Enter Director Access Key:", type="password").lower().strip()
+        submit = st.form_submit_button("Authorize Access")
+        
+        if submit:
+            if input_key in MASTER_USER_DB:
+                st.session_state["authenticated"] = True
+                st.session_state["identity"] = MASTER_USER_DB[input_key]
+                st.rerun()
+            else:
+                st.error("Access Key Not Recognized. Contact Director for authorization.")
     st.stop()
 
-# --- 4. THE DIRECTOR'S DASHBOARD ---
-st.sidebar.title(f"🫡 Welcome, {st.session_state['identity']}")
+# --- 5. THE DIRECTOR'S INTERFACE ---
+st.sidebar.title(f"🫡 {st.session_state['identity']}")
+st.sidebar.write("System Status: **Active**")
 
-# SECRET ADMIN PANEL (As requested)
-with st.sidebar.expander("🛠️ Admin Controls"):
-    st.write("**Manage Access Keys**")
-    new_key = st.text_input("New User Key:").lower().strip()
-    new_name = st.text_input("New User Name:")
-    if st.button("Grant Access"):
-        if new_key and new_name:
-            st.session_state["user_db"][new_key] = new_name
-            st.success(f"Added {new_name}")
-
-if st.sidebar.button("Logout"):
+if st.sidebar.button("Logout & Clear Session"):
     st.session_state["authenticated"] = False
     st.rerun()
 
-# MAIN TABS
+# Default tracking list (Professional & Clean)
+if "my_categories" not in st.session_state:
+    st.session_state["my_categories"] = ["Artificial Intelligence", "Digital Marketing"]
+
+# TABS
 t_global, t_search, t_compare, t_strategy = st.tabs([
     "🌍 Global Market Pulse", "🔍 Instant Insight", "📊 Comparison Board", "💡 Strategy Lab"
 ])
 
-# --- TAB: GLOBAL TRENDS (Fixed) ---
+# --- TAB 1: GLOBAL PULSE ---
 with t_global:
-    st.subheader("Current High-Velocity Topics (India)")
+    st.subheader("🔥 High-Velocity Market Trends (India)")
     global_list = ["Generative AI", "EV Infrastructure", "Remote Work Culture", "Personal Finance"]
     cols = st.columns(4)
     for i, topic in enumerate(global_list):
         with cols[i]:
-            g_data = fetch_all_data(topic)
+            g_data = fetch_executive_data(topic)
             st.metric(topic, f"{g_data['score']}%", delta=g_data['status'])
-            if st.button(f"Track {i}", key=f"g_{topic}"):
+            if st.button("Track", key=f"track_{topic}"):
                 if topic not in st.session_state["my_categories"]:
                     st.session_state["my_categories"].append(topic)
                     st.toast(f"Tracking {topic}")
 
-# --- TAB: INSTANT SEARCH (Fixed SEO) ---
+# --- TAB 2: INSTANT SEARCH (SEO Fixed) ---
 with t_search:
-    st.subheader("On-Demand Trend Analysis")
-    query = st.text_input("Enter target keyword:", placeholder="e.g. Luxury Real Estate")
+    st.subheader("On-Demand Strategic Analysis")
+    query = st.text_input("Search Niche:", placeholder="e.g. Fintech Innovation")
     if query:
-        with st.spinner("Mining Data..."):
-            data = fetch_all_data(query)
-            c1, c2 = st.columns([1, 2])
-            with c1:
-                st.metric("Velocity Score", f"{data['score']}%")
-                st.info(f"Market Status: {data['status']}")
-                st.markdown("### 🔑 SEO Keywords")
-                for s in data['seo']:
-                    st.code(s) # This ensures keywords are visible and copyable
-                if st.button("Add to Board"):
-                    if query not in st.session_state["my_categories"]:
-                        st.session_state["my_categories"].append(query)
-                        st.success("Board Updated")
-            with c2:
-                st.bar_chart(pd.DataFrame({"Velocity": [data['score']]}, index=[query]))
+        data = fetch_executive_data(query)
+        col_left, col_right = st.columns([1, 2])
+        with col_left:
+            st.metric("Market Velocity", f"{data['score']}%")
+            st.write(f"**Verdict:** {data['status']}")
+            st.markdown("### 🔑 SEO & Tags")
+            # Using Code blocks ensures they always render properly
+            for item in data['seo']:
+                st.code(item)
+            if st.button("Add to Executive Board"):
+                if query not in st.session_state["my_categories"]:
+                    st.session_state["my_categories"].append(query)
+                    st.success("Board Updated")
+        with col_right:
+            st.bar_chart(pd.DataFrame({"Velocity": [data['score']]}, index=[query]))
 
-# --- TAB: COMPARISON ---
+# --- TAB 3: COMPARISON ---
 with t_compare:
-    st.subheader("Director's Strategic Overview")
+    st.subheader("Multi-Trend Comparison")
     if st.session_state["my_categories"]:
-        # Trash Can to remove items
-        to_remove = st.selectbox("Select keyword to remove:", ["-- Select --"] + st.session_state["my_categories"])
-        if st.button("Delete Keyword"):
-            if to_remove != "-- Select --":
-                st.session_state["my_categories"].remove(to_remove)
-                st.rerun()
+        # Deletion logic moved to a clean dropdown
+        with st.expander("🗑️ Manage Tracked Keywords"):
+            to_del = st.selectbox("Select to remove:", ["-- Select --"] + st.session_state["my_categories"])
+            if st.button("Confirm Removal"):
+                if to_del != "-- Select --":
+                    st.session_state["my_categories"].remove(to_del)
+                    st.rerun()
 
-        res_list = []
+        comp_list = []
         for item in st.session_state["my_categories"]:
-            d = fetch_all_data(item)
-            res_list.append({"Keyword": item, "Velocity": d['score'], "Status": d['status']})
+            d = fetch_executive_data(item)
+            comp_list.append({"Trend": item, "Velocity": d['score'], "Status": d['status']})
         
-        df = pd.DataFrame(res_list).set_index("Keyword")
-        st.bar_chart(df['Velocity'], color="#1f77b4")
-        st.table(df)
+        df = pd.DataFrame(comp_list).set_index("Trend")
+        st.bar_chart(df['Velocity'])
+        st.dataframe(df, use_container_width=True)
     else:
-        st.write("Tracking board is currently empty.")
+        st.info("No trends currently tracked.")
 
-# --- TAB: STRATEGY LAB ---
+# --- TAB 4: STRATEGY LAB ---
 with t_strategy:
     if st.session_state["my_categories"]:
-        target = st.selectbox("Focus Area:", st.session_state["my_categories"])
-        t_data = fetch_all_data(target)
-        st.markdown(f"## 💡 Content Pillars for **{target}**")
+        target = st.selectbox("Select Focus Area:", st.session_state["my_categories"])
+        t_data = fetch_executive_data(target)
+        st.markdown(f"## 💡 Content Framework: {target}")
         
-        col1, col2 = st.columns(2)
-        with col1:
-            st.subheader("🎬 Viral Hooks")
-            st.write(f"- 'Why {target} is the only thing that matters in 2026...'")
-            st.write(f"- 'The hidden data behind {target} (Shocking Results)'")
-        with col2:
-            st.subheader("🏷️ Optimized Meta-Tags")
-            st.write(", ".join(t_data['seo']))
-    else:
-        st.warning("Please add keywords to analyze.")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.subheader("🎥 Engagement Hooks")
+            st.write(f"1. 'Why the data says {target} is the future...'")
+            st.write(f"2. 'The one thing leaders get wrong about {target}.'")
+        with c2:
+            st.subheader("📈 SEO Deployment")
+            st.write("Copy-paste these into meta-tags:")
+            st.info(", ".join(t_data['seo']))
