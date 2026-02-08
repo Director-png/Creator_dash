@@ -8,142 +8,102 @@ import plotly.express as px
 # ==========================================
 # 0. CONFIGURATION
 # ==========================================
-ACCESS_KEY = "admin"
+READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGThrIabwjsm42GgyOqNsPkdY3BRSwv5wnOKQMH_iMetJKnUMiPESLb7wb5_n24gn33RjEpG3VhSbD/pub?gid=0&single=true&output=csv" 
+WRITE_URL = "https://script.google.com/macros/s/AKfycbwR8tBqMc4XtfMfJBrjeZbzcgjIkTTIAmMXOmq2QFBf3QFB5aIJTwl5rb5KIpKiV5O7/exec"
 
 # ==========================================
-# 1. ELITE UI STYLING (THE "INTRIGUE" LAYER)
+# 1. PAGE SETTINGS & STYLING
 # ==========================================
-st.set_page_config(page_title="STRAT-INT COMMAND", layout="wide")
+st.set_page_config(page_title="Executive Intelligence", layout="wide")
 
+# Styling to separate Tabs from Header
 st.markdown("""
 <style>
-    /* Main Background & Text */
-    .stApp {
-        background-color: #0e1117;
-        color: #ffffff;
-    }
-    
-    /* Custom Header Styling */
-    .main-header {
-        font-size: 40px;
-        font-weight: 800;
-        letter-spacing: -1px;
-        color: #FF4B4B;
-        margin-bottom: 0px;
-    }
-    
-    /* Tab Styling - Making them stand out */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 10px;
-        background-color: #1c1f26;
-        padding: 10px 10px 0px 10px;
-        border-radius: 10px 10px 0px 0px;
+        gap: 15px;
+        background-color: #f1f4f9;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #d1d9e6;
     }
     .stTabs [data-baseweb="tab"] {
         height: 50px;
-        background-color: #262730;
-        border-radius: 5px 5px 0px 0px;
-        color: #808495;
-        font-weight: 600;
+        font-weight: bold;
+        font-size: 16px;
     }
     .stTabs [aria-selected="true"] {
-        background-color: #FF4B4B !important;
-        color: white !important;
-    }
-
-    /* Metric Card Styling */
-    .metric-card {
-        background-color: #1c1f26;
-        border-left: 5px solid #FF4B4B;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 10px;
+        color: #FF4B4B !important;
+        border-bottom: 3px solid #FF4B4B !important;
     }
 </style>
 """, unsafe_content_html=True)
 
-# ==========================================
-# 2. SESSION & AUTH
-# ==========================================
-if "authenticated" not in st.session_state:
-    st.session_state["authenticated"] = False
 if "history" not in st.session_state:
     st.session_state["history"] = []
 
-if not st.session_state["authenticated"]:
-    st.markdown("<h1 class='main-header'>SYSTEM LOCK</h1>", unsafe_content_html=True)
-    with st.container():
-        col1, col2 = st.columns([1,1])
-        with col1:
-            u = st.text_input("DIRECTOR ID:")
-            k = st.text_input("ACCESS KEY:", type="password")
-            if st.button("INITIATE LOGIN"):
-                if k == ACCESS_KEY and u:
-                    st.session_state["authenticated"] = True
-                    st.session_state["user"] = u
-                    st.rerun()
-        with col2:
-            st.info("Registration: New IDs are logged and mapped to hardware signatures.")
-    st.stop()
-
 # ==========================================
-# 3. DASHBOARD
+# 2. MAIN DASHBOARD
 # ==========================================
-st.markdown(f"<p class='main-header'>STRAT-INT // {st.session_state['user']}</p>", unsafe_content_html=True)
-st.caption(f"LIVE FEED ACTIVE • {datetime.now().strftime('%H:%M:%S')}")
+st.title("🚀 Strategic Command Portal")
+st.caption(f"Market Intelligence Feed • {datetime.now().strftime('%H:%M')} Local Time")
 
-t1, t2, t3 = st.tabs(["📊 GLOBAL PULSE", "🔍 DEEP ANALYSIS", "🆚 COMPETITIVE"])
+tab1, tab2, tab3 = st.tabs(["🌐 GLOBAL PULSE", "🔍 INSTANT SEARCH", "🆚 COMPETITION"])
 
-with t1:
-    st.subheader("🔥 Market Thermal Map")
-    sectors = ['AI SaaS', 'Energy Storage', 'Agri-Tech', 'FinTech', 'Bio-Intelligence']
+with tab1:
+    st.subheader("🔥 Sector Leaderboard (Vertical Velocity)")
+    
+    # Dynamic shuffle for ranking
+    sectors = ['AI Automation', 'Green Logistics', 'SaaS Fintech', 'HealthTech', 'Ad-Tech']
     random.shuffle(sectors)
-    df_pulse = pd.DataFrame({'Sector': sectors, 'Heat': sorted([random.randint(70,99) for _ in range(5)], reverse=True)})
-    fig = px.bar(df_pulse, x='Heat', y='Sector', orientation='h', color='Heat', 
-                 color_continuous_scale='Reds', template="plotly_dark")
+    heat_scores = sorted([random.randint(70, 99) for _ in range(5)], reverse=True)
+    
+    df_pulse = pd.DataFrame({'Sector': sectors, 'Market Heat': heat_scores})
+    
+    # Top Performer Badge
+    st.error(f"🏆 CURRENT TRENDING LEADER: {df_pulse.iloc[0]['Sector']}")
+    
+    # Vertical Bar Chart
+    fig = px.bar(
+        df_pulse, 
+        x='Sector', 
+        y='Market Heat', 
+        color='Market Heat',
+        text='Market Heat',
+        color_continuous_scale='Reds',
+        template="plotly_white"
+    )
+    fig.update_traces(textposition='outside')
+    fig.update_layout(yaxis_range=[0, 110], height=500)
     st.plotly_chart(fig, use_container_width=True)
 
-with t2:
-    query = st.text_input("ENTER TARGET NICHE:", placeholder="e.g. Quantum Computing")
+with tab2:
+    st.subheader("🔍 Deep-Dive Intelligence")
+    query = st.text_input("Enter target niche:", placeholder="e.g. Eco-SaaS")
+    
     if query:
         if query not in st.session_state["history"]:
             st.session_state["history"].append(query)
         
         c1, c2 = st.columns([2, 1])
         with c1:
-            st.markdown(f"### Trend Velocity: {query}")
-            line_data = pd.DataFrame({"X": range(7), "Y": [random.randint(50,100) for _ in range(7)]})
-            st.plotly_chart(px.line(line_data, x="X", y="Y", template="plotly_dark").update_layout(showlegend=False), use_container_width=True)
+            # Trend Graph
+            dates = [(datetime.now() - timedelta(days=i)).strftime("%b %d") for i in range(7)]
+            line_df = pd.DataFrame({"Date": list(reversed(dates)), "Interest": [random.randint(60, 100) for _ in range(7)]})
+            st.plotly_chart(px.line(line_df, x="Date", y="Interest", title=f"Velocity: {query}"), use_container_width=True)
             
-            st.markdown("<div class='metric-card'><h4>🌍 Global Intelligence</h4>"
-                        "• Regulatory shifts in APAC region creating entry gap.<br>"
-                        "• Institutional capital inflow increasing 14% MoM.</div>", unsafe_content_html=True)
+            st.markdown("### 🪝 Marketing Hooks")
+            st.code(f"1. Why {query} is the hidden goldmine of 2026.\n2. Stop wasting time on old trends; {query} is the future.", language=None)
         
         with c2:
-            st.markdown("### 🔑 SEO Strategy")
-            st.success(f"**Primary:** {query} ROI 2026")
-            st.markdown("---")
-            st.markdown("**Viral Hook Engine:**")
-            st.code(f"Why everyone is wrong about {query}...")
+            st.markdown("### 🔑 SEO Keywords")
+            keywords = [f"{query} ROI", f"Best {query} tools", f"Future of {query}"]
+            for kw in keywords:
+                st.button(kw, use_container_width=True)
 
-with t3:
-    if len(st.session_state["history"]) >= 2:
-        h = st.session_state["history"]
-        n1, n2 = h[-1], h[-2]
-        st.markdown(f"### Benchmarking: {n1} vs {n2}")
-        
-        metrics = ["Market Gap", "Search Vol", "Ease of Entry", "Profit Margin"]
-        s1 = [random.randint(60,95) for _ in range(4)]
-        s2 = [random.randint(60,95) for _ in range(4)]
-        
-        comp_df = pd.DataFrame({"Metric": metrics, n1: s1, n2: s2})
-        st.table(comp_df)
-        
-        # Winner calculation
-        winner = n1 if sum(s1) > sum(s2) else n2
-        st.error(f"🏆 STRATEGIC WINNER: {winner}")
+with tab3:
+    st.subheader("🆚 History & Comparison")
+    if st.session_state["history"]:
+        for h in reversed(st.session_state["history"]):
+            st.write(f"✅ Intelligence Gathered: **{h}**")
     else:
-        st.warning("Insufficient data. Perform at least 2 searches.")
-
-with st.sidebar:
-    st.button("SECURE LOGOUT", on_click=lambda: st.session_state.clear())
+        st.info("Your search history will appear here.")
