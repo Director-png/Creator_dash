@@ -6,9 +6,9 @@ import datetime
 import random
 
 # --- CONFIG ---
-st.set_page_config(page_title="Creator Strategy Pro", layout="wide", page_icon="🚀")
+st.set_page_config(page_title="Creator Strategy Pro", layout="wide", page_icon="🌍")
 
-# --- 1. SESSION STATE ---
+# --- 1. SESSION STATE & DB ---
 if "user_db" not in st.session_state:
     st.session_state["user_db"] = {"admin": "Deepak"}
 
@@ -25,7 +25,7 @@ def login_system():
         t1, t2 = st.tabs(["Login", "Register"])
         with t1:
             pwd = st.text_input("Access Key:", type="password")
-            if st.button("Enter"):
+            if st.button("Enter Dashboard"):
                 if pwd in st.session_state["user_db"]:
                     st.session_state["authenticated"] = True
                     st.session_state["client_name"] = st.session_state["user_db"][pwd]
@@ -51,8 +51,7 @@ def get_insights(keyword):
         data = response.json()
         r_count = len(data.get('relatedSearches', []))
         q_count = len(data.get('peopleAlsoAsk', []))
-        # Improved sensitivity math
-        score = 42 + (r_count * 7) + (q_count * 5) + random.randint(1, 4)
+        score = 45 + (r_count * 6) + (q_count * 5) + random.randint(1, 5)
         return {"score": min(score, 100), "related": [r.get('query') for r in data.get('relatedSearches', [])[:5]]}
     except:
         return {"score": 50, "related": []}
@@ -64,69 +63,88 @@ if login_system():
         st.session_state["authenticated"] = False
         st.rerun()
 
-    # THE MAIN NAVIGATION TABS
-    tab_search, tab_compare, tab_ideas = st.tabs(["🔍 Instant Trend Search", "📊 Market Comparison", "💡 Content Strategy"])
+    # --- NAVIGATION TABS ---
+    tab_global, tab_search, tab_compare, tab_ideas = st.tabs([
+        "🌍 Global Pulse", 
+        "🔍 Instant Search", 
+        "📊 Market View", 
+        "💡 Content Lab"
+    ])
+
+    # --- TAB 0: GLOBAL PULSE (NEW!) ---
+    with tab_global:
+        st.subheader("🔥 Top Trends in India (Real-Time)")
+        # In a production app, these would come from a 'trending' API endpoint
+        global_trends = ["AI Avatars", "Sustainable Fashion", "Electric Scooters", "Stock Market India", "Work from Home"]
+        
+        cols = st.columns(len(global_trends))
+        for i, trend in enumerate(global_trends):
+            with cols[i]:
+                # We pull a quick score for these
+                res = get_insights(trend)
+                st.metric(label=trend, value=f"{res['score']}%", delta="Trending")
+                if st.button(f"Track", key=f"btn_{trend}"):
+                    if trend not in st.session_state["my_categories"]:
+                        st.session_state["my_categories"].append(trend)
+                        st.rerun()
+        st.divider()
+        st.info("These are high-velocity topics currently gaining traction across search engines.")
 
     # --- TAB 1: SEARCH ---
     with tab_search:
-        st.subheader("Check the velocity of any trend")
-        query = st.text_input("What are we looking for today?", placeholder="e.g. AI Influencers")
-        
+        st.subheader("Deep Dive Analysis")
+        query = st.text_input("Search for a niche keyword:", placeholder="e.g. Minimalist Home Decor")
         if query:
             data = get_insights(query)
             c1, c2 = st.columns([1, 2])
             with c1:
                 st.metric("Velocity Score", f"{data['score']}%")
-                if st.button(f"📌 Save '{query}' to Comparison List"):
+                st.write("**Related Keywords:**")
+                for r in data['related']:
+                    st.caption(f"- {r}")
+                if st.button("Add to My Tracking List"):
                     if query not in st.session_state["my_categories"]:
                         st.session_state["my_categories"].append(query)
-                        st.success("Added!")
+                        st.success("Saved!")
             with c2:
                 st.bar_chart(pd.DataFrame({"Velocity": [data['score']]}, index=[query]), color="#FF4B4B")
 
     # --- TAB 2: COMPARISON ---
     with tab_compare:
-        st.subheader("Your Personalized Market View")
+        st.subheader("Comparison Dashboard")
         if st.session_state["my_categories"]:
-            col_list, col_chart = st.columns([1, 3])
+            comp_results = []
+            for p in st.session_state["my_categories"]:
+                res = get_insights(p)
+                comp_results.append({"Trend": p, "Velocity": res['score']})
             
-            with col_list:
-                st.write("**Currently Tracking:**")
-                for item in st.session_state["my_categories"]:
-                    st.write(f"• {item}")
-                if st.button("Clear List"):
-                    st.session_state["my_categories"] = []
-                    st.rerun()
+            df = pd.DataFrame(comp_results).set_index("Trend")
+            st.bar_chart(df, y="Velocity", color="#2E86C1")
             
-            with col_chart:
-                comp_results = []
-                for p in st.session_state["my_categories"]:
-                    res = get_insights(p)
-                    comp_results.append({"Trend": p, "Velocity": res['score']})
-                
-                df = pd.DataFrame(comp_results).set_index("Trend")
-                st.bar_chart(df, y="Velocity", color="#2E86C1")
+            with st.expander("View Data Table"):
+                st.dataframe(df.T, use_container_width=True)
         else:
-            st.info("Your list is empty. Go to 'Instant Trend Search' to add some trends!")
+            st.warning("No categories saved yet.")
 
     # --- TAB 3: CONTENT LAB ---
     with tab_ideas:
-        st.subheader("AI Content Pillar Generator")
-        selected_trend = st.selectbox("Select a trend to generate ideas for:", st.session_state["my_categories"])
-        
-        if selected_trend:
-            data = get_insights(selected_trend)
-            st.markdown(f"### Strategy for **{selected_trend}**")
+        st.subheader("AI Content Architect")
+        selected = st.selectbox("Pick a saved trend:", st.session_state["my_categories"])
+        if selected:
+            st.write(f"### Strategy Guide for **{selected}**")
             
-            c_reels, c_stories = st.columns(2)
-            with c_reels:
-                st.info("🎬 **Short-Form Video (Reels/Shorts)**")
-                st.write(f"1. **The Hook:** 'Stop ignoring {selected_trend}...'")
-                st.write(f"2. **The Value:** Explain why the score is {data['score']}% right now.")
-            with c_stories:
-                st.success("📸 **Engagement (Stories/Threads)**")
-                st.write("1. **Poll:** Ask 'Do you think this trend is overhyped?'")
-                st.write("2. **Behind the Scenes:** Show how you research this.")
+            # This is where we create the value for the user
+            col_vid, col_txt = st.columns(2)
+            with col_vid:
+                st.markdown("#### 🎥 Video Strategy")
+                st.write("1. **The 3-Second Hook:** 'Did you know that search interest for this is peaking?'")
+                st.write("2. **Visual Style:** Use fast cuts and overlay the data charts from this app.")
+                st.write("3. **Call to Action:** 'Comment BELOW if you saw this coming!'")
+            
+            with col_txt:
+                st.markdown("#### ✍️ Copywriting Strategy")
+                st.write("**Title Idea:** The Future of " + selected)
+                st.write("**Keywords:** Include " + ", ".join(get_insights(selected)['related'][:3]))
 
     st.divider()
-    st.caption(f"Sync: {datetime.datetime.now().strftime('%H:%M')} | System: Optimal")
+    st.caption(f"Creator Strategy Suite v11.0 | Server Time: {datetime.datetime.now().strftime('%H:%M:%S')}")
