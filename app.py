@@ -7,9 +7,9 @@ import random
 # ==========================================
 # 1. THE ONLY THREE THINGS YOU NEED TO PASTE
 # ==========================================
-GITHUB_CLIENT_ID = "YOUR_ID_HERE"
-GITHUB_CLIENT_SECRET = "YOUR_SECRET_HERE"
-SHEET_URL = "YOUR_GOOGLE_SHEET_CSV_LINK_HERE" # The one from 'Publish to Web'
+GITHUB_CLIENT_ID = "Ov23li5wGL4sv65QVDp3"
+GITHUB_CLIENT_SECRET = "b4b218b4ea2bb62ca1ca7e80acd0b682e2b52cc3"
+SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGThrIabwjsm42GgyOqNsPkdY3BRSwv5wnOKQMH_iMetJKnUMiPESLb7wb5_n24gn33RjEpG3VhSbD/pub?gid=0&single=true&output=csv" # The one from 'Publish to Web'
 # ==========================================
 
 st.set_page_config(page_title="Executive Strategy Portal", layout="wide")
@@ -78,3 +78,4 @@ st.write(f"Verified Identity: {user.get('login')}")
 
 # Add your Pulse and Search tabs here just like before...
 st.info("System is live. Tracking active for your GitHub ID.")
+
