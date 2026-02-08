@@ -51,9 +51,9 @@ if not st.session_state["authenticated"]:
         if st.button("Submit Registration"):
             if name and key:
                 requests.post(WRITE_URL, data=json.dumps({"key": key.lower().strip(), "name": name}))
-                st.success("✅ Registered. Please wait 30s for sync.")
+                st.success("✅ Registered. Syncing with Google (30s)...")
             else:
-                st.warning("Please fill fields.")
+                st.warning("Please fill all fields.")
 
     with t_login:
         l_key = st.text_input("Enter Key", type="password").lower().strip()
@@ -67,9 +67,23 @@ if not st.session_state["authenticated"]:
                 st.error("❌ Key not found yet. Try again in 30s.")
     st.stop()
 
+# --- SIDEBAR (THE DRAG DASHBOARD) ---
+with st.sidebar:
+    st.markdown(f"### 👤 User Profile")
+    st.success(f"**Name:** {st.session_state['identity']}")
+    st.markdown("---")
+    st.write("🛠️ **System Tools**")
+    if st.button("🔄 Sync Database"):
+        load_users()
+        st.toast("Database Refreshed")
+    
+    st.markdown("---")
+    if st.button("🔒 Secure Logout"):
+        st.session_state.clear()
+        st.rerun()
+
 # --- THE MAIN PORTAL ---
 st.title(f"📊 Market Intelligence: {st.session_state['identity']}")
-st.markdown(f"**Authorized Access Level:** Director | **Welcome, {st.session_state['identity']}**")
 
 tabs = st.tabs(["🌐 Global Pulse", "🔍 Niche Deep-Dive", "🆚 Trend Comparison"])
 
@@ -88,45 +102,3 @@ with tabs[1]:
             st.success(item.get('title'))
 
 with tabs[2]:
-    st.subheader("🆚 Trend Battle: Side-by-Side Comparison")
-    c1, c2 = st.columns(2)
-    with c1: niche_a = st.text_input("Enter Niche A", value="SaaS")
-    with c2: niche_b = st.text_input("Enter Niche B", value="E-commerce")
-    
-    if st.button("Generate Comparison Analysis"):
-        # 1. VISUAL CHART COMPARISON
-        chart_col1, chart_col2 = st.columns(2)
-        with chart_col1:
-            st.write(f"**{niche_a}** Regional Interest")
-            st.bar_chart(get_geo_data(), color="#29b5e8")
-        with chart_col2:
-            st.write(f"**{niche_b}** Regional Interest")
-            st.bar_chart(get_geo_data(), color="#FF4B4B")
-        
-        st.divider()
-
-        # 2. PROS / CONS & SOCIAL STATUS TABLE
-        st.write("### 📑 Strategic Breakdown")
-        comp_data = {
-            "Feature": ["Pros", "Cons", "YouTube Status", "Instagram Status", "Current Demand"],
-            niche_a: [
-                "High recurring revenue", 
-                "High technical barrier", 
-                "🔥 Trending (Tutorials)", 
-                "📈 Growing (B2B)", 
-                "Extreme"
-            ],
-            niche_b: [
-                "Low barrier to entry", 
-                "Complex logistics", 
-                "📊 Stable (Reviews)", 
-                "💎 Saturated (Influencer)", 
-                "High"
-            ]
-        }
-        st.table(pd.DataFrame(comp_data).set_index("Feature"))
-
-# LOGOUT
-if st.sidebar.button("🔒 Secure Logout"):
-    st.session_state.clear()
-    st.rerun()
