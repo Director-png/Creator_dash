@@ -5,11 +5,11 @@ import json
 import datetime
 
 # --- CONFIG ---
-st.set_page_config(page_title="Creator Strategy Suite", layout="wide", page_icon="⚡")
+st.set_page_config(page_title="Creator Strategy Pro", layout="wide", page_icon="💎")
 
-# --- 1. USER & CATEGORY DATABASE ---
+# --- 1. THE DATABASE (Simulated Permanent Memory) ---
 if "user_db" not in st.session_state:
-    st.session_state["user_db"] = {"void_admin": "Director (Admin)"}
+    st.session_state["user_db"] = {"void_admin": "Deepak (Admin)"}
 
 if "my_categories" not in st.session_state:
     st.session_state["my_categories"] = ["Cotton Kurti", "Sunscreen"]
@@ -18,108 +18,115 @@ if "my_categories" not in st.session_state:
 def login_system():
     if "authenticated" not in st.session_state:
         st.session_state["authenticated"] = False
-        st.session_state["client_name"] = ""
-
+    
     if not st.session_state["authenticated"]:
-        st.title("🔐 Creator Intelligence Portal")
-        tab1, tab2 = st.tabs(["Login", "Create Account"])
-        with tab1:
-            pwd_input = st.text_input("Access Key:", type="password", key="l_pwd")
-            if st.button("Unlock Dashboard"):
-                if pwd_input in st.session_state["user_db"]:
+        st.title("🔐 Creator Strategy Portal")
+        t1, t2 = st.tabs(["Login", "Register"])
+        with t1:
+            pwd = st.text_input("Access Key:", type="password")
+            if st.button("Enter Dashboard"):
+                if pwd in st.session_state["user_db"]:
                     st.session_state["authenticated"] = True
-                    st.session_state["client_name"] = st.session_state["user_db"][pwd_input]
+                    st.session_state["client_name"] = st.session_state["user_db"][pwd]
                     st.rerun()
-                else:
-                    st.error("Key not found.")
-        with tab2:
-            new_name = st.text_input("Your Name:")
-            new_key = st.text_input("Choose Access Key:", type="password")
-            if st.button("Register & Login"):
-                if new_key and new_name:
-                    st.session_state["user_db"][new_key] = new_name
-                    st.session_state["authenticated"] = True
-                    st.session_state["client_name"] = new_name
-                    st.rerun()
+        with t2:
+            n = st.text_input("Full Name:")
+            k = st.text_input("Create Key:", type="password")
+            if st.button("Sign Up"):
+                st.session_state["user_db"][k] = n
+                st.success("Account Created! Now go to Login.")
         return False
     return True
 
-# --- 3. ANALYTICS ENGINE ---
+# --- 3. THE SMART ENGINE ---
 API_KEY = "cfe3d0828971dc09543b2eaa2abc4b67d29d21a0" 
 
-def get_real_trends(keyword):
+def get_deep_insights(keyword):
     url = "https://google.serper.dev/search"
     payload = json.dumps({"q": keyword, "gl": "in", "hl": "en"}) 
     headers = {'X-API-KEY': API_KEY, 'Content-Type': 'application/json'}
     try:
         response = requests.post(url, headers=headers, data=payload)
         data = response.json()
-        related = len(data.get('relatedSearches', []))
-        questions = len(data.get('peopleAlsoAsk', []))
-        organic = data.get('organic', [])
-        snippet_text = " ".join([obj.get('snippet', '').lower() for obj in organic])
-        mention_count = snippet_text.count(keyword.lower())
-        score = 35 + (related * 6) + (questions * 4) + (mention_count * 1.5)
-        return min(round(score), 100)
+        
+        # Calculate Velocity
+        related = data.get('relatedSearches', [])
+        questions = data.get('peopleAlsoAsk', [])
+        score = 35 + (len(related) * 6) + (len(questions) * 4)
+        
+        return {
+            "score": min(score, 100),
+            "related": [r.get('query') for r in related[:5]],
+            "questions": [q.get('question') for q in questions[:3]]
+        }
     except:
-        return 50 
+        return {"score": 50, "related": [], "questions": []}
 
 # --- MAIN APP ---
 if login_system():
-    # --- SIDEBAR ---
-    st.sidebar.title(f"👋 {st.session_state['client_name']}")
+    st.sidebar.title(f"💎 {st.session_state['client_name']}")
     
-    st.sidebar.header("🔍 Quick Trend Search")
-    instant_query = st.sidebar.text_input("Search any keyword:", key="instant_search", placeholder="Type & hit Enter...")
-
+    # SEARCH BAR
+    st.sidebar.header("🔍 Trend Research")
+    query = st.sidebar.text_input("Enter Keyword:", placeholder="e.g. Vegan Leather")
+    
     st.sidebar.divider()
-
-    st.sidebar.header("📌 My Saved Trackers")
-    new_cat = st.sidebar.text_input("Save a category to list:", placeholder="e.g. AI Tools")
-    if st.sidebar.button("Save to List"):
-        if new_cat and new_cat not in st.session_state["my_categories"]:
-            st.session_state["my_categories"].append(new_cat)
-            st.rerun()
-
-    presets = st.sidebar.multiselect(
-        "Monitor these trends:", 
-        options=st.session_state["my_categories"],
-        default=st.session_state["my_categories"]
-    )
+    
+    # TRACKER MANAGEMENT
+    st.sidebar.header("📌 My Trackers")
+    presets = st.sidebar.multiselect("Active Views:", st.session_state["my_categories"], default=st.session_state["my_categories"])
+    
+    new_tag = st.sidebar.text_input("Add New Tracker:")
+    if st.sidebar.button("Save Tracker"):
+        if new_tag: st.session_state["my_categories"].append(new_tag); st.rerun()
 
     if st.sidebar.button("Logout"):
-        st.session_state["authenticated"] = False
-        st.rerun()
+        st.session_state["authenticated"] = False; st.rerun()
 
-    # --- MAIN UI ---
-    st.title("📈 Creator Intelligence Dashboard")
+    # --- UI LAYOUT ---
+    st.title("🚀 Market Intelligence Dashboard")
+    
+    if query:
+        data = get_deep_insights(query)
+        st.subheader(f"Analysis: {query.upper()}")
+        
+        m1, m2, m3 = st.columns(3)
+        m1.metric("Trend Velocity", f"{data['score']}%")
+        m2.metric("Market Competition", "Medium" if data['score'] < 80 else "High")
+        m3.metric("Demand Status", "🔥 EXPLODING" if data['score'] > 75 else "⚖️ STEADY")
+        
+        # RELATED TRENDS (Option 1)
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.write("**Related Keywords to target:**")
+            for item in data['related']:
+                st.write(f"- {item}")
+        
+        # CONTENT PILLARS (Option 3)
+        with col_b:
+            st.success("**🎯 Suggested Content Pillars:**")
+            if data['score'] > 70:
+                st.write("1. **The 'Why Now' Reel:** Explain the sudden spike in this trend.")
+                st.write("2. **Comparison Video:** This vs. the old alternative.")
+                st.write("3. **Beginner's Guide:** How to start with this in 2026.")
+            else:
+                st.write("1. **Educational Carousel:** Why this is a timeless staple.")
+                st.write("2. **Mistakes to Avoid:** Common errors people make here.")
 
-    # --- SECTION A: INSTANT SEARCH VISUALS (THE FIX) ---
-    if instant_query:
-        st.markdown(f"### ⚡ Analysis for: **{instant_query.upper()}**")
-        with st.spinner(f"Fetching live data for {instant_query}..."):
-            v_score = get_real_trends(instant_query)
-            
-            # Create a mini dataframe just for this search to show a chart
-            instant_df = pd.DataFrame({"Trend": [instant_query], "Velocity": [v_score]})
-            
-            col_chart, col_stats = st.columns([2, 1])
-            
-            with col_chart:
-                # This bar chart will now appear instantly
-                st.bar_chart(instant_df.set_index("Trend"), color="#FF4B4B")
-            
-            with col_stats:
-                status = "🔥 EXPLODING" if v_score > 75 else "🚀 RISING" if v_score > 55 else "⚖️ STABLE"
-                st.metric("Velocity Score", f"{v_score}%")
-                st.subheader(f"Status: {status}")
-                
-                if st.button(f"➕ Save '{instant_query}'"):
-                    if instant_query not in st.session_state["my_categories"]:
-                        st.session_state["my_categories"].append(instant_query)
-                        st.rerun()
-
-            if v_score > 70: 
-                st.balloons()
+        # VISUAL CHART
+        st.bar_chart(pd.DataFrame({"Score": [data['score']]}, index=[query]))
         st.divider()
 
+    # COMPARISON SECTION
+    if presets:
+        st.subheader("📊 Comparison Tracking")
+        comp_list = []
+        for p in presets:
+            d = get_deep_insights(p)
+            comp_list.append({"Trend": p, "Velocity": d['score']})
+        
+        df = pd.DataFrame(comp_list)
+        st.line_chart(df.set_index('Trend'))
+        st.table(df)
+
+    st.caption(f"Build v8.0 | Strategist: {st.session_state['client_name']}")
