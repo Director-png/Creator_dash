@@ -16,24 +16,24 @@ WRITE_URL = "https://script.google.com/macros/s/AKfycbwR8tBqMc4XtfMfJBrjeZbzcgjI
 # ==========================================
 st.set_page_config(page_title="Executive Intelligence", layout="wide")
 
-# Styling to separate Tabs from Header
+# High-Visibility Navigation Styling
 st.markdown("""
 <style>
     .stTabs [data-baseweb="tab-list"] {
-        gap: 15px;
-        background-color: #f1f4f9;
-        padding: 10px;
+        gap: 20px;
+        background-color: #1e293b;
+        padding: 15px;
         border-radius: 10px;
-        border: 1px solid #d1d9e6;
     }
     .stTabs [data-baseweb="tab"] {
         height: 50px;
+        background-color: #334155;
+        border-radius: 5px;
+        color: white !important;
         font-weight: bold;
-        font-size: 16px;
     }
     .stTabs [aria-selected="true"] {
-        color: #FF4B4B !important;
-        border-bottom: 3px solid #FF4B4B !important;
+        background-color: #FF4B4B !important;
     }
 </style>
 """, unsafe_content_html=True)
@@ -45,40 +45,36 @@ if "history" not in st.session_state:
 # 2. MAIN DASHBOARD
 # ==========================================
 st.title("🚀 Strategic Command Portal")
-st.caption(f"Market Intelligence Feed • {datetime.now().strftime('%H:%M')} Local Time")
 
 tab1, tab2, tab3 = st.tabs(["🌐 GLOBAL PULSE", "🔍 INSTANT SEARCH", "🆚 COMPETITION"])
 
 with tab1:
-    st.subheader("🔥 Sector Leaderboard (Vertical Velocity)")
+    st.subheader("🔥 Sector Leaderboard (Live Ranking)")
     
-    # Dynamic shuffle for ranking
-    sectors = ['AI Automation', 'Green Logistics', 'SaaS Fintech', 'HealthTech', 'Ad-Tech']
+    # Dynamic ranking logic
+    sectors = ['AI Content', 'Green Tech', 'SaaS', 'FinTech', 'Logistics']
     random.shuffle(sectors)
-    heat_scores = sorted([random.randint(70, 99) for _ in range(5)], reverse=True)
+    scores = sorted([random.randint(70, 99) for _ in range(5)], reverse=True)
+    df_pulse = pd.DataFrame({'Sector': sectors, 'Market Heat': scores})
     
-    df_pulse = pd.DataFrame({'Sector': sectors, 'Market Heat': heat_scores})
+    # Leaderboard Highlight
+    st.error(f"🏆 TOP RANKING SECTOR: {df_pulse.iloc[0]['Sector']}")
     
-    # Top Performer Badge
-    st.error(f"🏆 CURRENT TRENDING LEADER: {df_pulse.iloc[0]['Sector']}")
-    
-    # Vertical Bar Chart
+    # THE VERTICAL CHART
     fig = px.bar(
         df_pulse, 
         x='Sector', 
         y='Market Heat', 
         color='Market Heat',
         text='Market Heat',
-        color_continuous_scale='Reds',
-        template="plotly_white"
+        color_continuous_scale='Reds'
     )
-    fig.update_traces(textposition='outside')
-    fig.update_layout(yaxis_range=[0, 110], height=500)
+    fig.update_layout(yaxis_range=[0, 110], height=500, template="plotly_dark")
     st.plotly_chart(fig, use_container_width=True)
 
 with tab2:
     st.subheader("🔍 Deep-Dive Intelligence")
-    query = st.text_input("Enter target niche:", placeholder="e.g. Eco-SaaS")
+    query = st.text_input("Enter target niche:")
     
     if query:
         if query not in st.session_state["history"]:
@@ -92,18 +88,15 @@ with tab2:
             st.plotly_chart(px.line(line_df, x="Date", y="Interest", title=f"Velocity: {query}"), use_container_width=True)
             
             st.markdown("### 🪝 Marketing Hooks")
-            st.code(f"1. Why {query} is the hidden goldmine of 2026.\n2. Stop wasting time on old trends; {query} is the future.", language=None)
+            st.info(f"Why {query} is the key to scaling in 2026.")
         
         with c2:
             st.markdown("### 🔑 SEO Keywords")
-            keywords = [f"{query} ROI", f"Best {query} tools", f"Future of {query}"]
-            for kw in keywords:
-                st.button(kw, use_container_width=True)
+            st.button(f"{query} ROI", use_container_width=True)
+            st.button(f"Future of {query}", use_container_width=True)
 
 with tab3:
-    st.subheader("🆚 History & Comparison")
+    st.subheader("🆚 History Log")
     if st.session_state["history"]:
         for h in reversed(st.session_state["history"]):
-            st.write(f"✅ Intelligence Gathered: **{h}**")
-    else:
-        st.info("Your search history will appear here.")
+            st.write(f"✅ Logged: **{h}**")
