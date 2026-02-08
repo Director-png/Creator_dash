@@ -9,7 +9,7 @@ import time
 # 1. DATABASE & API KEYS
 # ==========================================
 READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGThrIabwjsm42GgyOqNsPkdY3BRSwv5wnOKQMH_iMetJKnUMiPESLb7wb5_n24gn33RjEpG3VhSbD/pub?gid=0&single=true&output=csv" 
-WRITE_URL = "web app  url - https://script.google.com/macros/s/AKfycbxJ6f6e2IYcSBXVUdyy9y_OhcAf6AuVHIp__SDPw5tgoCqOEEFAqjVabKxYoIX5FKDr/exec"
+WRITE_URL = "https://script.google.com/macros/s/AKfycbwR8tBqMc4XtfMfJBrjeZbzcgjIkTTIAmMXOmq2QFBf3QFB5aIJTwl5rb5KIpKiV5O7/exec"
 SERPER_API_KEY = "cfe3d0828971dc09543b2eaa2abc4b67d29d21a0" 
 
 # ==========================================
@@ -127,3 +127,4 @@ with t_reg:
             st.warning("Please fill out both fields.")
             
 # ... (rest of your code remains the same)
+
