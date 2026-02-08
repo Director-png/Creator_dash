@@ -19,7 +19,6 @@ SERPER_API_KEY = "cfe3d0828971dc09543b2eaa2abc4b67d29d21a0"
 
 def load_users():
     try:
-        # Cache buster to bypass Google's delay
         timestamp_url = f"{READ_URL}&cb={int(time.time())}"
         df = pd.read_csv(timestamp_url)
         df.columns = df.columns.str.lower().str.strip()
@@ -29,15 +28,21 @@ def load_users():
         return {"admin": "Director"}
 
 def get_comparison_chart(niche_name, color):
-    # Professional Vertical Bar Chart Data
+    # Data with FULL region names
     data = pd.DataFrame({
-        'Region': ['North Am.', 'Europe', 'Asia-Pac', 'Mid-East', 'LatAm'],
+        'Region': ['North America', 'Europe', 'Asia-Pacific', 'Middle East', 'Latin America'],
         'Score': [random.randint(50, 95) for _ in range(5)]
     })
     fig = px.bar(data, x='Region', y='Score', 
-                 title=f"Regional Interest: {niche_name}",
+                 title=f"Market Interest: {niche_name}",
                  color_discrete_sequence=[color])
-    fig.update_layout(margin=dict(l=20, r=20, t=40, b=20), height=300)
+    
+    # FORCE FULL NAMES: This prevents "North Am..." truncation
+    fig.update_layout(
+        xaxis={'categoryorder':'total descending', 'tickmode': 'linear'},
+        margin=dict(l=20, r=20, t=40, b=80), # Increased bottom margin for names
+        height=400
+    )
     return fig
 
 # ==========================================
@@ -60,7 +65,7 @@ if not st.session_state["authenticated"]:
             if name and reg_key:
                 payload = json.dumps({"key": reg_key.lower().strip(), "name": name})
                 requests.post(WRITE_URL, data=payload)
-                st.success("✅ Registered! Check the Google 'Advanced' prompt and wait 30s to Login.")
+                st.success("✅ Registered! Check the Google 'Advanced' prompt and wait 30s.")
             else:
                 st.warning("Please fill all fields.")
 
@@ -73,52 +78,42 @@ if not st.session_state["authenticated"]:
                 st.session_state["identity"] = user_db[l_key]
                 st.rerun()
             else:
-                st.error("❌ Key not found yet. Refreshing... (Google delay is ~30-60s)")
+                st.error("❌ Key not found. Please wait 30s for Google to sync.")
     st.stop()
 
-# --- SIDEBAR (THE DRAG DASHBOARD) ---
+# --- SIDEBAR (USER PROFILE) ---
 with st.sidebar:
     st.markdown(f"## 👤 {st.session_state['identity']}")
-    st.caption("Strategic Director Access")
+    st.caption("Status: Authorized Director")
     st.divider()
-    if st.button("🔄 Force Refresh Data"):
-        st.toast("Syncing with Google Sheets...")
+    if st.button("🔄 Sync Database"):
         load_users()
+        st.toast("Refreshed!")
     st.divider()
     if st.button("🔒 Secure Logout"):
         st.session_state.clear()
         st.rerun()
 
-# --- MAIN DASHBOARD ---
-st.title(f"📊 Global Trends: {st.session_state['identity']}")
+# --- MAIN DASHBOARD (ALL 3 TABS RESTORED) ---
+st.title(f"📊 Market Intelligence: {st.session_state['identity']}")
 
-tab1, tab2 = st.tabs(["📈 Market Pulse", "🆚 Niche Comparison"])
+tabs = st.tabs(["🌐 Global Pulse", "🔍 Niche Deep-Dive", "🆚 Trend Comparison"])
 
-with tab1:
-    st.subheader("🔥 Current Lead Trend: AI Content Scaling")
-    # Using Plotly for a more professional vertical bar chart
-    st.plotly_chart(get_comparison_chart("Global Market", "#636EFA"), use_container_width=True)
+# TAB 1: PULSE
+with tabs[0]:
+    st.subheader("🚀 Lead Sector Analysis")
+    st.plotly_chart(get_comparison_chart("Current Global Lead", "#636EFA"), use_container_width=True)
 
-with tab2:
-    st.subheader("🆚 Strategic Niche Battle")
-    col_a, col_b = st.columns(2)
-    with col_a:
-        niche_1 = st.text_input("First Niche", "SaaS Automation")
-    with col_b:
-        niche_2 = st.text_input("Second Niche", "E-com Logistics")
-    
-    if st.button("Compare Trends"):
-        c1, c2 = st.columns(2)
-        with c1:
-            st.plotly_chart(get_comparison_chart(niche_1, "#00CC96"), use_container_width=True)
-        with c2:
-            st.plotly_chart(get_comparison_chart(niche_2, "#EF553B"), use_container_width=True)
+# TAB 2: SEARCH (RESTORED)
+with tabs[1]:
+    st.subheader("🔍 Deep-Dive Research")
+    query = st.text_input("Enter specific niche to mine data:")
+    if query:
+        with st.spinner("Mining Google & Social Databases..."):
+            res = requests.post("https://google.serper.dev/search", 
+                                headers={'X-API-KEY': SERPER_API_KEY}, 
+                                json={"q": query}).json()
             
-        st.divider()
-        st.write("### 📑 Market Intelligence Report")
-        comp_df = pd.DataFrame({
-            "Metric": ["YouTube Status", "Instagram Status", "Market Gap", "Risk Level"],
-            niche_1: ["🔥 High Growth", "📈 Steady", "Underserved", "Moderate"],
-            niche_2: ["📊 Saturated", "💎 High Quality", "Competitive", "Low"]
-        }).set_index("Metric")
-        st.table(comp_df)
+            c1, c2 = st.columns(2)
+            with c1:
+                st.metric("Momentum Score", f"{random.randint(75
