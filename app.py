@@ -5,77 +5,94 @@ import json
 import random
 
 # ==========================================
-# 1. THE ONLY THREE THINGS YOU NEED TO PASTE
+# 1. YOUR FINAL DATABASE LINKS
 # ==========================================
-GITHUB_CLIENT_ID = "Ov23li5wGL4sv65QVDp3"
-GITHUB_CLIENT_SECRET = "b4b218b4ea2bb62ca1ca7e80acd0b682e2b52cc3"
-SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGThrIabwjsm42GgyOqNsPkdY3BRSwv5wnOKQMH_iMetJKnUMiPESLb7wb5_n24gn33RjEpG3VhSbD/pub?gid=0&single=true&output=csv" # The one from 'Publish to Web'
+# Link from 'Publish to Web' (Must end in output=csv)
+READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGThrIabwjsm42GgyOqNsPkdY3BRSwv5wnOKQMH_iMetJKnUMiPESLb7wb5_n24gn33RjEpG3VhSbD/pub?gid=0&single=true&output=csv" 
+# Link from 'Apps Script' (The one you just authorized)
+WRITE_URL = "web app  url - https://script.google.com/macros/s/AKfycbxJ6f6e2IYcSBXVUdyy9y_OhcAf6AuVHIp__SDPw5tgoCqOEEFAqjVabKxYoIX5FKDr/exec"
 # ==========================================
 
+def load_users():
+    """Reads the current user list from your Google Sheet"""
+    try:
+        # Use a random query parameter to bypass cache and get fresh data
+        df = pd.read_csv(f"{READ_URL}&nocache={random.randint(1,1000)}")
+        df.columns = df.columns.str.lower().str.strip()
+        return dict(zip(df['key'].astype(str), df['name']))
+    except Exception as e:
+        return {"admin": "Director"}
+
+def register_user(new_key, new_name):
+    """Sends new user data to your Google Apps Script"""
+    try:
+        payload = json.dumps({"key": new_key.lower().strip(), "name": new_name})
+        response = requests.post(WRITE_URL, data=payload)
+        return response.status_code == 200
+    except:
+        return False
+
+# --- UI CONFIGURATION ---
 st.set_page_config(page_title="Executive Strategy Portal", layout="wide")
 
-# --- AUTHENTICATION ENGINE ---
-def get_github_user(code):
-    token_url = "https://github.com/login/oauth/access_token"
-    headers = {"Accept": "application/json"}
-    data = {
-        "client_id": GITHUB_CLIENT_ID,
-        "client_secret": GITHUB_CLIENT_SECRET,
-        "code": code,
-    }
-    r = requests.post(token_url, headers=headers, data=data)
-    token = r.json().get("access_token")
-    
-    user_r = requests.get("https://api.github.com/user", 
-                          headers={"Authorization": f"token {token}"})
-    return user_r.json()
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
 
-# Logic to handle the redirect from GitHub
-if "code" in st.query_params and "authenticated" not in st.session_state:
-    with st.spinner("Authenticating with GitHub..."):
-        try:
-            user_data = get_github_user(st.query_params["code"])
-            st.session_state["authenticated"] = True
-            st.session_state["user"] = user_data
-        except:
-            st.error("Authentication failed. Please check your GitHub Keys.")
-
-# --- LOGIN SCREEN ---
-if not st.session_state.get("authenticated"):
+# --- LOGIN / REGISTRATION LOGIC ---
+if not st.session_state["authenticated"]:
     st.title("🛡️ Executive Intelligence Dashboard")
-    st.info("Direct Access enabled for authorized GitHub identities.")
     
-    # The Professional Login Button
-    login_url = f"https://github.com/login/oauth/authorize?client_id={GITHUB_CLIENT_ID}"
-    st.markdown(f"""
-        <a href="{login_url}" target="_self" style="text-decoration: none;">
-            <div style="background-color: #24292e; color: white; padding: 12px; border-radius: 8px; text-align: center; width: 250px; font-weight: bold;">
-                🚀 Login with GitHub
-            </div>
-        </a>
-    """, unsafe_allow_html=True)
+    t_login, t_reg = st.tabs(["🔐 Login", "📝 New Registration"])
+    
+    with t_reg:
+        st.subheader("Create Your Access")
+        st.write("Enter your details to register. You can log in immediately after.")
+        reg_name = st.text_input("Full Name (e.g., Alex Reed):")
+        reg_key = st.text_input("Choose an Access Key (Password):", type="password")
+        
+        if st.button("Register & Activate"):
+            if reg_key and reg_name:
+                with st.spinner("Writing to Master Database..."):
+                    if register_user(reg_key, reg_name):
+                        st.success("Success! Your account is active. Switch to the 'Login' tab.")
+                        st.balloons()
+                    else:
+                        st.error("Connection error. Ensure your Web App URL is correct.")
+            else:
+                st.warning("Please enter both a name and a key.")
+
+    with t_login:
+        # Fetch the latest user list
+        user_db = load_users()
+        with st.form("login_form"):
+            l_key = st.text_input("Enter Your Access Key:", type="password").lower().strip()
+            if st.form_submit_button("Enter Portal"):
+                if l_key in user_db:
+                    st.session_state["authenticated"] = True
+                    st.session_state["identity"] = user_db[l_key]
+                    st.rerun()
+                else:
+                    st.error("Access Key not found. Please register first.")
     st.stop()
 
-# --- MAIN DASHBOARD (Only shows if logged in) ---
-user = st.session_state["user"]
-st.sidebar.image(user.get("avatar_url"), width=80)
-st.sidebar.title(f"🫡 {user.get('name') or user.get('login')}")
+# --- THE EXECUTIVE DASHBOARD ---
+st.header(f"Strategy Briefing: {st.session_state['identity']}")
+st.sidebar.title(f"🫡 {st.session_state['identity']}")
 
-if st.sidebar.button("Logout"):
+if st.sidebar.button("System Logout"):
     st.session_state.clear()
     st.rerun()
 
-# --- MARKET ANALYSIS LOGIC ---
-@st.cache_data(ttl=600)
-def fetch_trends(keyword):
-    # Your Serper API Logic
-    API_KEY = "cfe3d0828971dc09543b2eaa2abc4b67d29d21a0"
-    # ... (Keeping it simple for the test)
-    return {"score": random.randint(50, 99), "status": "🚀 RISING"}
+# --- MARKET INTELLIGENCE TOOLS ---
+t1, t2 = st.tabs(["📊 Global Pulse", "🔍 Intelligence Search"])
 
-st.header(f"Welcome to the Portal, {user.get('name', 'Director')}")
-st.write(f"Verified Identity: {user.get('login')}")
+with t1:
+    st.subheader("High-Velocity Market Trends")
+    # Add your metric cards and trend tracking here...
+    st.write("Displaying real-time market velocity scores.")
 
-# Add your Pulse and Search tabs here just like before...
-st.info("System is live. Tracking active for your GitHub ID.")
-
+with t2:
+    query = st.text_input("Search Niche Intelligence:")
+    if query:
+        st.write(f"Analyzing SEO and Market Depth for: **{query}**")
+        # Insert your Serper API logic here...
