@@ -3,141 +3,63 @@ import pandas as pd
 import plotly.express as px
 import google.generativeai as genai
 import requests
-import time
 
-# --- 1. SYSTEM CONFIG & API INITIALIZATION ---
-st.set_page_config(page_title="Intelligence Command Portal", layout="wide")
-
-# Replace with your actual Gemini API Key
-GEMINI_API_KEY = "AIzaSyBk9U07hY-ppxvydq2jikTsCGZTOxHjjMU"
+# --- CONFIG & API ---
+st.set_page_config(page_title="Intelligence Portal", layout="wide")
+GEMINI_API_KEY = "AIzaSyDPwcKpNTwJ-Gi2dyMMW-reTl01rm-61L4" # Add your key
 genai.configure(api_key=GEMINI_API_KEY)
-# Replace your current model line with this:
-model = genai.GenerativeModel('gemini-pro')
 
-# --- 2. DATABASE CONNECTIONS (Read/Write) ---
-# Replace with your Published CSV URL from Google Sheets
-USER_DB_READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGThrIabwjsm42GgyOqNsPkdY3BRSwv5wnOKQMH_iMetJKnUMiPESLb7wb5_n24gn33RjEpG3VhSbD/pub?gid=0&single=true&output=csv"
-# Replace with your Google Apps Script Webhook URL for Writing
-USER_DB_WRITE_WEBHOOK = "https://script.google.com/macros/s/AKfycbwR8tBqMc4XtfMfJBrjeZbzcgjIkTTIAmMXOmq2QFBf3QFB5aIJTwl5rb5KIpKiV5O7/exec"
-
-# --- 3. AUTHENTICATION & REGISTRATION ENGINE ---
-def check_login(u, p):
-    # MASTER OVERRIDE: This will always work for you
-    if u == "Director" and p == "admin": 
-        return True
-        
-    # DATABASE CHECK: This looks at your Google Sheet
-    try:
-        df = pd.read_csv(USER_DB_READ_URL)
-        # Ensure your Sheet has columns named exactly 'username' and 'password'
-        user_match = df[(df['username'] == u) & (df['password'] == p)]
-        return not user_match.empty
-    except:
-        return False
-
-def register_user_to_db(u, p):
-    if USER_DB_WRITE_WEBHOOK:
-        try:
-            # Sends data to Google Sheet via Webhook
-            response = requests.post(USER_DB_WRITE_WEBHOOK, json={"username": u, "password": p})
-            return response.status_code == 200
-        except:
-            return False
-    return False
-
-# --- 4. ACCESS CONTROL LAYER ---
+# --- LOGIN OVERRIDE ---
 if 'logged_in' not in st.session_state:
-    st.session_state.update({'logged_in': False, 'user': "", 'history': []})
+    st.session_state['logged_in'] = False
 
 if not st.session_state['logged_in']:
-    tab1, tab2 = st.tabs(["🔐 Login", "📝 Register"])
-    with tab1:
-        u = st.text_input("Username", key="login_u")
-        p = st.text_input("Password", type="password", key="login_p")
-        if st.button("Access Portal"):
-            if check_login(u, p):
-                st.session_state.update({'logged_in': True, 'user': u})
-                st.rerun()
-            else:
-                st.error("Invalid credentials.")
-    with tab2:
-        new_u = st.text_input("New Username")
-        new_p = st.text_input("New Password", type="password")
-        if st.button("Create Account"):
-            if register_user_to_db(new_u, new_p):
-                st.success("Account created! Please Login.")
-            else:
-                st.error("Registration failed. Check Webhook.")
+    u = st.sidebar.text_input("Username")
+    p = st.sidebar.text_input("Password", type="password")
+    if st.sidebar.button("Login"):
+        if u == "Director" and p == "void2026":
+            st.session_state['logged_in'] = True
+            st.rerun()
     st.stop()
 
-# --- 5. SIDEBAR: NAVIGATION & INSTANT SEARCH ---
+# --- SIDEBAR: SEARCH & NAVIGATION ---
 with st.sidebar:
-    st.title(f"👤 {st.session_state['user']}")
-    st.write("---")
-    
-    # INSTANT SEARCH TAB (SEO & Strategy focused)
-    st.subheader("🔍 Instant Search")
-    search_query = st.text_input("Analyze Niche/Trend", placeholder="e.g. AI Fitness")
-    
-    if search_query:
-        st.info(f"Analysis for: {search_query}")
-        # SEO Logic
-        st.write(f"**SEO Keywords:** #{search_query.replace(' ','')}, #FutureTech, #MarketShift")
-        st.write("**Hook Idea:** 'They told you {search_query} was dead... they lied.'")
-    
-    st.write("---")
-    nav = st.radio("Intelligence Modules", ["Global Pulse", "Comparison Hub", "Script Architect"])
+    st.title("👤 Director Dashboard")
+    search_query = st.text_input("🔍 Instant Search", placeholder="Type a niche...")
+    nav = st.radio("Go to:", ["Global Pulse", "Comparison Hub", "Script Architect"])
 
-# --- 6. MODULES ---
+# --- DATA GENERATOR (Mock Data for Tabs) ---
+df = pd.DataFrame({
+    'Niche': ['AI Agents', 'Fitness Tech', 'SaaS', 'E-com'],
+    'Trend_Score': [95, 70, 85, 60],
+    'Status': ['🔥 Rising', '⚖️ Stable', '🔥 Rising', '📉 Dropping']
+})
 
-# A. GLOBAL PULSE (Charts & Status Labels)
+# --- TAB LOGIC ---
 if nav == "Global Pulse":
-    st.header("📈 Global Pulse trends")
-    # Mock data for visualization
-    data = pd.DataFrame({
-        'Niche': ['AI Agents', 'Green Tech', 'SaaS', 'Bio-Hacking'],
-        'Score': [98, 75, 82, 60],
-        'Status': ['🔥 Rising', '⚖️ Stable', '🔥 Rising', '📉 Dropping']
-    })
+    st.header("📈 Global Pulse Trends")
+    # Instant Search Filtering
+    display_df = df[df['Niche'].str.contains(search_query, case=False)] if search_query else df
     
-    st.table(data) # Show the labels clearly
-    
-    fig = px.bar(data, x='Niche', y='Score', color='Status', 
-                 color_discrete_map={'🔥 Rising': 'red', '⚖️ Stable': 'blue', '📉 Dropping': 'grey'},
-                 template="plotly_dark")
-    st.plotly_chart(fig, use_container_width=True)
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        fig = px.bar(display_df, x='Niche', y='Trend_Score', color='Status', template="plotly_dark")
+        st.plotly_chart(fig, use_container_width=True)
+    with col2:
+        st.subheader("Market Summary")
+        for index, row in display_df.iterrows():
+            st.write(f"**{row['Niche']}**: {row['Status']}")
 
-# B. COMPARISON HUB
-elif nav == "Comparison Hub":
-    st.header("⚖️ Niche Comparison Hub")
-    col1, col2 = st.columns(2)
-    with col1: n1 = st.selectbox("Primary Niche", ["AI", "Crypto", "Fitness"])
-    with col2: n2 = st.selectbox("Comparison Niche", ["SaaS", "Real Estate", "E-com"])
-    
-    st.write(f"Comparing **{n1}** vs **{n2}**")
-    # Comparison chart logic here
-
-# C. SCRIPT ARCHITECT (GEMINI API)
 elif nav == "Script Architect":
     st.header("💎 AI Script Architect")
-    topic = st.text_input("Video Topic", value=search_query if search_query else "")
+    topic = st.text_input("Script Topic", value=search_query)
     
     if st.button("Generate Strategy"):
-        if not GEMINI_API_KEY or GEMINI_API_KEY == "YOUR_GEMINI_API_KEY_HERE":
-            st.error("API Key missing! Please add your key to the code.")
-        else:
-            with st.status("Consulting Gemini AI...", expanded=True) as status:
-                try:
-                    prompt = f"Act as a viral strategist. Write a script for {topic} with hooks and SEO."
-                    # FIX: Using the explicit model path
-                    model = genai.GenerativeModel('models/gemini-1.5-flash')
-                    response = model.generate_content(prompt)
-                    
-                    st.markdown(response.text)
-                    status.update(label="Strategy Generated!", state="complete")
-                except Exception as e:
-                    status.update(label="API Error", state="error")
-                    st.error(f"The AI is unavailable: {e}")
-                    st.info("Try changing the model ID to 'models/gemini-pro' as a fallback.")
-
-
+        try:
+            # SWITCHED TO STABLE PRO MODEL
+            model = genai.GenerativeModel('gemini-pro') 
+            prompt = f"Viral script for {topic}. Hook, Body, SEO Keywords."
+            response = model.generate_content(prompt)
+            st.markdown(response.text)
+        except Exception as e:
+            st.error(f"API Connection Error: {e}")
