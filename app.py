@@ -39,18 +39,46 @@ with st.sidebar:
     nav = st.radio("Intelligence Modules", ["Global Pulse", "Script Architect"])
 
 # --- MODULE 1: GLOBAL PULSE ---
+import plotly.express as px
+
 if nav == "Global Pulse":
     st.header("📈 Market Momentum")
     
-    # Instant search filtering
+    # 1. THE SEARCH FILTER
     filtered_df = data[data['Niche'].str.contains(search_query, case=False)] if search_query else data
     
-    # A clean, simple table view for now (we can add charts once this is stable)
-    st.dataframe(filtered_df, use_container_width=True)
-    
-    if search_query and filtered_df.empty:
-        st.warning(f"No data found for '{search_query}'. Try 'AI' or 'SaaS'.")
+    if not filtered_df.empty:
+        # 2. THE TOP METRICS BARS (Visual Summary)
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total Niches Tracked", len(filtered_df))
+        with col2:
+            avg_growth = filtered_df['Growth'].mean()
+            st.metric("Avg Growth Score", f"{avg_growth:.1f}%")
+        with col3:
+            st.metric("Top Performer", filtered_df.iloc[0]['Niche'])
 
+        st.divider()
+
+        # 3. THE CHART (Replacing the 2nd table)
+        fig = px.bar(
+            filtered_df, 
+            x='Niche', 
+            y='Growth', 
+            color='Status',
+            text='Growth',
+            title="Growth Velocity by Niche",
+            template="plotly_dark", # Looks better for a "Director" portal
+            color_discrete_map={'🔥 Rising': '#FF4B4B', '⚖️ Stable': '#00CC96', '📉 Dropping': '#636EFA'}
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        # 4. THE DATA TABLE (Keep only one, at the bottom for reference)
+        with st.expander("📂 View Raw Data Source"):
+            st.dataframe(filtered_df, use_container_width=True)
+            
+    else:
+        st.warning("Director, no data found for that search. Check your Google Sheet!")
 # --- THE MAIN CONTENT AREA ---
 if nav == "Global Pulse":
     st.header("📈 Market Momentum")
@@ -74,6 +102,7 @@ elif nav == "Script Architect":
                 st.markdown(completion.choices[0].message.content)
         except Exception as e:
             st.error(f"Error: {e}")
+
 
 
 
