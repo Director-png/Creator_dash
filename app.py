@@ -35,20 +35,27 @@ if nav == "Global Pulse":
 
 # --- MODULE 2: SCRIPT ARCHITECT ---
 elif nav == "Script Architect":
-    st.header("💎 AI Strategy Generator (Groq)")
+    st.header("💎 AI Strategy Generator")
     topic = st.text_input("Content Topic", value=search_query)
     
     if st.button("Generate Strategy"):
-        # We fetch the key from your Streamlit Secrets
+        # 1. Try to find the key in Secrets
         try:
-            api_key = st.secrets["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"]
-            client = Groq(api_key=api_key)
+            if "GROQ_API_KEY" in st.secrets:
+                final_key = st.secrets["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"]
+            else:
+                st.error("🚨 Secret Not Found: Go to Settings > Secrets and add GROQ_API_KEY")
+                st.stop()
+
+            # 2. Connect to Groq
+            client = Groq(api_key=final_key)
             
-            with st.spinner("Groq is analyzing..."):
+            with st.spinner("Analyzing via Llama-3..."):
                 completion = client.chat.completions.create(
                     model="llama3-8b-8192",
-                    messages=[{"role": "user", "content": f"Create a viral script for: {topic}"}]
+                    messages=[{"role": "user", "content": f"Viral script for: {topic}"}]
                 )
                 st.markdown(completion.choices[0].message.content)
+                
         except Exception as e:
-            st.error("API Key Missing or Invalid. Please add GROQ_API_KEY to your Streamlit Secrets.")
+            st.error(f"System Block: {e}")
