@@ -1,11 +1,5 @@
-streamlit
+google-generativeai>=0.8.3
 pandas
-requests
 plotly
-yfinance
-google-generativeai>=0.7.2
-
-
-
-
-
+requests
+streamlit
