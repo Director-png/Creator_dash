@@ -18,17 +18,19 @@ def load_data():
     try:
         df = pd.read_csv(SHEET_URL)
         
-        # SAFETY CHECK: If the first column contains "DOCTYPE", it's a login page
-        if df.columns[0].startswith('<!DOCTYPE'):
-            st.error("🚨 GOOGLE ACCESS DENIED: Please set your Google Sheet to 'Anyone with the link can view'.")
-            return pd.DataFrame({'Niche': ['Access Error'], 'Growth': [0], 'Status': ['🔴 Locked']})
-        
-        # Clean up column names automatically
+        # 1. Clean Headers
         df.columns = [c.strip().capitalize() for c in df.columns]
+        
+        # 2. THE FIX: Clean the 'Growth' column
+        # This removes %, commas, or spaces and converts to a number
+        if 'Growth' in df.columns:
+            df['Growth'] = df['Growth'].astype(str).str.replace('%', '').str.replace(',', '').strip()
+            df['Growth'] = pd.to_numeric(df['Growth'], errors='coerce').fillna(0)
+            
         return df
     except Exception as e:
-        return pd.DataFrame({'Niche': ['Waiting...'], 'Growth': [0], 'Status': ['⚙️ Setup']})
-
+        st.error(f"⚠️ Connection Blocked: {e}")
+        return pd.DataFrame({'Niche': ['Check Sheet'], 'Growth': [0], 'Status': ['Error']})
 data = load_data()
 
 # --- SIDEBAR & SEARCH ---
@@ -102,6 +104,7 @@ elif nav == "Script Architect":
                 st.markdown(completion.choices[0].message.content)
         except Exception as e:
             st.error(f"Error: {e}")
+
 
 
 
