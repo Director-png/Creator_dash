@@ -168,8 +168,7 @@ if nav == "Global Pulse":
                 st.image(img_url, use_container_width=True)
                 st.markdown(f"**{entry.title}**")
                 st.caption(f"📅 {entry.published[:16]}")
-                st.markdown(f"[Read Full Intelligence]({entry.link})")
-    
+                st.markdown(f"[Read Full Intelligence]({entry.link})")    
     
     # 3. AI MARKET ANALYSIS (The "Brain") - Only runs once or on refresh
     if 'market_intelligence' not in st.session_state:
@@ -241,6 +240,7 @@ elif nav == "Script Architect":
                 st.error(f"AI Bridge Offline: {e}")
         else:
             st.warning("Please enter a topic to begin.")
+
 
 
 
