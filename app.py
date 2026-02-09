@@ -7,6 +7,12 @@ import requests
 # --- CONFIG & AUTH ---
 st.set_page_config(page_title="Director Command Center", layout="wide")
 
+# NEW IMPORT LOGIC
+try:
+    from groq import Groq
+except ImportError:
+    st.error("Groq library not found. Please check your requirements.txt and redeploy.")
+
 # Replace with your Groq API Key
 GROQ_API_KEY = "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"
 
@@ -70,3 +76,4 @@ elif nav == "Script Architect":
             st.markdown(completion.choices[0].message.content)
         except Exception as e:
             st.error(f"Groq Connection Error: {e}")
+
