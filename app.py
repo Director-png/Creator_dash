@@ -175,11 +175,7 @@ if nav == "Global Pulse":
 elif nav == "Script Architect":
     st.header("💎 Script Architecht")
     
-    # Now value=search_query will work because it's defined in the sidebar!
-    topic = st.text_input("Target Topic", value=search_query)
-    
-    # User Input
-    topic = st.text_input("Target Topic", value=search_query)
+topic = st.text_input("Target Topic", placeholder="Enter your niche or video idea...")
     
     # Strategy Toggle
     format_type = st.radio(
