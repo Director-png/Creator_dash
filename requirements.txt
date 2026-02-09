@@ -3,6 +3,7 @@ pandas
 requests
 plotly
 yfinance
+google-generativeai
 
 
 
