@@ -2,67 +2,71 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import google.generativeai as genai
+import requests
 
-# --- CONFIG ---
-st.set_page_config(page_title="Director Portal", layout="wide")
-GEMINI_API_KEY = "AIzaSyDPwcKpNTwJ-Gi2dyMMW-reTl01rm-61L4"
-genai.configure(api_key=GEMINI_API_KEY)
-# This is the most stable way to call the model in 2026
-model = genai.GenerativeModel('gemini-1.5-flash')
+# --- 1. CONFIG & AUTH ---
+st.set_page_config(page_title="Director Command Center", layout="wide")
 
+# Use a sidebar login to keep the main area clean
+if 'auth' not in st.session_state:
+    st.session_state['auth'] = False
 
-# --- SIDEBAR: SEARCH & NAVIGATION ---
 with st.sidebar:
-    st.title("🛡️ Command Center")
-    # THE INSTANT SEARCH TAB
-    search_query = st.text_input("🔍 Instant Search", placeholder="Search niche (e.g., SaaS)...").strip()
+    st.title("🔐 Secure Access")
+    if not st.session_state['auth']:
+        user = st.text_input("Director ID")
+        pw = st.text_input("Access Key", type="password")
+        if st.button("Unlock System"):
+            if user == "Director" and pw == "admin":
+                st.session_state['auth'] = True
+                st.rerun()
+            else:
+                st.error("Access Denied")
+        st.stop()
     
-    if search_query:
-        st.subheader("⚡ Quick Strategy")
-        st.caption(f"Keywords: #{search_query.replace(' ','')}, #Viral2026")
-        st.write(f"**Hook:** 'Stop scrolling if you care about {search_query}...'")
+    st.success("Authorized: Director")
+    st.write("---")
+    # INSTANT SEARCH IN SIDEBAR
+    query = st.text_input("🔍 Instant Niche Search", placeholder="e.g. AI SaaS")
+    nav = st.radio("Intelligence Modules", ["Global Pulse", "Comparison Hub", "Script Architect"])
 
-    nav = st.radio("Navigation", ["Global Pulse", "Comparison Hub", "Script Architect"])
-
-# --- DATABASE (MOCK DATA FOR VISUALS) ---
-# This data feeds the charts and tables
-market_data = pd.DataFrame({
-    'Niche': ['AI Agents', 'SaaS', 'Bio-Hacking', 'E-com', 'Fitness'],
-    'Growth': [98, 85, 45, 62, 77],
-    'Status': ['🔥 Rising', '🔥 Rising', '📉 Dropping', '⚖️ Stable', '⚖️ Stable']
+# --- 2. DATA ENGINE (The "Rising/Stable" Logic) ---
+data = pd.DataFrame({
+    'Niche': ['AI Agents', 'Green Tech', 'SaaS', 'Bio-Hacking', 'Fitness'],
+    'Score': [98, 75, 88, 55, 72],
+    'Status': ['🔥 Rising', '⚖️ Stable', '🔥 Rising', '📉 Dropping', '⚖️ Stable']
 })
 
-# --- MODULES ---
-
+# --- 3. TAB LOGIC ---
 if nav == "Global Pulse":
     st.header("📈 Global Pulse Trends")
     
-    # Filtering logic for Search
-    filtered_df = market_data[market_data['Niche'].str.contains(search_query, case=False)] if search_query else market_data
+    # Filtering by Search Query
+    view_df = data[data['Niche'].str.contains(query, case=False)] if query else data
     
-    # Displaying Metrics & Labels (Rising, Stable, etc.)
-    cols = st.columns(len(filtered_df))
-    for i, (idx, row) in enumerate(filtered_df.iterrows()):
-        cols[i].metric(row['Niche'], f"{row['Growth']}%", row['Status'])
-
-    # THE CHART
-    fig = px.bar(filtered_df, x='Niche', y='Growth', color='Status', 
-                 title="Market Momentum Analysis", template="plotly_dark",
-                 color_discrete_map={'🔥 Rising': '#00FF00', '⚖️ Stable': '#00BFFF', '📉 Dropping': '#FF4B4B'})
+    # Displaying Status Metrics
+    m1, m2, m3 = st.columns(3)
+    if not view_df.empty:
+        m1.metric("Top Niche", view_df.iloc[0]['Niche'], view_df.iloc[0]['Status'])
+    
+    # The Chart
+    fig = px.bar(view_df, x='Niche', y='Score', color='Status', 
+                 color_discrete_map={'🔥 Rising': 'red', '⚖️ Stable': 'cyan', '📉 Dropping': 'gray'},
+                 template="plotly_dark")
     st.plotly_chart(fig, use_container_width=True)
+    st.table(view_df)
 
 elif nav == "Script Architect":
     st.header("💎 AI Script Architect")
-    topic = st.text_input("Video Topic", value=search_query)
+    topic = st.text_input("Topic", value=query)
     
-    if st.button("Generate Master Strategy"):
+    if st.button("Generate Strategy"):
         try:
-            # EXPLICIT MODEL PATHING
-            model = genai.GenerativeModel(model_name='models/gemini-1.5-flash')
-            prompt = f"Develop a viral script for {topic}. Include 3 hooks and SEO keywords."
-            response = model.generate_content(prompt)
+            genai.configure(api_key="YOUR_ACTUAL_API_KEY") # Ensure this is correct
+            # Stable Model Call
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            response = model.generate_content(f"Viral script strategy for {topic}. Hooks and SEO.")
             st.markdown(response.text)
         except Exception as e:
-            st.error(f"API Error: {e}")
-            st.info("Ensure your requirements.txt is updated to google-generativeai>=0.8.3")
-
+            st.error(f"System Offline: {e}")
+            st.info("Check if requirements.txt is uploaded to GitHub.")
