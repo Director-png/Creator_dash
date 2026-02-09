@@ -41,15 +41,20 @@ with st.sidebar:
 
 # --- CONTENT AREA ---
 if nav == "Global Pulse":
-    st.header("📈 Market Momentum") # This is your ONLY header
+    st.header("📈 Market Momentum")
     
     filtered_df = data[data['Niche'].str.contains(search_query, case=False)] if search_query else data
     
     if not filtered_df.empty:
-        # 1. TOP METRICS
-        c1, c2 = st.columns(2)
-        c1.metric("Total Niches", len(filtered_df))
-        c2.metric("Avg Growth", f"{filtered_df['Growth'].mean():.1f}%")
+        # Metrics & Charts here... (keep your existing chart code)
+
+        # THE DATA TABLE
+        with st.expander("📂 View Raw Intelligence Feed"):
+            # This logic shifts the index from 0,1,2 to 1,2,3
+            display_df = filtered_df.copy()
+            display_df.index = range(1, len(display_df) + 1) # Force 1 to N counting
+            
+            st.dataframe(display_df, use_container_width=True)
 
         # 2. THE CHART (Visual)
         fig = px.bar(filtered_df, x='Niche', y='Growth', color='Status', template="plotly_dark")
@@ -103,6 +108,7 @@ elif nav == "Script Architect":
                 st.markdown(completion.choices[0].message.content)
         except Exception as e:
             st.error(f"Error: {e}")
+
 
 
 
