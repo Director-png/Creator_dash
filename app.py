@@ -1,84 +1,72 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import google.generativeai as genai
+from groq import Groq # Swapped from Google
+import requests
 
-# --- 1. CONFIG ---
-st.set_page_config(page_title="Director Portal", layout="wide")
+# --- CONFIG & AUTH ---
+st.set_page_config(page_title="Director Command Center", layout="wide")
 
-# Force the library to use the stable API version
-import os
+# Replace with your Groq API Key
+GROQ_API_KEY = "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"
 
-# Put this BEFORE genai.configure
-os.environ["GOOGLE_API_USE_MTLS_ENDPOINT"] = "never" 
+# --- LOGIN OVERRIDE ---
+if 'logged_in' not in st.session_state:
+    st.session_state['logged_in'] = False
 
-genai.configure(api_key="AIzaSyDPwcKpNTwJ-Gi2dyMMW-reTl01rm-61L4")
-
-# USE THIS EXACT STRING - no 'models/' prefix needed in the new stable version
-try:
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    # If that still fails, the absolute fail-safe for the 404 is:
-    # model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-except Exception as e:
-    st.error(f"Configuration Error: {e}")
-# --- 2. THE ACCESS SYSTEM (Login) ---
-if 'auth' not in st.session_state:
-    st.session_state['auth'] = False
-
-if not st.session_state['auth']:
-    st.title("🛡️ Access Restricted")
+if not st.session_state['logged_in']:
+    st.title("🛡️ Secure Login")
     u = st.text_input("Username")
     p = st.text_input("Password", type="password")
-    if st.button("Authenticate"):
-        if u == "Director" and p == "admin": # Your Master Key
-            st.session_state['auth'] = True
+    if st.button("Access System"):
+        if u == "Director" and p == "admin":
+            st.session_state['logged_in'] = True
             st.rerun()
-        else:
-            st.error("Invalid Credentials")
     st.stop()
 
-# --- 3. THE COMMAND CENTER (Post-Login) ---
+# --- SIDEBAR: INSTANT SEARCH & SEO ---
 with st.sidebar:
-    st.header(f"Welcome, Director")
-    # THE INSTANT SEARCH
-    search_query = st.text_input("🔍 Instant Search", placeholder="e.g. AI Fitness")
-    nav = st.radio("Intelligence Modules", ["Global Pulse", "Comparison Hub", "Script Architect"])
+    st.header("🔍 Global Intelligence")
+    search_query = st.text_input("Instant Search", placeholder="e.g. AI Fitness")
+    
+    if search_query:
+        st.subheader("SEO Quick-Stack")
+        st.code(f"Keywords: {search_query}, Viral, 2026, Growth")
+        st.info(f"Hook: 'They don't want you to know this about {search_query}...'")
+    
+    nav = st.radio("Modules", ["Global Pulse", "Comparison Hub", "Script Architect"])
 
-# --- 4. TABS & VISUALS ---
+# --- DATA ENGINE ---
+df = pd.DataFrame({
+    'Niche': ['AI Agents', 'SaaS', 'Bio-Hacking', 'Fitness', 'E-com'],
+    'Score': [98, 85, 40, 75, 60],
+    'Status': ['🔥 Rising', '🔥 Rising', '📉 Dropping', '⚖️ Stable', '⚖️ Stable']
+})
+
+# --- MODULES ---
 if nav == "Global Pulse":
     st.header("📈 Global Pulse Trends")
+    display_df = df[df['Niche'].str.contains(search_query, case=False)] if search_query else df
     
-    # Mock Data for Charts (Replace with your Sheet Read URL later)
-    df = pd.DataFrame({
-        'Niche': ['AI Agents', 'SaaS', 'E-com', 'Bio-Hacking'],
-        'Momentum': [95, 88, 62, 45],
-        'Status': ['🔥 Rising', '🔥 Rising', '⚖️ Stable', '📉 Dropping']
-    })
-    
-    # Filter based on Instant Search
-    if search_query:
-        df = df[df['Niche'].str.contains(search_query, case=False)]
-
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        # Professional Dark Chart
-        fig = px.bar(df, x='Niche', y='Momentum', color='Status', 
-                     template="plotly_dark", title="Market Heatmap")
-        st.plotly_chart(fig, use_container_width=True)
-    with col2:
-        st.subheader("Market Labels")
-        st.write(df[['Niche', 'Status']])
+    fig = px.bar(display_df, x='Niche', y='Score', color='Status', 
+                 template="plotly_dark", color_discrete_map={'🔥 Rising': 'red', '⚖️ Stable': 'blue', '📉 Dropping': 'gray'})
+    st.plotly_chart(fig, use_container_width=True)
+    st.table(display_df)
 
 elif nav == "Script Architect":
-    st.header("💎 AI Script Strategy")
-    topic = st.text_input("Target Topic", value=search_query)
+    st.header("💎 Groq-Powered Script Architect")
+    topic = st.text_input("Script Topic", value=search_query)
     
-    if st.button("Generate Strategy"):
+    if st.button("Generate Strategy (Ultra-Fast)"):
         try:
-            # Using the absolute latest stable model call
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            response = model.generate_content(f"Viral script strategy for {topic}. Hooks, SEO, and Body.")
-            st.markdown(response.text)
+            client = Groq(api_key=GROQ_API_KEY)
+            completion = client.chat.completions.create(
+                model="llama3-8b-8192", # Extremely fast and reliable
+                messages=[
+                    {"role": "system", "content": "You are a viral marketing strategist."},
+                    {"role": "user", "content": f"Create a viral script for {topic} with 3 hooks and SEO keywords."}
+                ]
+            )
+            st.markdown(completion.choices[0].message.content)
         except Exception as e:
-            st.error(f"AI Engine Offline: {e}")
-
+            st.error(f"Groq Connection Error: {e}")
