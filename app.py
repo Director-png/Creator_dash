@@ -1,84 +1,82 @@
 import streamlit as st
 import pandas as pd
-import time
+import plotly.express as px
+import google.generativeai as genai  # The AI Engine
 
-# 1. Page Config & Professional Styling
-st.set_page_config(page_title="Market Intelligence Portal", layout="wide")
+# --- 1. CONFIG & API SETUP ---
+st.set_page_config(page_title="Command Portal", layout="wide")
 
-st.markdown("""
-    <style>
-    .main { background-color: #0e1117; }
-    .stMetric { background-color: #1a1c24; padding: 15px; border-radius: 10px; border: 1px solid #30363d; }
-    .sidebar .sidebar-content { background-image: linear-gradient(#2e313d,#0e1117); }
-    </style>
-    """, unsafe_allow_html=True)
+# Replace with your actual Gemini API Key
+# Get one for free at: https://aistudio.google.com/
+GEMINI_API_KEY = "AIzaSyBk9U07hY-ppxvydq2jikTsCGZTOxHjjMU"
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel('gemini-1.5-flash')
 
-# 2. Authentication Layer (Restored)
-if 'logged_in' not in st.session_state:
-    st.session_state['logged_in'] = False
-    st.session_state['user_name'] = ""
+# --- 2. THE READ/WRITE URL SECTION (The "Brain" of your data) ---
+st.sidebar.subheader("🔗 Data Connections")
+SHEET_URL = st.sidebar.text_input("Google Sheet CSV URL", 
+            placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv")
 
-if not st.session_state['logged_in']:
-    cols = st.columns([1, 2, 1])
-    with cols[1]:
-        st.title("🔐 Intelligence Login")
-        user_input = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        if st.button("Access Portal"):
-            if user_input and password == "director2026": # Replace with your password
-                st.session_state['logged_in'] = True
-                st.session_state['user_name'] = user_input
-                st.rerun()
-    st.stop()
+# --- 3. SESSION STATE (History & Auth) ---
+if 'history' not in st.session_state:
+    st.session_state['history'] = []
 
-# 3. Sidebar - Identity & Navigation
+# --- 4. DATA LOADING LOGIC (Read) ---
+def load_market_data():
+    if SHEET_URL:
+        try:
+            df = pd.read_csv(SHEET_URL)
+            return df
+        except Exception as e:
+            st.sidebar.error("Check Sheet URL/Permissions")
+            return None
+    return None
+
+df = load_market_data()
+
+# --- 5. THE SCRIPT ARCHITECT (With Real AI) ---
 with st.sidebar:
-    st.title(f"👤 {st.session_state['user_name']}")
+    nav = st.radio("Intelligence Modules", ["Global Pulse", "Comparison Hub", "Script Architect"])
     st.write("---")
-    tool_choice = st.radio("Navigation", ["Global Pulse", "Comparison Hub", "Script Architect"])
-    st.write("---")
-    st.subheader("📜 Search History")
-    # Placeholder for history logic
-    st.info("No recent history found.")
-    if st.button("Logout"):
-        st.session_state['logged_in'] = False
-        st.rerun()
+    st.subheader("📜 History Log")
+    for item in st.session_state['history']:
+        st.caption(item)
 
-# 4. Main App Logic
-if tool_choice == "Global Pulse":
-    st.header("📈 Global Pulse Trends")
-    st.write("Current Market Heatmap and real-time data flow.")
-    # (Your Google Sheets / Plotly logic goes here)
+if nav == "Script Architect":
+    st.header("💎 AI Script Architect (Gemini Powered)")
+    topic = st.text_input("Enter Topic/Niche", placeholder="e.g. AI Automation for Real Estate")
+    platform = st.selectbox("Format", ["YouTube Longform", "IG Reel", "TikTok", "X Thread"])
+    tone = st.select_slider("Script Tone", ["Aggressive", "Educational", "Hype"])
 
-elif tool_choice == "Comparison Hub":
-    st.header("⚖️ Niche Comparison Tab")
-    col1, col2 = st.columns(2)
-    niche_a = col1.text_input("Niche A", "AI Automation")
-    niche_b = col2.text_input("Niche B", "SaaS")
-    st.button("Compare Metrics")
-
-elif tool_choice == "Script Architect":
-    st.header("💎 Script Architect (Premium)")
-    niche_input = st.text_input("Enter Niche/Trend Name:")
-    platform = st.segmented_control("Select Platform", ["YouTube", "Instagram", "TikTok"])
-    
-    if st.button("Generate Strategy"):
-        if niche_input:
-            with st.status("Architecting Content...", expanded=True) as status:
-                st.write("Fetching historical trend data...")
-                time.sleep(1)
-                st.write("Analyzing current monthly spikes...")
-                time.sleep(1)
-                st.write("Predicting future trajectory...")
-                time.sleep(1)
-                status.update(label="Strategy Complete!", state="complete", expanded=False)
-            
-            # This is where the output was "stuck" before. Fixed:
-            st.success(f"### {platform} Strategy for {niche_input}")
-            st.markdown(f"""
-            **The Hook (Current Trend):** "Why everyone is talking about {niche_input}..."
-            **The Value (Future Prediction):** Explain how this shifts in the next 30 days.
-            **CTA:** "Follow for the next trend update."
-            """)
+    if st.button("Generate Professional Strategy"):
+        if topic:
+            with st.spinner("AI analyzing market sentiment..."):
+                # Professional Prompt Engineering
+                prompt = f"""
+                Act as a viral content strategist. Create a {platform} script about {topic}.
+                The tone should be {tone}.
+                Include:
+                1. A high-retention Hook.
+                2. A body that explains WHY this is trending now based on recent market shifts.
+                3. A future prediction for this niche.
+                4. A strong CTA.
+                Format clearly with bold headings.
+                """
+                response = model.generate_content(prompt)
+                
+                # Write to Screen
+                st.markdown(response.text)
+                
+                # Write to History
+                st.session_state['history'].append(f"Generated {platform} script for {topic}")
         else:
-            st.warning("Please enter a niche to begin.")
+            st.warning("Enter a topic first.")
+
+# --- 6. GLOBAL PULSE (With Real Data) ---
+elif nav == "Global Pulse":
+    st.header("📈 Real-Time Global Pulse")
+    if df is not None:
+        fig = px.line(df, x=df.columns[0], y=df.columns[1], title="Market Movement")
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("Paste your Google Sheet CSV URL in the sidebar to visualize trends.")
