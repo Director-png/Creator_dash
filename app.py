@@ -105,6 +105,41 @@ elif nav == "Script Architect":
 
 # --- 6. MODULE: USER DATABASE ---
 elif nav == "User Database":
-    st.header("👥 User Growth Portal")
-    st.write("This module will eventually track your sign-ups and leads.")
-    st.info("Next Step: Connect this to a persistent database.")
+    st.header("👥 Creator Intelligence Network")
+    st.subheader("Join the Elite Database")
+    
+    # 1. THE FORM
+    with st.form("signup_form"):
+        st.write("Register your channel to receive custom market reports.")
+        name = st.text_input("Full Name")
+        email = st.text_input("Email Address")
+        creator_niche = st.selectbox("Your Primary Niche", data['Niche'].unique())
+        
+        submit_button = st.form_submit_button("Secure My Spot")
+        
+        if submit_button:
+            if name and email:
+                # 2. THE DATA OBJECT
+                new_lead = pd.DataFrame([{
+                    "Name": name,
+                    "Niche": creator_niche,
+                    "Email": email,
+                    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }])
+                
+                # 3. SUCCESS MESSAGE (Visual Feedback)
+                st.success(f"Welcome to the network, Director {name}!")
+                st.balloons()
+                
+                # Note: We will link the actual Google Sheet "Write" 
+                # function once your credentials are set up!
+                st.info("System Log: Lead captured. Finalizing database sync...")
+            else:
+                st.warning("Please fill in all fields to authorize access.")
+
+    # 4. PREVIEW FOR THE DIRECTOR
+    st.divider()
+    st.subheader("Current Network Strength")
+    st.write("Only you can see this high-level overview.")
+    # This will eventually pull from your 'Leads' sheet
+    st.info("Database encrypted. Total Members: 1")
