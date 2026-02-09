@@ -38,7 +38,6 @@ if nav == "Global Pulse":
     st.header("📈 Market Momentum")
     filtered_df = data[data['Niche'].str.contains(search_query, case=False)] if search_query else data
     st.dataframe(filtered_df, use_container_width=True)
-
 elif nav == "Script Architect":
     st.header("💎 AI Strategy Generator")
     topic = st.text_input("Content Topic", value=search_query)
@@ -48,11 +47,13 @@ elif nav == "Script Architect":
             final_key = st.secrets["GROQ_API_KEY"]
             client = Groq(api_key=final_key)
             
-            with st.spinner("Thinking..."):
+            with st.spinner("Groq is thinking..."):
                 completion = client.chat.completions.create(
-                    model="llama3-8b-8192",
-                    messages=[{"role": "user", "content": f"Viral script for {topic}"}]
+                    # WE UPDATED THIS LINE BELOW:
+                    model="llama-3.1-8b-instant", 
+                    messages=[{"role": "user", "content": f"Create a viral script for: {topic}"}]
                 )
                 st.markdown(completion.choices[0].message.content)
         except Exception as e:
             st.error(f"Error: {e}")
+
