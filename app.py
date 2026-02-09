@@ -157,6 +157,45 @@ if nav == "Global Pulse":
         st.warning("No niche-specific data found. Showing all markets.")
         st.dataframe(market_data, use_container_width=True)
 
+
+# --- 3. DATA VISUALIZATION (Paste this at the bottom of Global Pulse) ---
+    st.divider()
+    st.subheader("📊 Market Strength Analysis")
+    
+    # Apply the Global Search filter to the chart data as well
+    if search_query:
+        chart_df = filtered_df[filtered_df['Niche'].str.contains(search_query, case=False, na=False)]
+    else:
+        chart_df = filtered_df
+
+    if not chart_df.empty:
+        # Vertical-style Bar Chart (Horizontal bars are easier to read for Niche lists)
+        fig = px.bar(
+            chart_df, 
+            x='Growth', 
+            y='Niche', 
+            orientation='h', 
+            title=f"Growth Velocity Intelligence",
+            template="plotly_dark",
+            color='Growth',
+            color_continuous_scale='Turbo' # High-contrast colors
+        )
+        
+        # Adjust layout for a clean, professional look
+        fig.update_layout(
+            yaxis={'categoryorder':'total ascending'}, # Puts highest growth at the top
+            height=400 + (len(chart_df) * 30),
+            margin=dict(l=20, r=20, t=40, b=20)
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        st.dataframe(chart_df, use_container_width=True)
+    else:
+        st.warning("No data matches your current search or niche.")
+        if st.button("View Global Data"):
+            st.dataframe(market_data, use_container_width=True)
+            
+
 # --- MODULE: SCRIPT ARCHITECT ---
 elif nav == "Script Architect":
     st.header("💎 Script Architect")
@@ -194,3 +233,4 @@ elif nav == "Script Architect":
                 st.error(f"AI Bridge Offline: {e}")
         else:
             st.warning("Please enter a topic to begin.")
+
