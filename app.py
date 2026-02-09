@@ -7,10 +7,21 @@ st.set_page_config(page_title="Director Portal", layout="wide")
 
 # --- DATABASE (The Global Pulse Data) ---
 # We'll keep this local for now, then link your Google Sheet next.
-data = pd.DataFrame({
-    'Niche': ['AI Agents', 'SaaS', 'Bio-Hacking', 'Solar Tech'],
-    'Growth': [98, 85, 40, 92],
-    'Status': ['🔥 Rising', '🔥 Rising', '📉 Dropping', '🔥 Rising']
+# --- GOOGLE SHEET BRIDGE ---
+# Replace the XXXXXX with the long ID from your Google Sheet URL
+SHEET_ID = "163haIuPIna3pEY9IDxncPM2kFFsuZ76HfKsULcMu1y4"
+SHEET_URL = f"https://docs.google.com/spreadsheets/d/163haIuPIna3pEY9IDxncPM2kFFsuZ76HfKsULcMu1y4/edit?usp=sharing"
+
+@st.cache_data(ttl=600)  # This saves your data for 10 mins so it's lightning fast
+def load_data():
+    try:
+        df = pd.read_csv(SHEET_URL)
+        return df
+    except Exception as e:
+        st.error(f"Spreadsheet Error: {e}")
+        return pd.DataFrame() # Return empty if it fails
+
+data = load_data()
 })
 
 # --- SIDEBAR & SEARCH ---
@@ -56,4 +67,5 @@ elif nav == "Script Architect":
                 st.markdown(completion.choices[0].message.content)
         except Exception as e:
             st.error(f"Error: {e}")
+
 
