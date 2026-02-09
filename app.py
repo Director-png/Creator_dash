@@ -9,20 +9,27 @@ st.set_page_config(page_title="Director Portal", layout="wide")
 # We'll keep this local for now, then link your Google Sheet next.
 # --- GOOGLE SHEET BRIDGE ---
 # Replace the XXXXXX with the long ID from your Google Sheet URL
+# Use this EXACT ID from your file
 SHEET_ID = "163haIuPIna3pEY9IDxncPM2kFFsuZ76HfKsULcMu1y4"
-SHEET_URL = f"https://docs.google.com/spreadsheets/d/163haIuPIna3pEY9IDxncPM2kFFsuZ76HfKsULcMu1y4/edit?usp=sharing"
+SHEET_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv"
 
-@st.cache_data(ttl=600)  # This saves your data for 10 mins so it's lightning fast
+@st.cache_data(ttl=60)
 def load_data():
     try:
         df = pd.read_csv(SHEET_URL)
+        
+        # SAFETY CHECK: If the first column contains "DOCTYPE", it's a login page
+        if df.columns[0].startswith('<!DOCTYPE'):
+            st.error("🚨 GOOGLE ACCESS DENIED: Please set your Google Sheet to 'Anyone with the link can view'.")
+            return pd.DataFrame({'Niche': ['Access Error'], 'Growth': [0], 'Status': ['🔴 Locked']})
+        
+        # Clean up column names automatically
+        df.columns = [c.strip().capitalize() for c in df.columns]
         return df
     except Exception as e:
-        st.error(f"Spreadsheet Error: {e}")
-        return pd.DataFrame() # Return empty if it fails
+        return pd.DataFrame({'Niche': ['Waiting...'], 'Growth': [0], 'Status': ['⚙️ Setup']})
 
 data = load_data()
-
 
 # --- SIDEBAR & SEARCH ---
 with st.sidebar:
@@ -67,6 +74,7 @@ elif nav == "Script Architect":
                 st.markdown(completion.choices[0].message.content)
         except Exception as e:
             st.error(f"Error: {e}")
+
 
 
 
