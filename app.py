@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from groq import Groq
 import plotly.express as px
+from datetime import datetime
+
 
 # --- 1. PAGE CONFIG & STYLING ---
 st.set_page_config(page_title="Creator Director Portal", layout="wide")
@@ -103,43 +105,61 @@ elif nav == "Script Architect":
         except Exception as e:
             st.error(f"AI Connection Error: {e}")
 
+
 # --- 6. MODULE: USER DATABASE ---
 elif nav == "User Database":
     st.header("👥 Creator Intelligence Network")
-    st.subheader("Join the Elite Database")
     
-    # 1. THE FORM
-    with st.form("signup_form"):
-        st.write("Register your channel to receive custom market reports.")
-        name = st.text_input("Full Name")
-        email = st.text_input("Email Address")
-        creator_niche = st.selectbox("Your Primary Niche", data['Niche'].unique())
-        
-        submit_button = st.form_submit_button("Secure My Spot")
-        
-        if submit_button:
-            if name and email:
-                # 2. THE DATA OBJECT
-                new_lead = pd.DataFrame([{
-                    "Name": name,
-                    "Niche": creator_niche,
-                    "Email": email,
-                    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                }])
-                
-                # 3. SUCCESS MESSAGE (Visual Feedback)
-                st.success(f"Welcome to the network, Director {name}!")
-                st.balloons()
-                
-                # Note: We will link the actual Google Sheet "Write" 
-                # function once your credentials are set up!
-                st.info("System Log: Lead captured. Finalizing database sync...")
-            else:
-                st.warning("Please fill in all fields to authorize access.")
+    # Visual Progress Bar (makes the form feel more professional)
+    st.write("Complete your registration to unlock advanced analytics.")
+    st.progress(65) 
+    
+    st.markdown("---")
 
-    # 4. PREVIEW FOR THE DIRECTOR
-    st.divider()
-    st.subheader("Current Network Strength")
-    st.write("Only you can see this high-level overview.")
-    # This will eventually pull from your 'Leads' sheet
-    st.info("Database encrypted. Total Members: 1")
+    # Creating two columns: One for the form, one for a "Why Join" info box
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        with st.form("signup_form", clear_on_submit=True):
+            st.subheader("Registration Portal")
+            
+            name = st.text_input("Full Name", placeholder="e.g. Director Smith")
+            email = st.text_input("Email Address", placeholder="director@agency.com")
+            
+            # Pulling niche options directly from your Google Sheet data!
+            niche_list = data['Niche'].unique().tolist()
+            creator_niche = st.selectbox("Your Primary Niche", options=niche_list)
+            
+            experience = st.select_slider(
+                "Experience Level",
+                options=["Newbie", "Growing", "Professional", "Elite"]
+            )
+            
+            submit_button = st.form_submit_button("Secure My Spot In Database")
+            
+            if submit_button:
+                if name and email:
+                    # This part simulates the save logic
+                    st.success(f"✅ Protocol Initiated! Welcome, {name}.")
+                    st.balloons()
+                    
+                    # Logic Preview (What will be sent to Google Sheets later)
+                    st.code(f"""
+                    SENDING TO DATABASE:
+                    --------------------
+                    User: {name}
+                    Niche: {creator_niche}
+                    Level: {experience}
+                    Time: {datetime.now().strftime("%H:%M:%S")}
+                    """)
+                else:
+                    st.error("Missing Credentials. Please fill in Name and Email.")
+
+    with col2:
+        st.info("### 🛡️ Why Register?")
+        st.write("""
+        - **Early Access:** Get the Global Pulse trends 24h early.
+        - **AI Credits:** 50 free Script Architect generations/month.
+        - **Network:** Connect with other 'Elite' level creators.
+        """)
+        st.image("https://cdn-icons-png.flaticon.com/512/6596/6596121.png", width=100)
