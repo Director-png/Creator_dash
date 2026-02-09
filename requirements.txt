@@ -3,7 +3,8 @@ pandas
 requests
 plotly
 yfinance
-google-generativeai
+google-generativeai>=0.7.2
+
 
 
 
