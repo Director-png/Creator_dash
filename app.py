@@ -124,26 +124,34 @@ if nav == "Global Pulse":
     headlines = [entry.title for entry in feed.entries[:10]]
     headlines_str = " | ".join(headlines)
 
-    # 2. AI MARKET ANALYSIS (The "Brain")
+# 2. AI MARKET ANALYSIS (The "Brain")
     if 'market_intelligence' not in st.session_state:
         try:
             client = Groq(api_key=st.secrets["GROQ_API_KEY"])
             with st.spinner("AI is analyzing live market signals..."):
                 analysis_prompt = f"""
-                Analyze these tech headlines: {headlines_str}
-                Based on these, identify the top 5 trending content niches.
-                Return ONLY a CSV-style list with two columns: Niche, GrowthScore (0-100).
-                Example:
-                AI Video, 95
-                Sustainable Tech, 70
+                Analyze these headlines: {headlines_str}
+                Identify the top 5 trending content niches.
+                Format the output EXACTLY like this (No intro, no chat):
+                Niche:GrowthScore
+                AI Video:95
+                Sustainable Tech:70
                 """
                 completion = client.chat.completions.create(
                     model="llama-3.1-8b-instant",
                     messages=[{"role": "user", "content": analysis_prompt}]
                 )
-                # Convert AI text to DataFrame
-                raw_data = completion.choices[0].message.content.strip().split('\n')
-                data_rows = [r.split(',') for r in raw_data if ',' in r]
+                
+                # CLEANING LOGIC: Find only lines with a colon
+                raw_output = completion.choices[0].message.content.strip().split('\n')
+                data_rows = []
+                for line in raw_output:
+                    if ":" in line and "Niche:" not in line: # Skip the header
+                        parts = line.split(':')
+                        if len(parts) == 2:
+                            data_rows.append([parts[0].strip(), parts[1].strip()])
+                
+                # Convert to DataFrame
                 st.session_state.market_intelligence = pd.DataFrame(data_rows, columns=['Niche', 'Growth'])
                 st.session_state.market_intelligence['Growth'] = pd.to_numeric(st.session_state.market_intelligence['Growth'])
         except Exception as e:
@@ -224,5 +232,6 @@ elif nav == "Script Architect":
                 st.error(f"AI Bridge Offline: {e}")
         else:
             st.warning("Please enter a topic to begin.")
+
 
 
