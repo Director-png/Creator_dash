@@ -106,60 +106,57 @@ elif nav == "Script Architect":
             st.error(f"AI Connection Error: {e}")
 
 
-# --- 6. MODULE: USER DATABASE ---
+# --- 6. MODULE: USER DATABASE ---# --- 6. MODULE: USER DATABASE (LOGIN & REGISTRATION) ---
 elif nav == "User Database":
-    st.header("👥 Creator Intelligence Network")
-    
-    # Visual Progress Bar (makes the form feel more professional)
-    st.write("Complete your registration to unlock advanced analytics.")
-    st.progress(65) 
-    
-    st.markdown("---")
+    # Initialize session state for login if it doesn't exist
+    if 'logged_in' not in st.session_state:
+        st.session_state.logged_in = False
+        st.session_state.user_name = ""
 
-    # Creating two columns: One for the form, one for a "Why Join" info box
-    col1, col2 = st.columns([2, 1])
+    # IF NOT LOGGED IN: Show Login/Register Tabs
+    if not st.session_state.logged_in:
+        st.header("🛡️ Director Access Portal")
+        tab1, tab2 = st.tabs(["🔑 Login", "📝 Register"])
 
-    with col1:
-        with st.form("signup_form", clear_on_submit=True):
-            st.subheader("Registration Portal")
-            
-            name = st.text_input("Full Name", placeholder="e.g. Director Smith")
-            email = st.text_input("Email Address", placeholder="director@agency.com")
-            
-            # Pulling niche options directly from your Google Sheet data!
-            niche_list = data['Niche'].unique().tolist()
-            creator_niche = st.selectbox("Your Primary Niche", options=niche_list)
-            
-            experience = st.select_slider(
-                "Experience Level",
-                options=["Newbie", "Growing", "Professional", "Elite"]
-            )
-            
-            submit_button = st.form_submit_button("Secure My Spot In Database")
-            
-            if submit_button:
-                if name and email:
-                    # This part simulates the save logic
-                    st.success(f"✅ Protocol Initiated! Welcome, {name}.")
-                    st.balloons()
-                    
-                    # Logic Preview (What will be sent to Google Sheets later)
-                    st.code(f"""
-                    SENDING TO DATABASE:
-                    --------------------
-                    User: {name}
-                    Niche: {creator_niche}
-                    Level: {experience}
-                    Time: {datetime.now().strftime("%H:%M:%S")}
-                    """)
+        with tab1:
+            st.subheader("Login to Intelligence Network")
+            login_email = st.text_input("Email")
+            login_pw = st.text_input("Password", type="password")
+            if st.button("Access Dashboard"):
+                # MOCK LOGIC: We will connect this to your Google Sheet later
+                if login_email and login_pw: 
+                    st.session_state.logged_in = True
+                    st.session_state.user_name = login_email.split('@')[0].capitalize()
+                    st.rerun()
                 else:
-                    st.error("Missing Credentials. Please fill in Name and Email.")
+                    st.error("Invalid credentials.")
 
-    with col2:
-        st.info("### 🛡️ Why Register?")
-        st.write("""
-        - **Early Access:** Get the Global Pulse trends 24h early.
-        - **AI Credits:** 50 free Script Architect generations/month.
-        - **Network:** Connect with other 'Elite' level creators.
-        """)
-        st.image("https://cdn-icons-png.flaticon.com/512/6596/6596121.png", width=100)
+        with tab2:
+            st.subheader("Create Director Account")
+            with st.form("reg_form"):
+                new_name = st.text_input("Full Name")
+                new_email = st.text_input("Email")
+                new_pw = st.text_input("Create Password", type="password")
+                niche = st.selectbox("Niche", data['Niche'].unique())
+                
+                if st.form_submit_button("Register"):
+                    if new_name and new_email and new_pw:
+                        st.success("Account created! You can now login in the 'Login' tab.")
+                        # This data will be sent to Google Sheets in our next step
+                    else:
+                        st.warning("Please fill all fields.")
+
+    # IF LOGGED IN: Show the Private Dashboard
+    else:
+        st.header(f"Welcome back, Director {st.session_state.user_name}")
+        
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Account Status", "Elite")
+        col2.metric("Credits Remaining", "500")
+        col3.metric("Last Sync", datetime.now().strftime("%H:%M"))
+
+        st.info("You now have full access to the Script Architect and Global Pulse.")
+        
+        if st.button("Logout"):
+            st.session_state.logged_in = False
+            st.rerun()
