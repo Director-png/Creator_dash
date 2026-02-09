@@ -22,7 +22,7 @@ def load_data():
         return pd.DataFrame() # Return empty if it fails
 
 data = load_data()
-)
+
 
 # --- SIDEBAR & SEARCH ---
 with st.sidebar:
@@ -67,6 +67,7 @@ elif nav == "Script Architect":
                 st.markdown(completion.choices[0].message.content)
         except Exception as e:
             st.error(f"Error: {e}")
+
 
 
 
