@@ -112,7 +112,7 @@ with st.sidebar:
         st.session_state.logged_in = False
         st.rerun()
 
-# --- MODULE: AUTONOMOUS GLOBAL PULSE ---
+# --- MODULE: AUTONOMOUS GLOBAL PULSE (WITH IMAGES) ---
 if nav == "Global Pulse":
     st.header("📈 Autonomous Market Intelligence")
     
@@ -120,80 +120,70 @@ if nav == "Global Pulse":
     RSS_URL = "https://techcrunch.com/feed/" 
     feed = feedparser.parse(RSS_URL)
     
-    # Extract headlines to feed to the AI
+    # Extract data for AI
     headlines = [entry.title for entry in feed.entries[:10]]
     headlines_str = " | ".join(headlines)
 
-# 2. AI MARKET ANALYSIS (The "Brain")
+    # 2. THE LIVE FEED (Visual Cards)
+    st.subheader("📡 Recent Intel")
+    cols = st.columns(3)
+    
+    if feed.entries:
+        for i, entry in enumerate(feed.entries[:3]):
+            with cols[i]:
+                # Try to find an image in the feed metadata
+                img_url = "https://images.unsplash.com/photo-1518186239717-319049a9ec27?q=80&w=500&auto=format&fit=crop" # Default Placeholder
+                if 'links' in entry:
+                    for link in entry.links:
+                        if 'image' in link.get('type', ''):
+                            img_url = link.get('href')
+                
+                # If TechCrunch specific: they often hide images in 'media_content'
+                try:
+                    img_url = entry.media_content[0]['url']
+                except:
+                    pass
+
+                # The "Authentic" Card Look
+                st.image(img_url, use_container_width=True)
+                st.markdown(f"**{entry.title}**")
+                st.caption(f"📅 {entry.published[:16]}")
+                st.markdown(f"[Read Full Intelligence]({entry.link})")
+    
+    st.divider()
+
+    # 3. AI MARKET ANALYSIS (The "Brain") - Only runs once or on refresh
     if 'market_intelligence' not in st.session_state:
         try:
             client = Groq(api_key=st.secrets["GROQ_API_KEY"])
             with st.spinner("AI is analyzing live market signals..."):
-                analysis_prompt = f"""
-                Analyze these headlines: {headlines_str}
-                Identify the top 5 trending content niches.
-                Format the output EXACTLY like this (No intro, no chat):
-                Niche:GrowthScore
-                AI Video:95
-                Sustainable Tech:70
-                """
+                analysis_prompt = f"Analyze: {headlines_str}. Identify top 5 niches. Format: Niche:Score. No chat."
                 completion = client.chat.completions.create(
                     model="llama-3.1-8b-instant",
                     messages=[{"role": "user", "content": analysis_prompt}]
                 )
-                
-                # CLEANING LOGIC: Find only lines with a colon
                 raw_output = completion.choices[0].message.content.strip().split('\n')
-                data_rows = []
-                for line in raw_output:
-                    if ":" in line and "Niche:" not in line: # Skip the header
-                        parts = line.split(':')
-                        if len(parts) == 2:
-                            data_rows.append([parts[0].strip(), parts[1].strip()])
-                
-                # Convert to DataFrame
+                data_rows = [line.split(':') for line in raw_output if ":" in line and "Niche:" not in line]
                 st.session_state.market_intelligence = pd.DataFrame(data_rows, columns=['Niche', 'Growth'])
                 st.session_state.market_intelligence['Growth'] = pd.to_numeric(st.session_state.market_intelligence['Growth'])
         except Exception as e:
             st.error(f"Intelligence Bridge Error: {e}")
-            st.session_state.market_intelligence = pd.DataFrame()
-
-    # 3. THE LIVE FEED (Visuals)
-    st.subheader("📡 Recent Intel")
-    cols = st.columns(3)
-    if feed.entries:
-        for i, entry in enumerate(feed.entries[:3]):
-            with cols[i]:
-                st.caption(f"LIVE: {entry.title[:50]}...")
-                st.markdown(f"[Source]({entry.link})")
-
-    st.divider()
 
     # 4. THE VERTICAL AUTO-CHART
     st.subheader("📊 AI-Predicted Growth Velocity")
-    if not st.session_state.market_intelligence.empty:
-        df = st.session_state.market_intelligence
-        
-        # Vertical Chart Logic
+    if 'market_intelligence' in st.session_state and not st.session_state.market_intelligence.empty:
         fig = px.bar(
-            df, 
-            x='Growth', 
-            y='Niche', 
-            orientation='h',
-            color='Growth',
-            color_continuous_scale='Magma',
-            template="plotly_dark"
+            st.session_state.market_intelligence, 
+            x='Growth', y='Niche', orientation='h',
+            color='Growth', color_continuous_scale='Viridis', template="plotly_dark"
         )
         fig.update_layout(yaxis={'categoryorder':'total ascending'}, height=400)
         st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.info("Gathering intelligence... Refreshing stream.")
 
-    if st.button("🔄 Refresh Market Intelligence"):
+    if st.button("🔄 Sync Live Intelligence"):
         if 'market_intelligence' in st.session_state:
             del st.session_state.market_intelligence
-        st.rerun()
-            
+        st.rerun()            
 
 # --- MODULE: SCRIPT ARCHITECT ---
 elif nav == "Script Architect":
@@ -232,6 +222,7 @@ elif nav == "Script Architect":
                 st.error(f"AI Bridge Offline: {e}")
         else:
             st.warning("Please enter a topic to begin.")
+
 
 
 
