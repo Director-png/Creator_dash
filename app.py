@@ -105,3 +105,6 @@ elif nav == "Script Architect":
 
 # --- 6. MODULE: USER DATABASE (Placeholder) ---
 elif nav == "User Database":
+st.header("👥 User Growth Portal")
+    st.write("This module will eventually track your sign-ups and leads.")
+    st.info("Next Step: Connect this to a persistent database.")
