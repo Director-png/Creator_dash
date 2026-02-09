@@ -6,10 +6,21 @@ import google.generativeai as genai
 # --- 1. CONFIG ---
 st.set_page_config(page_title="Director Portal", layout="wide")
 
-# Set this in Streamlit Secrets for security
-API_KEY = st.secrets.get("GEMINI_KEY", "AIzaSyDPwcKpNTwJ-Gi2dyMMW-reTl01rm-61L4")
-genai.configure(api_key=API_KEY)
+# Force the library to use the stable API version
+import os
 
+# Put this BEFORE genai.configure
+os.environ["GOOGLE_API_USE_MTLS_ENDPOINT"] = "never" 
+
+genai.configure(api_key="AIzaSyDPwcKpNTwJ-Gi2dyMMW-reTl01rm-61L4")
+
+# USE THIS EXACT STRING - no 'models/' prefix needed in the new stable version
+try:
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    # If that still fails, the absolute fail-safe for the 404 is:
+    # model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+except Exception as e:
+    st.error(f"Configuration Error: {e}")
 # --- 2. THE ACCESS SYSTEM (Login) ---
 if 'auth' not in st.session_state:
     st.session_state['auth'] = False
@@ -70,3 +81,4 @@ elif nav == "Script Architect":
             st.markdown(response.text)
         except Exception as e:
             st.error(f"AI Engine Offline: {e}")
+
