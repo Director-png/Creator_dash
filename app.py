@@ -124,35 +124,53 @@ if nav == "Global Pulse":
     headlines = [entry.title for entry in feed.entries[:10]]
     headlines_str = " | ".join(headlines)
 
-   # 2. THE LIVE FEED (Visual Cards with Robust Scraper)
+
+# 2. THE LIVE FEED (Deep-Scan Thumbnail Scraper)
     st.subheader("📡 Recent Intel")
     cols = st.columns(3)
     
     if feed.entries:
         for i, entry in enumerate(feed.entries[:3]):
             with cols[i]:
-                # 1. Default fallback image (Professional Tech Style)
-                img_url = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=500"
+                # Deep-Scan logic to find the AUTHENTIC article image
+                img_url = None
                 
-                # 2. Try to extract real thumbnail from feed tags
-                if 'media_content' in entry:
-                    img_url = entry.media_content[0]['url']
-                elif 'links' in entry:
-                    for link in entry.links:
-                        if 'image' in link.get('type', ''):
-                            img_url = link.get('href')
-                elif 'description' in entry and '<img' in entry.description:
-                    # Some feeds hide the image inside the HTML description
+                # Check 1: Standard Media Tag (Most likely for TechCrunch)
+                if 'media_content' in entry and len(entry.media_content) > 0:
+                    img_url = entry.media_content[0].get('url')
+                
+                # Check 2: Media Thumbnail Tag
+                if not img_url and 'media_thumbnail' in entry and len(entry.media_thumbnail) > 0:
+                    img_url = entry.media_thumbnail[0].get('url')
+                
+                # Check 3: Description HTML Scraping
+                if not img_url and 'description' in entry:
                     try:
-                        img_url = entry.description.split('src="')[1].split('"')[0]
+                        # Extract the first 'src' from an <img> tag in the HTML description
+                        import re
+                        img_tags = re.findall(r'<img [^>]*src="([^"]+)"', entry.description)
+                        if img_tags:
+                            img_url = img_tags[0]
                     except:
                         pass
 
-                # Display the Card
+                # Check 4: Feed-specific enclosure
+                if not img_url and 'links' in entry:
+                    for link in entry.links:
+                        if 'image' in link.get('type', ''):
+                            img_url = link.get('href')
+
+                # FINAL FALLBACK (Only if all above fail)
+                if not img_url:
+                    img_url = f"https://source.unsplash.com/featured/?tech,{i}"
+
+                # Display the authentic card
                 st.image(img_url, use_container_width=True)
                 st.markdown(f"**{entry.title}**")
                 st.caption(f"📅 {entry.published[:16]}")
                 st.markdown(f"[Read Full Intelligence]({entry.link})")
+    
+    
     # 3. AI MARKET ANALYSIS (The "Brain") - Only runs once or on refresh
     if 'market_intelligence' not in st.session_state:
         try:
@@ -223,6 +241,7 @@ elif nav == "Script Architect":
                 st.error(f"AI Bridge Offline: {e}")
         else:
             st.warning("Please enter a topic to begin.")
+
 
 
 
