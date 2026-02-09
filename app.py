@@ -12,7 +12,7 @@ st.set_page_config(page_title="Intelligence Command Portal", layout="wide")
 GEMINI_API_KEY = "AIzaSyBk9U07hY-ppxvydq2jikTsCGZTOxHjjMU"
 genai.configure(api_key=GEMINI_API_KEY)
 # Replace your current model line with this:
-model = genai.GenerativeModel('models/gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-pro')
 
 # --- 2. DATABASE CONNECTIONS (Read/Write) ---
 # Replace with your Published CSV URL from Google Sheets
@@ -139,4 +139,5 @@ elif nav == "Script Architect":
                     status.update(label="API Error", state="error")
                     st.error(f"The AI is unavailable: {e}")
                     st.info("Try changing the model ID to 'models/gemini-pro' as a fallback.")
+
 
