@@ -17,26 +17,27 @@ WRITE_URL = "https://script.google.com/macros/s/AKfycbwR8tBqMc4XtfMfJBrjeZbzcgjI
 st.set_page_config(page_title="Executive Intelligence", layout="wide")
 
 # High-Visibility Navigation Styling
+import streamlit as st
+
+# 1. Clean CSS Injection
+st.set_page_config(page_title="Market Intelligence Portal", layout="wide")
+
 st.markdown("""
-<style>
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 20px;
-        background-color: #1e293b;
+    <style>
+    .main {
+        background-color: #0e1117;
+    }
+    .stMetric {
+        background-color: #1a1c24;
         padding: 15px;
         border-radius: 10px;
+        border: 1px solid #30363d;
     }
-    .stTabs [data-baseweb="tab"] {
-        height: 50px;
-        background-color: #334155;
-        border-radius: 5px;
-        color: white !important;
-        font-weight: bold;
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: #FF4B4B !important;
-    }
-</style>
-""", unsafe_content_html=True)
+    /* This fixes the potential markdown error */
+    </style>
+    """, unsafe_allow_html=True)
+
+st.title("Executive Intelligence Dashboard")
 
 if "history" not in st.session_state:
     st.session_state["history"] = []
@@ -100,3 +101,16 @@ with tab3:
     if st.session_state["history"]:
         for h in reversed(st.session_state["history"]):
             st.write(f"✅ Logged: **{h}**")
+
+with st.sidebar:
+    st.header("💎 Premium Features")
+    tool_choice = st.selectbox("Select Tool", ["Global Pulse", "Script Architect"])
+
+if tool_choice == "Script Architect":
+    st.subheader("Video Script Generator")
+    niche = st.text_input("Enter Niche (or Trend name):")
+    platform = st.radio("Platform", ["YouTube", "Instagram/TikTok"])
+    
+    if st.button("Generate Strategy"):
+        st.info(f"Analyzing past, current, and future trends for {niche}...")
+        # We will plug the AI logic here next!
