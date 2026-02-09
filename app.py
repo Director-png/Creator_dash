@@ -1,82 +1,131 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import google.generativeai as genai  # The AI Engine
+import google.generativeai as genai
+import requests
+import time
 
-# --- 1. CONFIG & API SETUP ---
-st.set_page_config(page_title="Command Portal", layout="wide")
+# --- 1. SYSTEM CONFIG & API INITIALIZATION ---
+st.set_page_config(page_title="Intelligence Command Portal", layout="wide")
 
 # Replace with your actual Gemini API Key
-# Get one for free at: https://aistudio.google.com/
 GEMINI_API_KEY = "AIzaSyBk9U07hY-ppxvydq2jikTsCGZTOxHjjMU"
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
-# --- 2. THE READ/WRITE URL SECTION (The "Brain" of your data) ---
-st.sidebar.subheader("🔗 Data Connections")
-SHEET_URL = st.sidebar.text_input("Google Sheet CSV URL", 
-            placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv")
+# --- 2. DATABASE CONNECTIONS (Read/Write) ---
+# Replace with your Published CSV URL from Google Sheets
+USER_DB_READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGThrIabwjsm42GgyOqNsPkdY3BRSwv5wnOKQMH_iMetJKnUMiPESLb7wb5_n24gn33RjEpG3VhSbD/pub?gid=0&single=true&output=csv"
+# Replace with your Google Apps Script Webhook URL for Writing
+USER_DB_WRITE_WEBHOOK = "https://script.google.com/macros/s/AKfycbwR8tBqMc4XtfMfJBrjeZbzcgjIkTTIAmMXOmq2QFBf3QFB5aIJTwl5rb5KIpKiV5O7/exec"
 
-# --- 3. SESSION STATE (History & Auth) ---
-if 'history' not in st.session_state:
-    st.session_state['history'] = []
+# --- 3. AUTHENTICATION & REGISTRATION ENGINE ---
+def check_login(u, p):
+    try:
+        df = pd.read_csv(USER_DB_READ_URL)
+        user_match = df[(df['username'] == u) & (df['password'] == p)]
+        return not user_match.empty
+    except:
+        return False
 
-# --- 4. DATA LOADING LOGIC (Read) ---
-def load_market_data():
-    if SHEET_URL:
+def register_user_to_db(u, p):
+    if USER_DB_WRITE_WEBHOOK:
         try:
-            df = pd.read_csv(SHEET_URL)
-            return df
-        except Exception as e:
-            st.sidebar.error("Check Sheet URL/Permissions")
-            return None
-    return None
+            # Sends data to Google Sheet via Webhook
+            response = requests.post(USER_DB_WRITE_WEBHOOK, json={"username": u, "password": p})
+            return response.status_code == 200
+        except:
+            return False
+    return False
 
-df = load_market_data()
+# --- 4. ACCESS CONTROL LAYER ---
+if 'logged_in' not in st.session_state:
+    st.session_state.update({'logged_in': False, 'user': "", 'history': []})
 
-# --- 5. THE SCRIPT ARCHITECT (With Real AI) ---
+if not st.session_state['logged_in']:
+    tab1, tab2 = st.tabs(["🔐 Login", "📝 Register"])
+    with tab1:
+        u = st.text_input("Username", key="login_u")
+        p = st.text_input("Password", type="password", key="login_p")
+        if st.button("Access Portal"):
+            if check_login(u, p):
+                st.session_state.update({'logged_in': True, 'user': u})
+                st.rerun()
+            else:
+                st.error("Invalid credentials.")
+    with tab2:
+        new_u = st.text_input("New Username")
+        new_p = st.text_input("New Password", type="password")
+        if st.button("Create Account"):
+            if register_user_to_db(new_u, new_p):
+                st.success("Account created! Please Login.")
+            else:
+                st.error("Registration failed. Check Webhook.")
+    st.stop()
+
+# --- 5. SIDEBAR: NAVIGATION & INSTANT SEARCH ---
 with st.sidebar:
-    nav = st.radio("Intelligence Modules", ["Global Pulse", "Comparison Hub", "Script Architect"])
+    st.title(f"👤 {st.session_state['user']}")
     st.write("---")
-    st.subheader("📜 History Log")
-    for item in st.session_state['history']:
-        st.caption(item)
+    
+    # INSTANT SEARCH TAB (SEO & Strategy focused)
+    st.subheader("🔍 Instant Search")
+    search_query = st.text_input("Analyze Niche/Trend", placeholder="e.g. AI Fitness")
+    
+    if search_query:
+        st.info(f"Analysis for: {search_query}")
+        # SEO Logic
+        st.write(f"**SEO Keywords:** #{search_query.replace(' ','')}, #FutureTech, #MarketShift")
+        st.write("**Hook Idea:** 'They told you {search_query} was dead... they lied.'")
+    
+    st.write("---")
+    nav = st.radio("Intelligence Modules", ["Global Pulse", "Comparison Hub", "Script Architect"])
 
-if nav == "Script Architect":
-    st.header("💎 AI Script Architect (Gemini Powered)")
-    topic = st.text_input("Enter Topic/Niche", placeholder="e.g. AI Automation for Real Estate")
-    platform = st.selectbox("Format", ["YouTube Longform", "IG Reel", "TikTok", "X Thread"])
-    tone = st.select_slider("Script Tone", ["Aggressive", "Educational", "Hype"])
+# --- 6. MODULES ---
 
-    if st.button("Generate Professional Strategy"):
-        if topic:
-            with st.spinner("AI analyzing market sentiment..."):
-                # Professional Prompt Engineering
-                prompt = f"""
-                Act as a viral content strategist. Create a {platform} script about {topic}.
-                The tone should be {tone}.
-                Include:
-                1. A high-retention Hook.
-                2. A body that explains WHY this is trending now based on recent market shifts.
-                3. A future prediction for this niche.
-                4. A strong CTA.
-                Format clearly with bold headings.
-                """
-                response = model.generate_content(prompt)
-                
-                # Write to Screen
-                st.markdown(response.text)
-                
-                # Write to History
-                st.session_state['history'].append(f"Generated {platform} script for {topic}")
-        else:
-            st.warning("Enter a topic first.")
+# A. GLOBAL PULSE (Charts & Status Labels)
+if nav == "Global Pulse":
+    st.header("📈 Global Pulse trends")
+    # Mock data for visualization
+    data = pd.DataFrame({
+        'Niche': ['AI Agents', 'Green Tech', 'SaaS', 'Bio-Hacking'],
+        'Score': [98, 75, 82, 60],
+        'Status': ['🔥 Rising', '⚖️ Stable', '🔥 Rising', '📉 Dropping']
+    })
+    
+    st.table(data) # Show the labels clearly
+    
+    fig = px.bar(data, x='Niche', y='Score', color='Status', 
+                 color_discrete_map={'🔥 Rising': 'red', '⚖️ Stable': 'blue', '📉 Dropping': 'grey'},
+                 template="plotly_dark")
+    st.plotly_chart(fig, use_container_width=True)
 
-# --- 6. GLOBAL PULSE (With Real Data) ---
-elif nav == "Global Pulse":
-    st.header("📈 Real-Time Global Pulse")
-    if df is not None:
-        fig = px.line(df, x=df.columns[0], y=df.columns[1], title="Market Movement")
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.info("Paste your Google Sheet CSV URL in the sidebar to visualize trends.")
+# B. COMPARISON HUB
+elif nav == "Comparison Hub":
+    st.header("⚖️ Niche Comparison Hub")
+    col1, col2 = st.columns(2)
+    with col1: n1 = st.selectbox("Primary Niche", ["AI", "Crypto", "Fitness"])
+    with col2: n2 = st.selectbox("Comparison Niche", ["SaaS", "Real Estate", "E-com"])
+    
+    st.write(f"Comparing **{n1}** vs **{n2}**")
+    # Comparison chart logic here
+
+# C. SCRIPT ARCHITECT (GEMINI API)
+elif nav == "Script Architect":
+    st.header("💎 AI Script Architect (Premium)")
+    topic = st.text_input("Video Topic", value=search_query if search_query else "")
+    
+    if st.button("Generate Strategy"):
+        with st.status("Consulting Gemini AI...", expanded=True):
+            prompt = f"""
+            Generate a viral video strategy for {topic}. 
+            Include: 
+            1. 3 High-Retention Hooks. 
+            2. Full Script Body with market insights. 
+            3. SEO Keywords and Tags. 
+            4. Future Trend Prediction.
+            """
+            response = model.generate_content(prompt)
+            st.write("Strategy Ready!")
+        
+        st.markdown(response.text)
