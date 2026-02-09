@@ -73,7 +73,7 @@ if nav == "Global Pulse":
             # 3. The Table
             st.subheader("Raw Intelligence Feed")
             st.dataframe(filtered_df, use_container_width=True)
-        else:
+    else:
             st.warning(f"No results found for '{search_query}'. Try clearing the search bar!")
 
 # --- THE MAIN CONTENT AREA ---
@@ -99,6 +99,7 @@ elif nav == "Script Architect":
                 st.markdown(completion.choices[0].message.content)
         except Exception as e:
             st.error(f"Error: {e}")
+
 
 
 
