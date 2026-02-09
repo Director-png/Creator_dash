@@ -38,26 +38,26 @@ elif nav == "Script Architect":
     st.header("💎 AI Strategy Generator")
     topic = st.text_input("Content Topic", value=search_query)
     
+   elif nav == "Script Architect":
+    st.header("💎 AI Strategy Generator")
+    topic = st.text_input("Content Topic", value=search_query)
+    
     if st.button("Generate Strategy"):
-        # 1. Try to find the key in Secrets
         try:
-            if "GROQ_API_KEY" in st.secrets:
-               # DO NOT paste your gsk_ key here. Paste the NAME of the secret.
-final_key = st.secrets["GROQ_API_KEY"]
-            else:
-                st.error("🚨 Secret Not Found: Go to Settings > Secrets and add GROQ_API_KEY")
-                st.stop()
-
-            # 2. Connect to Groq
+            # Pushed to the right because it's INSIDE the button
+            final_key = st.secrets["GROQ_API_KEY"]
             client = Groq(api_key=final_key)
             
-            with st.spinner("Analyzing via Llama-3..."):
+            with st.spinner("Thinking..."):
                 completion = client.chat.completions.create(
                     model="llama3-8b-8192",
-                    messages=[{"role": "user", "content": f"Viral script for: {topic}"}]
+                    messages=[{"role": "user", "content": f"Viral script for {topic}"}]
                 )
                 st.markdown(completion.choices[0].message.content)
+        except Exception as e:
+            st.error(f"Error: {e}")
                 
         except Exception as e:
             st.error(f"System Block: {e}")
+
 
