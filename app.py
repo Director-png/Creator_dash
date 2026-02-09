@@ -110,10 +110,11 @@ market_data = load_market_data()
 
 with st.sidebar:
     st.title(f"Director: {st.session_state.user_name}")
+    # Define search_query here so it's global!
+    search_query = st.text_input("Global Intelligence Search", placeholder="e.g. AI, Fitness...")
     nav = st.radio("Modules", ["Global Pulse", "Script Architect"])
-    if st.button("Logout"):
-        st.session_state.logged_in = False
-        st.rerun()
+    # ... rest of sidebar code
+
 
 
 
@@ -172,7 +173,10 @@ if nav == "Global Pulse":
 
 # --- MODULE: ENHANCED SCRIPT ARCHITECT ---
 elif nav == "Script Architect":
-    st.header("💎 Dual-Format Strategy Generator")
+    st.header("💎 Script Architecht")
+    
+    # Now value=search_query will work because it's defined in the sidebar!
+    topic = st.text_input("Target Topic", value=search_query)
     
     # User Input
     topic = st.text_input("Target Topic", value=search_query)
@@ -209,6 +213,7 @@ elif nav == "Script Architect":
                 st.error("AI Bridge Offline. Check your Groq Key.")
         else:
             st.warning("Please enter a topic to begin.")
+
 
 
 
