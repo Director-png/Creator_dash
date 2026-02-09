@@ -1,79 +1,53 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from groq import Groq # Swapped from Google
-import requests
+from groq import Groq 
 
-# --- CONFIG & AUTH ---
+# --- CONFIG ---
 st.set_page_config(page_title="Director Command Center", layout="wide")
 
-# NEW IMPORT LOGIC
-try:
-    from groq import Groq
-except ImportError:
-    st.error("Groq library not found. Please check your requirements.txt and redeploy.")
-
-# Replace with your Groq API Key
+# Replace with your key from console.groq.com
 GROQ_API_KEY = "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"
 
-# --- LOGIN OVERRIDE ---
-if 'logged_in' not in st.session_state:
-    st.session_state['logged_in'] = False
-
-if not st.session_state['logged_in']:
-    st.title("🛡️ Secure Login")
-    u = st.text_input("Username")
-    p = st.text_input("Password", type="password")
-    if st.button("Access System"):
-        if u == "Director" and p == "admin":
-            st.session_state['logged_in'] = True
-            st.rerun()
-    st.stop()
-
-# --- SIDEBAR: INSTANT SEARCH & SEO ---
+# --- SIDEBAR & SEARCH ---
 with st.sidebar:
-    st.header("🔍 Global Intelligence")
-    search_query = st.text_input("Instant Search", placeholder="e.g. AI Fitness")
-    
-    if search_query:
-        st.subheader("SEO Quick-Stack")
-        st.code(f"Keywords: {search_query}, Viral, 2026, Growth")
-        st.info(f"Hook: 'They don't want you to know this about {search_query}...'")
-    
-    nav = st.radio("Modules", ["Global Pulse", "Comparison Hub", "Script Architect"])
+    st.title("👤 Director Dashboard")
+    search_query = st.text_input("🔍 Instant Search", placeholder="e.g. AI Fitness")
+    nav = st.radio("Intelligence Modules", ["Global Pulse", "Comparison Hub", "Script Architect"])
 
-# --- DATA ENGINE ---
-df = pd.DataFrame({
-    'Niche': ['AI Agents', 'SaaS', 'Bio-Hacking', 'Fitness', 'E-com'],
-    'Score': [98, 85, 40, 75, 60],
-    'Status': ['🔥 Rising', '🔥 Rising', '📉 Dropping', '⚖️ Stable', '⚖️ Stable']
-})
-
-# --- MODULES ---
+# --- TAB: GLOBAL PULSE ---
 if nav == "Global Pulse":
     st.header("📈 Global Pulse Trends")
-    display_df = df[df['Niche'].str.contains(search_query, case=False)] if search_query else df
+    # This data is currently "local" - we can link it to your Google Sheet next
+    df = pd.DataFrame({
+        'Niche': ['AI Agents', 'SaaS', 'Bio-Hacking', 'E-com'],
+        'Momentum': [95, 88, 45, 60],
+        'Status': ['🔥 Rising', '🔥 Rising', '📉 Dropping', '⚖️ Stable']
+    })
     
-    fig = px.bar(display_df, x='Niche', y='Score', color='Status', 
-                 template="plotly_dark", color_discrete_map={'🔥 Rising': 'red', '⚖️ Stable': 'blue', '📉 Dropping': 'gray'})
+    # Instant Search logic
+    if search_query:
+        df = df[df['Niche'].str.contains(search_query, case=False)]
+
+    fig = px.bar(df, x='Niche', y='Momentum', color='Status', template="plotly_dark")
     st.plotly_chart(fig, use_container_width=True)
-    st.table(display_df)
 
+# --- TAB: SCRIPT ARCHITECT ---
 elif nav == "Script Architect":
-    st.header("💎 Groq-Powered Script Architect")
-    topic = st.text_input("Script Topic", value=search_query)
+    st.header("💎 AI Script Architect (Groq)")
+    topic = st.text_input("Content Topic", value=search_query)
     
-    if st.button("Generate Strategy (Ultra-Fast)"):
-        try:
-            client = Groq(api_key=GROQ_API_KEY)
-            completion = client.chat.completions.create(
-                model="llama3-8b-8192", # Extremely fast and reliable
-                messages=[
-                    {"role": "system", "content": "You are a viral marketing strategist."},
-                    {"role": "user", "content": f"Create a viral script for {topic} with 3 hooks and SEO keywords."}
-                ]
-            )
-            st.markdown(completion.choices[0].message.content)
-        except Exception as e:
-            st.error(f"Groq Connection Error: {e}")
-
+    if st.button("Generate Strategy"):
+        if not GROQ_API_KEY:
+            st.error("Please add your Groq API Key to the code.")
+        else:
+            try:
+                client = Groq(api_key=GROQ_API_KEY)
+                # Using llama3-8b for maximum speed
+                completion = client.chat.completions.create(
+                    model="llama3-8b-8192",
+                    messages=[{"role": "user", "content": f"Create a viral script for {topic}."}]
+                )
+                st.markdown(completion.choices[0].message.content)
+            except Exception as e:
+                st.error(f"System Error: {e}")
