@@ -3,6 +3,11 @@ import pandas as pd
 from groq import Groq
 import plotly.express as px
 import requests
+import feedparser # Add this to the very top of your app.py
+
+
+
+
 
 # --- 1. CONFIG & CONNECTIONS ---
 st.set_page_config(page_title="Director Portal", layout="wide")
@@ -110,39 +115,60 @@ with st.sidebar:
         st.session_state.logged_in = False
         st.rerun()
 
-# --- MODULE: GLOBAL PULSE (Personalized) ---
+
+
+# --- MODULE: GLOBAL PULSE (With Live Intelligence) ---
 if nav == "Global Pulse":
     st.header("📈 Market Momentum")
     
-    # 1. Get the User's Niche from the Database
+    # 1. LIVE RSS FEED LOGIC
+    st.subheader("📡 Live Intelligence Feed")
+    
+    # You can change this URL to any RSS feed (Google Trends, Tech News, etc.)
+    RSS_URL = "https://techcrunch.com/feed/" 
+    feed = feedparser.parse(RSS_URL)
+    
+    # Display the latest 3 headlines in a clean "Ticker" style
+    if feed.entries:
+        cols = st.columns(3)
+        for i, entry in enumerate(feed.entries[:3]):
+            with cols[i]:
+                st.info(f"**{entry.title}**")
+                st.caption(f"Source: {feed.feed.title}")
+                st.markdown(f"[Read Intel]({entry.link})")
+    
+    st.divider()
+
+    # 2. PERSONALIZED MARKET DATA
     users = load_user_db()
     user_niche = ""
     
-    if not users.empty:
-        # Finding the niche column (flexible naming)
-        niche_col = [c for c in users.columns if 'niche' in c][0]
-        email_col = [c for c in users.columns if 'email' in c][0]
+    if not users.empty and 'user_email' in st.session_state:
+        # Finding the niche column flexibly
+        niche_cols = [c for c in users.columns if 'niche' in c]
+        email_cols = [c for c in users.columns if 'email' in c]
         
-        # Look up the current user's niche
-        current_user_row = users[users[email_col] == st.session_state.get('user_email', '')]
-        if not current_user_row.empty:
-            user_niche = current_user_row.iloc[0][niche_col]
+        if niche_cols and email_cols:
+            current_user_row = users[users[email_cols[0]] == st.session_state.user_email]
+            if not current_user_row.empty:
+                user_niche = current_user_row.iloc[0][niche_cols[0]]
 
-    # 2. Filtering Logic
     if user_niche:
-        st.subheader(f"Focus Area: {user_niche.capitalize()}")
-        # Filter market data where 'Niche' matches user's registered niche
+        st.subheader(f"Targeted Analysis: {user_niche.capitalize()}")
         filtered_df = market_data[market_data['Niche'].str.contains(user_niche, case=False, na=False)]
     else:
+        st.subheader("Global Market Overview")
         filtered_df = market_data
 
-    # 3. Display Data
+    # 3. DATA VISUALIZATION
     if not filtered_df.empty:
+        # Show a growth chart
+        fig = px.area(filtered_df, x='Niche', y='Growth', title="Growth Velocity", template="plotly_dark")
+        st.plotly_chart(fig, use_container_width=True)
         st.dataframe(filtered_df, use_container_width=True)
     else:
-        st.warning(f"No specific data found for {user_niche}. Showing global feed.")
+        st.warning("No niche-specific data found. Showing all markets.")
         st.dataframe(market_data, use_container_width=True)
-
 
 # --- MODULE: ENHANCED SCRIPT ARCHITECT ---
 elif nav == "Script Architect":
@@ -183,6 +209,7 @@ elif nav == "Script Architect":
                 st.error("AI Bridge Offline. Check your Groq Key.")
         else:
             st.warning("Please enter a topic to begin.")
+
 
 
 
