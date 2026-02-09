@@ -2,147 +2,155 @@ import streamlit as st
 import pandas as pd
 from groq import Groq
 import plotly.express as px
-from datetime import datetime
 import requests
 
-# --- 1. PAGE CONFIG ---
-st.set_page_config(page_title="Director Portal", layout="wide", initial_sidebar_state="expanded")
+# --- 1. CONFIG & CONNECTIONS ---
+st.set_page_config(page_title="Director Portal", layout="wide")
 
-# --- 2. DATA LOAD (Market Pulse) ---
-SHEET_ID = "163haIuPIna3pEY9IDxncPM2kFFsuZ76HfKsULcMu1y4"
-SHEET_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv"
+# Market Data (Your original sheet)
+MARKET_URL = "https://docs.google.com/spreadsheets/d/163haIuPIna3pEY9IDxncPM2kFFsuZ76HfKsULcMu1y4/export?format=csv"
 
-@st.cache_data(ttl=60)
-def load_data():
+# User Database (The CSV link from "Publish to Web" for your Form's Sheet)
+# IMPORTANT: Replace the link below with your CSV link!
+USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
+
+# Google Form Submission Link (The 'formResponse' version)
+FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
+
+# --- 2. DATA LOADING FUNCTIONS ---
+def load_market_data():
+    df = pd.read_csv(MARKET_URL)
+    df.columns = [str(c).strip().capitalize() for c in df.columns]
+    return df
+
+def load_user_db():
     try:
-        df = pd.read_csv(SHEET_URL)
-        df.columns = [str(c).strip().capitalize() for c in df.columns]
-        if 'Growth' in df.columns:
-            df['Growth'] = df['Growth'].astype(str).str.replace('%', '').str.replace(',', '').str.strip()
-            df['Growth'] = pd.to_numeric(df['Growth'], errors='coerce').fillna(0)
+        df = pd.read_csv(USER_DB_URL)
+        # This part renames columns so the code can find 'Email' and 'Password' 
+        # even if the Google Form headers are long questions.
+        df.columns = [str(c).strip().lower() for c in df.columns]
         return df
     except:
-        return pd.DataFrame({'Niche': ['Global Data'], 'Growth': [0], 'Status': ['⚖️']})
+        return pd.DataFrame()
 
-data = load_data()
-
-# --- 3. SESSION STATE (Authentication Memory) ---
+# --- 3. SESSION STATE ---
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 if 'user_name' not in st.session_state:
     st.session_state.user_name = ""
 
-# --- 4. THE GATEKEEPER (Login/Registration Screen) ---
+# --- 4. THE GATEKEEPER ---
 if not st.session_state.logged_in:
     st.title("🛡️ Director's Intelligence Portal")
-    st.markdown("---")
-    
-    tab_login, tab_reg = st.tabs(["🔑 Authorized Login", "📝 Request New Access"])
-    
-    with tab_login:
-        st.subheader("Enter Credentials")
-        login_email = st.text_input("Email", key="l_email")
-        login_pw = st.text_input("Password", type="password", key="l_pw")
+    t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
+
+    with t1:
+        email_in = st.text_input("Email").lower().strip()
+        pw_in = st.text_input("Password", type="password").strip()
         
-        if st.button("Unlock Dashboard", use_container_width=True):
-            # MASTER BYPASS: Use these to enter the app
-            if login_email == "admin" and login_pw == "1234":
+        if st.button("Access System", use_container_width=True):
+            users = load_user_db()
+            
+            # Master Bypass
+            if email_in == "Director" and pw_in == "Iamin":
                 st.session_state.logged_in = True
                 st.session_state.user_name = "Master Director"
+                st.session_state.user_email = "Admin"
                 st.rerun()
-            else:
-                st.error("Access Denied. Please check your credentials.")
-
-    with tab_reg:
-        st.subheader("Secure Registration")
-        st.info("Submitted details will be transmitted for HQ review.")
-        
-# 1. Change the URL to the 'formResponse' version
-# Note: Use the ID from your notepad link here
-GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
-
-# 2. Update the entry numbers to match your specific form
-form_data = {
-    "entry.483203499": reg_name,   # Replace with your actual Name ID
-    "entry.1873870532": reg_email,  # Replace with your actual Email ID
-    "entry.1396549807": reg_pw      # Replace with your actual Password ID
-}
-        
-        with st.form("reg_form", clear_on_submit=True):
-            reg_name = st.text_input("Full Name")
-            reg_email = st.text_input("Email")
-            reg_pw = st.text_input("Choose Password", type="password")
             
-            submit = st.form_submit_button("Send Access Request", use_container_width=True)
-            
-            if submit:
-                if reg_name and reg_email and reg_pw:
-                    # Logic to send data to Google Form silently
-                    form_data = {
-                        "entry.123456": reg_name, 
-                        "entry.789012": reg_email, 
-                        "entry.345678": reg_pw
-                    }
-                    try:
-                        # This sends the data to your Google Sheet via the Form
-                        requests.post(GOOGLE_FORM_URL, data=form_data)
-                        st.success(f"Request for {reg_name} transmitted.")
-                        st.balloons()
-                    except:
-                        st.warning("Preview Mode: Registration logic is ready, awaiting Form Link.")
+            # Check the DB for matching Email/Password
+            elif not users.empty:
+                # We search for any column containing 'email' or 'password' to be safe
+                email_col = [c for c in users.columns if 'email' in c][0]
+                pw_col = [c for c in users.columns if 'password' in c][0]
+                name_col = [c for c in users.columns if 'name' in c][0]
+                
+                match = users[(users[email_col] == email_in) & (users[pw_col].astype(str) == pw_in)]
+                
+                if not match.empty:
+                    st.session_state.logged_in = True
+                    st.session_state.user_name = match.iloc[0][name_col]
+                    st.session_state.user_email = email_in
+                    st.rerun()
                 else:
-                    st.error("All fields are mandatory.")
-    
-    st.stop() # Prevents the app from loading until logged_in is True
+                    st.error("Invalid credentials.")
+            else:
+                st.error("Database connecting... Use admin login.")
 
-# --- 5. THE MAIN DASHBOARD (Only runs if logged_in is True) ---
+    with t2:
+        with st.form("reg_form"):
+            name = st.text_input("Name")
+            email = st.text_input("Email")
+            niche = st.text_input("Niche (Focus Area)") # <--- NICHE COLUMN ADDED
+            pw = st.text_input("Set Password", type="password")
+            
+            if st.form_submit_button("Submit Registration"):
+                # PAYLOAD WITH NICHE ENTRY KEY
+                payload = {
+                    "entry.483203499": name,
+                    "entry.1873870532": email,
+                    "entry.1906780868": niche, # <--- NICHE ENTRY KEY
+                    "entry.1396549807": pw
+                }
+                try:
+                    requests.post(FORM_POST_URL, data=payload)
+                    st.success("Registration transmitted! Please wait 60s for Google to sync.")
+                    st.balloons()
+                except:
+                    st.error("Transmission failed. Check internet connection.")
+    st.stop()
+
+# --- 5. DASHBOARD (Unlocked) ---
+market_data = load_market_data()
+
 with st.sidebar:
-    st.title(f"Director HQ")
-    st.caption(f"Authenticated: {st.session_state.user_name}")
-    st.divider()
-    
-    search_query = st.text_input("Global Search", placeholder="Filter niches...")
-    nav = st.radio("Intelligence Modules", ["Global Pulse", "Script Architect"])
-    
-    st.divider()
-    if st.button("🔴 Terminate Session"):
+    st.title(f"Director: {st.session_state.user_name}")
+    nav = st.radio("Modules", ["Global Pulse", "Script Architect"])
+    if st.button("Logout"):
         st.session_state.logged_in = False
         st.rerun()
 
-# MODULE: GLOBAL PULSE
+# --- MODULE: GLOBAL PULSE (Personalized) ---
 if nav == "Global Pulse":
     st.header("📈 Market Momentum")
-    filtered_df = data[data['Niche'].str.contains(search_query, case=False)] if search_query else data
     
-    if not filtered_df.empty:
-        m1, m2 = st.columns(2)
-        m1.metric("Active Niches", len(filtered_df))
-        m2.metric("Avg Growth", f"{filtered_df['Growth'].mean():.1f}%")
-
-        fig = px.bar(filtered_df, x='Niche', y='Growth', color='Status', template="plotly_dark")
-        st.plotly_chart(fig, use_container_width=True)
+    # 1. Get the User's Niche from the Database
+    users = load_user_db()
+    user_niche = ""
+    
+    if not users.empty:
+        # Finding the niche column (flexible naming)
+        niche_col = [c for c in users.columns if 'niche' in c][0]
+        email_col = [c for c in users.columns if 'email' in c][0]
         
-        with st.expander("📂 View Raw Intelligence Feed"):
-            display_df = filtered_df.copy()
-            display_df.index = range(1, len(display_df) + 1)
-            st.dataframe(display_df, use_container_width=True)
+        # Look up the current user's niche
+        current_user_row = users[users[email_col] == st.session_state.get('user_email', '')]
+        if not current_user_row.empty:
+            user_niche = current_user_row.iloc[0][niche_col]
+
+    # 2. Filtering Logic
+    if user_niche:
+        st.subheader(f"Focus Area: {user_niche.capitalize()}")
+        # Filter market data where 'Niche' matches user's registered niche
+        filtered_df = market_data[market_data['Niche'].str.contains(user_niche, case=False, na=False)]
     else:
-        st.warning("No data matches your search.")
+        filtered_df = market_data
 
-# MODULE: SCRIPT ARCHITECT
+    # 3. Display Data
+    if not filtered_df.empty:
+        st.dataframe(filtered_df, use_container_width=True)
+    else:
+        st.warning(f"No specific data found for {user_niche}. Showing global feed.")
+        st.dataframe(market_data, use_container_width=True)
+
+
 elif nav == "Script Architect":
-    st.header("💎 AI Strategy Generator")
-    topic = st.text_input("Topic", value=search_query)
-    
-    if st.button("Generate Strategy"):
-        try:
-            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-            with st.spinner("AI is thinking..."):
-                completion = client.chat.completions.create(
-                    model="llama-3.1-8b-instant", 
-                    messages=[{"role": "user", "content": f"Script for: {topic}"}]
-                )
-                st.write(completion.choices[0].message.content)
-        except Exception as e:
-            st.error("AI Bridge Offline. Check your Secrets.")
-
+    st.header("💎 AI Strategy")
+    topic = st.text_input("Niche Topic")
+    if st.button("Generate"):
+        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+        res = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": f"Outline for {topic}"}]
+        )
+        st.write(res.choices[0].message.content)
