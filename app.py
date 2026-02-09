@@ -41,22 +41,24 @@ with st.sidebar:
 
 # --- CONTENT AREA ---
 if nav == "Global Pulse":
-    st.header("📈 Market Momentum")
+    st.header("📈 Market Momentum") # This is your ONLY header
     
-    # DEBUG VIEW: This helps us see if the data exists
-    if data.empty or data.iloc[0]['Niche'] == "Check Sheet":
-        st.error("The app can't see your data. Check the column headers in your Google Sheet!")
-        st.info(f"Detected Columns: {list(data.columns)}")
-    else:
-        # Filtering logic
-        filtered_df = data[data['Niche'].str.contains(search_query, case=False)] if search_query else data
-        
-        if not filtered_df.empty:
-            # 1. Metrics
-            c1, c2 = st.columns(2)
-            c1.metric("Total Niches", len(filtered_df))
-            c2.metric("Avg Growth", f"{filtered_df['Growth'].mean():.1f}%")
+    filtered_df = data[data['Niche'].str.contains(search_query, case=False)] if search_query else data
+    
+    if not filtered_df.empty:
+        # 1. TOP METRICS
+        c1, c2 = st.columns(2)
+        c1.metric("Total Niches", len(filtered_df))
+        c2.metric("Avg Growth", f"{filtered_df['Growth'].mean():.1f}%")
 
+        # 2. THE CHART (Visual)
+        fig = px.bar(filtered_df, x='Niche', y='Growth', color='Status', template="plotly_dark")
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # 3. THE DATA (Hidden in an expander)
+        with st.expander("📂 View Raw Intelligence Feed"):
+            st.dataframe(filtered_df, use_container_width=True)
+           
             # 2. The Chart
             fig = px.bar(
                 filtered_df, 
@@ -97,6 +99,7 @@ elif nav == "Script Architect":
                 st.markdown(completion.choices[0].message.content)
         except Exception as e:
             st.error(f"Error: {e}")
+
 
 
 
