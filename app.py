@@ -52,7 +52,7 @@ if not st.session_state.logged_in:
             users = load_user_db()
             
             # Master Bypass
-            if email_in == "Director" and pw_in == "Iamin":
+            if email_in == "admin" and pw_in == "1234":
                 st.session_state.logged_in = True
                 st.session_state.user_name = "Master Director"
                 st.session_state.user_email = "Admin"
@@ -154,3 +154,4 @@ elif nav == "Script Architect":
             messages=[{"role": "user", "content": f"Outline for {topic}"}]
         )
         st.write(res.choices[0].message.content)
+
