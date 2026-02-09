@@ -1,16 +1,21 @@
-import plotly.express as px
 import streamlit as st
 import pandas as pd
 from groq import Groq
+import plotly.express as px
 
-# --- CONFIG ---
-st.set_page_config(page_title="Director Portal", layout="wide")
+# --- 1. PAGE CONFIG & STYLING ---
+st.set_page_config(page_title="Creator Director Portal", layout="wide")
 
-# --- DATABASE (The Global Pulse Data) ---
-# We'll keep this local for now, then link your Google Sheet next.
-# --- GOOGLE SHEET BRIDGE ---
-# Replace the XXXXXX with the long ID from your Google Sheet URL
-# Use this EXACT ID from your file
+# Custom CSS to make it look "Pro"
+st.markdown("""
+    <style>
+    .main { background-color: #0e1117; }
+    .stMetric { background-color: #1e2130; padding: 15px; border-radius: 10px; }
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- 2. THE GOOGLE SHEET BRIDGE ---
+# Using your verified Sheet ID
 SHEET_ID = "163haIuPIna3pEY9IDxncPM2kFFsuZ76HfKsULcMu1y4"
 SHEET_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv"
 
@@ -18,106 +23,85 @@ SHEET_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=cs
 def load_data():
     try:
         df = pd.read_csv(SHEET_URL)
-        # Clean up column names: remove spaces and make Title Case
+        # Standardize headers
         df.columns = [str(c).strip().capitalize() for c in df.columns]
         
+        # Clean numeric growth column
         if 'Growth' in df.columns:
-            # Fix: Added .str before .strip()
             df['Growth'] = df['Growth'].astype(str).str.replace('%', '').str.replace(',', '').str.strip()
             df['Growth'] = pd.to_numeric(df['Growth'], errors='coerce').fillna(0)
-        
         return df
     except Exception as e:
-        return pd.DataFrame({'Niche': [f"Error: {e}"], 'Growth': [0], 'Status': ['🔴']})
+        # Fallback if Google Sheet is unreachable
+        return pd.DataFrame({'Niche': ['Check Sheet Share Settings'], 'Growth': [0], 'Status': ['🔴']})
 
 data = load_data()
 
-# --- SIDEBAR & SEARCH ---
+# --- 3. SIDEBAR NAVIGATION & SEARCH ---
 with st.sidebar:
-    st.title("👤 Director Control")
-    search_query = st.text_input("🔍 Instant Search", placeholder="e.g. AI Agents")
+    st.title("🛡️ Director HQ")
+    search_query = st.text_input("Global Search", placeholder="Search niche...")
+    nav = st.radio("Intelligence Modules", ["Global Pulse", "Script Architect", "User Database"])
     st.divider()
-    nav = st.radio("Intelligence Modules", ["Global Pulse", "Script Architect"])
+    st.info("Bridge Status: Connected ✅")
 
-# --- CONTENT AREA ---
+# --- 4. MODULE: GLOBAL PULSE ---
 if nav == "Global Pulse":
     st.header("📈 Market Momentum")
     
+    # Filter logic
     filtered_df = data[data['Niche'].str.contains(search_query, case=False)] if search_query else data
     
     if not filtered_df.empty:
-        # Metrics & Charts here... (keep your existing chart code)
+        # Top Metrics
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.metric("Total Niches", len(filtered_df))
+        with c2:
+            st.metric("Avg Growth", f"{filtered_df['Growth'].mean():.1f}%")
+        with c3:
+            st.metric("Top Performer", filtered_df.iloc[0]['Niche'])
 
-        # THE DATA TABLE
-        with st.expander("📂 View Raw Intelligence Feed"):
-            # This logic shifts the index from 0,1,2 to 1,2,3
-            display_df = filtered_df.copy()
-            display_df.index = range(1, len(display_df) + 1) # Force 1 to N counting
-            
-            st.dataframe(display_df, use_container_width=True)
-
-        # 2. THE CHART (Visual)
-        fig = px.bar(filtered_df, x='Niche', y='Growth', color='Status', template="plotly_dark")
+        # Plotly Chart
+        fig = px.bar(
+            filtered_df, 
+            x='Niche', 
+            y='Growth', 
+            color='Status',
+            text_auto='.2s',
+            title="Niche Growth Velocity",
+            template="plotly_dark",
+            color_discrete_map={'🔥 Rising': '#FF4B4B', '⚖️ Stable': '#00CC96', '📉 Dropping': '#636EFA'}
+        )
         st.plotly_chart(fig, use_container_width=True)
-        
-      # 3. THE DATA (Hidden in an expander)
-        with st.expander("📂 View Raw Intelligence Feed"):
-            # THE FIX: This creates a copy and shifts the count by 1
-            display_df = filtered_df.copy()
-            display_df.index = display_df.index + 1
-            
-            st.dataframe(display_df, use_container_width=True)
-           
-            # 2. The Chart
-            fig = px.bar(
-                filtered_df, 
-                x='Niche', 
-                y='Growth', 
-                color='Status',
-                title="Real-Time Market Heat",
-                template="plotly_dark"
-            )
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # 3. The Table
-            st.subheader("Raw Intelligence Feed")
-            st.dataframe(filtered_df, use_container_width=True)
-    else:
-            st.warning(f"No results found for '{search_query}'. Try clearing the search bar!")
 
-# --- THE MAIN CONTENT AREA ---
-if nav == "Global Pulse":
-    st.header("📈 Market Momentum")
-    filtered_df = data[data['Niche'].str.contains(search_query, case=False)] if search_query else data
-    st.dataframe(filtered_df, use_container_width=True)
+        # Raw Data Table (Starting from 1)
+        with st.expander("📂 View Raw Intelligence Feed"):
+            display_df = filtered_df.copy()
+            display_df.index = range(1, len(display_df) + 1)
+            st.dataframe(display_df, use_container_width=True)
+    else:
+        st.warning(f"No data found for '{search_query}'.")
+
+# --- 5. MODULE: SCRIPT ARCHITECT ---
 elif nav == "Script Architect":
     st.header("💎 AI Strategy Generator")
     topic = st.text_input("Content Topic", value=search_query)
     
     if st.button("Generate Strategy"):
         try:
-            final_key = st.secrets["GROQ_API_KEY"]
-            client = Groq(api_key=final_key)
+            # Pulling your secret key from Streamlit Cloud
+            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
             
-            with st.spinner("Groq is thinking..."):
+            with st.spinner("Llama-3.1 is analyzing..."):
                 completion = client.chat.completions.create(
-                    # WE UPDATED THIS LINE BELOW:
                     model="llama-3.1-8b-instant", 
-                    messages=[{"role": "user", "content": f"Create a viral script for: {topic}"}]
+                    messages=[{"role": "user", "content": f"Create a viral video script for: {topic}. Include a hook, 3 value points, and a CTA."}]
                 )
-                st.markdown(completion.choices[0].message.content)
+                st.markdown("### Output Script")
+                st.write(completion.choices[0].message.content)
         except Exception as e:
-            st.error(f"Error: {e}")
+            st.error(f"AI Connection Error: {e}")
 
-
-
-
-
-
-
-
-
-
-
-
-
+# --- 6. MODULE: USER DATABASE (Placeholder) ---
+elif nav == "User Database":
