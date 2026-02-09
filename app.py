@@ -145,7 +145,7 @@ if nav == "Global Pulse":
 
 
 elif nav == "Script Architect":
-    st.header("💎 AI Strategy")
+    st.header("💎 Script Architect")
     topic = st.text_input("Niche Topic")
     if st.button("Generate"):
         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
@@ -154,4 +154,5 @@ elif nav == "Script Architect":
             messages=[{"role": "user", "content": f"Outline for {topic}"}]
         )
         st.write(res.choices[0].message.content)
+
 
