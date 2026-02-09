@@ -33,18 +33,18 @@ if nav == "Global Pulse":
     if search_query and filtered_df.empty:
         st.warning(f"No data found for '{search_query}'. Try 'AI' or 'SaaS'.")
 
-# --- MODULE 2: SCRIPT ARCHITECT ---
+# --- THE MAIN CONTENT AREA ---
+if nav == "Global Pulse":
+    st.header("📈 Market Momentum")
+    filtered_df = data[data['Niche'].str.contains(search_query, case=False)] if search_query else data
+    st.dataframe(filtered_df, use_container_width=True)
+
 elif nav == "Script Architect":
-    st.header("💎 AI Strategy Generator")
-    topic = st.text_input("Content Topic", value=search_query)
-    
-   elif nav == "Script Architect":
     st.header("💎 AI Strategy Generator")
     topic = st.text_input("Content Topic", value=search_query)
     
     if st.button("Generate Strategy"):
         try:
-            # Pushed to the right because it's INSIDE the button
             final_key = st.secrets["GROQ_API_KEY"]
             client = Groq(api_key=final_key)
             
@@ -56,8 +56,3 @@ elif nav == "Script Architect":
                 st.markdown(completion.choices[0].message.content)
         except Exception as e:
             st.error(f"Error: {e}")
-                
-        except Exception as e:
-            st.error(f"System Block: {e}")
-
-
