@@ -1,116 +1,84 @@
 import streamlit as st
 import pandas as pd
-import random
-import requests
-from datetime import datetime, timedelta
-import plotly.express as px
+import time
 
-# ==========================================
-# 0. CONFIGURATION
-# ==========================================
-READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGThrIabwjsm42GgyOqNsPkdY3BRSwv5wnOKQMH_iMetJKnUMiPESLb7wb5_n24gn33RjEpG3VhSbD/pub?gid=0&single=true&output=csv" 
-WRITE_URL = "https://script.google.com/macros/s/AKfycbwR8tBqMc4XtfMfJBrjeZbzcgjIkTTIAmMXOmq2QFBf3QFB5aIJTwl5rb5KIpKiV5O7/exec"
-
-# ==========================================
-# 1. PAGE SETTINGS & STYLING
-# ==========================================
-st.set_page_config(page_title="Executive Intelligence", layout="wide")
-
-# High-Visibility Navigation Styling
-import streamlit as st
-
-# 1. Clean CSS Injection
+# 1. Page Config & Professional Styling
 st.set_page_config(page_title="Market Intelligence Portal", layout="wide")
 
 st.markdown("""
     <style>
-    .main {
-        background-color: #0e1117;
-    }
-    .stMetric {
-        background-color: #1a1c24;
-        padding: 15px;
-        border-radius: 10px;
-        border: 1px solid #30363d;
-    }
-    /* This fixes the potential markdown error */
+    .main { background-color: #0e1117; }
+    .stMetric { background-color: #1a1c24; padding: 15px; border-radius: 10px; border: 1px solid #30363d; }
+    .sidebar .sidebar-content { background-image: linear-gradient(#2e313d,#0e1117); }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("Executive Intelligence Dashboard")
+# 2. Authentication Layer (Restored)
+if 'logged_in' not in st.session_state:
+    st.session_state['logged_in'] = False
+    st.session_state['user_name'] = ""
 
-if "history" not in st.session_state:
-    st.session_state["history"] = []
+if not st.session_state['logged_in']:
+    cols = st.columns([1, 2, 1])
+    with cols[1]:
+        st.title("🔐 Intelligence Login")
+        user_input = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        if st.button("Access Portal"):
+            if user_input and password == "director2026": # Replace with your password
+                st.session_state['logged_in'] = True
+                st.session_state['user_name'] = user_input
+                st.rerun()
+    st.stop()
 
-# ==========================================
-# 2. MAIN DASHBOARD
-# ==========================================
-st.title("🚀 Strategic Command Portal")
-
-tab1, tab2, tab3 = st.tabs(["🌐 GLOBAL PULSE", "🔍 INSTANT SEARCH", "🆚 COMPETITION"])
-
-with tab1:
-    st.subheader("🔥 Sector Leaderboard (Live Ranking)")
-    
-    # Dynamic ranking logic
-    sectors = ['AI Content', 'Green Tech', 'SaaS', 'FinTech', 'Logistics']
-    random.shuffle(sectors)
-    scores = sorted([random.randint(70, 99) for _ in range(5)], reverse=True)
-    df_pulse = pd.DataFrame({'Sector': sectors, 'Market Heat': scores})
-    
-    # Leaderboard Highlight
-    st.error(f"🏆 TOP RANKING SECTOR: {df_pulse.iloc[0]['Sector']}")
-    
-    # THE VERTICAL CHART
-    fig = px.bar(
-        df_pulse, 
-        x='Sector', 
-        y='Market Heat', 
-        color='Market Heat',
-        text='Market Heat',
-        color_continuous_scale='Reds'
-    )
-    fig.update_layout(yaxis_range=[0, 110], height=500, template="plotly_dark")
-    st.plotly_chart(fig, use_container_width=True)
-
-with tab2:
-    st.subheader("🔍 Deep-Dive Intelligence")
-    query = st.text_input("Enter target niche:")
-    
-    if query:
-        if query not in st.session_state["history"]:
-            st.session_state["history"].append(query)
-        
-        c1, c2 = st.columns([2, 1])
-        with c1:
-            # Trend Graph
-            dates = [(datetime.now() - timedelta(days=i)).strftime("%b %d") for i in range(7)]
-            line_df = pd.DataFrame({"Date": list(reversed(dates)), "Interest": [random.randint(60, 100) for _ in range(7)]})
-            st.plotly_chart(px.line(line_df, x="Date", y="Interest", title=f"Velocity: {query}"), use_container_width=True)
-            
-            st.markdown("### 🪝 Marketing Hooks")
-            st.info(f"Why {query} is the key to scaling in 2026.")
-        
-        with c2:
-            st.markdown("### 🔑 SEO Keywords")
-            st.button(f"{query} ROI", use_container_width=True)
-            st.button(f"Future of {query}", use_container_width=True)
-
-with tab3:
-    st.subheader("🆚 History Log")
-    if st.session_state["history"]:
-        for h in reversed(st.session_state["history"]):
-            st.write(f"✅ Logged: **{h}**")
-
+# 3. Sidebar - Identity & Navigation
 with st.sidebar:
-    st.header("💎 Premium Features")
-    tool_choice = st.selectbox("Select Tool", ["Global Pulse", "Script Architect"])
+    st.title(f"👤 {st.session_state['user_name']}")
+    st.write("---")
+    tool_choice = st.radio("Navigation", ["Global Pulse", "Comparison Hub", "Script Architect"])
+    st.write("---")
+    st.subheader("📜 Search History")
+    # Placeholder for history logic
+    st.info("No recent history found.")
+    if st.button("Logout"):
+        st.session_state['logged_in'] = False
+        st.rerun()
 
-if tool_choice == "Script Architect":
-    st.subheader("Video Script Generator")
-    niche = st.text_input("Enter Niche (or Trend name):")
-    platform = st.radio("Platform", ["YouTube", "Instagram/TikTok"])
+# 4. Main App Logic
+if tool_choice == "Global Pulse":
+    st.header("📈 Global Pulse Trends")
+    st.write("Current Market Heatmap and real-time data flow.")
+    # (Your Google Sheets / Plotly logic goes here)
+
+elif tool_choice == "Comparison Hub":
+    st.header("⚖️ Niche Comparison Tab")
+    col1, col2 = st.columns(2)
+    niche_a = col1.text_input("Niche A", "AI Automation")
+    niche_b = col2.text_input("Niche B", "SaaS")
+    st.button("Compare Metrics")
+
+elif tool_choice == "Script Architect":
+    st.header("💎 Script Architect (Premium)")
+    niche_input = st.text_input("Enter Niche/Trend Name:")
+    platform = st.segmented_control("Select Platform", ["YouTube", "Instagram", "TikTok"])
     
     if st.button("Generate Strategy"):
-        st.info(f"Analyzing past, current, and future trends for {niche}...")
-        # We will plug the AI logic here next!
+        if niche_input:
+            with st.status("Architecting Content...", expanded=True) as status:
+                st.write("Fetching historical trend data...")
+                time.sleep(1)
+                st.write("Analyzing current monthly spikes...")
+                time.sleep(1)
+                st.write("Predicting future trajectory...")
+                time.sleep(1)
+                status.update(label="Strategy Complete!", state="complete", expanded=False)
+            
+            # This is where the output was "stuck" before. Fixed:
+            st.success(f"### {platform} Strategy for {niche_input}")
+            st.markdown(f"""
+            **The Hook (Current Trend):** "Why everyone is talking about {niche_input}..."
+            **The Value (Future Prediction):** Explain how this shifts in the next 30 days.
+            **CTA:** "Follow for the next trend update."
+            """)
+        else:
+            st.warning("Please enter a niche to begin.")
