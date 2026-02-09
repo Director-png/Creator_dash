@@ -144,15 +144,45 @@ if nav == "Global Pulse":
         st.dataframe(market_data, use_container_width=True)
 
 
+# --- MODULE: ENHANCED SCRIPT ARCHITECT ---
 elif nav == "Script Architect":
-    st.header("💎 Script Architect")
-    topic = st.text_input("Niche Topic")
-    if st.button("Generate"):
-        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-        res = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-            messages=[{"role": "user", "content": f"Outline for {topic}"}]
-        )
-        st.write(res.choices[0].message.content)
+    st.header("💎 Dual-Format Strategy Generator")
+    
+    # User Input
+    topic = st.text_input("Target Topic", value=search_query)
+    
+    # Strategy Toggle
+    format_type = st.radio(
+        "Select Content Architecture:",
+        ["📱 Short-Form (Reels/Shorts/TikTok)", "📺 Long-Form (YouTube/Masterclass)"],
+        horizontal=True
+    )
+    
+    if st.button("Generate Strategy", use_container_width=True):
+        if topic:
+            # Custom prompt based on format
+            if "Short-Form" in format_type:
+                system_prompt = "Generate a 60-second viral script. Focus on a 3-second visual hook, fast-paced value, and a high-energy CTA."
+            else:
+                system_prompt = "Generate a 10-minute video outline. Focus on an intro hook, storytelling arc, 3 deep-dive sections, and a long-term retention strategy."
+
+            try:
+                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                with st.spinner("Architecting your content..."):
+                    completion = client.chat.completions.create(
+                        model="llama-3.1-8b-instant", 
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": f"Topic: {topic}"}
+                        ]
+                    )
+                    st.markdown("---")
+                    st.subheader(f"Strategy: {format_type}")
+                    st.markdown(completion.choices[0].message.content)
+            except Exception as e:
+                st.error("AI Bridge Offline. Check your Groq Key.")
+        else:
+            st.warning("Please enter a topic to begin.")
+
 
 
