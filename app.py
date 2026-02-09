@@ -42,7 +42,8 @@ elif nav == "Script Architect":
         # 1. Try to find the key in Secrets
         try:
             if "GROQ_API_KEY" in st.secrets:
-                final_key = st.secrets["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"]
+               # DO NOT paste your gsk_ key here. Paste the NAME of the secret.
+final_key = st.secrets["GROQ_API_KEY"]
             else:
                 st.error("🚨 Secret Not Found: Go to Settings > Secrets and add GROQ_API_KEY")
                 st.stop()
@@ -59,3 +60,4 @@ elif nav == "Script Architect":
                 
         except Exception as e:
             st.error(f"System Block: {e}")
+
