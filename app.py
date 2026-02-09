@@ -11,7 +11,8 @@ st.set_page_config(page_title="Intelligence Command Portal", layout="wide")
 # Replace with your actual Gemini API Key
 GEMINI_API_KEY = "AIzaSyBk9U07hY-ppxvydq2jikTsCGZTOxHjjMU"
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash-latest')
+# Replace your current model line with this:
+model = genai.GenerativeModel('models/gemini-1.5-flash')
 
 # --- 2. DATABASE CONNECTIONS (Read/Write) ---
 # Replace with your Published CSV URL from Google Sheets
@@ -135,4 +136,5 @@ elif nav == "Script Architect":
             st.write("Strategy Ready!")
         
         st.markdown(response.text)
+
 
