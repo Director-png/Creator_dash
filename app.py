@@ -57,8 +57,16 @@ if not st.session_state.logged_in:
         st.subheader("Secure Registration")
         st.info("Submitted details will be transmitted for HQ review.")
         
-        # This URL will be your Google Form 'formResponse' link
-        GOOGLE_FORM_URL = "YOUR_FORM_RESPONSE_URL_HERE"
+# 1. Change the URL to the 'formResponse' version
+# Note: Use the ID from your notepad link here
+GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
+
+# 2. Update the entry numbers to match your specific form
+form_data = {
+    "entry.483203499": reg_name,   # Replace with your actual Name ID
+    "entry.1873870532": reg_email,  # Replace with your actual Email ID
+    "entry.1396549807": reg_pw      # Replace with your actual Password ID
+}
         
         with st.form("reg_form", clear_on_submit=True):
             reg_name = st.text_input("Full Name")
@@ -137,3 +145,4 @@ elif nav == "Script Architect":
                 st.write(completion.choices[0].message.content)
         except Exception as e:
             st.error("AI Bridge Offline. Check your Secrets.")
+
