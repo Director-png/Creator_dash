@@ -55,9 +55,13 @@ if nav == "Global Pulse":
         fig = px.bar(filtered_df, x='Niche', y='Growth', color='Status', template="plotly_dark")
         st.plotly_chart(fig, use_container_width=True)
         
-        # 3. THE DATA (Hidden in an expander)
+      # 3. THE DATA (Hidden in an expander)
         with st.expander("📂 View Raw Intelligence Feed"):
-            st.dataframe(filtered_df, use_container_width=True)
+            # THE FIX: This creates a copy and shifts the count by 1
+            display_df = filtered_df.copy()
+            display_df.index = display_df.index + 1
+            
+            st.dataframe(display_df, use_container_width=True)
            
             # 2. The Chart
             fig = px.bar(
@@ -99,6 +103,7 @@ elif nav == "Script Architect":
                 st.markdown(completion.choices[0].message.content)
         except Exception as e:
             st.error(f"Error: {e}")
+
 
 
 
