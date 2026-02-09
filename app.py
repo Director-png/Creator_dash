@@ -103,8 +103,8 @@ elif nav == "Script Architect":
         except Exception as e:
             st.error(f"AI Connection Error: {e}")
 
-# --- 6. MODULE: USER DATABASE (Placeholder) ---
+# --- 6. MODULE: USER DATABASE ---
 elif nav == "User Database":
-st.header("👥 User Growth Portal")
+    st.header("👥 User Growth Portal")
     st.write("This module will eventually track your sign-ups and leads.")
     st.info("Next Step: Connect this to a persistent database.")
