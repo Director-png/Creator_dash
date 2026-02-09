@@ -21,8 +21,14 @@ USER_DB_WRITE_WEBHOOK = "https://script.google.com/macros/s/AKfycbwR8tBqMc4XtfMf
 
 # --- 3. AUTHENTICATION & REGISTRATION ENGINE ---
 def check_login(u, p):
+    # MASTER OVERRIDE: This will always work for you
+    if u == "Director" and p == "admin": 
+        return True
+        
+    # DATABASE CHECK: This looks at your Google Sheet
     try:
         df = pd.read_csv(USER_DB_READ_URL)
+        # Ensure your Sheet has columns named exactly 'username' and 'password'
         user_match = df[(df['username'] == u) & (df['password'] == p)]
         return not user_match.empty
     except:
@@ -129,3 +135,4 @@ elif nav == "Script Architect":
             st.write("Strategy Ready!")
         
         st.markdown(response.text)
+
