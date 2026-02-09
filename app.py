@@ -112,88 +112,79 @@ with st.sidebar:
         st.session_state.logged_in = False
         st.rerun()
 
-# --- MODULE: GLOBAL PULSE ---
+# --- MODULE: AUTONOMOUS GLOBAL PULSE ---
 if nav == "Global Pulse":
-    st.header("📈 Market Momentum")
+    st.header("📈 Autonomous Market Intelligence")
     
-    st.subheader("📡 Live Intelligence Feed")
+    # 1. LIVE NEWS SOURCE
     RSS_URL = "https://techcrunch.com/feed/" 
     feed = feedparser.parse(RSS_URL)
     
+    # Extract headlines to feed to the AI
+    headlines = [entry.title for entry in feed.entries[:10]]
+    headlines_str = " | ".join(headlines)
+
+    # 2. AI MARKET ANALYSIS (The "Brain")
+    if 'market_intelligence' not in st.session_state:
+        try:
+            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+            with st.spinner("AI is analyzing live market signals..."):
+                analysis_prompt = f"""
+                Analyze these tech headlines: {headlines_str}
+                Based on these, identify the top 5 trending content niches.
+                Return ONLY a CSV-style list with two columns: Niche, GrowthScore (0-100).
+                Example:
+                AI Video, 95
+                Sustainable Tech, 70
+                """
+                completion = client.chat.completions.create(
+                    model="llama-3.1-8b-instant",
+                    messages=[{"role": "user", "content": analysis_prompt}]
+                )
+                # Convert AI text to DataFrame
+                raw_data = completion.choices[0].message.content.strip().split('\n')
+                data_rows = [r.split(',') for r in raw_data if ',' in r]
+                st.session_state.market_intelligence = pd.DataFrame(data_rows, columns=['Niche', 'Growth'])
+                st.session_state.market_intelligence['Growth'] = pd.to_numeric(st.session_state.market_intelligence['Growth'])
+        except Exception as e:
+            st.error(f"Intelligence Bridge Error: {e}")
+            st.session_state.market_intelligence = pd.DataFrame()
+
+    # 3. THE LIVE FEED (Visuals)
+    st.subheader("📡 Recent Intel")
+    cols = st.columns(3)
     if feed.entries:
-        cols = st.columns(3)
         for i, entry in enumerate(feed.entries[:3]):
             with cols[i]:
-                st.info(f"**{entry.title}**")
-                st.caption(f"Source: {feed.feed.title}")
-                st.markdown(f"[Read Intel]({entry.link})")
-    
+                st.caption(f"LIVE: {entry.title[:50]}...")
+                st.markdown(f"[Source]({entry.link})")
+
     st.divider()
 
-    users = load_user_db()
-    user_niche = ""
-    
-    if not users.empty and st.session_state.user_email:
-        niche_cols = [c for c in users.columns if 'niche' in c]
-        email_cols = [c for c in users.columns if 'email' in c]
+    # 4. THE VERTICAL AUTO-CHART
+    st.subheader("📊 AI-Predicted Growth Velocity")
+    if not st.session_state.market_intelligence.empty:
+        df = st.session_state.market_intelligence
         
-        if niche_cols and email_cols:
-            current_user_row = users[users[email_cols[0]] == st.session_state.user_email]
-            if not current_user_row.empty:
-                user_niche = current_user_row.iloc[0][niche_cols[0]]
-
-    if user_niche:
-        st.subheader(f"Targeted Analysis: {user_niche.capitalize()}")
-        filtered_df = market_data[market_data['Niche'].str.contains(user_niche, case=False, na=False)]
-    else:
-        st.subheader("Global Market Overview")
-        filtered_df = market_data
-
-    if not filtered_df.empty:
-        fig = px.area(filtered_df, x='Niche', y='Growth', title="Growth Velocity", template="plotly_dark")
-        st.plotly_chart(fig, use_container_width=True)
-        st.dataframe(filtered_df, use_container_width=True)
-    else:
-        st.warning("No niche-specific data found. Showing all markets.")
-        st.dataframe(market_data, use_container_width=True)
-
-
-# --- 3. DATA VISUALIZATION (Paste this at the bottom of Global Pulse) ---
-    st.divider()
-    st.subheader("📊 Market Strength Analysis")
-    
-    # Apply the Global Search filter to the chart data as well
-    if search_query:
-        chart_df = filtered_df[filtered_df['Niche'].str.contains(search_query, case=False, na=False)]
-    else:
-        chart_df = filtered_df
-
-    if not chart_df.empty:
-        # Vertical-style Bar Chart (Horizontal bars are easier to read for Niche lists)
+        # Vertical Chart Logic
         fig = px.bar(
-            chart_df, 
+            df, 
             x='Growth', 
             y='Niche', 
-            orientation='h', 
-            title=f"Growth Velocity Intelligence",
-            template="plotly_dark",
+            orientation='h',
             color='Growth',
-            color_continuous_scale='Turbo' # High-contrast colors
+            color_continuous_scale='Magma',
+            template="plotly_dark"
         )
-        
-        # Adjust layout for a clean, professional look
-        fig.update_layout(
-            yaxis={'categoryorder':'total ascending'}, # Puts highest growth at the top
-            height=400 + (len(chart_df) * 30),
-            margin=dict(l=20, r=20, t=40, b=20)
-        )
-        
+        fig.update_layout(yaxis={'categoryorder':'total ascending'}, height=400)
         st.plotly_chart(fig, use_container_width=True)
-        st.dataframe(chart_df, use_container_width=True)
     else:
-        st.warning("No data matches your current search or niche.")
-        if st.button("View Global Data"):
-            st.dataframe(market_data, use_container_width=True)
+        st.info("Gathering intelligence... Refreshing stream.")
+
+    if st.button("🔄 Refresh Market Intelligence"):
+        if 'market_intelligence' in st.session_state:
+            del st.session_state.market_intelligence
+        st.rerun()
             
 
 # --- MODULE: SCRIPT ARCHITECT ---
@@ -233,4 +224,5 @@ elif nav == "Script Architect":
                 st.error(f"AI Bridge Offline: {e}")
         else:
             st.warning("Please enter a topic to begin.")
+
 
