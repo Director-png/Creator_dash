@@ -7,6 +7,9 @@ import google.generativeai as genai
 st.set_page_config(page_title="Director Portal", layout="wide")
 GEMINI_API_KEY = "AIzaSyDPwcKpNTwJ-Gi2dyMMW-reTl01rm-61L4"
 genai.configure(api_key=GEMINI_API_KEY)
+# This is the most stable way to call the model in 2026
+model = genai.GenerativeModel('gemini-1.5-flash')
+
 
 # --- SIDEBAR: SEARCH & NAVIGATION ---
 with st.sidebar:
@@ -62,3 +65,4 @@ elif nav == "Script Architect":
         except Exception as e:
             st.error(f"API Error: {e}")
             st.info("Ensure your requirements.txt is updated to google-generativeai>=0.8.3")
+
