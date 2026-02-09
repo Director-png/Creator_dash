@@ -119,22 +119,24 @@ elif nav == "Comparison Hub":
 
 # C. SCRIPT ARCHITECT (GEMINI API)
 elif nav == "Script Architect":
-    st.header("💎 AI Script Architect (Premium)")
+    st.header("💎 AI Script Architect")
     topic = st.text_input("Video Topic", value=search_query if search_query else "")
     
     if st.button("Generate Strategy"):
-        with st.status("Consulting Gemini AI...", expanded=True):
-            prompt = f"""
-            Generate a viral video strategy for {topic}. 
-            Include: 
-            1. 3 High-Retention Hooks. 
-            2. Full Script Body with market insights. 
-            3. SEO Keywords and Tags. 
-            4. Future Trend Prediction.
-            """
-            response = model.generate_content(prompt)
-            st.write("Strategy Ready!")
-        
-        st.markdown(response.text)
-
+        if not GEMINI_API_KEY or GEMINI_API_KEY == "YOUR_GEMINI_API_KEY_HERE":
+            st.error("API Key missing! Please add your key to the code.")
+        else:
+            with st.status("Consulting Gemini AI...", expanded=True) as status:
+                try:
+                    prompt = f"Act as a viral strategist. Write a script for {topic} with hooks and SEO."
+                    # FIX: Using the explicit model path
+                    model = genai.GenerativeModel('models/gemini-1.5-flash')
+                    response = model.generate_content(prompt)
+                    
+                    st.markdown(response.text)
+                    status.update(label="Strategy Generated!", state="complete")
+                except Exception as e:
+                    status.update(label="API Error", state="error")
+                    st.error(f"The AI is unavailable: {e}")
+                    st.info("Try changing the model ID to 'models/gemini-pro' as a fallback.")
 
