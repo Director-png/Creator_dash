@@ -17,20 +17,18 @@ SHEET_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=cs
 def load_data():
     try:
         df = pd.read_csv(SHEET_URL)
+        # Clean up column names: remove spaces and make Title Case
+        df.columns = [str(c).strip().capitalize() for c in df.columns]
         
-        # 1. Clean Headers
-        df.columns = [c.strip().capitalize() for c in df.columns]
-        
-        # 2. THE FIX: Clean the 'Growth' column
-        # This removes %, commas, or spaces and converts to a number
         if 'Growth' in df.columns:
-            df['Growth'] = df['Growth'].astype(str).str.replace('%', '').str.replace(',', '').strip()
+            # Fix: Added .str before .strip()
+            df['Growth'] = df['Growth'].astype(str).str.replace('%', '').str.replace(',', '').str.strip()
             df['Growth'] = pd.to_numeric(df['Growth'], errors='coerce').fillna(0)
-            
+        
         return df
     except Exception as e:
-        st.error(f"⚠️ Connection Blocked: {e}")
-        return pd.DataFrame({'Niche': ['Check Sheet'], 'Growth': [0], 'Status': ['Error']})
+        return pd.DataFrame({'Niche': [f"Error: {e}"], 'Growth': [0], 'Status': ['🔴']})
+
 data = load_data()
 
 # --- SIDEBAR & SEARCH ---
@@ -40,47 +38,41 @@ with st.sidebar:
     st.divider()
     nav = st.radio("Intelligence Modules", ["Global Pulse", "Script Architect"])
 
-# --- MODULE 1: GLOBAL PULSE ---
-import plotly.express as px
-
+# --- CONTENT AREA ---
 if nav == "Global Pulse":
     st.header("📈 Market Momentum")
     
-    # 1. THE SEARCH FILTER
-    filtered_df = data[data['Niche'].str.contains(search_query, case=False)] if search_query else data
-    
-    if not filtered_df.empty:
-        # 2. THE TOP METRICS BARS (Visual Summary)
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Total Niches Tracked", len(filtered_df))
-        with col2:
-            avg_growth = filtered_df['Growth'].mean()
-            st.metric("Avg Growth Score", f"{avg_growth:.1f}%")
-        with col3:
-            st.metric("Top Performer", filtered_df.iloc[0]['Niche'])
-
-        st.divider()
-
-        # 3. THE CHART (Replacing the 2nd table)
-        fig = px.bar(
-            filtered_df, 
-            x='Niche', 
-            y='Growth', 
-            color='Status',
-            text='Growth',
-            title="Growth Velocity by Niche",
-            template="plotly_dark", # Looks better for a "Director" portal
-            color_discrete_map={'🔥 Rising': '#FF4B4B', '⚖️ Stable': '#00CC96', '📉 Dropping': '#636EFA'}
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-        # 4. THE DATA TABLE (Keep only one, at the bottom for reference)
-        with st.expander("📂 View Raw Data Source"):
-            st.dataframe(filtered_df, use_container_width=True)
-            
+    # DEBUG VIEW: This helps us see if the data exists
+    if data.empty or data.iloc[0]['Niche'] == "Check Sheet":
+        st.error("The app can't see your data. Check the column headers in your Google Sheet!")
+        st.info(f"Detected Columns: {list(data.columns)}")
     else:
-        st.warning("Director, no data found for that search. Check your Google Sheet!")
+        # Filtering logic
+        filtered_df = data[data['Niche'].str.contains(search_query, case=False)] if search_query else data
+        
+        if not filtered_df.empty:
+            # 1. Metrics
+            c1, c2 = st.columns(2)
+            c1.metric("Total Niches", len(filtered_df))
+            c2.metric("Avg Growth", f"{filtered_df['Growth'].mean():.1f}%")
+
+            # 2. The Chart
+            fig = px.bar(
+                filtered_df, 
+                x='Niche', 
+                y='Growth', 
+                color='Status',
+                title="Real-Time Market Heat",
+                template="plotly_dark"
+            )
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # 3. The Table
+            st.subheader("Raw Intelligence Feed")
+            st.dataframe(filtered_df, use_container_width=True)
+        else:
+            st.warning(f"No results found for '{search_query}'. Try clearing the search bar!")
+
 # --- THE MAIN CONTENT AREA ---
 if nav == "Global Pulse":
     st.header("📈 Market Momentum")
@@ -104,6 +96,7 @@ elif nav == "Script Architect":
                 st.markdown(completion.choices[0].message.content)
         except Exception as e:
             st.error(f"Error: {e}")
+
 
 
 
