@@ -1,4 +1,1 @@
-streamlit
-groq
-pandas
-plotly
+
