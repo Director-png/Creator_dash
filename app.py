@@ -56,7 +56,7 @@ if nav == "Dashboard":
     col2.metric("Scripts Ready", "12", "+2 Today")
     col3.metric("VOID Value", "Top 1%", "Rising")
 
-# --- MODULE: VOID INTELLIGENCE (Market Trends) ---
+# --- MODULE: VOID INTELLIGENCE ---
 elif nav == "VOID Intelligence":
     st.markdown("<h1 style='color: #000080;'>🌑 VOID INTELLIGENCE</h1>", unsafe_allow_html=True)
     st.caption("Strategic Market Signal Analysis | Version 1.1")
@@ -80,7 +80,7 @@ elif nav == "VOID Intelligence":
     
     st.divider()
 
-    # 3. THE ANALYTICS BRAIN (10 Niches with Fallback)
+    # 3. THE ANALYTICS BRAIN
     if 'market_intelligence' not in st.session_state:
         try:
             client = Groq(api_key=st.secrets["GROQ_API_KEY"])
@@ -88,19 +88,46 @@ elif nav == "VOID Intelligence":
             
             with st.spinner("Decoding VOID Signals..."):
                 prompt = f"Analyze: {headlines}. Identify 10 unique tech/finance niches. Output ONLY 10 lines like: Topic:Score. (Score 1-100). No talk."
-              raw_text = chat_completion.choices[0].message.content
-                # Fixed Regex String:
+                chat_completion = client.chat.completions.create(
+                    model="llama-3.1-8b-instant",
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                
+                # --- CAREFUL INDENTATION HERE ---
+                raw_text = chat_completion.choices[0].message.content
                 matches = re.findall(r"([^:\n]+):(\d+)", raw_text)
                 
                 final_data = []
                 for m in matches:
                     final_data.append([m[0].strip(), int(m[1])])
                 
-                # PADDING LOGIC:
                 if len(final_data) < 10:
-                    fallbacks = [["VOID AI", 95], ["FinTech", 88], ["SaaS", 82], ["Quantum", 79], ["Neural Nets", 75], ["DeFi", 72], ["GreenTech", 68]]
+                    fallbacks = [["VOID AI", 95], ["FinTech", 88], ["SaaS", 82], ["Quantum", 79], ["Neural Nets", 75]]
                     for f in fallbacks:
-                        if len(final_data) < 10: 
+                        if len(final_data) < 10:
                             final_data.append(f)
                 
                 st.session_state.market_intelligence = pd.DataFrame(final_data[:10], columns=['Niche', 'Growth'])
+                # -------------------------------
+                
+        except Exception as e:
+            st.error(f"Intelligence Bridge Error: {e}")
+
+    # 4. BLUE GRADIENT CHART
+    if 'market_intelligence' in st.session_state:
+        df = st.session_state.market_intelligence
+        if not df.empty:
+            st.subheader("📊 Growth Velocity (Top 10 Niches)")
+            fig = px.bar(
+                df, x='Growth', y='Niche', orientation='h', 
+                color='Growth',
+                color_continuous_scale=[[0, '#ADD8E6'], [0.5, '#0000FF'], [1.0, '#000080']],
+                template="plotly_dark"
+            )
+            fig.update_layout(showlegend=False, height=500, yaxis={'categoryorder':'total ascending'})
+            st.plotly_chart(fig, use_container_width=True)
+
+    if st.button("🔄 Sync VOID Feed"):
+        if 'market_intelligence' in st.session_state:
+            del st.session_state.market_intelligence
+        st.rerun()
