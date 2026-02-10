@@ -359,7 +359,7 @@ else:
 
 
 # --- MODULE: SCRIPT ARCHITECT ---
-elif nav == "Script Architect":
+ elif nav == "Script Architect":
     st.markdown("<h1 style='color: #000080;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
     st.caption("Strategic Content Engineering for the 1% | Version 1.2")
 
@@ -413,6 +413,7 @@ elif nav == "Script Architect":
                 st.warning("Founder, a topic is required to generate intelligence.")
         else:
             st.info("Awaiting input parameters to begin architecture.")
+
 
 
 
