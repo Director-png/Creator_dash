@@ -115,16 +115,71 @@ with st.sidebar:
         st.session_state.logged_in = False
         st.rerun()
 
-# --- 5. INTERFACE MODULES ---
+# --- MODULE: DASHBOARD (CUSTOMIZABLE) ---
 if nav == "Dashboard":
-    st.header("🌑 SYSTEM OVERVIEW")
-    data = load_data(MARKET_URL)
-    if not data.empty:
-        # FIXED: Line-break protection applied
-        fig = px.bar(data.head(8), x=data.columns[1], y=data.columns[0], orientation='h', template="plotly_dark")
-        fig.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
-        st.plotly_chart(fig, use_container_width=True)
+    st.markdown("<h1 style='color: white;'>🌑 VOID COMMAND CENTER</h1>", unsafe_allow_html=True)
+    
+    # --- CUSTOMIZATION DRAWER ---
+    with st.expander("🛠️ Customize Dashboard Layout"):
+        col_edit1, col_edit2 = st.columns(2)
+        st.session_state.metric_1_label = col_edit1.text_input("Metric 1 Label", st.session_state.metric_1_label)
+        st.session_state.metric_1_val = col_edit1.text_input("Metric 1 Value", st.session_state.metric_1_val)
+        st.session_state.daily_directive = col_edit2.text_area("Edit Daily Directive", st.session_state.daily_directive)
 
+    st.divider()
+
+    # TOP ROW: METRICS (Using Custom State)
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric(label=st.session_state.metric_1_label, value=st.session_state.metric_1_val)
+    m2.metric(label="Scripts Ready", value="24", delta="+6")
+    m3.metric(label="Agency Leads", value="3", delta="Target: 10")
+    m4.metric(label="System Status", value="Operational")
+
+    st.markdown("---")
+
+    # MIDDLE ROW
+    col_left, col_right = st.columns([2, 1])
+    with col_left:
+        st.subheader("🚀 Active VOID Roadmap")
+        roadmap_data = {
+            "Phase": ["VOID Intelligence", "Script Architect", "Client Pitcher", "Agency Portal"],
+            "Status": ["Stable", "Stable", "Online", "Planned"],
+            "Priority": ["Completed", "Active", "High", "Critical"]
+        }
+        df_road = pd.DataFrame(roadmap_data)
+        df_road.index = df_road.index + 1
+        st.table(df_road)
+
+    with col_right:
+        st.subheader("💡 Daily Directive")
+        st.info(st.session_state.daily_directive)
+        st.write("Grind Completion")
+        st.progress(45)
+
+# --- MODULE: CLIENT PITCHER (VOID CAPITAL) ---
+elif nav == "Client Pitcher":
+    st.markdown("<h1 style='color: #000080;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
+    st.caption("Closing high-ticket clients with AI precision.")
+
+    c1, c2 = st.columns([1, 1.5])
+    with c1:
+        client_name = st.text_input("Business Name")
+        niche = st.selectbox("Niche", ["Real Estate", "E-commerce", "SaaS", "Local Business"])
+        offer = st.text_area("What are you selling?", placeholder="e.g., Short-form video growth packages")
+        pitch_btn = st.button("🔥 Generate Power Pitch")
+
+    with c2:
+        if pitch_btn and client_name:
+            try:
+                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                prompt = f"Write a high-converting, professional cold DM for {client_name} in the {niche} niche. Our offer: {offer}. Tone: Confident, minimalist, and value-driven. No fluff."
+                
+                with st.spinner("Crafting..."):
+                    res = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": prompt}])
+                    st.markdown("### The Pitch")
+                    st.write(res.choices[0].message.content)
+            except Exception as e:
+                st.error(f"Sync Error: {e}")
 elif nav == "Global Pulse":
     st.header("🌐 GLOBAL INTELLIGENCE")
     feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
@@ -143,4 +198,5 @@ elif nav == "Script Architect":
             chat = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role":"user","content":f"Short script: {topic}"}])
             st.write(chat.choices[0].message.content)
         except Exception as e: st.error(f"Error: {e}")
+
 
