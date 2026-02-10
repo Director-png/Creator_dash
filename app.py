@@ -66,55 +66,56 @@ if nav == "Dashboard":
 
     st.markdown("---")
 
-    # --- MIDDLE ROW: STRATEGIC OVERVIEW ---
+# --- MODULE: DASHBOARD ---
+if nav == "Dashboard":
+    st.markdown("<h1 style='color: white;'>🌑 VOID COMMAND CENTER</h1>", unsafe_allow_html=True)
+    st.markdown(f"**Founder Status:** <span style='color: #0000FF;'>Active</span> | **Tier:** <span style='color: #000080;'>1% Potential</span>", unsafe_allow_html=True)
+    st.divider()
+
+    # KPI METRICS
+    m1, m2, m3, m4 = st.columns(4)
+    with m1:
+        st.metric(label="Market Volatility", value="High", delta="+12% Signals")
+    with m2:
+        st.metric(label="Scripts Architected", value="24", delta="6 This Week")
+    with m3:
+        st.metric(label="Agency Leads", value="3", delta="Target: 10")
+    with m4:
+        st.metric(label="VOID Network", value="Operational", delta="Synced")
+
+    st.markdown("---")
+
+    # TWO-COLUMN STRATEGY SECTION
     col_left, col_right = st.columns([2, 1])
 
-with col_left:
+    with col_left:
         st.subheader("🚀 Active VOID Roadmap")
-        
-        # Creating the roadmap data
         roadmap_data = {
             "Phase": ["VOID Intelligence", "Script Architect", "Real Estate AI", "Agency Client Portal"],
             "Status": ["Stable", "Stable", "In Development", "Planned"],
             "Priority": ["Completed", "Active", "High", "Critical"]
         }
-        
-        # Convert to DataFrame
         df_road = pd.DataFrame(roadmap_data)
-        
-        # FIX: Shift the index to start at 1 instead of 0
-        df_road.index = df_road.index + 1
-        
-        # Display the table
-        st.table(df_road)
-        
-        # Color-coded status for a premium feel
-        def color_status(val):
-            color = '#000080' if val == 'Stable' else '#00051a'
-            return f'background-color: {color}'
-
+        df_road.index = df_road.index + 1  # Start serial number at 1
         st.table(df_road)
 
     with col_right:
-        st.subheader("💡 Founder's Daily Directive")
+        st.subheader("💡 Founder's Directive")
         st.info("""
-        1. **Code:** Finalize VOID OS stability.
-        2. **Content:** Generate 3 scripts in Script Architect.
-        3. **Outreach:** Identify 1 high-ticket client for VOID Capital.
-        4. **Discipline:** Word is Law. No distractions.
+        1. **Code:** Fix Dashboard UI.
+        2. **Content:** Draft 3 scripts.
+        3. **Outreach:** 1 Client Lead.
+        4. **Discipline:** Word is Law.
         """)
-        
-        # Progress Bar for the day's grind
         st.write("Daily Grind Completion")
         st.progress(45)
 
-    # --- BOTTOM ROW: TERMINAL LOG ---
-    with st.expander("📂 View System Logs", expanded=False):
+    # TERMINAL LOG
+    with st.expander("📂 View System Logs"):
         st.code("""
-        [SYSTEM] VOID Intelligence Feed: 10/10 Niches Synced.
-        [SYSTEM] Groq API: Connection Stable (Latency 24ms).
-        [SYSTEM] Founder Word: Maintained.
-        [LOG] Awaiting next directive...
+        [SYSTEM] VOID Intelligence: Online.
+        [SYSTEM] Script Architect: Ready.
+        [SYSTEM] Founder Logic: Focused.
         """)
 
 
@@ -250,5 +251,6 @@ elif nav == "Script Architect":
                 st.warning("Founder, a topic is required to generate intelligence.")
         else:
             st.info("Awaiting input parameters to begin architecture.")
+
 
 
