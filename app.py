@@ -229,6 +229,8 @@ elif nav == "Client Pitcher":
                     st.write(res.choices[0].message.content)
             except Exception as e:
                 st.error(f"Sync Error: {e}")
+
+
 elif nav == "Global Pulse":
     st.header("🌐 GLOBAL INTELLIGENCE")
     feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
@@ -237,6 +239,73 @@ elif nav == "Global Pulse":
         st.write(entry.summary[:150] + "...")
         st.markdown(f"[Intel Link]({entry.link})")
         st.divider()
+
+elif nav == "Trend Comparison":
+    st.title("📊 TREND INTELLIGENCE & DUEL")
+
+    # 1. CLEAN DATASET (Simplified & Specific)
+    trend_data = {
+        'Rank': ['#01', '#02', '#03', '#04', '#05', '#06'],
+        'Keyword': ['AI Agents', 'Short-form SaaS', 'UGC Ads', 'Newsletter Alpha', 'Faceless YT', 'High-Ticket DM'],
+        'Growth': [94, 82, 77, 65, 89, 72],
+        'Saturation': [20, 45, 80, 30, 60, 50],
+        'YT_Potential': [95, 80, 60, 85, 98, 40],
+        'IG_Potential': [88, 92, 95, 70, 85, 90],
+        'Monetization': ['High', 'Very High', 'Medium', 'High', 'Medium', 'Extreme']
+    }
+    df = pd.DataFrame(trend_data)
+
+    # 2. KEYWORD DUEL (The Comparison Engine)
+    st.subheader("⚔️ KEYWORD DUEL")
+    col_search1, col_search2 = st.columns(2)
+    
+    with col_search1:
+        kw1 = st.selectbox("Select Primary Keyword", df['Keyword'].unique(), index=0)
+    with col_search2:
+        kw2 = st.selectbox("Select Challenger Keyword", df['Keyword'].unique(), index=1)
+
+    # Duel Metrics Extraction
+    d1 = df[df['Keyword'] == kw1].iloc[0]
+    d2 = df[df['Keyword'] == kw2].iloc[0]
+
+    # Side-by-Side Comparison Charts
+    c1, c2 = st.columns(2)
+    
+    with c1:
+        st.caption(f"Stats for {kw1}")
+        # Platform Dominance Chart (Radar-style Bar)
+        fig1 = px.bar(
+            x=['Growth', 'Saturation', 'YT Pot.', 'IG Pot.'],
+            y=[d1['Growth'], d1['Saturation'], d1['YT_Potential'], d1['IG_Potential']],
+            color=['#00d4ff', '#ff4b4b', '#00ff41', '#00ff41'],
+            color_discrete_map="identity",
+            height=300
+        )
+        st.plotly_chart(fig1, use_container_width=True)
+
+    with c2:
+        st.caption(f"Stats for {kw2}")
+        fig2 = px.bar(
+            x=['Growth', 'Saturation', 'YT Pot.', 'IG Pot.'],
+            y=[d2['Growth'], d2['Saturation'], d2['YT_Potential'], d2['IG_Potential']],
+            color=['#00d4ff', '#ff4b4b', '#00ff41', '#00ff41'],
+            color_discrete_map="identity",
+            height=300
+        )
+        st.plotly_chart(fig2, use_container_width=True)
+
+    # Small Comparison Table Right Below
+    st.table(df[df['Keyword'].isin([kw1, kw2])].set_index('Rank'))
+
+    st.divider()
+
+    # 3. MASTER TREND TABLE (The current trends data)
+    st.subheader("📋 CURRENT MARKET TRENDS")
+    st.dataframe(
+        df.set_index('Rank'), 
+        use_container_width=True,
+    )
+
 
 elif nav == "Script Architect":
     st.header("💎 SCRIPT ARCHITECT")
@@ -247,6 +316,7 @@ elif nav == "Script Architect":
             chat = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role":"user","content":f"Short script: {topic}"}])
             st.write(chat.choices[0].message.content)
         except Exception as e: st.error(f"Error: {e}")
+
 
 
 
