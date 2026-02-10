@@ -34,39 +34,25 @@ def load_user_db():
         return pd.DataFrame()
 
 def get_intel_image(entry):
-    # Try 1: Media Content tags
     try:
-        if 'media_content' in entry:
-            return entry.media_content[0]['url']
-    except:
-        pass
-    # Try 2: HTML Summary Scraping
+        if 'media_content' in entry: return entry.media_content[0]['url']
+    except: pass
     try:
         if 'summary' in entry:
             soup = BeautifulSoup(entry.summary, 'html.parser')
             img = soup.find('img')
-            if img and img.get('src'):
-                return img['src']
-    except:
-        pass
-    # Try 3: Unique Fallback
+            if img and img.get('src'): return img['src']
+    except: pass
     return f"https://picsum.photos/seed/{len(entry.title)}/400/250"
 
 # --- 3. SESSION STATE ---
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
-if 'user_name' not in st.session_state:
-    st.session_state.user_name = ""
-if 'user_role' not in st.session_state:
-    st.session_state.user_role = "user"
-if 'user_email' not in st.session_state:
-    st.session_state.user_email = ""
-if 'metric_1_label' not in st.session_state:
-    st.session_state.metric_1_label = "Market Volatility"
-if 'metric_1_val' not in st.session_state:
-    st.session_state.metric_1_val = "High"
-if 'daily_directive' not in st.session_state:
-    st.session_state.daily_directive = "1. Code VOID OS\n2. Draft 3 Scripts\n3. 1 Client Lead\n4. Word is Law"
+if 'logged_in' not in st.session_state: st.session_state.logged_in = False
+if 'user_name' not in st.session_state: st.session_state.user_name = ""
+if 'user_role' not in st.session_state: st.session_state.user_role = "user"
+if 'user_email' not in st.session_state: st.session_state.user_email = ""
+if 'metric_1_label' not in st.session_state: st.session_state.metric_1_label = "Market Volatility"
+if 'metric_1_val' not in st.session_state: st.session_state.metric_1_val = "High"
+if 'daily_directive' not in st.session_state: st.session_state.daily_directive = "1. Code VOID OS\n2. Draft 3 Scripts\n3. 1 Client Lead\n4. Word is Law"
 
 # --- 4. THE GATEKEEPER ---
 if not st.session_state.logged_in:
@@ -94,10 +80,8 @@ if not st.session_state.logged_in:
                         niche_val = str(match.iloc[0, 3]).lower()
                         st.session_state.user_role = "admin" if any(x in niche_val for x in ["fitness", "admin"]) else "user"
                         st.rerun()
-                    else:
-                        st.error("Invalid credentials.")
-                else:
-                    st.error("Database connecting... Use admin login.")
+                    else: st.error("Invalid credentials.")
+                else: st.error("Database connecting... Use admin login.")
     with t2:
         col_l, col_mid, col_r = st.columns([1, 2, 1])
         with col_mid:
@@ -111,8 +95,7 @@ if not st.session_state.logged_in:
                     try:
                         requests.post(FORM_POST_URL, data=payload)
                         st.success("Registration transmitted!")
-                    except:
-                        st.error("Transmission failed.")
+                    except: st.error("Transmission failed.")
     st.stop()
 
 # --- 5. SIDEBAR ---
@@ -147,8 +130,8 @@ if nav == "📊 Dashboard":
     with col_left:
         st.subheader("🚀 Active VOID Roadmap")
         df_road = pd.DataFrame({"Phase": ["VOID Intelligence", "Script Architect", "Client Pitcher", "Agency Portal"],
-                               "Status": ["Stable", "Stable", "Online", "Planned"],
-                               "Priority": ["Completed", "Active", "High", "Critical"]})
+                                "Status": ["Stable", "Stable", "Online", "Planned"],
+                                "Priority": ["Completed", "Active", "High", "Critical"]})
         st.table(df_road)
     with col_right:
         st.subheader("💡 Daily Directive")
@@ -158,7 +141,19 @@ if nav == "📊 Dashboard":
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     data = load_market_data()
+    
     if not data.empty:
+        # Top 3 High Heat Opportunities
+        st.subheader("🔥 TOP MARKET OPPORTUNITIES")
+        top_movers = data.sort_values(by=data.columns[1], ascending=False).head(3)
+        cols = st.columns(3)
+        for i, (index, row) in enumerate(top_movers.iterrows()):
+            with cols[i]:
+                st.metric(label=row.iloc[0], value=f"{row.iloc[1]}%", delta="High Heat")
+                st.caption(f"**Why:** {row.iloc[2]}")
+        st.divider()
+
+        # Chart
         chart_data = data.sort_values(by=data.columns[1], ascending=False).head(10)
         fig = px.bar(chart_data, x=chart_data.columns[1], y=chart_data.columns[0], orientation='h',
                      color=chart_data.columns[1],
@@ -174,8 +169,7 @@ elif nav == "🌐 Global Pulse":
         for entry in feed.entries[:6]:
             c_img, c_txt = st.columns([1, 2.5])
             with c_img:
-                img_url = get_intel_image(entry)
-                st.image(img_url, use_container_width=True)
+                st.image(get_intel_image(entry), use_container_width=True)
             with c_txt:
                 st.markdown(f"**[{entry.title.upper()}]({entry.link})**")
                 st.write(BeautifulSoup(entry.summary, "html.parser").text[:120] + "...")
@@ -187,81 +181,45 @@ elif nav == "🌐 Global Pulse":
 
 elif nav == "⚔️ Trend Duel":
     st.title("⚔️ COMPETITIVE INTELLIGENCE MATRIX")
-    
-    # 1. YOUR ENHANCED DATASET
     trend_df = pd.DataFrame({
         'Keyword': ['AI Agents', 'Short-form SaaS', 'UGC Ads', 'Newsletter Alpha', 'Faceless YT', 'High-Ticket DM'],
         'Growth_Score': [94, 82, 77, 65, 89, 72],
         'Saturation': [20, 45, 80, 30, 60, 50],
         'YT_Rank': [5, 4, 3, 4, 5, 2],
         'IG_Rank': [4, 5, 5, 3, 4, 5],
-        'Monetization': ['High', 'Very High', 'Medium', 'High', 'Medium', 'Extreme'],
-        'Pros': ['High Moat', 'Recurring', 'Quick Cash', 'Asset Ownership', 'Scaleable', 'No Ad Spend'],
-        'Cons': ['Complex', 'Churn', 'Burnout', 'Slow Build', 'Algorithm Risk', 'Time Intensive']
+        'Monetization': ['High', 'Very High', 'Medium', 'High', 'Medium', 'Extreme']
     })
-
-    # 2. THE DUEL CHARTS (Kept from before for interaction)
     col_search1, col_search2 = st.columns(2)
     kw1 = col_search1.selectbox("Primary Keyword", trend_df['Keyword'].unique(), index=0)
     kw2 = col_search2.selectbox("Challenger Keyword", trend_df['Keyword'].unique(), index=1)
-    
     d1 = trend_df[trend_df['Keyword'] == kw1].iloc[0]
     d2 = trend_df[trend_df['Keyword'] == kw2].iloc[0]
-    
     c1, c2 = st.columns(2)
-    with c1: 
-        st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Rank', 'IG Rank'], 
-                               y=[d1['Growth_Score'], d1['Saturation'], d1['YT_Rank']*20, d1['IG_Rank']*20], 
-                               color_discrete_sequence=['#00d4ff'], title=f"Stats: {kw1}", height=300), use_container_width=True)
-    with c2: 
-        st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Rank', 'IG Rank'], 
-                               y=[d2['Growth_Score'], d2['Saturation'], d2['YT_Rank']*20, d2['IG_Rank']*20], 
-                               color_discrete_sequence=['#ff4b4b'], title=f"Stats: {kw2}", height=300), use_container_width=True)
-
-    # 3. THE MASTER ANALYSIS TABLE (Your requested table logic)
+    with c1: st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Rank', 'IG Rank'], y=[d1['Growth_Score'], d1['Saturation'], d1['YT_Rank']*20, d1['IG_Rank']*20], color_discrete_sequence=['#00d4ff'], title=f"Stats: {kw1}", height=300), use_container_width=True)
+    with c2: st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Rank', 'IG Rank'], y=[d2['Growth_Score'], d2['Saturation'], d2['YT_Rank']*20, d2['IG_Rank']*20], color_discrete_sequence=['#ff4b4b'], title=f"Stats: {kw2}", height=300), use_container_width=True)
     st.subheader("📋 Detailed Intelligence Breakdown")
-    
-    def style_performance(val):
-        if val == 'Extreme' or val == 5: return 'color: #00ff41; font-weight: bold'
-        if val == 'High' or val == 4: return 'color: #00d4ff'
-        return ''
+    st.table(trend_df)
 
-    # Rendering the styled table exactly as you wanted
-    st.table(trend_df.style.applymap(style_performance, subset=['Monetization', 'YT_Rank', 'IG_Rank']))
-    # Pull the data from your sheet
-df = pd.read_csv(MARKET_URL)
-
-# Identify the "Hottest" Trends
-top_movers = df.sort_values(by='Score', ascending=False).head(3)
-
-st.subheader("🔥 TOP MARKET OPPORTUNITIES")
-cols = st.columns(3)
-
-for i, (index, row) in enumerate(top_movers.iterrows()):
-    with cols[i]:
-        st.metric(label=row['Niche'], value=f"{row['Score']}%", delta="High Heat")
-        st.caption(f"**Why:** {row['Reason']}")
-       
 elif nav == "💼 Client Pitcher":
-    st.markdown("<h1 style='color: #000080;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns([1, 1.5])
     with c1:
         client_name = st.text_input("Business Name")
-        niche = st.selectbox("Niche", ["Real Estate", "E-commerce", "SaaS", "Local Business"])
+        niche_choice = st.selectbox("Niche", ["Real Estate", "E-commerce", "SaaS", "Local Business"])
         offer = st.text_area("What are you selling?")
         pitch_btn = st.button("🔥 Generate Power Pitch")
     with c2:
         if pitch_btn and client_name:
             try:
-                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                prompt = f"Write a cold DM for {client_name} in {niche}. Offer: {offer}. Tone: Minimalist."
-                res = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": prompt}])
+                groq_client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                prompt = f"Write a cold DM for {client_name} in {niche_choice}. Offer: {offer}. Tone: Minimalist."
+                res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown("### The Pitch")
                 st.write(res.choices[0].message.content)
             except Exception as e: st.error(f"Sync Error: {e}")
 
 elif nav == "💎 Script Architect":
-    st.markdown("<h1 style='color: #000080;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #00ff41;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
     col1, col2 = st.columns([1, 1.5], gap="large")
     with col1:
         topic_input = st.text_input("Enter Focus Topic")
@@ -271,13 +229,8 @@ elif nav == "💎 Script Architect":
     with col2:
         if generate_btn and topic_input:
             try:
-                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                groq_client = Groq(api_key=st.secrets["GROQ_API_KEY"])
                 prompt = f"Write a {platform_choice} script about {topic_input}. Tone: {tone_choice}."
-                res = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": prompt}])
+                res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
-
-
-
-
-
