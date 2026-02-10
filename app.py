@@ -26,12 +26,12 @@ def load_user_db():
         return df
     except: return pd.DataFrame()
 
-# --- 3. MASTER SESSION STATE (Prevents AttributeErrors) ---
+# --- 3. MASTER SESSION STATE ---
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 if 'user_role' not in st.session_state: st.session_state.user_role = "user"
 if 'user_name' not in st.session_state: st.session_state.user_name = "Operator"
 
-# --- 4. AUTH PORTAL (Restored Tabs & Design) ---
+# --- 4. AUTH PORTAL (Restored Original Tabs) ---
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align: center;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
     t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
@@ -48,6 +48,7 @@ if not st.session_state.logged_in:
             else:
                 users = load_user_db()
                 if not users.empty:
+                    # Column 2 is Email, Column 4 is Password
                     match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & (users.iloc[:, 4].astype(str) == pw_in)]
                     if not match.empty:
                         st.session_state.logged_in = True
@@ -60,10 +61,9 @@ if not st.session_state.logged_in:
         st.info("Registration points to internal database. Contact Admin for credentials.")
     st.stop()
 
-# --- 5. ENHANCED SIDEBAR COMMAND CONSOLE ---
+# --- 5. SIDEBAR (Your Custom Layout) ---
 with st.sidebar:
     st.markdown("<h1 style='text-align: center; color: #00d4ff; margin-bottom: 0;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
-    # Personalized Name Placement
     st.markdown(f"""
         <div style='text-align: center; margin-bottom: 20px;'>
             <p style='color: #00ff41; font-family: monospace; font-size: 0.9em; margin: 0;'>● ONLINE: {st.session_state.user_name.upper()}</p>
@@ -91,22 +91,16 @@ with st.sidebar:
     nav = nav_map[selection]
 
     st.divider()
-    st.subheader("⚡ QUICK ACTIONS")
     if st.button("🔄 Force Data Refresh", use_container_width=True):
         st.cache_data.clear()
         st.rerun()
     
-    if st.button("📤 Export Intel Report", use_container_width=True):
-        st.toast(f"Generating {st.session_state.user_name}'s Report...", icon="📄")
-
-    st.sidebar.markdown("---")
     if st.button("🔓 Terminate Session", use_container_width=True):
         st.session_state.logged_in = False
         st.rerun()
 
 # --- 6. MODULES ---
 
-# DASHBOARD
 if nav == "Dashboard":
     st.header("🌑 SYSTEM OVERVIEW")
     data = load_market_data()
@@ -121,45 +115,9 @@ if nav == "Dashboard":
     m2.metric("Director Access", "Verified" if st.session_state.user_role == "admin" else "Restricted")
     m3.metric("Network", "Secure")
 
-# GLOBAL PULSE
 elif nav == "Global Pulse":
     st.title("🌐 GLOBAL PULSE")
     data = load_market_data()
     if not data.empty:
         st.subheader("📊 Niche Momentum Index")
-        fig = px.bar(data.head(8), x=data.columns[1], y=data.columns[0], orientation='h', color_discrete_sequence=['#00d4ff'])
-        fig.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)", font_color="white")
-        st.plotly_chart(fig, use_container_width=True)
-    
-    st.divider()
-    st.subheader("📰 Live Intelligence Feed")
-    feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
-    for entry in feed.entries[:5]:
-        col1, col2 = st.columns([1, 2])
-        img = "https://images.unsplash.com/photo-1614728263952-84ea206f99b6?w=400"
-        if 'media_content' in entry: img = entry.media_content[0]['url']
-        elif 'media_thumbnail' in entry: img = entry.media_thumbnail[0]['url']
-        col1.image(img, use_container_width=True)
-        col2.subheader(entry.title)
-        col2.write(entry.summary[:160] + "...")
-        col2.markdown(f"[Deploy Intel]({entry.link})")
-        st.write("---")
-
-# TREND COMPARISON / DUEL
-elif nav == "Trend Comparison":
-    st.title("📊 TREND INTELLIGENCE & DUEL")
-    trend_data = {
-        'Rank': ['#01', '#02', '#03', '#04', '#05', '#06'],
-        'Keyword': ['AI Agents', 'Short-form SaaS', 'UGC Ads', 'Newsletter Alpha', 'Faceless YT', 'High-Ticket DM'],
-        'Growth': [94, 82, 77, 65, 89, 72],
-        'Saturation': [20, 45, 80, 30, 60, 50],
-        'YT_Potential': [95, 80, 60, 85, 98, 40],
-        'IG_Potential': [88, 92, 95, 70, 85, 90],
-        'Monetization': ['High', 'Very High', 'Medium', 'High', 'Medium', 'Extreme']
-    }
-    df = pd.DataFrame(trend_data)
-
-    st.subheader("⚔️ KEYWORD DUEL")
-    col_search1, col_search2 = st.columns(2)
-    kw1 = col_search1.selectbox("Select Primary Keyword", df['Keyword'].unique(), index=0)
-    kw2 = col_search2.selectbox("Select Challenger Keyword", df['Keyword'].
+        fig = px.bar(data.head(8), x=data.columns[1], y
