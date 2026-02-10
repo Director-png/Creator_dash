@@ -228,7 +228,20 @@ elif nav == "⚔️ Trend Duel":
 
     # Rendering the styled table exactly as you wanted
     st.table(trend_df.style.applymap(style_performance, subset=['Monetization', 'YT_Rank', 'IG_Rank']))
-    
+    # Pull the data from your sheet
+df = pd.read_csv(MARKET_URL)
+
+# Identify the "Hottest" Trends
+top_movers = df.sort_values(by='Score', ascending=False).head(3)
+
+st.subheader("🔥 TOP MARKET OPPORTUNITIES")
+cols = st.columns(3)
+
+for i, (index, row) in enumerate(top_movers.iterrows()):
+    with cols[i]:
+        st.metric(label=row['Niche'], value=f"{row['Score']}%", delta="High Heat")
+        st.caption(f"**Why:** {row['Reason']}")
+        
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #000080;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns([1, 1.5])
@@ -263,5 +276,6 @@ elif nav == "💎 Script Architect":
                 res = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
 
 
