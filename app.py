@@ -148,51 +148,72 @@ if nav == "📊 Dashboard":
         st.info(st.session_state.daily_directive)
         st.progress(45)
 
+
+
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     data = load_market_data()
     
     if not data.empty:
-        # DEBUG: Uncomment the line below if the box is still black to see your data structure
-        # st.write(data.head()) 
-
         try:
-            # Ensure the second column (values) is definitely a float/int
+            # CLEANING: Remove symbols that break numeric conversion
+            data.iloc[:, 1] = data.iloc[:, 1].replace(r'[%\$,]', '', regex=True)
             data.iloc[:, 1] = pd.to_numeric(data.iloc[:, 1], errors='coerce').fillna(0)
             
-            # Use iloc for the path and values to avoid NameErrors if headers change
-            fig = px.treemap(
-                data.head(20), 
-                path=[data.columns[0]], 
-                values=data.columns[1],
-                color=data.columns[1],
-                color_continuous_scale='Viridis', # High visibility scale
-                template="plotly_dark"
-            )
-            
-            fig.update_layout(margin=dict(t=10, l=10, r=10, b=10))
-            st.plotly_chart(fig, use_container_width=True)
-            
+            # Ensure we have non-zero values to plot
+            if data.iloc[:, 1].sum() == 0:
+                st.warning("Data detected, but all values are zero or non-numeric. Check Column 2 of your sheet.")
+            else:
+                fig = px.treemap(
+                    data.head(20), 
+                    path=[data.columns[0]], 
+                    values=data.columns[1],
+                    color=data.columns[1],
+                    color_continuous_scale='RdBu', 
+                    template="plotly_dark"
+                )
+                fig.update_layout(margin=dict(t=0, l=0, r=0, b=0), paper_bgcolor="rgba(0,0,0,0)")
+                st.plotly_chart(fig, use_container_width=True)
         except Exception as e:
-            st.error(f"Visualization Logic Error: {e}")
-    else:
-        st.warning("Connection established, but no data found in the source sheet.")
-
-    # Rest of your News/Analysis columns remain untouched...
+            st.error(f"Chart Render Error: {e}")
     
+    st.divider()
+
     col_news, col_analysis = st.columns([2, 1])
     with col_news:
         st.subheader("📰 Live Tech Intelligence")
         feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
+        
         for entry in feed.entries[:6]:
-            st.markdown(f"### {entry.title}")
-            st.write(entry.summary[:250] + "...")
-            st.markdown(f"[🔗 DEPLOY FULL INTEL]({entry.link})")
-            st.divider()
+            with st.container():
+                # Attempt to find an image in the feed metadata
+                img_url = ""
+                if 'links' in entry:
+                    for link in entry.links:
+                        if 'image' in link.get('type', ''):
+                            img_url = link.get('href', "")
+                
+                # Fallback: Check media_content
+                if not img_url and 'media_content' in entry:
+                    img_url = entry.media_content[0]['url']
+
+                c_img, c_txt = st.columns([1, 3])
+                with c_img:
+                    if img_url:
+                        st.image(img_url, use_container_width=True)
+                    else:
+                        st.image("https://via.placeholder.com/150/000000/FFFFFF?text=VOID+INTEL", use_container_width=True)
+                with c_txt:
+                    st.markdown(f"**[{entry.title}]({entry.link})**")
+                    st.caption(f"Published: {entry.published[:16]}")
+                st.divider()
+
     with col_analysis:
         st.subheader("⚡ AI Trend Analysis")
-        st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs\n- Groq LPUs")
-        st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400")
+        st.info("**Current Alpha:**\n- Search GPT Deployment\n- Llama 4 Rumors\n- DeepSeek V3 Scaling")
+        st.image("https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400")
+
+
 
 elif nav == "⚔️ Trend Duel":
     st.subheader("⚔️ KEYWORD DUEL")
@@ -265,4 +286,5 @@ elif nav == "💎 Script Architect":
                 st.markdown(res.choices[0].message.content)
             except Exception as e:
                 st.error(f"Error: {e}")
+
 
