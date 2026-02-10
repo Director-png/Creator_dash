@@ -151,14 +151,34 @@ if nav == "📊 Dashboard":
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     data = load_market_data()
+    
     if not data.empty:
-        fig = px.treemap(data.head(15), 
-                         path=[data.columns[0]], 
-                         values=data.columns[1],
-                         color=data.columns[1],
-                         color_continuous_scale='GnBu',
-                         template="plotly_dark")
-        st.plotly_chart(fig, use_container_width=True)
+        # DEBUG: Uncomment the line below if the box is still black to see your data structure
+        # st.write(data.head()) 
+
+        try:
+            # Ensure the second column (values) is definitely a float/int
+            data.iloc[:, 1] = pd.to_numeric(data.iloc[:, 1], errors='coerce').fillna(0)
+            
+            # Use iloc for the path and values to avoid NameErrors if headers change
+            fig = px.treemap(
+                data.head(20), 
+                path=[data.columns[0]], 
+                values=data.columns[1],
+                color=data.columns[1],
+                color_continuous_scale='Viridis', # High visibility scale
+                template="plotly_dark"
+            )
+            
+            fig.update_layout(margin=dict(t=10, l=10, r=10, b=10))
+            st.plotly_chart(fig, use_container_width=True)
+            
+        except Exception as e:
+            st.error(f"Visualization Logic Error: {e}")
+    else:
+        st.warning("Connection established, but no data found in the source sheet.")
+
+    # Rest of your News/Analysis columns remain untouched...
     
     col_news, col_analysis = st.columns([2, 1])
     with col_news:
@@ -245,3 +265,4 @@ elif nav == "💎 Script Architect":
                 st.markdown(res.choices[0].message.content)
             except Exception as e:
                 st.error(f"Error: {e}")
+
