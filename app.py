@@ -291,8 +291,8 @@ if nav == "🌐 GLOBAL PULSE":
     render_global_pulse()
 else:
     st.write(f"Switching to {nav}...")
-elif nav == "Trend Comparison":
-    st.title("📊 TREND INTELLIGENCE & DUEL")
+
+
 
     # 1. CLEAN DATASET (Simplified & Specific)
     trend_data = {
@@ -413,6 +413,7 @@ elif nav == "Script Architect":
                 st.warning("Founder, a topic is required to generate intelligence.")
         else:
             st.info("Awaiting input parameters to begin architecture.")
+
 
 
 
