@@ -106,14 +106,63 @@ if not st.session_state.logged_in:
                         st.error("Transmission failed.")
     st.stop()
 
-# --- 4. SIDEBAR NAVIGATION ---
+# --- 5. ENHANCED SIDEBAR COMMAND CONSOLE ---
 with st.sidebar:
-    st.title("🌑 VOID OS")
-    st.caption(f"CONNECTED: {st.session_state.user_name.upper()}")
-    nav = st.radio("MODULES", ["Dashboard", "Global Pulse", "Script Architect"] + (["Pitch Vault"] if st.session_state.user_role == "admin" else []))
-    if st.button("TERMINATE"):
+    # System Identity
+    st.markdown("<h1 style='text-align: center; color: #00d4ff; margin-bottom: 0;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
+    
+    # Dynamic User Identity
+    user_display = st.session_state.get('user_name', 'Operator')
+    st.markdown(f"""
+        <div style='text-align: center; margin-bottom: 20px;'>
+            <p style='color: #00ff41; font-family: monospace; font-size: 0.9em; margin: 0;'>
+                ● ONLINE: {user_display.upper()}
+            </p>
+            <p style='color: gray; font-size: 0.7em; margin: 0;'>ACCESS LEVEL: {st.session_state.user_role.upper()}</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.divider()
+
+    # System Status Readout
+    with st.expander("📡 SYSTEM STATUS", expanded=False):
+        st.write("🟢 Core: Operational")
+        st.write("🔵 Intel: Synchronized")
+        st.write("🔒 Security: Level 5")
+    
+    st.divider()
+
+    # Navigation with Icons
+    st.subheader("🛠️ COMMANDS")
+    nav_map = {
+        "📊 Dashboard": "Dashboard",
+        "🌐 Global Pulse": "Global Pulse",
+        "⚔️ Trend Duel": "Trend Comparison",
+        "💎 Script Architect": "Script Architect"
+    }
+    
+    if st.session_state.user_role == "admin":
+        nav_map["💼 Client Pitcher"] = "Client Pitcher"
+
+    selection = st.radio("SELECT MODULE", list(nav_map.keys()), label_visibility="collapsed")
+    nav = nav_map[selection]
+
+    st.divider()
+
+    # Quick Intelligence Actions
+    st.subheader("⚡ QUICK ACTIONS")
+    if st.button("🔄 Force Data Refresh", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
+    
+    if st.button("📤 Export Intel Report", use_container_width=True):
+        st.toast(f"Generating {user_display}'s Report...", icon="📄")
+
+    st.sidebar.markdown("---")
+    if st.button("🔓 Terminate Session", use_container_width=True):
         st.session_state.logged_in = False
         st.rerun()
+        
 
 # --- MODULE: DASHBOARD (CUSTOMIZABLE) ---
 if nav == "Dashboard":
@@ -198,5 +247,6 @@ elif nav == "Script Architect":
             chat = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role":"user","content":f"Short script: {topic}"}])
             st.write(chat.choices[0].message.content)
         except Exception as e: st.error(f"Error: {e}")
+
 
 
