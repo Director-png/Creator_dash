@@ -162,18 +162,64 @@ elif nav == "Global Pulse":
         st.write("---")
 
 elif nav == "Trend Comparison":
-    st.title("📊 KEYWORD GROWTH")
-    # Simulation table for YouTube/IG performance
+    st.title("📊 COMPETITIVE INTELLIGENCE MATRIX")
+    
+    # 1. ENHANCED DATASET
     trend_df = pd.DataFrame({
-        'Keyword': ['AI Agents', 'Short-form SaaS', 'UGC Ads', 'Newsletter Alpha'],
-        'Growth': [94, 82, 77, 65],
-        'YT Performance': ['Viral', 'High', 'Medium', 'High'],
-        'IG Performance': ['High', 'Viral', 'Viral', 'Medium'],
-        'Pros': ['High Moat', 'Recurring', 'Quick Cash', 'Asset Ownership'],
-        'Cons': ['Complex', 'Churn', 'Burnout', 'Slow Build']
+        'Keyword': ['AI Agents', 'Short-form SaaS', 'UGC Ads', 'Newsletter Alpha', 'Faceless YT', 'High-Ticket DM'],
+        'Growth_Score': [94, 82, 77, 65, 89, 72],
+        'Saturation': [20, 45, 80, 30, 60, 50], # 0-100 scale
+        'YT_Rank': [5, 4, 3, 4, 5, 2], # 1-5 scale
+        'IG_Rank': [4, 5, 5, 3, 4, 5],
+        'Monetization': ['High', 'Very High', 'Medium', 'High', 'Medium', 'Extreme'],
+        'Pros': ['High Moat', 'Recurring', 'Quick Cash', 'Asset Ownership', 'Scaleable', 'No Ad Spend'],
+        'Cons': ['Complex', 'Churn', 'Burnout', 'Slow Build', 'Algorithm Risk', 'Time Intensive']
     })
-    st.plotly_chart(px.line(trend_df, x='Keyword', y='Growth', markers=True), use_container_width=True)
-    st.table(trend_df)
+
+    # 2. THE GROWTH VS SATURATION QUADRANT
+    # This helps identify "Blue Oceans" (High Growth, Low Saturation)
+    st.subheader("🌊 Market Opportunity Quadrant")
+    fig_quad = px.scatter(
+        trend_df, 
+        x='Saturation', 
+        y='Growth_Score',
+        text='Keyword',
+        size='Growth_Score',
+        color='Monetization',
+        color_discrete_map={'Extreme': '#ff4b4b', 'High': '#00d4ff', 'Very High': '#00ff41', 'Medium': '#ffaa00'},
+        template="plotly_dark"
+    )
+    fig_quad.update_traces(textposition='top center')
+    fig_quad.add_hline(y=75, line_dash="dot", annotation_text="High Growth Zone")
+    fig_quad.add_vline(x=50, line_dash="dot", annotation_text="Market Saturation Midpoint")
+    
+    st.plotly_chart(fig_quad, use_container_width=True)
+
+    # 3. PERFORMANCE HEATMAP (Visualizing Platforms)
+    st.subheader("📱 Platform Dominance")
+    
+    # Transforming data for a heatmap look
+    platform_data = trend_df.set_index('Keyword')[['YT_Rank', 'IG_Rank']]
+    fig_heat = px.imshow(
+        platform_data.T,
+        labels=dict(x="Niche", y="Platform", color="Potential"),
+        color_continuous_scale='Blues',
+        text_auto=True
+    )
+    st.plotly_chart(fig_heat, use_container_width=True)
+
+    # 4. THE MASTER ANALYSIS TABLE
+    st.subheader("📋 Detailed Intelligence Breakdown")
+    
+    # Custom styling for the table to highlight Pros/Cons
+    def style_performance(val):
+        if val == 'Extreme' or val == 5: return 'color: #00ff41; font-weight: bold'
+        if val == 'High' or val == 4: return 'color: #00d4ff'
+        return ''
+
+    st.table(trend_df.style.applymap(style_performance, subset=['Monetization', 'YT_Rank', 'IG_Rank']))
+
+
 
 elif nav == "Script Architect":
     st.title("💎 SCRIPT ARCHITECT")
@@ -199,4 +245,5 @@ elif nav == "Client Pitcher":
                                                  messages=[{"role":"user","content":f"Draft an elite cold pitch to {c_name} regarding {offer}"}])
             st.info(res.choices[0].message.content)
         except Exception as e: st.error(f"Error: {e}")
+
 
