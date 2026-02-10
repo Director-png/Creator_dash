@@ -31,7 +31,7 @@ if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 if 'user_role' not in st.session_state: st.session_state.user_role = "user"
 if 'user_name' not in st.session_state: st.session_state.user_name = "Operator"
 
-# --- 4. AUTH PORTAL (Restored Original Tabs) ---
+# --- 4. AUTH PORTAL ---
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align: center;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
     t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
@@ -48,7 +48,6 @@ if not st.session_state.logged_in:
             else:
                 users = load_user_db()
                 if not users.empty:
-                    # Column 2 is Email, Column 4 is Password
                     match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & (users.iloc[:, 4].astype(str) == pw_in)]
                     if not match.empty:
                         st.session_state.logged_in = True
@@ -61,7 +60,7 @@ if not st.session_state.logged_in:
         st.info("Registration points to internal database. Contact Admin for credentials.")
     st.stop()
 
-# --- 5. SIDEBAR (Your Custom Layout) ---
+# --- 5. SIDEBAR ---
 with st.sidebar:
     st.markdown("<h1 style='text-align: center; color: #00d4ff; margin-bottom: 0;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
     st.markdown(f"""
@@ -72,13 +71,6 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     st.divider()
-    with st.expander("📡 SYSTEM STATUS", expanded=False):
-        st.write("🟢 Core: Operational")
-        st.write("🔵 Intelligence: Syncing")
-        st.write("🔒 Security: Level 5")
-    
-    st.divider()
-    st.subheader("🛠️ COMMANDS")
     nav_map = {
         "📊 Dashboard": "Dashboard",
         "🌐 Global Pulse": "Global Pulse",
@@ -90,11 +82,6 @@ with st.sidebar:
     selection = st.radio("SELECT MODULE", list(nav_map.keys()), label_visibility="collapsed")
     nav = nav_map[selection]
 
-    st.divider()
-    if st.button("🔄 Force Data Refresh", use_container_width=True):
-        st.cache_data.clear()
-        st.rerun()
-    
     if st.button("🔓 Terminate Session", use_container_width=True):
         st.session_state.logged_in = False
         st.rerun()
@@ -105,19 +92,7 @@ if nav == "Dashboard":
     st.header("🌑 SYSTEM OVERVIEW")
     data = load_market_data()
     if not data.empty:
+        # FIXED: Completed the bar chart logic properly
         fig = px.bar(data.head(8), x=data.columns[1], y=data.columns[0], orientation='h', 
                      title="Niche Momentum Index", color_discrete_sequence=['#00d4ff'])
-        fig.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)", font_color="white")
-        st.plotly_chart(fig, use_container_width=True)
-    
-    m1, m2, m3 = st.columns(3)
-    m1.metric("VOID Status", "Active")
-    m2.metric("Director Access", "Verified" if st.session_state.user_role == "admin" else "Restricted")
-    m3.metric("Network", "Secure")
-
-elif nav == "Global Pulse":
-    st.title("🌐 GLOBAL PULSE")
-    data = load_market_data()
-    if not data.empty:
-        st.subheader("📊 Niche Momentum Index")
-        fig = px.bar(data.head(8), x=data.columns[1], y
+        fig.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)", font_
