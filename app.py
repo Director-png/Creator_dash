@@ -1,69 +1,134 @@
-
 import streamlit as st
 import pandas as pd
-from streamlit_gsheets import GSheetsConnection
 from groq import Groq
+import plotly.express as px
+import requests
 import feedparser
-import re
 
-# --- PAGE CONFIG ---
-st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
+# --- 1. CONFIG & CONNECTIONS ---
+st.set_page_config(page_title="VOID Director Portal", layout="wide", page_icon="🌑")
 
-# --- DATABASE CONNECTION ---
-# Ensure your secrets.toml has the correct spreadsheet URL
-conn = st.connection("gsheets", type=GSheetsConnection)
+# User Database (Public CSV link from your Google Sheet)
+USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
 
-# --- SESSION STATE INITIALIZATION ---
+# Google Form Submission Link (For Registration)
+FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
+
+# --- 2. DATA LOADING ---
+def load_user_db():
+    try:
+        # We use clear cache to ensure we get the latest registrations
+        df = pd.read_csv(USER_DB_URL)
+        df.columns = [str(c).strip().lower() for c in df.columns]
+        return df
+    except:
+        return pd.DataFrame()
+
+# --- 3. SESSION STATE ---
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 if 'user_role' not in st.session_state:
-    st.session_state.user_role = None
+    st.session_state.user_role = "user"
+if 'user_name' not in st.session_state:
+    st.session_state.user_name = ""
 
-# --- AUTHENTICATION FUNCTION ---
-def login_user(username, password):
-    try:
-        # Reading the sheet linked to your form
-        df = conn.read() 
-        
-        # Clean column names (Google Forms often adds timestamps or long headers)
-        # We look for rows where username and password match your form's structure
-        user_row = df[(df.iloc[:, 1] == username) & (df.iloc[:, 4] == password)]
-        
-        if not user_row.empty:
-            st.session_state.logged_in = True
-            st.session_state.username = username
-            # We treat the 'niche' column (Index 3) as the role/access level
-            role_val = str(user_row.iloc[0, 3]).lower()
-            st.session_state.user_role = 'admin' if 'admin' in role_val or 'fitness' in role_val else 'user'
-            return True
-        return False
-    except Exception as e:
-        st.error(f"Database Connection Error: {e}")
-        return False
-
-# --- LOGIN UI ---
+# --- 4. THE DIRECTOR'S GATEKEEPER (LOGIN/REG) ---
 if not st.session_state.logged_in:
-    st.markdown("<h1 style='text-align: center;'>🌑 VOID AUTHENTICATION</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: white;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        with st.container(border=True):
-            u = st.text_input("Username (Entry.483203499)")
-            p = st.text_input("Password (Entry.1396549807)", type="password")
+    t1, t2 = st.tabs(["🔑 Access System", "📝 Register Intelligence"])
+
+    with t1:
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            email_in = st.text_input("Username / Email", key="login_email").lower().strip()
+            pw_in = st.text_input("Access Key (Password)", type="password", key="login_pw").strip()
             
-            if st.button("Initialize System Access", use_container_width=True):
-                if login_user(u, p):
-                    st.success("Access Granted. Synchronizing...")
+            if st.button("Initialize VOID Access", use_container_width=True):
+                users = load_user_db()
+                
+                # Master Admin Bypass
+                if email_in == "admin" and pw_in == "1234":
+                    st.session_state.logged_in = True
+                    st.session_state.user_name = "Master Director"
+                    st.session_state.user_role = "admin"
                     st.rerun()
+                
+                elif not users.empty:
+                    # Dynamically find columns based on your form structure
+                    email_col = users.columns[1] # entry.1873870532
+                    pw_col = users.columns[4]    # entry.1396549807
+                    name_col = users.columns[0]  # entry.483203499
+                    niche_col = users.columns[3] # entry.1906780868
+
+                    match = users[(users[email_col].astype(str).str.lower() == email_in) & (users[pw_col].astype(str) == pw_in)]
+                    
+                    if not match.empty:
+                        st.session_state.logged_in = True
+                        st.session_state.user_name = match.iloc[0][name_col]
+                        # Set admin if 'fitness' or 'admin' is in their niche/role
+                        role_val = str(match.iloc[0][niche_col]).lower()
+                        st.session_state.user_role = "admin" if "fitness" in role_val or "admin" in role_val else "user"
+                        st.rerun()
+                    else:
+                        st.error("Invalid Intelligence Credentials.")
                 else:
-                    st.error("Credential Mismatch. Access Denied.")
+                    st.error("Database connection lag. Try again in 10s.")
+
+    with t2:
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            with st.form("reg_form"):
+                name = st.text_input("Full Name")
+                email = st.text_input("Email")
+                niche = st.text_input("Niche / Focus Area")
+                pw = st.text_input("Set Access Key", type="password")
+                
+                if st.form_submit_button("Transmit Registration", use_container_width=True):
+                    payload = {
+                        "entry.483203499": name,
+                        "entry.1873870532": email,
+                        "entry.1906780868": niche,
+                        "entry.1396549807": pw
+                    }
+                    try:
+                        requests.post(FORM_POST_URL, data=payload)
+                        st.success("Data Transmitted. System sync takes ~60 seconds.")
+                        st.balloons()
+                    except:
+                        st.error("Transmission Interrupted.")
     st.stop()
 
-# --- DYNAMIC SIDEBAR ---
+# --- 5. UNLOCKED COMMAND CENTER ---
 with st.sidebar:
-    st.markdown(f"### 🌑 VOID OS")
-    st.caption(f"Operator: {st.session_state.username}")
+    st.markdown(f"### 🌑 VOID OS\n**Director:** {st.session_state.user_name}")
+    st.caption(f"Status: {st.session_state.user_role.upper()} ACCESS")
     st.divider()
+    
+    nav_items = ["Dashboard", "Global Pulse", "Script Architect"]
+    if st.session_state.user_role == "admin":
+        nav_items.append("Client Pitcher")
+    
+    nav = st.radio("Intelligence Modules", nav_items)
+    
+    st.divider()
+    if st.button("Terminate Session"):
+        st.session_state.logged_in = False
+        st.rerun()
+
+# --- DASHBOARD LOGIC ---
+if nav == "Dashboard":
+    st.title("🌑 VOID COMMAND CENTER")
+    # Insert your customizable metrics here...
+    st.info(f"Welcome back, {st.session_state.user_name}. Your {st.session_state.user_role} clearance is active.")
+
+# --- CLIENT PITCHER (ADMIN LOCK) ---
+elif nav == "Client Pitcher":
+    if st.session_state.user_role == "admin":
+        st.header("💼 VOID CAPITAL: PITCH GENERATOR")
+        # Insert Pitcher Code here...
+    else:
+        st.error("Access Denied. Admin clearance required.")
     
     # Define standard tabs
     nav_items = ["Dashboard", "VOID Intelligence", "Script Architect"]
@@ -326,6 +391,7 @@ elif nav == "Script Architect":
                 st.warning("Founder, a topic is required to generate intelligence.")
         else:
             st.info("Awaiting input parameters to begin architecture.")
+
 
 
 
