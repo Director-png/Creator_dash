@@ -51,6 +51,7 @@ if not st.session_state.logged_in:
             else: st.error("Database connection failure.")
     st.stop()
 
+
 # --- 5. ENHANCED SIDEBAR COMMAND CONSOLE ---
 with st.sidebar:
     # System Identity
@@ -100,6 +101,8 @@ with st.sidebar:
     if st.button("🔓 Terminate Session", use_container_width=True):
         st.session_state.logged_in = False
         st.rerun()
+
+
 # --- 6. MODULES ---
 
 # --- MODULE: DASHBOARD (CUSTOMIZABLE) ---
@@ -289,6 +292,7 @@ elif nav == "Client Pitcher":
                                                  messages=[{"role":"user","content":f"Draft an elite cold pitch to {c_name} regarding {offer}"}])
             st.info(res.choices[0].message.content)
         except Exception as e: st.error(f"Error: {e}")
+
 
 
 
