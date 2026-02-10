@@ -4,6 +4,7 @@ from groq import Groq
 import plotly.express as px
 import requests
 import feedparser
+from bs4 import BeautifulSoup  # Added for image extraction
 
 # --- 1. CONFIG & CONNECTIONS ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -17,7 +18,8 @@ def load_market_data():
     try:
         df = pd.read_csv(MARKET_URL)
         df.columns = [str(c).strip().capitalize() for c in df.columns]
-        # FIX: Ensure the values column is numeric for the Treemap
+        # FIX: Remove currency/percent symbols and force Column 2 to be numeric
+        df.iloc[:, 1] = df.iloc[:, 1].replace(r'[%\$,]', '', regex=True)
         df.iloc[:, 1] = pd.to_numeric(df.iloc[:, 1], errors='coerce').fillna(0)
         return df
     except:
@@ -30,6 +32,18 @@ def load_user_db():
         return df
     except:
         return pd.DataFrame()
+
+# Helper to fix "Crashed" images by digging into the HTML description
+def get_intel_image(entry):
+    try:
+        if 'summary' in entry:
+            soup = BeautifulSoup(entry.summary, 'html.parser')
+            img = soup.find('img')
+            if img and img.get('src'):
+                return img['src']
+    except:
+        pass
+    return "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400" # High-quality fallback
 
 # --- 3. SESSION STATE INITIALIZATION ---
 if 'logged_in' not in st.session_state:
@@ -148,72 +162,39 @@ if nav == "📊 Dashboard":
         st.info(st.session_state.daily_directive)
         st.progress(45)
 
-
-
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     data = load_market_data()
-    
     if not data.empty:
-        try:
-            # CLEANING: Remove symbols that break numeric conversion
-            data.iloc[:, 1] = data.iloc[:, 1].replace(r'[%\$,]', '', regex=True)
-            data.iloc[:, 1] = pd.to_numeric(data.iloc[:, 1], errors='coerce').fillna(0)
-            
-            # Ensure we have non-zero values to plot
-            if data.iloc[:, 1].sum() == 0:
-                st.warning("Data detected, but all values are zero or non-numeric. Check Column 2 of your sheet.")
-            else:
-                fig = px.treemap(
-                    data.head(20), 
-                    path=[data.columns[0]], 
-                    values=data.columns[1],
-                    color=data.columns[1],
-                    color_continuous_scale='RdBu', 
-                    template="plotly_dark"
-                )
-                fig.update_layout(margin=dict(t=0, l=0, r=0, b=0), paper_bgcolor="rgba(0,0,0,0)")
-                st.plotly_chart(fig, use_container_width=True)
-        except Exception as e:
-            st.error(f"Chart Render Error: {e}")
+        # Check if we actually have data that isn't zero
+        if data.iloc[:, 1].sum() > 0:
+            fig = px.treemap(data.head(15), 
+                             path=[data.columns[0]], 
+                             values=data.columns[1],
+                             color=data.columns[1],
+                             color_continuous_scale='GnBu',
+                             template="plotly_dark")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.error("Data detected, but Column 2 contains non-numeric values. Verify your Sheet format.")
     
-    st.divider()
-
     col_news, col_analysis = st.columns([2, 1])
     with col_news:
         st.subheader("📰 Live Tech Intelligence")
         feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
-        
         for entry in feed.entries[:6]:
-            with st.container():
-                # Attempt to find an image in the feed metadata
-                img_url = ""
-                if 'links' in entry:
-                    for link in entry.links:
-                        if 'image' in link.get('type', ''):
-                            img_url = link.get('href', "")
-                
-                # Fallback: Check media_content
-                if not img_url and 'media_content' in entry:
-                    img_url = entry.media_content[0]['url']
-
-                c_img, c_txt = st.columns([1, 3])
-                with c_img:
-                    if img_url:
-                        st.image(img_url, use_container_width=True)
-                    else:
-                        st.image("https://via.placeholder.com/150/000000/FFFFFF?text=VOID+INTEL", use_container_width=True)
-                with c_txt:
-                    st.markdown(f"**[{entry.title}]({entry.link})**")
-                    st.caption(f"Published: {entry.published[:16]}")
-                st.divider()
-
+            c_img, c_txt = st.columns([1, 2])
+            with c_img:
+                img_url = get_intel_image(entry)
+                st.image(img_url, use_container_width=True)
+            with c_txt:
+                st.markdown(f"### [{entry.title}]({entry.link})")
+                st.write(entry.summary[:150] + "...")
+            st.divider()
     with col_analysis:
         st.subheader("⚡ AI Trend Analysis")
-        st.info("**Current Alpha:**\n- Search GPT Deployment\n- Llama 4 Rumors\n- DeepSeek V3 Scaling")
-        st.image("https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400")
-
-
+        st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs\n- Groq LPUs")
+        st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400")
 
 elif nav == "⚔️ Trend Duel":
     st.subheader("⚔️ KEYWORD DUEL")
@@ -241,7 +222,6 @@ elif nav == "⚔️ Trend Duel":
     with c2:
         st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Pot.', 'IG Pot.'], y=[d2['Growth'], d2['Saturation'], d2['YT_Potential'], d2['IG_Potential']], color_discrete_sequence=['#ff4b4b'], height=300), use_container_width=True)
     
-    # YOUR ORIGINAL TABLE
     st.table(df[df['Keyword'].isin([kw1, kw2])].set_index('Rank'))
     st.divider()
     st.subheader("📋 CURRENT MARKET TRENDS")
@@ -252,7 +232,6 @@ elif nav == "💼 Client Pitcher":
     c1, c2 = st.columns([1, 1.5])
     with c1:
         client_name = st.text_input("Business Name")
-        # YOUR ORIGINAL NICHE COLUMN
         niche = st.selectbox("Niche", ["Real Estate", "E-commerce", "SaaS", "Local Business"])
         offer = st.text_area("What are you selling?")
         pitch_btn = st.button("🔥 Generate Power Pitch")
@@ -274,7 +253,6 @@ elif nav == "💎 Script Architect":
         st.subheader("🛠️ Configuration")
         topic_input = st.text_input("Enter Focus Topic", key="topic_input")
         platform_choice = st.selectbox("Target Platform", ["YouTube Shorts", "Instagram Reels", "Long-form"], key="plat_choice")
-        # YOUR ORIGINAL SELECT SLIDER
         tone_choice = st.select_slider("Script Tone", options=["Aggressive", "Professional", "Storyteller"], key="tone_choice")
         generate_btn = st.button("🚀 Architect Script", type="primary")
     with col2:
@@ -286,5 +264,3 @@ elif nav == "💎 Script Architect":
                 st.markdown(res.choices[0].message.content)
             except Exception as e:
                 st.error(f"Error: {e}")
-
-
