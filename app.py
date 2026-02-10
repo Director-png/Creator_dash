@@ -17,6 +17,8 @@ def load_market_data():
     try:
         df = pd.read_csv(MARKET_URL)
         df.columns = [str(c).strip().capitalize() for c in df.columns]
+        # FIX: Ensure the values column is numeric for the Treemap
+        df.iloc[:, 1] = pd.to_numeric(df.iloc[:, 1], errors='coerce').fillna(0)
         return df
     except:
         return pd.DataFrame()
@@ -45,7 +47,7 @@ if 'metric_1_val' not in st.session_state:
 if 'daily_directive' not in st.session_state:
     st.session_state.daily_directive = "1. Code VOID OS\n2. Draft 3 Scripts\n3. 1 Client Lead\n4. Word is Law"
 
-# --- 4. THE GATEKEEPER ---
+# --- 4. THE GATEKEEPER (LOGIN & REGISTRATION) ---
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align: center;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
     t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
@@ -99,125 +101,147 @@ if not st.session_state.logged_in:
                         st.error("Transmission failed.")
     st.stop()
 
-# --- 5. SIDEBAR COMMAND CONSOLE ---
+# --- 5. SIDEBAR NAVIGATION ---
 with st.sidebar:
-    st.markdown("<h1 style='text-align: center; color: #00d4ff; margin-bottom: 0;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #00d4ff;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
     user_display = st.session_state.get('user_name', 'Operator')
-    st.markdown(f"<div style='text-align: center; margin-bottom: 20px;'><p style='color: #00ff41; font-family: monospace;'>● ONLINE: {user_display.upper()}</p></div>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align: center; color: #00ff41; font-family: monospace;'>● {user_display.upper()}</p>", unsafe_allow_html=True)
+    
+    nav_options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "💎 Script Architect"]
+    if st.session_state.user_role == "admin":
+        nav_options.append("💼 Client Pitcher")
+    
+    nav = st.radio("COMMAND CENTER", nav_options)
     
     st.divider()
-    nav_map = {
-        "📊 Dashboard": "Dashboard",
-        "🌐 Global Pulse": "Global Pulse",
-        "⚔️ Trend Duel": "Trend Comparison",
-        "💎 Script Architect": "Script Architect"
-    }
-    if st.session_state.user_role == "admin":
-        nav_map["💼 Client Pitcher"] = "Client Pitcher"
-
-    selection = st.radio("SELECT MODULE", list(nav_map.keys()))
-    nav = nav_map[selection]
-
     if st.button("🔓 Terminate Session", use_container_width=True):
         st.session_state.logged_in = False
         st.rerun()
 
-# --- 6. CORE LOGIC & MODULES ---
+# --- 6. MODULES ---
 
-if nav == "Dashboard":
-    st.title("🌑 VOID COMMAND CENTER")
-    # Customization Logic
-    with st.expander("🛠️ Customize Dashboard"):
-        st.session_state.metric_1_label = st.text_input("Metric 1 Label", st.session_state.metric_1_label)
-        st.session_state.metric_1_val = st.text_input("Metric 1 Value", st.session_state.metric_1_val)
-        st.session_state.daily_directive = st.text_area("Edit Directive", st.session_state.daily_directive)
-    
+if nav == "📊 Dashboard":
+    st.markdown("<h1 style='color: white;'>🌑 VOID COMMAND CENTER</h1>", unsafe_allow_html=True)
+    with st.expander("🛠️ Customize Dashboard Layout"):
+        col_edit1, col_edit2 = st.columns(2)
+        st.session_state.metric_1_label = col_edit1.text_input("Metric 1 Label", st.session_state.metric_1_label)
+        st.session_state.metric_1_val = col_edit1.text_input("Metric 1 Value", st.session_state.metric_1_val)
+        st.session_state.daily_directive = col_edit2.text_area("Edit Daily Directive", st.session_state.daily_directive)
+
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric(st.session_state.metric_1_label, st.session_state.metric_1_val)
-    m2.metric("Scripts Ready", "24", "+6")
-    m3.metric("Leads", "3", "Target: 10")
-    m4.metric("Status", "Operational")
+    m1.metric(label=st.session_state.metric_1_label, value=st.session_state.metric_1_val)
+    m2.metric(label="Scripts Ready", value="24", delta="+6")
+    m3.metric(label="Agency Leads", value="3", delta="Target: 10")
+    m4.metric(label="System Status", value="Operational")
 
-    col_l, col_r = st.columns([2, 1])
-    with col_l:
-        st.subheader("🚀 Roadmap")
+    col_left, col_right = st.columns([2, 1])
+    with col_left:
+        st.subheader("🚀 Active VOID Roadmap")
         df_road = pd.DataFrame({
-            "Phase": ["VOID Intelligence", "Script Architect", "Client Pitcher"],
-            "Status": ["Stable", "Stable", "Online"]
+            "Phase": ["VOID Intelligence", "Script Architect", "Client Pitcher", "Agency Portal"],
+            "Status": ["Stable", "Stable", "Online", "Planned"],
+            "Priority": ["Completed", "Active", "High", "Critical"]
         })
         st.table(df_road)
-    with col_r:
-        st.subheader("💡 Directive")
+    with col_right:
+        st.subheader("💡 Daily Directive")
         st.info(st.session_state.daily_directive)
+        st.progress(45)
 
-elif nav == "Global Pulse":
+elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     data = load_market_data()
     if not data.empty:
-        fig = px.treemap(data.head(15), path=[data.columns[0]], values=data.columns[1], color=data.columns[1], template="plotly_dark")
+        fig = px.treemap(data.head(15), 
+                         path=[data.columns[0]], 
+                         values=data.columns[1],
+                         color=data.columns[1],
+                         color_continuous_scale='GnBu',
+                         template="plotly_dark")
         st.plotly_chart(fig, use_container_width=True)
     
     col_news, col_analysis = st.columns([2, 1])
     with col_news:
         st.subheader("📰 Live Tech Intelligence")
         feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
-        for entry in feed.entries[:5]:
-            st.markdown(f"**{entry.title}**")
-            st.write(entry.summary[:150] + "...")
-            st.markdown(f"[Intel Link]({entry.link})")
+        for entry in feed.entries[:6]:
+            st.markdown(f"### {entry.title}")
+            st.write(entry.summary[:250] + "...")
+            st.markdown(f"[🔗 DEPLOY FULL INTEL]({entry.link})")
             st.divider()
     with col_analysis:
-        st.warning("Director's Note: Focus on Agentic Workflows.")
+        st.subheader("⚡ AI Trend Analysis")
+        st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs\n- Groq LPUs")
         st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400")
 
-elif nav == "Trend Comparison":
-    st.title("⚔️ TREND DUEL ENGINE")
+elif nav == "⚔️ Trend Duel":
+    st.subheader("⚔️ KEYWORD DUEL")
     trend_data = {
+        'Rank': ['#01', '#02', '#03', '#04', '#05', '#06'],
         'Keyword': ['AI Agents', 'Short-form SaaS', 'UGC Ads', 'Newsletter Alpha', 'Faceless YT', 'High-Ticket DM'],
         'Growth': [94, 82, 77, 65, 89, 72],
         'Saturation': [20, 45, 80, 30, 60, 50],
         'YT_Potential': [95, 80, 60, 85, 98, 40],
-        'IG_Potential': [88, 92, 95, 70, 85, 90]
+        'IG_Potential': [88, 92, 95, 70, 85, 90],
+        'Monetization': ['High', 'Very High', 'Medium', 'High', 'Medium', 'Extreme']
     }
     df = pd.DataFrame(trend_data)
-    kw1 = st.selectbox("Primary Keyword", df['Keyword'].unique(), index=0)
-    kw2 = st.selectbox("Challenger Keyword", df['Keyword'].unique(), index=1)
     
+    col_search1, col_search2 = st.columns(2)
+    kw1 = col_search1.selectbox("Select Primary Keyword", df['Keyword'].unique(), index=0)
+    kw2 = col_search2.selectbox("Select Challenger Keyword", df['Keyword'].unique(), index=1)
+
     d1 = df[df['Keyword'] == kw1].iloc[0]
     d2 = df[df['Keyword'] == kw2].iloc[0]
-    
+
     c1, c2 = st.columns(2)
     with c1:
-        st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Pot', 'IG Pot'], y=[d1[1], d1[2], d1[3], d1[4]], title=kw1), use_container_width=True)
+        st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Pot.', 'IG Pot.'], y=[d1['Growth'], d1['Saturation'], d1['YT_Potential'], d1['IG_Potential']], color_discrete_sequence=['#00d4ff'], height=300), use_container_width=True)
     with c2:
-        st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Pot', 'IG Pot'], y=[d2[1], d2[2], d2[3], d2[4]], title=kw2), use_container_width=True)
+        st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Pot.', 'IG Pot.'], y=[d2['Growth'], d2['Saturation'], d2['YT_Potential'], d2['IG_Potential']], color_discrete_sequence=['#ff4b4b'], height=300), use_container_width=True)
+    
+    # YOUR ORIGINAL TABLE
+    st.table(df[df['Keyword'].isin([kw1, kw2])].set_index('Rank'))
+    st.divider()
+    st.subheader("📋 CURRENT MARKET TRENDS")
+    st.dataframe(df.set_index('Rank'), use_container_width=True)
 
-elif nav == "Client Pitcher":
-    st.title("💼 VOID CAPITAL: PITCH GENERATOR")
-    c_name = st.text_input("Business Name")
-    offer = st.text_area("What are you selling?")
-    if st.button("Generate Pitch") and c_name:
-        try:
-            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-            res = client.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=[{"role": "user", "content": f"Write a cold DM for {c_name}. Offer: {offer}"}]
-            )
-            st.success(res.choices[0].message.content)
-        except Exception as e:
-            st.error(f"Error: {e}")
+elif nav == "💼 Client Pitcher":
+    st.markdown("<h1 style='color: #000080;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
+    c1, c2 = st.columns([1, 1.5])
+    with c1:
+        client_name = st.text_input("Business Name")
+        # YOUR ORIGINAL NICHE COLUMN
+        niche = st.selectbox("Niche", ["Real Estate", "E-commerce", "SaaS", "Local Business"])
+        offer = st.text_area("What are you selling?")
+        pitch_btn = st.button("🔥 Generate Power Pitch")
+    with c2:
+        if pitch_btn and client_name:
+            try:
+                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                prompt = f"Write a cold DM for {client_name} in {niche}. Offer: {offer}. Tone: Minimalist."
+                res = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": prompt}])
+                st.markdown("### The Pitch")
+                st.write(res.choices[0].message.content)
+            except Exception as e:
+                st.error(f"Sync Error: {e}")
 
-elif nav == "Script Architect":
-    st.title("✍️ VOID SCRIPT ARCHITECT")
-    topic = st.text_input("Focus Topic")
-    platform = st.selectbox("Platform", ["YouTube Shorts", "Instagram Reels", "Long-form"])
-    if st.button("🚀 Architect Script") and topic:
-        try:
-            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-            res = client.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=[{"role": "user", "content": f"Write a {platform} script about {topic} using the VOID framework."}]
-            )
-            st.markdown(res.choices[0].message.content)
-        except Exception as e:
-            st.error(f"Error: {e}")
+elif nav == "💎 Script Architect":
+    st.markdown("<h1 style='color: #000080;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+    col1, col2 = st.columns([1, 1.5], gap="large")
+    with col1:
+        st.subheader("🛠️ Configuration")
+        topic_input = st.text_input("Enter Focus Topic", key="topic_input")
+        platform_choice = st.selectbox("Target Platform", ["YouTube Shorts", "Instagram Reels", "Long-form"], key="plat_choice")
+        # YOUR ORIGINAL SELECT SLIDER
+        tone_choice = st.select_slider("Script Tone", options=["Aggressive", "Professional", "Storyteller"], key="tone_choice")
+        generate_btn = st.button("🚀 Architect Script", type="primary")
+    with col2:
+        if generate_btn and topic_input:
+            try:
+                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                prompt = f"Write a {platform_choice} script about {topic_input}. Tone: {tone_choice}."
+                res = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": prompt}])
+                st.markdown(res.choices[0].message.content)
+            except Exception as e:
+                st.error(f"Error: {e}")
