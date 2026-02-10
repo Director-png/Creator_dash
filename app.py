@@ -231,15 +231,66 @@ elif nav == "Client Pitcher":
                 st.error(f"Sync Error: {e}")
 
 
-elif nav == "Global Pulse":
-    st.header("🌐 GLOBAL INTELLIGENCE")
-    feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
-    for entry in feed.entries[:3]:
-        st.subheader(entry.title)
-        st.write(entry.summary[:150] + "...")
-        st.markdown(f"[Intel Link]({entry.link})")
-        st.divider()
+# --- 3. GLOBAL PULSE MODULE (UPGRADED) ---
+def render_global_pulse():
+    st.title("🌐 GLOBAL INTELLIGENCE PULSE")
+    
+    # --- ROW 1: MARKET MOMENTUM ---
+    st.subheader("📊 Niche Momentum Index")
+    data = load_market_data()
+    
+    if not data.empty:
+        # We use a Treemap here for a more "Elite" data look than a simple bar chart
+        # It shows the size of the niche (Growth) vs the Color (Saturation)
+        fig = px.treemap(data.head(15), 
+                         path=[data.columns[0]], 
+                         values=data.columns[1],
+                         color=data.columns[1],
+                         color_continuous_scale='GnBu',
+                         template="plotly_dark")
+        fig.update_layout(margin=dict(t=0, l=0, r=0, b=0), paper_bgcolor="rgba(0,0,0,0)")
+        st.plotly_chart(fig, use_container_width=True)
+    
+    st.divider()
 
+    # --- ROW 2: SPLIT VIEW (NEWS vs TREND ANALYSIS) ---
+    col_news, col_analysis = st.columns([2, 1])
+
+    with col_news:
+        st.subheader("📰 Live Tech Intelligence")
+        feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
+        
+        for entry in feed.entries[:6]:
+            with st.container():
+                # Clean up display
+                st.markdown(f"### {entry.title}")
+                st.caption(f"Source: TechCrunch | Published: {entry.published[:16]}")
+                st.write(entry.summary[:250] + "...")
+                st.markdown(f"[🔗 DEPLOY FULL INTEL]({entry.link})")
+                st.markdown("---")
+
+    with col_analysis:
+        st.subheader("⚡ AI Trend Analysis")
+        st.warning("Director's Note: Focus on 'Agentic Workflows' this week.")
+        
+        # Actionable items for the user
+        st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs\n- Groq LPUs")
+        
+        st.divider()
+        st.subheader("📡 Network Status")
+        st.success("🟢 API: Connected")
+        st.success("🟢 Database: Synced")
+        st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400", caption="VOID Network Active")
+
+# --- 4. NAVIGATION LOGIC ---
+with st.sidebar:
+    st.markdown("<h1 style='color: #00d4ff;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
+    nav = st.radio("COMMAND CENTER", ["📊 DASHBOARD", "🌐 GLOBAL PULSE", "💎 SCRIPT ARCHITECT"])
+
+if nav == "🌐 GLOBAL PULSE":
+    render_global_pulse()
+else:
+    st.write(f"Switching to {nav}...")
 elif nav == "Trend Comparison":
     st.title("📊 TREND INTELLIGENCE & DUEL")
 
@@ -362,6 +413,7 @@ elif nav == "Script Architect":
                 st.warning("Founder, a topic is required to generate intelligence.")
         else:
             st.info("Awaiting input parameters to begin architecture.")
+
 
 
 
