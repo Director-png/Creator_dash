@@ -4,3 +4,4 @@ pandas
 plotly
 st-gsheets-connection
 feedparser
+beautifulsoup4
