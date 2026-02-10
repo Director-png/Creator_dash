@@ -1,251 +1,97 @@
 import streamlit as st
 import pandas as pd
-from groq import Groq
 import plotly.express as px
-import requests
 import feedparser
+from groq import Groq
+import re
 
-# --- 1. CONFIG & CONNECTIONS ---
-st.set_page_config(page_title="Director Portal", layout="wide")
+# --- PAGE CONFIGURATION ---
+st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 
-# Market Data
-MARKET_URL = "https://docs.google.com/spreadsheets/d/163haIuPIna3pEY9IDxncPM2kFFsuZ76HfKsULcMu1y4/export?format=csv"
+# --- CUSTOM CSS FOR PROFESSIONAL SIDEBAR & UI ---
+st.markdown("""
+    <style>
+        [data-testid="stSidebar"] {
+            background-color: #00051a;
+            border-right: 1px solid #000080;
+        }
+        .stButton>button {
+            width: 100%;
+            border-radius: 5px;
+            background-color: #000080;
+            color: white;
+            border: none;
+        }
+        .stButton>button:hover {
+            background-color: #0000ff;
+            border: none;
+        }
+        h1, h2, h3 {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
-# User Database (Form Responses)
-USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
-
-# Google Form Submission Link
-FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
-
-# --- 2. DATA LOADING FUNCTIONS ---
-def load_market_data():
-    try:
-        df = pd.read_csv(MARKET_URL)
-        df.columns = [str(c).strip().capitalize() for c in df.columns]
-        return df
-    except:
-        return pd.DataFrame()
-
-def load_user_db():
-    try:
-        df = pd.read_csv(USER_DB_URL)
-        df.columns = [str(c).strip().lower() for c in df.columns]
-        return df
-    except:
-        return pd.DataFrame()
-
-# --- 3. SESSION STATE ---
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
-if 'user_name' not in st.session_state:
-    st.session_state.user_name = ""
-if 'user_email' not in st.session_state:
-    st.session_state.user_email = ""
-
-# --- 4. THE GATEKEEPER ---
-if not st.session_state.logged_in:
-    st.title("🛡️ Director's Intelligence Portal")
-    t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
-
-    with t1:
-        email_in = st.text_input("Email", key="login_email").lower().strip()
-        pw_in = st.text_input("Password", type="password", key="login_pw").strip()
-        
-        if st.button("Access System", use_container_width=True):
-            users = load_user_db()
-            
-            if email_in == "admin" and pw_in == "1234":
-                st.session_state.logged_in = True
-                st.session_state.user_name = "Master Director"
-                st.session_state.user_email = "admin"
-                st.rerun()
-            
-            elif not users.empty:
-                email_col = [c for c in users.columns if 'email' in c][0]
-                pw_col = [c for c in users.columns if 'password' in c][0]
-                name_col = [c for c in users.columns if 'name' in c][0]
-                
-                match = users[(users[email_col] == email_in) & (users[pw_col].astype(str) == pw_in)]
-                
-                if not match.empty:
-                    st.session_state.logged_in = True
-                    st.session_state.user_name = match.iloc[0][name_col]
-                    st.session_state.user_email = email_in
-                    st.rerun()
-                else:
-                    st.error("Invalid credentials.")
-            else:
-                st.error("Database connecting... Use admin login.")
-
-    with t2:
-        with st.form("reg_form"):
-            name = st.text_input("Name")
-            email = st.text_input("Email")
-            niche = st.text_input("Niche (Focus Area)")
-            pw = st.text_input("Set Password", type="password")
-            
-            if st.form_submit_button("Submit Registration"):
-                payload = {
-                    "entry.483203499": name,
-                    "entry.1873870532": email,
-                    "entry.1906780868": niche,
-                    "entry.1396549807": pw
-                }
-                try:
-                    requests.post(FORM_POST_URL, data=payload)
-                    st.success("Registration transmitted! Please wait 60s for Google to sync.")
-                    st.balloons()
-                except:
-                    st.error("Transmission failed.")
-    st.stop()
-
-# --- 5. DASHBOARD (Unlocked) ---
-market_data = load_market_data()
-
+# --- SIDEBAR NAVIGATION ---
 with st.sidebar:
-    st.title(f"Director: {st.session_state.user_name}")
-    search_query = st.text_input("Global Intelligence Search", placeholder="e.g. AI, Fitness...", key="global_search")
-    nav = st.radio("Modules", ["Global Pulse", "Script Architect"])
+    st.markdown("<h1 style='text-align: center; color: white;'>VOID</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #4f4f4f;'>Parent Company: VOID</p>", unsafe_allow_html=True)
+    st.divider()
+    
+    nav = st.radio("COMMAND CENTER", 
+                  ["Dashboard", "VOID Intelligence", "Script Architect", "Settings"],
+                  index=1)
+    
+    st.spacer = st.container()
+    st.sidebar.markdown("---")
+    st.sidebar.info("Founder Level Access: 1% Potential")
+
+# --- MODULE: DASHBOARD (Home) ---
+if nav == "Dashboard":
+    st.title("🌑 VOID COMMAND")
+    st.write(f"Welcome back, Founder. All systems operational.")
+    
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Market Pulse", "Active", "High Velocity")
+    col2.metric("Scripts Ready", "12", "+2 Today")
+    col3.metric("VOID Value", "Top 1%", "Rising")
+
+# --- MODULE: VOID INTELLIGENCE (Market Trends) ---
+elif nav == "VOID Intelligence":
+    st.markdown("<h1 style='color: #000080;'>🌑 VOID INTELLIGENCE</h1>", unsafe_allow_html=True)
+    st.caption("Strategic Market Signal Analysis | Version 1.1")
+
+    # 1. LIVE NEWS SOURCE
+    RSS_URL = "https://techcrunch.com/feed/" 
+    feed = feedparser.parse(RSS_URL)
+    
+    # 2. THE INTEL FEED
+    st.subheader("📡 Recent Market Intel")
+    cols = st.columns(3)
+    
+    if feed.entries:
+        for i, entry in enumerate(feed.entries[:3]):
+            with cols[i]:
+                search_term = entry.title.split()[0] if entry.title else "tech"
+                img_url = f"https://loremflickr.com/800/600/{search_term}?random={i}"
+                st.image(img_url, use_container_width=True)
+                st.markdown(f"**{entry.title}**")
+                st.markdown(f"[Access Intelligence]({entry.link})")
     
     st.divider()
-    if st.button("Logout"):
-        st.session_state.logged_in = False
-        st.rerun()
 
-
-
-# 3. THE ANALYTICS BRAIN (Reinforced for 10 Niches)
+    # 3. THE ANALYTICS BRAIN (10 Niches with Fallback)
     if 'market_intelligence' not in st.session_state:
         try:
             client = Groq(api_key=st.secrets["GROQ_API_KEY"])
             headlines = " | ".join([e.title for e in feed.entries[:10]])
             
             with st.spinner("Decoding VOID Signals..."):
-                # Precision Prompting
-                prompt = f"Analyze: {headlines}. List exactly 10 market niches. Format each line exactly like this: Niche:Score. No symbols, no bullets, no intro."
+                prompt = f"Analyze: {headlines}. Identify 10 unique tech/finance niches. Output ONLY 10 lines like: Topic:Score. (Score 1-100). No talk."
                 chat_completion = client.chat.completions.create(
                     model="llama-3.1-8b-instant",
                     messages=[{"role": "user", "content": prompt}]
                 )
                 
                 raw_text = chat_completion.choices[0].message.content
-                import re
-                # Improved Regex to be more forgiving with spaces
-                matches = re.findall(r"([^:\n]+):(\d+)", raw_text)
-                
-                # DATA PADDING: Ensure we always have 10
-                final_data = []
-                for m in matches:
-                    final_data.append([m[0].strip(), int(m[1])])
-                
-                # If the AI gave us less than 10, fill the rest with 'VOID Standard' niches
-                if len(final_data) < 10:
-                    fallbacks = [["VOID AI", 98], ["Quantum Computing", 88], ["Edge SaaS", 82], 
-                                 ["DeFi Protocols", 79], ["Neural Nets", 75], ["Green Tech", 70]]
-                    for f in fallbacks:
-                        if len(final_data) < 10:
-                            final_data.append(f)
-                
-                st.session_state.market_intelligence = pd.DataFrame(final_data[:10], columns=['Niche', 'Growth'])
-                
-        except Exception as e:
-            st.error("Rerouting Intelligence through VOID backup...")
-# 5. SYNC BUTTON (Correctly Indented)
-    if st.button("🔄 Sync VOID Feed"):
-        if 'market_intelligence' in st.session_state:
-            del st.session_state.market_intelligence
-        st.rerun()
-
-# --- NAVIGATION BREAK: BACK TO THE MARGIN ---
-# Ensure 'elif' starts at the very beginning of the line (0 spaces) 
-# or matches your sidebar 'if' indentation.
-
-elif nav == "Script Architect":
-    st.markdown("<h1 style='color: #000080;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
-    st.caption("High-Retention Video Scripting Engine | Version 1.0")
-
-    # Script Inputs
-    with st.expander("📝 Script Configuration", expanded=True):
-        topic = st.text_input("Video Topic", placeholder="e.g., The Rise of AI in 2026")
-        platform = st.selectbox("Platform", ["YouTube Shorts", "Instagram Reels", "Long-form Video"])
-        tone = st.select_slider("Tone", options=["Aggressive", "Professional", "Storyteller"])
-
-    if st.button("🚀 Generate VOID Script"):
-        if topic:
-            try:
-                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                
-                # The VOID Scripting Prompt
-                prompt = f"""
-                Create a {platform} script about '{topic}'. 
-                Tone: {tone}.
-                Structure: 
-                1. Viral Hook (First 3 seconds)
-                2. The 'Void' (The problem/gap in the market)
-                3. The Solution (Value)
-                4. CTA (Call to Action)
-                """
-                
-                with st.spinner("Architecting Script..."):
-                    chat_completion = client.chat.completions.create(
-                        model="llama-3.1-8b-instant",
-                        messages=[{"role": "user", "content": prompt}]
-                    )
-                    script_output = chat_completion.choices[0].message.content
-                    st.text_area("Final Script Output", script_output, height=400)
-            except Exception as e:
-                st.error(f"Script Engine Offline: {e}")
-        else:
-            st.warning("Founder, please enter a topic first.")
-
-# --- MODULE: SCRIPT ARCHITECT ---
-elif nav == "Script Architect":
-    st.header("💎 Script Architect")
-    
-    topic = st.text_input("Target Topic", value=search_query, placeholder="Enter your niche or video idea...", key="script_topic_input")
-    
-    format_type = st.radio(
-        "Select Content Architecture:",
-        ["📱 Short-Form (Reels/Shorts/TikTok)", "📺 Long-Form (YouTube/Masterclass)"],
-        horizontal=True,
-        key="format_selector"
-    )
-    
-    if st.button("Generate Strategy", use_container_width=True):
-        if topic:
-            if "Short-Form" in format_type:
-                system_prompt = "Generate a 60-second viral script. Focus on a 3-second visual hook, fast-paced value, and a high-energy CTA."
-            else:
-                system_prompt = "Generate a 10-minute video outline. Focus on an intro hook, storytelling arc, 3 deep-dive sections, and a long-term retention strategy."
-
-            try:
-                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                with st.spinner("Architecting your content..."):
-                    completion = client.chat.completions.create(
-                        model="llama-3.1-8b-instant", 
-                        messages=[
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": f"Topic: {topic}"}
-                        ]
-                    )
-                    st.markdown("---")
-                    st.subheader(f"Strategy: {format_type}")
-                    st.markdown(completion.choices[0].message.content)
-            except Exception as e:
-                st.error(f"AI Bridge Offline: {e}")
-        else:
-            st.warning("Please enter a topic to begin.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                matches = re.findall(r"([^:\n]+):(\d
