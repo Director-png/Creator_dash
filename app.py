@@ -123,3 +123,12 @@ elif nav == "Script Architect":
 elif nav == "Client Pitcher":
     st.title("💼 DIRECTOR'S PITCH VAULT")
     # Pitcher logic...
+st.header("💼 DIRECTOR'S PITCH VAULT")
+    c_name = st.text_input("Client Name")
+    offer = st.text_area("The Offer")
+    if st.button("Generate Pitch"):
+        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+        prompt = f"Write a world-class cold pitch to {c_name} regarding {offer}. Keep it sharp and elite."
+        res = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role":"user","content":prompt}])
+        st.info(res.choices[0].message.content)
+
