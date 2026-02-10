@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -5,118 +6,93 @@ import feedparser
 from groq import Groq
 import re
 
-# --- PAGE CONFIGURATION ---
+# --- PAGE CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 
-# --- CUSTOM CSS FOR PROFESSIONAL SIDEBAR & UI ---
-st.markdown("""
-    <style>
-        [data-testid="stSidebar"] {
-            background-color: #00051a;
-            border-right: 1px solid #000080;
-        }
-        .stButton>button {
-            width: 100%;
-            border-radius: 5px;
-            background-color: #000080;
-            color: white;
-            border: none;
-        }
-        .stButton>button:hover {
-            background-color: #0000ff;
-            border: none;
-        }
-        h1, h2, h3 {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
-""", unsafe_allow_html=True)
+# --- SESSION STATE INITIALIZATION (For Customization) ---
+if 'metric_1_label' not in st.session_state:
+    st.session_state.metric_1_label = "Market Volatility"
+    st.session_state.metric_1_val = "High"
+if 'daily_directive' not in st.session_state:
+    st.session_state.daily_directive = "1. Code VOID OS\n2. Draft 3 Scripts\n3. 1 Client Lead\n4. Word is Law"
 
 # --- SIDEBAR NAVIGATION ---
 with st.sidebar:
-    st.markdown("<h1 style='text-align: center; color: white;'>VOID</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #4f4f4f;'>Parent Company: VOID</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: white;'>🌑 VOID</h1>", unsafe_allow_html=True)
     st.divider()
-    
     nav = st.radio("COMMAND CENTER", 
-                  ["Dashboard", "VOID Intelligence", "Script Architect", "Settings"],
-                  index=1)
+                  ["Dashboard", "VOID Intelligence", "Script Architect", "Client Pitcher", "Settings"])
+    st.divider()
+    st.info("Founder Level Access: 1%")
+
+# --- MODULE: DASHBOARD (CUSTOMIZABLE) ---
+if nav == "Dashboard":
+    st.markdown("<h1 style='color: white;'>🌑 VOID COMMAND CENTER</h1>", unsafe_allow_html=True)
     
-    st.spacer = st.container()
-    st.sidebar.markdown("---")
-    st.sidebar.info("Founder Level Access: 1% Potential")
+    # --- CUSTOMIZATION DRAWER ---
+    with st.expander("🛠️ Customize Dashboard Layout"):
+        col_edit1, col_edit2 = st.columns(2)
+        st.session_state.metric_1_label = col_edit1.text_input("Metric 1 Label", st.session_state.metric_1_label)
+        st.session_state.metric_1_val = col_edit1.text_input("Metric 1 Value", st.session_state.metric_1_val)
+        st.session_state.daily_directive = col_edit2.text_area("Edit Daily Directive", st.session_state.daily_directive)
 
-# --- MODULE: DASHBOARD (The Command Center) ---
-if nav == "Dashboard":
-    # Header with customized greeting
-    st.markdown("<h1 style='color: white;'>🌑 VOID COMMAND CENTER</h1>", unsafe_allow_html=True)
-    st.markdown(f"**Founder Status:** <span style='color: #0000FF;'>Active</span> | **Tier:** <span style='color: #000080;'>1% Potential</span>", unsafe_allow_html=True)
     st.divider()
 
-    # --- TOP ROW: KPI METRICS ---
+    # TOP ROW: METRICS (Using Custom State)
     m1, m2, m3, m4 = st.columns(4)
-    with m1:
-        st.metric(label="Market Volatility", value="High", delta="+12% Signals")
-    with m2:
-        st.metric(label="Scripts Architected", value="24", delta="6 This Week")
-    with m3:
-        st.metric(label="Agency Leads", value="3", delta="Target: 10")
-    with m4:
-        st.metric(label="VOID Network", value="Operational", delta="Synced")
+    m1.metric(label=st.session_state.metric_1_label, value=st.session_state.metric_1_val)
+    m2.metric(label="Scripts Ready", value="24", delta="+6")
+    m3.metric(label="Agency Leads", value="3", delta="Target: 10")
+    m4.metric(label="System Status", value="Operational")
 
     st.markdown("---")
 
-# --- MODULE: DASHBOARD ---
-if nav == "Dashboard":
-    st.markdown("<h1 style='color: white;'>🌑 VOID COMMAND CENTER</h1>", unsafe_allow_html=True)
-    st.markdown(f"**Founder Status:** <span style='color: #0000FF;'>Active</span> | **Tier:** <span style='color: #000080;'>1% Potential</span>", unsafe_allow_html=True)
-    st.divider()
-
-    # KPI METRICS
-    m1, m2, m3, m4 = st.columns(4)
-    with m1:
-        st.metric(label="Market Volatility", value="High", delta="+12% Signals")
-    with m2:
-        st.metric(label="Scripts Architected", value="24", delta="6 This Week")
-    with m3:
-        st.metric(label="Agency Leads", value="3", delta="Target: 10")
-    with m4:
-        st.metric(label="VOID Network", value="Operational", delta="Synced")
-
-    st.markdown("---")
-
-    # TWO-COLUMN STRATEGY SECTION
+    # MIDDLE ROW
     col_left, col_right = st.columns([2, 1])
-
     with col_left:
         st.subheader("🚀 Active VOID Roadmap")
         roadmap_data = {
-            "Phase": ["VOID Intelligence", "Script Architect", "Real Estate AI", "Agency Client Portal"],
-            "Status": ["Stable", "Stable", "In Development", "Planned"],
+            "Phase": ["VOID Intelligence", "Script Architect", "Client Pitcher", "Agency Portal"],
+            "Status": ["Stable", "Stable", "Online", "Planned"],
             "Priority": ["Completed", "Active", "High", "Critical"]
         }
         df_road = pd.DataFrame(roadmap_data)
-        df_road.index = df_road.index + 1  # Start serial number at 1
+        df_road.index = df_road.index + 1
         st.table(df_road)
 
     with col_right:
-        st.subheader("💡 Founder's Directive")
-        st.info("""
-        1. **Code:** Fix Dashboard UI.
-        2. **Content:** Draft 3 scripts.
-        3. **Outreach:** 1 Client Lead.
-        4. **Discipline:** Word is Law.
-        """)
-        st.write("Daily Grind Completion")
+        st.subheader("💡 Daily Directive")
+        st.info(st.session_state.daily_directive)
+        st.write("Grind Completion")
         st.progress(45)
 
-    # TERMINAL LOG
-    with st.expander("📂 View System Logs"):
-        st.code("""
-        [SYSTEM] VOID Intelligence: Online.
-        [SYSTEM] Script Architect: Ready.
-        [SYSTEM] Founder Logic: Focused.
-        """)
+# --- MODULE: CLIENT PITCHER (VOID CAPITAL) ---
+elif nav == "Client Pitcher":
+    st.markdown("<h1 style='color: #000080;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
+    st.caption("Closing high-ticket clients with AI precision.")
+
+    c1, c2 = st.columns([1, 1.5])
+    with c1:
+        client_name = st.text_input("Business Name")
+        niche = st.selectbox("Niche", ["Real Estate", "E-commerce", "SaaS", "Local Business"])
+        offer = st.text_area("What are you selling?", placeholder="e.g., Short-form video growth packages")
+        pitch_btn = st.button("🔥 Generate Power Pitch")
+
+    with c2:
+        if pitch_btn and client_name:
+            try:
+                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                prompt = f"Write a high-converting, professional cold DM for {client_name} in the {niche} niche. Our offer: {offer}. Tone: Confident, minimalist, and value-driven. No fluff."
+                
+                with st.spinner("Crafting..."):
+                    res = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": prompt}])
+                    st.markdown("### The Pitch")
+                    st.write(res.choices[0].message.content)
+            except Exception as e:
+                st.error(f"Sync Error: {e}")
+
+# --- KEEPING OTHER MODULES (PULSE & ARCHITECT) ---
+# [Include your Intelligence and Script Architect code here following the same elif pattern]
 
 
 
@@ -251,6 +227,7 @@ elif nav == "Script Architect":
                 st.warning("Founder, a topic is required to generate intelligence.")
         else:
             st.info("Awaiting input parameters to begin architecture.")
+
 
 
 
