@@ -51,17 +51,55 @@ if not st.session_state.logged_in:
             else: st.error("Database connection failure.")
     st.stop()
 
-# --- 5. SIDEBAR ---
+# --- 5. ENHANCED SIDEBAR COMMAND CONSOLE ---
 with st.sidebar:
-    st.title("🌑 VOID OS")
-    nav_items = ["Dashboard", "Global Pulse", "Trend Comparison", "Script Architect"]
+    # System Identity
+    st.markdown("<h1 style='text-align: center; color: #00d4ff;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align: center; font-size: 0.8em; color: gray;'>V 2.0 | {st.session_state.user_role.upper()} ACCESS</p>", unsafe_allow_html=True)
+    
+    st.divider()
+
+    # System Status Readout (Real-time Feel)
+    with st.expander("📡 SYSTEM STATUS", expanded=False):
+        st.write("🟢 Core: Operational")
+        st.write("🔵 Intelligence: Syncing")
+        st.write("🔒 Security: Level 5")
+    
+    st.divider()
+
+    # Navigation with Icons
+    st.subheader("🛠️ COMMANDS")
+    nav_map = {
+        "📊 Dashboard": "Dashboard",
+        "🌐 Global Pulse": "Global Pulse",
+        "⚔️ Trend Duel": "Trend Comparison",
+        "💎 Script Architect": "Script Architect"
+    }
+    
+    # Add Admin Only Command
     if st.session_state.user_role == "admin":
-        nav_items.append("Client Pitcher")
-    nav = st.radio("COMMAND", nav_items)
-    if st.button("Logout"):
+        nav_map["💼 Client Pitcher"] = "Client Pitcher"
+
+    # Using a cleaner radio button with icons
+    selection = st.radio("SELECT MODULE", list(nav_map.keys()), label_visibility="collapsed")
+    nav = nav_map[selection]
+
+    st.divider()
+
+    # Quick Intelligence Actions
+    st.subheader("⚡ QUICK ACTIONS")
+    if st.button("🔄 Force Data Refresh", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
+    
+    if st.button("📤 Export Intel Report", use_container_width=True):
+        st.toast("Generating PDF Report...", icon="📄")
+
+    # Logout at the bottom
+    st.sidebar.markdown("---")
+    if st.button("🔓 Terminate Session", use_container_width=True):
         st.session_state.logged_in = False
         st.rerun()
-
 # --- 6. MODULES ---
 
 # --- MODULE: DASHBOARD (CUSTOMIZABLE) ---
@@ -251,6 +289,7 @@ elif nav == "Client Pitcher":
                                                  messages=[{"role":"user","content":f"Draft an elite cold pitch to {c_name} regarding {offer}"}])
             st.info(res.choices[0].message.content)
         except Exception as e: st.error(f"Error: {e}")
+
 
 
 
