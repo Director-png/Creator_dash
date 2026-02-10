@@ -34,13 +34,57 @@ def load_user_db():
         return pd.DataFrame()
 
 # Helper to fix "Crashed" images by digging into the HTML description
+# --- 1. THE UPGRADED IMAGE EXTRACTOR ---
 def get_intel_image(entry):
+    # Priority 1: Check for the direct media content tag (common in RSS)
+    try:
+        if 'media_content' in entry:
+            return entry.media_content[0]['url']
+        if 'links' in entry:
+            for link in entry.links:
+                if 'image' in link.get('type', ''):
+                    return link.get('href')
+    except:
+        pass
+
+    # Priority 2: Dig into the HTML summary
     try:
         if 'summary' in entry:
             soup = BeautifulSoup(entry.summary, 'html.parser')
             img = soup.find('img')
             if img and img.get('src'):
                 return img['src']
+    except:
+        pass
+    
+    # Priority 3: Tech-themed dynamic fallback (different for each to avoid "same image" look)
+    hash_id = len(entry.title) % 10 # Uses title length to pick a unique-ish image
+    return f"https://picsum.photos/seed/{hash_id}/400/250"
+
+# --- 2. THE UPDATED NEWS LOOP (Within nav == "🌐 Global Pulse") ---
+with col_news:
+    st.subheader("📰 Live Tech Intelligence")
+    feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
+    
+    if not feed.entries:
+        st.warning("No live intel detected. Re-establishing link...")
+    
+    for entry in feed.entries[:6]:
+        c_img, c_txt = st.columns([1, 2.5])
+        with c_img:
+            img_url = get_intel_image(entry)
+            # Added a stylized border and rounded corners for the "VOID" look
+            st.markdown(f"""
+                <div style="border: 1px solid #00d4ff; border-radius: 5px; overflow: hidden;">
+                    <img src="{img_url}" style="width: 100%; display: block;">
+                </div>
+                """, unsafe_allow_html=True)
+        with c_txt:
+            st.markdown(f"**[{entry.title.upper()}]({entry.link})**")
+            # Clean HTML tags out of the summary for a cleaner look
+            clean_summary = BeautifulSoup(entry.summary, "lxml").text[:150]
+            st.write(clean_summary + "...")
+        st.divider()
     except:
         pass
     return "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400" # High-quality fallback
@@ -283,4 +327,5 @@ elif nav == "💎 Script Architect":
                 st.markdown(res.choices[0].message.content)
             except Exception as e:
                 st.error(f"Error: {e}")
+
 
