@@ -6,6 +6,15 @@ import requests
 import feedparser
 from bs4 import BeautifulSoup
 
+def load_market_pulse_data():
+    # Connect to your VOID OS sheet
+    spread = Spread('Market Pulse') 
+    df = spread.sheet_to_df(index=0) # Pulls everything
+    
+    # Convert 'Score' to numeric so the charts work
+    df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
+    return df.dropna(subset=['Niche']) # Remove empty row
+
 # --- 1. CONFIG & CONNECTIONS ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 
@@ -200,6 +209,27 @@ elif nav == "⚔️ Trend Duel":
     st.subheader("📋 Detailed Intelligence Breakdown")
     st.table(trend_df)
 
+# Inside your "Trend Comparison" tab logic:
+df = load_market_pulse_data()
+
+st.title("🌑 VOID Market Pulse Integration")
+
+# Let you choose which niches to compare from the REAL sheet data
+selected_niches = st.multiselect(
+    "Select Niches to Compare",
+    options=df['Niche'].unique(),
+    default=df['Niche'].nlargest(5, 'Score').tolist() # Defaults to top 5 performers
+)
+
+# Filter the data based on selection
+comparison_df = df[df['Niche'].isin(selected_niches)]
+
+# Display the Chart
+st.bar_chart(data=comparison_df, x='Niche', y='Score')
+
+# Show the raw data for the selected niches
+st.dataframe(comparison_df[['Niche', 'Score', 'Growth', 'Reason']])
+
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns([1, 1.5])
@@ -234,3 +264,4 @@ elif nav == "💎 Script Architect":
                 res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
