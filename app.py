@@ -4,7 +4,7 @@ from groq import Groq
 import plotly.express as px
 import requests
 import feedparser
-from bs4 import BeautifulSoup  # Added for image extraction
+from bs4 import BeautifulSoup
 
 # --- 1. CONFIG & CONNECTIONS ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -18,8 +18,8 @@ def load_market_data():
     try:
         df = pd.read_csv(MARKET_URL)
         df.columns = [str(c).strip().capitalize() for c in df.columns]
-        # FIX: Remove currency/percent symbols and force Column 2 to be numeric
-        df.iloc[:, 1] = df.iloc[:, 1].replace(r'[%\$,]', '', regex=True)
+        # Clean currency/symbols and force numeric
+        df.iloc[:, 1] = df.iloc[:, 1].astype(str).replace(r'[%\$,]', '', regex=True)
         df.iloc[:, 1] = pd.to_numeric(df.iloc[:, 1], errors='coerce').fillna(0)
         return df
     except:
@@ -33,21 +33,14 @@ def load_user_db():
     except:
         return pd.DataFrame()
 
-# Helper to fix "Crashed" images by digging into the HTML description
-# --- 1. THE UPGRADED IMAGE EXTRACTOR ---
 def get_intel_image(entry):
-    # Priority 1: Check for the direct media content tag (common in RSS)
+    # Try 1: Media Content tags
     try:
         if 'media_content' in entry:
             return entry.media_content[0]['url']
-        if 'links' in entry:
-            for link in entry.links:
-                if 'image' in link.get('type', ''):
-                    return link.get('href')
     except:
         pass
-
-    # Priority 2: Dig into the HTML summary
+    # Try 2: HTML Summary Scraping
     try:
         if 'summary' in entry:
             soup = BeautifulSoup(entry.summary, 'html.parser')
@@ -56,40 +49,10 @@ def get_intel_image(entry):
                 return img['src']
     except:
         pass
-    
-    # Priority 3: Tech-themed dynamic fallback (different for each to avoid "same image" look)
-    hash_id = len(entry.title) % 10 # Uses title length to pick a unique-ish image
-    return f"https://picsum.photos/seed/{hash_id}/400/250"
+    # Try 3: Unique Fallback
+    return f"https://picsum.photos/seed/{len(entry.title)}/400/250"
 
-# --- 2. THE UPDATED NEWS LOOP (Within nav == "🌐 Global Pulse") ---
-with col_news:
-    st.subheader("📰 Live Tech Intelligence")
-    feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
-    
-    if not feed.entries:
-        st.warning("No live intel detected. Re-establishing link...")
-    
-    for entry in feed.entries[:6]:
-        c_img, c_txt = st.columns([1, 2.5])
-        with c_img:
-            img_url = get_intel_image(entry)
-            # Added a stylized border and rounded corners for the "VOID" look
-            st.markdown(f"""
-                <div style="border: 1px solid #00d4ff; border-radius: 5px; overflow: hidden;">
-                    <img src="{img_url}" style="width: 100%; display: block;">
-                </div>
-                """, unsafe_allow_html=True)
-        with c_txt:
-            st.markdown(f"**[{entry.title.upper()}]({entry.link})**")
-            # Clean HTML tags out of the summary for a cleaner look
-            clean_summary = BeautifulSoup(entry.summary, "lxml").text[:150]
-            st.write(clean_summary + "...")
-        st.divider()
-    except:
-        pass
-    return "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400" # High-quality fallback
-
-# --- 3. SESSION STATE INITIALIZATION ---
+# --- 3. SESSION STATE ---
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 if 'user_name' not in st.session_state:
@@ -105,7 +68,7 @@ if 'metric_1_val' not in st.session_state:
 if 'daily_directive' not in st.session_state:
     st.session_state.daily_directive = "1. Code VOID OS\n2. Draft 3 Scripts\n3. 1 Client Lead\n4. Word is Law"
 
-# --- 4. THE GATEKEEPER (LOGIN & REGISTRATION) ---
+# --- 4. THE GATEKEEPER ---
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align: center;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
     t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
@@ -115,7 +78,6 @@ if not st.session_state.logged_in:
         with col_mid:
             email_in = st.text_input("Email", key="login_email").lower().strip()
             pw_in = st.text_input("Password", type="password", key="login_pw").strip()
-            
             if st.button("Access System", use_container_width=True):
                 users = load_user_db()
                 if email_in == "admin" and pw_in == "1234":
@@ -130,13 +92,12 @@ if not st.session_state.logged_in:
                         st.session_state.user_name = match.iloc[0, 1]
                         st.session_state.user_email = email_in
                         niche_val = str(match.iloc[0, 3]).lower()
-                        st.session_state.user_role = "admin" if "fitness" in niche_val or "admin" in niche_val else "user"
+                        st.session_state.user_role = "admin" if any(x in niche_val for x in ["fitness", "admin"]) else "user"
                         st.rerun()
                     else:
                         st.error("Invalid credentials.")
                 else:
                     st.error("Database connecting... Use admin login.")
-
     with t2:
         col_l, col_mid, col_r = st.columns([1, 2, 1])
         with col_mid:
@@ -146,41 +107,31 @@ if not st.session_state.logged_in:
                 niche = st.text_input("Niche (Focus Area)")
                 pw = st.text_input("Set Password", type="password")
                 if st.form_submit_button("Submit Registration"):
-                    payload = {
-                        "entry.483203499": name,
-                        "entry.1873870532": email,
-                        "entry.1906780868": niche,
-                        "entry.1396549807": pw
-                    }
+                    payload = {"entry.483203499": name, "entry.1873870532": email, "entry.1906780868": niche, "entry.1396549807": pw}
                     try:
                         requests.post(FORM_POST_URL, data=payload)
-                        st.success("Registration transmitted! Wait 60s for sync.")
+                        st.success("Registration transmitted!")
                     except:
                         st.error("Transmission failed.")
     st.stop()
 
-# --- 5. SIDEBAR NAVIGATION ---
+# --- 5. SIDEBAR ---
 with st.sidebar:
     st.markdown("<h1 style='text-align: center; color: #00d4ff;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
     user_display = st.session_state.get('user_name', 'Operator')
     st.markdown(f"<p style='text-align: center; color: #00ff41; font-family: monospace;'>● {user_display.upper()}</p>", unsafe_allow_html=True)
-    
     nav_options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "💎 Script Architect"]
-    if st.session_state.user_role == "admin":
-        nav_options.append("💼 Client Pitcher")
-    
+    if st.session_state.user_role == "admin": nav_options.append("💼 Client Pitcher")
     nav = st.radio("COMMAND CENTER", nav_options)
-    
     st.divider()
     if st.button("🔓 Terminate Session", use_container_width=True):
         st.session_state.logged_in = False
         st.rerun()
 
 # --- 6. MODULES ---
-
 if nav == "📊 Dashboard":
     st.markdown("<h1 style='color: white;'>🌑 VOID COMMAND CENTER</h1>", unsafe_allow_html=True)
-    with st.expander("🛠️ Customize Dashboard Layout"):
+    with st.expander("🛠️ Customize Layout"):
         col_edit1, col_edit2 = st.columns(2)
         st.session_state.metric_1_label = col_edit1.text_input("Metric 1 Label", st.session_state.metric_1_label)
         st.session_state.metric_1_val = col_edit1.text_input("Metric 1 Value", st.session_state.metric_1_val)
@@ -195,11 +146,9 @@ if nav == "📊 Dashboard":
     col_left, col_right = st.columns([2, 1])
     with col_left:
         st.subheader("🚀 Active VOID Roadmap")
-        df_road = pd.DataFrame({
-            "Phase": ["VOID Intelligence", "Script Architect", "Client Pitcher", "Agency Portal"],
-            "Status": ["Stable", "Stable", "Online", "Planned"],
-            "Priority": ["Completed", "Active", "High", "Critical"]
-        })
+        df_road = pd.DataFrame({"Phase": ["VOID Intelligence", "Script Architect", "Client Pitcher", "Agency Portal"],
+                               "Status": ["Stable", "Stable", "Online", "Planned"],
+                               "Priority": ["Completed", "Active", "High", "Critical"]})
         st.table(df_road)
     with col_right:
         st.subheader("💡 Daily Directive")
@@ -209,55 +158,32 @@ if nav == "📊 Dashboard":
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     data = load_market_data()
-    
     if not data.empty:
-        # Sort data by the score/value column descending and take top 10
         chart_data = data.sort_values(by=data.columns[1], ascending=False).head(10)
-        
-        # Check if we actually have data that isn't zero
-        if chart_data.iloc[:, 1].sum() > 0:
-            # Create a horizontal bar chart
-            # Light Blue (#ADD8E6) -> Blue (#0000FF) -> Navy (#000080)
-            fig = px.bar(
-                chart_data, 
-                x=chart_data.columns[1], 
-                y=chart_data.columns[0],
-                orientation='h',
-                color=chart_data.columns[1],
-                color_continuous_scale=[[0, '#ADD8E6'], [0.5, '#0000FF'], [1, '#000080']],
-                template="plotly_dark",
-                labels={chart_data.columns[1]: 'Intelligence Score', chart_data.columns[0]: 'Niche'}
-            )
-            
-            fig.update_layout(
-                yaxis={'categoryorder':'total ascending'}, # Keep highest at the top
-                showlegend=False,
-                coloraxis_showscale=False, # Keeps it clean
-                margin=dict(l=0, r=20, t=30, b=0),
-                height=450
-            )
-            
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.error("Data detected, but values are zero. Check your Sheet format.")
-    
-    st.divider()
+        fig = px.bar(chart_data, x=chart_data.columns[1], y=chart_data.columns[0], orientation='h',
+                     color=chart_data.columns[1],
+                     color_continuous_scale=[[0, '#ADD8E6'], [0.5, '#0000FF'], [1, '#000080']],
+                     template="plotly_dark")
+        fig.update_layout(yaxis={'categoryorder':'total ascending'}, showlegend=False, coloraxis_showscale=False, height=400)
+        st.plotly_chart(fig, use_container_width=True)
     
     col_news, col_analysis = st.columns([2, 1])
     with col_news:
         st.subheader("📰 Live Tech Intelligence")
         feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
         for entry in feed.entries[:6]:
-            c_img, c_txt = st.columns([1, 2.5]) # Slightly wider text area
+            c_img, c_txt = st.columns([1, 2.5])
             with c_img:
                 img_url = get_intel_image(entry)
                 st.image(img_url, use_container_width=True)
             with c_txt:
-                st.markdown(f"**[{entry.title}]({entry.link})**")
-                st.caption(f"Published: {entry.published[:16]}")
-                st.write(entry.summary[:120] + "...")
+                st.markdown(f"**[{entry.title.upper()}]({entry.link})**")
+                st.write(BeautifulSoup(entry.summary, "html.parser").text[:120] + "...")
             st.divider()
-
+    with col_analysis:
+        st.subheader("⚡ AI Trend Analysis")
+        st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs\n- Groq LPUs")
+        st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400")
 
 elif nav == "⚔️ Trend Duel":
     st.subheader("⚔️ KEYWORD DUEL")
@@ -271,24 +197,15 @@ elif nav == "⚔️ Trend Duel":
         'Monetization': ['High', 'Very High', 'Medium', 'High', 'Medium', 'Extreme']
     }
     df = pd.DataFrame(trend_data)
-    
     col_search1, col_search2 = st.columns(2)
-    kw1 = col_search1.selectbox("Select Primary Keyword", df['Keyword'].unique(), index=0)
-    kw2 = col_search2.selectbox("Select Challenger Keyword", df['Keyword'].unique(), index=1)
-
+    kw1 = col_search1.selectbox("Primary Keyword", df['Keyword'].unique(), index=0)
+    kw2 = col_search2.selectbox("Challenger Keyword", df['Keyword'].unique(), index=1)
     d1 = df[df['Keyword'] == kw1].iloc[0]
     d2 = df[df['Keyword'] == kw2].iloc[0]
-
     c1, c2 = st.columns(2)
-    with c1:
-        st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Pot.', 'IG Pot.'], y=[d1['Growth'], d1['Saturation'], d1['YT_Potential'], d1['IG_Potential']], color_discrete_sequence=['#00d4ff'], height=300), use_container_width=True)
-    with c2:
-        st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Pot.', 'IG Pot.'], y=[d2['Growth'], d2['Saturation'], d2['YT_Potential'], d2['IG_Potential']], color_discrete_sequence=['#ff4b4b'], height=300), use_container_width=True)
-    
+    with c1: st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Pot.', 'IG Pot.'], y=[d1['Growth'], d1['Saturation'], d1['YT_Potential'], d1['IG_Potential']], color_discrete_sequence=['#00d4ff'], height=300), use_container_width=True)
+    with c2: st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Pot.', 'IG Pot.'], y=[d2['Growth'], d2['Saturation'], d2['YT_Potential'], d2['IG_Potential']], color_discrete_sequence=['#ff4b4b'], height=300), use_container_width=True)
     st.table(df[df['Keyword'].isin([kw1, kw2])].set_index('Rank'))
-    st.divider()
-    st.subheader("📋 CURRENT MARKET TRENDS")
-    st.dataframe(df.set_index('Rank'), use_container_width=True)
 
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #000080;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
@@ -306,17 +223,15 @@ elif nav == "💼 Client Pitcher":
                 res = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": prompt}])
                 st.markdown("### The Pitch")
                 st.write(res.choices[0].message.content)
-            except Exception as e:
-                st.error(f"Sync Error: {e}")
+            except Exception as e: st.error(f"Sync Error: {e}")
 
 elif nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #000080;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
     col1, col2 = st.columns([1, 1.5], gap="large")
     with col1:
-        st.subheader("🛠️ Configuration")
-        topic_input = st.text_input("Enter Focus Topic", key="topic_input")
-        platform_choice = st.selectbox("Target Platform", ["YouTube Shorts", "Instagram Reels", "Long-form"], key="plat_choice")
-        tone_choice = st.select_slider("Script Tone", options=["Aggressive", "Professional", "Storyteller"], key="tone_choice")
+        topic_input = st.text_input("Enter Focus Topic")
+        platform_choice = st.selectbox("Target Platform", ["YouTube Shorts", "Instagram Reels", "Long-form"])
+        tone_choice = st.select_slider("Script Tone", options=["Aggressive", "Professional", "Storyteller"])
         generate_btn = st.button("🚀 Architect Script", type="primary")
     with col2:
         if generate_btn and topic_input:
@@ -325,7 +240,4 @@ elif nav == "💎 Script Architect":
                 prompt = f"Write a {platform_choice} script about {topic_input}. Tone: {tone_choice}."
                 res = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
-            except Exception as e:
-                st.error(f"Error: {e}")
-
-
+            except Exception as e: st.error(f"Error: {e}")
