@@ -5,24 +5,21 @@ import plotly.express as px
 import requests
 import feedparser
 from bs4 import BeautifulSoup
-
-def load_market_pulse_data():
-    # Connect to your VOID OS sheet
-    spread = Spread('Market Pulse') 
-    df = spread.sheet_to_df(index=0) # Pulls everything
-    
-    # Convert 'Score' to numeric so the charts work
-    df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
-    return df.dropna(subset=['Niche']) # Remove empty row
-
-# --- 1. CONFIG & CONNECTIONS ---
-st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
-
-MARKET_URL = "https://docs.google.com/spreadsheets/d/163haIuPIna3pEY9IDxncPM2kFFsuZ76HfKsULcMu1y4/export?format=csv"
-USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
-FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
+from gspread_pandas import Spread # Ensure this is installed
 
 # --- 2. DATA LOADING FUNCTIONS ---
+def load_market_pulse_data():
+    try:
+        # Connect to your VOID OS sheet
+        spread = Spread('Market Pulse') 
+        df = spread.sheet_to_df(index=0) # Pulls everything
+        
+        # Convert 'Score' to numeric so the charts work
+        df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
+        return df.dropna(subset=['Niche']) # Remove empty rows
+    except:
+        return pd.DataFrame(columns=['Niche', 'Score', 'Growth', 'Reason'])
+
 def load_market_data():
     try:
         df = pd.read_csv(MARKET_URL)
@@ -53,6 +50,13 @@ def get_intel_image(entry):
             if img and img.get('src'): return img['src']
     except: pass
     return f"https://picsum.photos/seed/{len(entry.title)}/400/250"
+
+# --- 1. CONFIG & CONNECTIONS ---
+st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
+
+MARKET_URL = "https://docs.google.com/spreadsheets/d/163haIuPIna3pEY9IDxncPM2kFFsuZ76HfKsULcMu1y4/export?format=csv"
+USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
+FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
 
 # --- 3. SESSION STATE ---
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
@@ -152,7 +156,6 @@ elif nav == "🌐 Global Pulse":
     data = load_market_data()
     
     if not data.empty:
-        # Top 3 High Heat Opportunities
         st.subheader("🔥 TOP MARKET OPPORTUNITIES")
         top_movers = data.sort_values(by=data.columns[1], ascending=False).head(3)
         cols = st.columns(3)
@@ -162,7 +165,6 @@ elif nav == "🌐 Global Pulse":
                 st.caption(f"**Why:** {row.iloc[2]}")
         st.divider()
 
-        # Chart
         chart_data = data.sort_values(by=data.columns[1], ascending=False).head(10)
         fig = px.bar(chart_data, x=chart_data.columns[1], y=chart_data.columns[0], orientation='h',
                      color=chart_data.columns[1],
@@ -190,6 +192,23 @@ elif nav == "🌐 Global Pulse":
 
 elif nav == "⚔️ Trend Duel":
     st.title("⚔️ COMPETITIVE INTELLIGENCE MATRIX")
+    
+    # Integrated Market Pulse Data
+    pulse_df = load_market_pulse_data()
+    
+    if not pulse_df.empty:
+        st.subheader("🌑 VOID Market Pulse Integration")
+        selected_niches = st.multiselect(
+            "Select Niches to Compare (from Live Sheet)",
+            options=pulse_df['Niche'].unique(),
+            default=pulse_df['Niche'].nlargest(5, 'Score').tolist()
+        )
+        comparison_df = pulse_df[pulse_df['Niche'].isin(selected_niches)]
+        st.bar_chart(data=comparison_df, x='Niche', y='Score')
+        st.dataframe(comparison_df[['Niche', 'Score', 'Growth', 'Reason']])
+        st.divider()
+
+    # Original Duel Logic
     trend_df = pd.DataFrame({
         'Keyword': ['AI Agents', 'Short-form SaaS', 'UGC Ads', 'Newsletter Alpha', 'Faceless YT', 'High-Ticket DM'],
         'Growth_Score': [94, 82, 77, 65, 89, 72],
@@ -206,29 +225,8 @@ elif nav == "⚔️ Trend Duel":
     c1, c2 = st.columns(2)
     with c1: st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Rank', 'IG Rank'], y=[d1['Growth_Score'], d1['Saturation'], d1['YT_Rank']*20, d1['IG_Rank']*20], color_discrete_sequence=['#00d4ff'], title=f"Stats: {kw1}", height=300), use_container_width=True)
     with c2: st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Rank', 'IG Rank'], y=[d2['Growth_Score'], d2['Saturation'], d2['YT_Rank']*20, d2['IG_Rank']*20], color_discrete_sequence=['#ff4b4b'], title=f"Stats: {kw2}", height=300), use_container_width=True)
-    st.subheader("📋 Detailed Intelligence Breakdown")
     st.table(trend_df)
 
-# Inside your "Trend Comparison" tab logic:
-df = load_market_pulse_data()
-
-st.title("🌑 VOID Market Pulse Integration")
-
-# Let you choose which niches to compare from the REAL sheet data
-selected_niches = st.multiselect(
-    "Select Niches to Compare",
-    options=df['Niche'].unique(),
-    default=df['Niche'].nlargest(5, 'Score').tolist() # Defaults to top 5 performers
-)
-
-# Filter the data based on selection
-comparison_df = df[df['Niche'].isin(selected_niches)]
-
-# Display the Chart
-st.bar_chart(data=comparison_df, x='Niche', y='Score')
-
-# Show the raw data for the selected niches
-st.dataframe(comparison_df[['Niche', 'Score', 'Growth', 'Reason']])
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns([1, 1.5])
@@ -263,5 +261,3 @@ elif nav == "💎 Script Architect":
                 res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
-
-
