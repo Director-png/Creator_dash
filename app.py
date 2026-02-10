@@ -186,27 +186,62 @@ elif nav == "🌐 Global Pulse":
         st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400")
 
 elif nav == "⚔️ Trend Duel":
-    st.subheader("⚔️ KEYWORD DUEL")
-    trend_data = {
-        'Rank': ['#01', '#02', '#03', '#04', '#05', '#06'],
+    st.title("📊 COMPETITIVE INTELLIGENCE MATRIX")
+    
+    # 1. ENHANCED DATASET
+    trend_df = pd.DataFrame({
         'Keyword': ['AI Agents', 'Short-form SaaS', 'UGC Ads', 'Newsletter Alpha', 'Faceless YT', 'High-Ticket DM'],
-        'Growth': [94, 82, 77, 65, 89, 72],
-        'Saturation': [20, 45, 80, 30, 60, 50],
-        'YT_Potential': [95, 80, 60, 85, 98, 40],
-        'IG_Potential': [88, 92, 95, 70, 85, 90],
-        'Monetization': ['High', 'Very High', 'Medium', 'High', 'Medium', 'Extreme']
-    }
-    df = pd.DataFrame(trend_data)
-    col_search1, col_search2 = st.columns(2)
-    kw1 = col_search1.selectbox("Primary Keyword", df['Keyword'].unique(), index=0)
-    kw2 = col_search2.selectbox("Challenger Keyword", df['Keyword'].unique(), index=1)
-    d1 = df[df['Keyword'] == kw1].iloc[0]
-    d2 = df[df['Keyword'] == kw2].iloc[0]
-    c1, c2 = st.columns(2)
-    with c1: st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Pot.', 'IG Pot.'], y=[d1['Growth'], d1['Saturation'], d1['YT_Potential'], d1['IG_Potential']], color_discrete_sequence=['#00d4ff'], height=300), use_container_width=True)
-    with c2: st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Pot.', 'IG Pot.'], y=[d2['Growth'], d2['Saturation'], d2['YT_Potential'], d2['IG_Potential']], color_discrete_sequence=['#ff4b4b'], height=300), use_container_width=True)
-    st.table(df[df['Keyword'].isin([kw1, kw2])].set_index('Rank'))
+        'Growth_Score': [94, 82, 77, 65, 89, 72],
+        'Saturation': [20, 45, 80, 30, 60, 50], # 0-100 scale
+        'YT_Rank': [5, 4, 3, 4, 5, 2], # 1-5 scale
+        'IG_Rank': [4, 5, 5, 3, 4, 5],
+        'Monetization': ['High', 'Very High', 'Medium', 'High', 'Medium', 'Extreme'],
+        'Pros': ['High Moat', 'Recurring', 'Quick Cash', 'Asset Ownership', 'Scaleable', 'No Ad Spend'],
+        'Cons': ['Complex', 'Churn', 'Burnout', 'Slow Build', 'Algorithm Risk', 'Time Intensive']
+    })
 
+    # 2. THE GROWTH VS SATURATION QUADRANT
+    st.subheader("🌊 Market Opportunity Quadrant")
+    fig_quad = px.scatter(
+        trend_df, 
+        x='Saturation', 
+        y='Growth_Score',
+        text='Keyword',
+        size='Growth_Score',
+        color='Monetization',
+        color_discrete_map={'Extreme': '#ff4b4b', 'High': '#00d4ff', 'Very High': '#00ff41', 'Medium': '#ffaa00'},
+        template="plotly_dark"
+    )
+    fig_quad.update_traces(textposition='top center')
+    fig_quad.add_hline(y=75, line_dash="dot", annotation_text="High Growth Zone")
+    fig_quad.add_vline(x=50, line_dash="dot", annotation_text="Market Saturation Midpoint")
+    
+    st.plotly_chart(fig_quad, use_container_width=True)
+
+    # 3. PERFORMANCE HEATMAP (Visualizing Platforms)
+    st.subheader("📱 Platform Dominance")
+    
+    platform_data = trend_df.set_index('Keyword')[['YT_Rank', 'IG_Rank']]
+    fig_heat = px.imshow(
+        platform_data.T,
+        labels=dict(x="Niche", y="Platform", color="Potential"),
+        color_continuous_scale='Blues',
+        text_auto=True,
+        template="plotly_dark"
+    )
+    st.plotly_chart(fig_heat, use_container_width=True)
+
+    # 4. THE MASTER ANALYSIS TABLE
+    st.subheader("📋 Detailed Intelligence Breakdown")
+    
+    def style_performance(val):
+        if val == 'Extreme' or val == 5: return 'color: #00ff41; font-weight: bold'
+        if val == 'High' or val == 4: return 'color: #00d4ff'
+        return ''
+
+    # Using .map instead of .applymap for modern compatibility
+    st.table(trend_df.style.map(style_performance, subset=['Monetization', 'YT_Rank', 'IG_Rank']))
+    
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #000080;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns([1, 1.5])
@@ -241,3 +276,4 @@ elif nav == "💎 Script Architect":
                 res = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
