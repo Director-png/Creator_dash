@@ -150,7 +150,10 @@ with st.sidebar:
                 
         except Exception as e:
             st.error("Rerouting Intelligence through VOID backup...")
-
+            if st.button("🔄 Sync VOID Feed"):
+        if 'market_intelligence' in st.session_state:
+            del st.session_state.market_intelligence
+        st.rerun()
 
 # --- MODULE: SCRIPT ARCHITECT ---
 elif nav == "Script Architect":
@@ -189,6 +192,7 @@ elif nav == "Script Architect":
                 st.error(f"AI Bridge Offline: {e}")
         else:
             st.warning("Please enter a topic to begin.")
+
 
 
 
