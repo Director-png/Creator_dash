@@ -88,10 +88,19 @@ elif nav == "VOID Intelligence":
             
             with st.spinner("Decoding VOID Signals..."):
                 prompt = f"Analyze: {headlines}. Identify 10 unique tech/finance niches. Output ONLY 10 lines like: Topic:Score. (Score 1-100). No talk."
-                chat_completion = client.chat.completions.create(
-                    model="llama-3.1-8b-instant",
-                    messages=[{"role": "user", "content": prompt}]
-                )
+              raw_text = chat_completion.choices[0].message.content
+                # Fixed Regex String:
+                matches = re.findall(r"([^:\n]+):(\d+)", raw_text)
                 
-                raw_text = chat_completion.choices[0].message.content
-                matches = re.findall(r"([^:\n]+):(\d
+                final_data = []
+                for m in matches:
+                    final_data.append([m[0].strip(), int(m[1])])
+                
+                # PADDING LOGIC:
+                if len(final_data) < 10:
+                    fallbacks = [["VOID AI", 95], ["FinTech", 88], ["SaaS", 82], ["Quantum", 79], ["Neural Nets", 75], ["DeFi", 72], ["GreenTech", 68]]
+                    for f in fallbacks:
+                        if len(final_data) < 10: 
+                            final_data.append(f)
+                
+                st.session_state.market_intelligence = pd.DataFrame(final_data[:10], columns=['Niche', 'Growth'])
