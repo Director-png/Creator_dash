@@ -150,10 +150,53 @@ with st.sidebar:
                 
         except Exception as e:
             st.error("Rerouting Intelligence through VOID backup...")
-            if st.button("🔄 Sync VOID Feed"):
+# 5. SYNC BUTTON (Correctly Indented)
+    if st.button("🔄 Sync VOID Feed"):
         if 'market_intelligence' in st.session_state:
             del st.session_state.market_intelligence
         st.rerun()
+
+# --- NAVIGATION BREAK: BACK TO THE MARGIN ---
+# Ensure 'elif' starts at the very beginning of the line (0 spaces) 
+# or matches your sidebar 'if' indentation.
+
+elif nav == "Script Architect":
+    st.markdown("<h1 style='color: #000080;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+    st.caption("High-Retention Video Scripting Engine | Version 1.0")
+
+    # Script Inputs
+    with st.expander("📝 Script Configuration", expanded=True):
+        topic = st.text_input("Video Topic", placeholder="e.g., The Rise of AI in 2026")
+        platform = st.selectbox("Platform", ["YouTube Shorts", "Instagram Reels", "Long-form Video"])
+        tone = st.select_slider("Tone", options=["Aggressive", "Professional", "Storyteller"])
+
+    if st.button("🚀 Generate VOID Script"):
+        if topic:
+            try:
+                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                
+                # The VOID Scripting Prompt
+                prompt = f"""
+                Create a {platform} script about '{topic}'. 
+                Tone: {tone}.
+                Structure: 
+                1. Viral Hook (First 3 seconds)
+                2. The 'Void' (The problem/gap in the market)
+                3. The Solution (Value)
+                4. CTA (Call to Action)
+                """
+                
+                with st.spinner("Architecting Script..."):
+                    chat_completion = client.chat.completions.create(
+                        model="llama-3.1-8b-instant",
+                        messages=[{"role": "user", "content": prompt}]
+                    )
+                    script_output = chat_completion.choices[0].message.content
+                    st.text_area("Final Script Output", script_output, height=400)
+            except Exception as e:
+                st.error(f"Script Engine Offline: {e}")
+        else:
+            st.warning("Founder, please enter a topic first.")
 
 # --- MODULE: SCRIPT ARCHITECT ---
 elif nav == "Script Architect":
@@ -192,6 +235,7 @@ elif nav == "Script Architect":
                 st.error(f"AI Bridge Offline: {e}")
         else:
             st.warning("Please enter a topic to begin.")
+
 
 
 
