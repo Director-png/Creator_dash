@@ -1,13 +1,74 @@
 
 import streamlit as st
 import pandas as pd
-import plotly.express as px
-import feedparser
+from streamlit_gsheets import GSheetsConnection
 from groq import Groq
+import feedparser
 import re
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
+
+# --- DATABASE CONNECTION ---
+conn = st.connection("gsheets", type=GSheetsConnection)
+
+# --- AUTHENTICATION LOGIC ---
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+if 'user_role' not in st.session_state:
+    st.session_state.user_role = None
+
+def login_user(username, password):
+    # Fetch user data from Google Sheets
+    data = conn.read(worksheet="Users")
+    user_row = data[(data['username'] == username) & (data['password'] == password)]
+    if not user_row.empty:
+        st.session_state.logged_in = True
+        st.session_state.user_role = user_row.iloc[0]['role'] # 'admin' or 'user'
+        st.session_state.username = username
+        return True
+    return False
+
+# --- LOGIN / REGISTRATION UI ---
+if not st.session_state.logged_in:
+    tab1, tab2 = st.tabs(["Login", "Register"])
+    
+    with tab1:
+        st.title("🌑 VOID LOGIN")
+        u = st.text_input("Username")
+        p = st.text_input("Password", type="password")
+        if st.button("Enter The Void"):
+            if login_user(u, p):
+                st.success(f"Welcome, {u}")
+                st.rerun()
+            else:
+                st.error("Invalid Credentials")
+                
+    with tab2:
+        st.title("📜 REGISTER")
+        new_u = st.text_input("New Username")
+        new_p = st.text_input("New Password", type="password")
+        if st.button("Create Account"):
+            # Add logic here to append to GSheet
+            st.info("Registration requires Admin Approval.")
+    st.stop() # Prevents showing the dashboard until logged in
+
+# --- AUTHORIZED SIDEBAR ---
+with st.sidebar:
+    st.markdown(f"**User:** {st.session_state.username} | **Role:** {st.session_state.user_role}")
+    
+    # DYNAMIC NAVIGATION based on Role
+    nav_options = ["Dashboard", "VOID Intelligence", "Script Architect", "Settings"]
+    
+    # ONLY SHOW CLIENT PITCHER TO ADMIN
+    if st.session_state.user_role == 'admin':
+        nav_options.insert(3, "Client Pitcher")
+    
+    nav = st.radio("COMMAND CENTER", nav_options)
+    
+    if st.button("Logout"):
+        st.session_state.logged_in = False
+        st.rerun()
 
 # --- SESSION STATE INITIALIZATION (For Customization) ---
 if 'metric_1_label' not in st.session_state:
@@ -227,6 +288,7 @@ elif nav == "Script Architect":
                 st.warning("Founder, a topic is required to generate intelligence.")
         else:
             st.info("Awaiting input parameters to begin architecture.")
+
 
 
 
