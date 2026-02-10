@@ -307,15 +307,64 @@ elif nav == "Trend Comparison":
     )
 
 
+# --- MODULE: SCRIPT ARCHITECT ---
 elif nav == "Script Architect":
-    st.header("💎 SCRIPT ARCHITECT")
-    topic = st.text_input("Core Topic")
-    if st.button("Generate") and topic:
-        try:
-            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-            chat = client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role":"user","content":f"Short script: {topic}"}])
-            st.write(chat.choices[0].message.content)
-        except Exception as e: st.error(f"Error: {e}")
+    st.markdown("<h1 style='color: #000080;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+    st.caption("Strategic Content Engineering for the 1% | Version 1.2")
+
+    # Creating a clean, centered interface
+    col1, col2 = st.columns([1, 1.5], gap="large")
+    
+    with col1:
+        st.subheader("🛠️ Configuration")
+        # Use keys to ensure Streamlit doesn't lose the data on rerun
+        topic_input = st.text_input("Enter Focus Topic", placeholder="e.g., The collapse of traditional banking", key="topic_input")
+        platform_choice = st.selectbox("Target Platform", ["YouTube Shorts", "Instagram Reels", "Long-form", "Twitter/X Thread"], key="plat_choice")
+        tone_choice = st.select_slider("Script Tone", options=["Aggressive", "Professional", "Storyteller"], key="tone_choice")
+        
+        generate_btn = st.button("🚀 Architect Script", type="primary")
+
+    with col2:
+        st.subheader("📄 VOID Script Output")
+        if generate_btn:
+            if topic_input:
+                try:
+                    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                    
+                    # The VOID Framework Prompt
+                    prompt = f"""
+                    You are the VOID Content Architect. Write a high-retention {platform_choice} script about '{topic_input}'.
+                    Tone: {tone_choice}.
+                    
+                    STRUCTURE (Strict):
+                    1. THE PATTERN INTERRUPT (0-3s): A hook that stops the scroll.
+                    2. THE PROBLEM (3-10s): Why does the viewer feel 'empty' or behind?
+                    3. THE VOID INSIGHT (10-40s): 3 rapid-fire, high-value facts or strategies.
+                    4. THE EXECUTION (40-55s): How to apply this immediately.
+                    5. THE CALL TO POWER (CTA): A sharp directive to follow/subscribe.
+                    
+                    Formatting: Use bolding for emphasis. No emojis. Short, punchy sentences.
+                    """
+                    
+                    with st.spinner("Analyzing Market Trends & Architecting..."):
+                        chat_completion = client.chat.completions.create(
+                            model="llama-3.1-8b-instant",
+                            messages=[{"role": "user", "content": prompt}]
+                        )
+                        final_script = chat_completion.choices[0].message.content
+                        st.markdown("---")
+                        st.markdown(final_script)
+                        # Add a download button for the script
+                        st.download_button("📥 Download Script", final_script, file_name=f"VOID_Script_{topic_input}.txt")
+                except Exception as e:
+                    st.error(f"Logic Bridge Failure: {e}")
+            else:
+                st.warning("Founder, a topic is required to generate intelligence.")
+        else:
+            st.info("Awaiting input parameters to begin architecture.")
+
+
+
 
 
 
