@@ -111,76 +111,82 @@ with st.sidebar:
     if st.button("Logout"):
         st.session_state.logged_in = False
         st.rerun()
-# --- MODULE: ULTIMATE GLOBAL PULSE (STABLE) ---
+
+
+# --- MODULE: VOID INTELLIGENCE (v1.0 STABLE) ---
 if nav == "Global Pulse":
-    st.header("📈 Autonomous Market Intelligence")
-    
-    # 1. LIVE NEWS SOURCE
+    st.title("🌑 VOID INTELLIGENCE")
+    st.caption("Strategic Market Signal Analysis | Version 1.0")
+
+    # 1. LIVE NEWS SOURCE (VOID ENGINE)
     RSS_URL = "https://techcrunch.com/feed/" 
     feed = feedparser.parse(RSS_URL)
     
-    # 2. THE LIVE FEED (High-Def Related Visuals)
-    st.subheader("📡 Recent Intel")
+    # 2. THE INTEL FEED (Visual Cards with Dynamic Search)
+    st.subheader("📡 Recent Market Intel")
     cols = st.columns(3)
     
     if feed.entries:
         for i, entry in enumerate(feed.entries[:3]):
             with cols[i]:
-                # We pull a high-def image related to the first 2 words of the headline
-                keywords = "+".join(entry.title.split()[:2])
-                img_url = f"https://source.unsplash.com/featured/500x300?{keywords}"
+                # Dynamic Image Search based on headline keywords
+                search_query = "+".join(entry.title.split()[:2])
+                img_url = f"https://source.unsplash.com/featured/800x600?{search_query}"
                 
-                # Check for actual feed image first
+                # Check for direct media link if available
                 if 'media_content' in entry:
                     img_url = entry.media_content[0]['url']
-
+                
+                # Render the Card
                 st.image(img_url, use_container_width=True)
                 st.markdown(f"**{entry.title}**")
-                st.markdown(f"[Read Article]({entry.link})")
+                st.markdown(f"[Access Intelligence]({entry.link})")
     
     st.divider()
 
-    # 3. THE AI BRAIN (Bulletproof Extraction)
+    # 3. THE ANALYTICS BRAIN (Regex Protection)
     if 'market_intelligence' not in st.session_state:
         try:
             client = Groq(api_key=st.secrets["GROQ_API_KEY"])
             headlines = " | ".join([e.title for e in feed.entries[:5]])
             
-            with st.spinner("Decoding Market Signals..."):
-                prompt = f"Analyze: {headlines}. Output ONLY 5 lines like: Topic:Score. No text."
+            with st.spinner("Decoding VOID Signals..."):
+                prompt = f"Analyze: {headlines}. Output ONLY 5 lines like: Topic:Score. (Score 1-100). No talk."
                 chat_completion = client.chat.completions.create(
                     model="llama-3.1-8b-instant",
                     messages=[{"role": "user", "content": prompt}]
                 )
                 
                 raw_text = chat_completion.choices[0].message.content
-                # REGEX: This finds any text followed by a colon and a number
+                
+                # REGEX: Search for 'Any Word : Any Number'
                 import re
                 matches = re.findall(r"([a-zA-Z\s]+):(\d+)", raw_text)
                 
                 if matches:
-                    st.session_state.market_intelligence = pd.DataFrame(matches, columns=['Niche', 'Growth'])
-                    st.session_state.market_intelligence['Growth'] = pd.to_numeric(st.session_state.market_intelligence['Growth'])
+                    df = pd.DataFrame(matches, columns=['Niche', 'Growth'])
+                    df['Growth'] = pd.to_numeric(df['Growth'])
+                    st.session_state.market_intelligence = df
                 else:
-                    # Emergency Backup if AI fails
-                    st.session_state.market_intelligence = pd.DataFrame([["AI Tech", 95], ["SaaS", 80], ["Mobile", 70]], columns=['Niche', 'Growth'])
+                    # Fail-Safe Data
+                    st.session_state.market_intelligence = pd.DataFrame([["VOID Tech", 99], ["AI Systems", 85]], columns=['Niche', 'Growth'])
         except Exception as e:
-            st.error("System warming up... try syncing again.")
+            st.warning("Intelligence Bridge initializing...")
 
-    # 4. THE CHART (The Fix)
+    # 4. DATA VISUALIZATION (THE CHART)
     if 'market_intelligence' in st.session_state:
         df = st.session_state.market_intelligence
-        # Check if df is empty before plotting
         if not df.empty:
-            fig = px.bar(df, x='Growth', y='Niche', orientation='h', color='Growth', 
-                         color_continuous_scale='Turbo', template="plotly_dark")
-            fig.update_layout(yaxis={'categoryorder':'total ascending'}, height=350)
+            st.subheader("📊 Projected Growth Velocity")
+            # Minimalist VOID Color Palette
+            fig = px.bar(df, x='Growth', y='Niche', orientation='h', 
+                         color='Growth', color_continuous_scale='Greys', template="plotly_dark")
+            fig.update_layout(showlegend=False, height=350, margin=dict(l=0, r=0, t=20, b=0))
             st.plotly_chart(fig, use_container_width=True)
 
-    if st.button("🔄 Sync Intelligence"):
+    if st.button("🔄 Sync VOID Feed"):
         del st.session_state.market_intelligence
         st.rerun()
-
 
 # --- MODULE: SCRIPT ARCHITECT ---
 elif nav == "Script Architect":
@@ -219,6 +225,7 @@ elif nav == "Script Architect":
                 st.error(f"AI Bridge Offline: {e}")
         else:
             st.warning("Please enter a topic to begin.")
+
 
 
 
