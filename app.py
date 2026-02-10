@@ -10,65 +10,103 @@ import re
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 
 # --- DATABASE CONNECTION ---
+# Ensure your secrets.toml has the correct spreadsheet URL
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-# --- AUTHENTICATION LOGIC ---
+# --- SESSION STATE INITIALIZATION ---
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 if 'user_role' not in st.session_state:
     st.session_state.user_role = None
 
+# --- AUTHENTICATION FUNCTION ---
 def login_user(username, password):
-    # Fetch user data from Google Sheets
-    data = conn.read(worksheet="Users")
-    user_row = data[(data['username'] == username) & (data['password'] == password)]
-    if not user_row.empty:
-        st.session_state.logged_in = True
-        st.session_state.user_role = user_row.iloc[0]['role'] # 'admin' or 'user'
-        st.session_state.username = username
-        return True
-    return False
+    try:
+        # Reading the sheet linked to your form
+        df = conn.read() 
+        
+        # Clean column names (Google Forms often adds timestamps or long headers)
+        # We look for rows where username and password match your form's structure
+        user_row = df[(df.iloc[:, 1] == username) & (df.iloc[:, 4] == password)]
+        
+        if not user_row.empty:
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            # We treat the 'niche' column (Index 3) as the role/access level
+            role_val = str(user_row.iloc[0, 3]).lower()
+            st.session_state.user_role = 'admin' if 'admin' in role_val or 'fitness' in role_val else 'user'
+            return True
+        return False
+    except Exception as e:
+        st.error(f"Database Connection Error: {e}")
+        return False
 
-# --- LOGIN / REGISTRATION UI ---
+# --- LOGIN UI ---
 if not st.session_state.logged_in:
-    tab1, tab2 = st.tabs(["Login", "Register"])
+    st.markdown("<h1 style='text-align: center;'>🌑 VOID AUTHENTICATION</h1>", unsafe_allow_html=True)
     
-    with tab1:
-        st.title("🌑 VOID LOGIN")
-        u = st.text_input("Username")
-        p = st.text_input("Password", type="password")
-        if st.button("Enter The Void"):
-            if login_user(u, p):
-                st.success(f"Welcome, {u}")
-                st.rerun()
-            else:
-                st.error("Invalid Credentials")
-                
-    with tab2:
-        st.title("📜 REGISTER")
-        new_u = st.text_input("New Username")
-        new_p = st.text_input("New Password", type="password")
-        if st.button("Create Account"):
-            # Add logic here to append to GSheet
-            st.info("Registration requires Admin Approval.")
-    st.stop() # Prevents showing the dashboard until logged in
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        with st.container(border=True):
+            u = st.text_input("Username (Entry.483203499)")
+            p = st.text_input("Password (Entry.1396549807)", type="password")
+            
+            if st.button("Initialize System Access", use_container_width=True):
+                if login_user(u, p):
+                    st.success("Access Granted. Synchronizing...")
+                    st.rerun()
+                else:
+                    st.error("Credential Mismatch. Access Denied.")
+    st.stop()
 
-# --- AUTHORIZED SIDEBAR ---
+# --- DYNAMIC SIDEBAR ---
 with st.sidebar:
-    st.markdown(f"**User:** {st.session_state.username} | **Role:** {st.session_state.user_role}")
+    st.markdown(f"### 🌑 VOID OS")
+    st.caption(f"Operator: {st.session_state.username}")
+    st.divider()
     
-    # DYNAMIC NAVIGATION based on Role
-    nav_options = ["Dashboard", "VOID Intelligence", "Script Architect", "Settings"]
+    # Define standard tabs
+    nav_items = ["Dashboard", "VOID Intelligence", "Script Architect"]
     
-    # ONLY SHOW CLIENT PITCHER TO ADMIN
+    # ADMIN GATE: Only show Client Pitcher if role is admin
     if st.session_state.user_role == 'admin':
-        nav_options.insert(3, "Client Pitcher")
+        nav_items.append("Client Pitcher")
     
-    nav = st.radio("COMMAND CENTER", nav_options)
+    nav_items.append("Settings")
     
-    if st.button("Logout"):
+    nav = st.radio("COMMAND CENTER", nav_items)
+    
+    st.divider()
+    if st.button("Terminate Session"):
         st.session_state.logged_in = False
         st.rerun()
+
+# --- MODULE: DASHBOARD ---
+if nav == "Dashboard":
+    st.title("🌑 VOID COMMAND")
+    # Using your customizable metrics from the previous step
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Status", "Operational", "Stable")
+    m2.metric("Access Level", st.session_state.user_role.upper())
+    m3.metric("Database", "G-Sheets Connected")
+
+# --- MODULE: CLIENT PITCHER (ADMIN ONLY) ---
+elif nav == "Client Pitcher":
+    if st.session_state.user_role == 'admin':
+        st.title("💼 VOID CAPITAL: PITCH GENERATOR")
+        # [Insert Pitcher Code here]
+    else:
+        st.error("Unauthorized Access. This incident has been logged.")
+
+# --- MODULE: VOID INTELLIGENCE ---
+elif nav == "VOID Intelligence":
+    st.title("📡 VOID INTELLIGENCE")
+    # [Insert Intelligence Code here]
+
+# --- MODULE: SCRIPT ARCHITECT ---
+elif nav == "Script Architect":
+    st.title("✍️ SCRIPT ARCHITECT")
+    # [Insert Script Architect Code here]
 
 # --- SESSION STATE INITIALIZATION (For Customization) ---
 if 'metric_1_label' not in st.session_state:
@@ -288,6 +326,7 @@ elif nav == "Script Architect":
                 st.warning("Founder, a topic is required to generate intelligence.")
         else:
             st.info("Awaiting input parameters to begin architecture.")
+
 
 
 
