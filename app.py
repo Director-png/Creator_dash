@@ -55,15 +55,25 @@ if not st.session_state.logged_in:
 # --- 5. ENHANCED SIDEBAR COMMAND CONSOLE ---
 with st.sidebar:
     # System Identity
-    st.markdown("<h1 style='text-align: center; color: #00d4ff;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
-    st.markdown(f"<p style='text-align: center; font-size: 0.8em; color: gray;'>V 2.0 | {st.session_state.user_role.upper()} ACCESS</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #00d4ff; margin-bottom: 0;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
+    
+    # Dynamic User Identity
+    user_display = st.session_state.get('user_name', 'Operator')
+    st.markdown(f"""
+        <div style='text-align: center; margin-bottom: 20px;'>
+            <p style='color: #00ff41; font-family: monospace; font-size: 0.9em; margin: 0;'>
+                ● ONLINE: {user_display.upper()}
+            </p>
+            <p style='color: gray; font-size: 0.7em; margin: 0;'>ACCESS LEVEL: {st.session_state.user_role.upper()}</p>
+        </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
 
-    # System Status Readout (Real-time Feel)
+    # System Status Readout
     with st.expander("📡 SYSTEM STATUS", expanded=False):
         st.write("🟢 Core: Operational")
-        st.write("🔵 Intelligence: Syncing")
+        st.write("🔵 Intel: Synchronized")
         st.write("🔒 Security: Level 5")
     
     st.divider()
@@ -77,11 +87,9 @@ with st.sidebar:
         "💎 Script Architect": "Script Architect"
     }
     
-    # Add Admin Only Command
     if st.session_state.user_role == "admin":
         nav_map["💼 Client Pitcher"] = "Client Pitcher"
 
-    # Using a cleaner radio button with icons
     selection = st.radio("SELECT MODULE", list(nav_map.keys()), label_visibility="collapsed")
     nav = nav_map[selection]
 
@@ -94,14 +102,12 @@ with st.sidebar:
         st.rerun()
     
     if st.button("📤 Export Intel Report", use_container_width=True):
-        st.toast("Generating PDF Report...", icon="📄")
+        st.toast(f"Generating {user_display}'s Report...", icon="📄")
 
-    # Logout at the bottom
     st.sidebar.markdown("---")
     if st.button("🔓 Terminate Session", use_container_width=True):
         st.session_state.logged_in = False
         st.rerun()
-
 
 # --- 6. MODULES ---
 
@@ -292,6 +298,7 @@ elif nav == "Client Pitcher":
                                                  messages=[{"role":"user","content":f"Draft an elite cold pitch to {c_name} regarding {offer}"}])
             st.info(res.choices[0].message.content)
         except Exception as e: st.error(f"Error: {e}")
+
 
 
 
