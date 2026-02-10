@@ -113,29 +113,26 @@ with st.sidebar:
         st.rerun()
 
 
-# --- MODULE: VOID INTELLIGENCE (v1.0 STABLE) ---
+# --- MODULE: VOID INTELLIGENCE (v1.1 DEEP BLUE) ---
 if nav == "Global Pulse":
-    st.title("🌑 VOID INTELLIGENCE")
-    st.caption("Strategic Market Signal Analysis | Version 1.0")
+    st.markdown("<h1 style='color: #000080;'>🌑 VOID INTELLIGENCE</h1>", unsafe_allow_html=True)
+    st.caption("Strategic Market Signal Analysis | Version 1.1")
 
-    # 1. LIVE NEWS SOURCE (VOID ENGINE)
+    # 1. LIVE NEWS SOURCE
     RSS_URL = "https://techcrunch.com/feed/" 
     feed = feedparser.parse(RSS_URL)
     
-    # 2. THE INTEL FEED (Visual Cards with Dynamic Search)
+    # 2. THE INTEL FEED (Reliable Image Source)
     st.subheader("📡 Recent Market Intel")
     cols = st.columns(3)
     
     if feed.entries:
         for i, entry in enumerate(feed.entries[:3]):
             with cols[i]:
-                # Dynamic Image Search based on headline keywords
-                search_query = "+".join(entry.title.split()[:2])
-                img_url = f"https://source.unsplash.com/featured/800x600?{search_query}"
-                
-                # Check for direct media link if available
-                if 'media_content' in entry:
-                    img_url = entry.media_content[0]['url']
+                # Using Placehold.jp or LoremFlickr for stability
+                # This uses the headline to find a relevant image
+                search_term = entry.title.split()[0] if entry.title else "tech"
+                img_url = f"https://loremflickr.com/800/600/{search_term}?random={i}"
                 
                 # Render the Card
                 st.image(img_url, use_container_width=True)
@@ -144,50 +141,59 @@ if nav == "Global Pulse":
     
     st.divider()
 
-    # 3. THE ANALYTICS BRAIN (Regex Protection)
+    # 3. THE ANALYTICS BRAIN (Expanded to 10 Niches)
     if 'market_intelligence' not in st.session_state:
         try:
             client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-            headlines = " | ".join([e.title for e in feed.entries[:5]])
+            headlines = " | ".join([e.title for e in feed.entries[:8]]) # More headlines for more niches
             
             with st.spinner("Decoding VOID Signals..."):
-                prompt = f"Analyze: {headlines}. Output ONLY 5 lines like: Topic:Score. (Score 1-100). No talk."
+                prompt = f"Analyze: {headlines}. Identify 10 unique tech/finance niches. Output ONLY 10 lines like: Topic:Score. (Score 1-100). No talk."
                 chat_completion = client.chat.completions.create(
                     model="llama-3.1-8b-instant",
                     messages=[{"role": "user", "content": prompt}]
                 )
                 
                 raw_text = chat_completion.choices[0].message.content
-                
-                # REGEX: Search for 'Any Word : Any Number'
                 import re
                 matches = re.findall(r"([a-zA-Z\s]+):(\d+)", raw_text)
                 
                 if matches:
-                    df = pd.DataFrame(matches, columns=['Niche', 'Growth'])
+                    df = pd.DataFrame(matches[:10], columns=['Niche', 'Growth'])
                     df['Growth'] = pd.to_numeric(df['Growth'])
                     st.session_state.market_intelligence = df
                 else:
-                    # Fail-Safe Data
-                    st.session_state.market_intelligence = pd.DataFrame([["VOID Tech", 99], ["AI Systems", 85]], columns=['Niche', 'Growth'])
+                    st.session_state.market_intelligence = pd.DataFrame([["VOID AI", 95], ["FinTech", 80], ["SaaS", 70]], columns=['Niche', 'Growth'])
         except Exception as e:
-            st.warning("Intelligence Bridge initializing...")
+            st.error("Intelligence Bridge Syncing...")
 
-    # 4. DATA VISUALIZATION (THE CHART)
+    # 4. THE BLUE GRADIENT CHART
     if 'market_intelligence' in st.session_state:
         df = st.session_state.market_intelligence
         if not df.empty:
-            st.subheader("📊 Projected Growth Velocity")
-            # Minimalist VOID Color Palette
-            fig = px.bar(df, x='Growth', y='Niche', orientation='h', 
-                         color='Growth', color_continuous_scale='Greys', template="plotly_dark")
-            fig.update_layout(showlegend=False, height=350, margin=dict(l=0, r=0, t=20, b=0))
+            st.subheader("📊 Growth Velocity (Top 10 Niches)")
+            
+            # Custom Blue Gradient logic: Light Blue -> Blue -> Navy
+            # We use a custom color scale: [[0, 'lightblue'], [0.5, 'blue'], [1.0, 'navy']]
+            fig = px.bar(
+                df, x='Growth', y='Niche', orientation='h', 
+                color='Growth',
+                color_continuous_scale=[[0, '#ADD8E6'], [0.5, '#0000FF'], [1.0, '#000080']],
+                template="plotly_dark"
+            )
+            
+            fig.update_layout(
+                showlegend=False, 
+                height=500, # Increased height for 10 items
+                yaxis={'categoryorder':'total ascending'},
+                margin=dict(l=0, r=0, t=30, b=0)
+            )
             st.plotly_chart(fig, use_container_width=True)
 
     if st.button("🔄 Sync VOID Feed"):
-        del st.session_state.market_intelligence
+        if 'market_intelligence' in st.session_state:
+            del st.session_state.market_intelligence
         st.rerun()
-
 # --- MODULE: SCRIPT ARCHITECT ---
 elif nav == "Script Architect":
     st.header("💎 Script Architect")
@@ -225,6 +231,7 @@ elif nav == "Script Architect":
                 st.error(f"AI Bridge Offline: {e}")
         else:
             st.warning("Please enter a topic to begin.")
+
 
 
 
