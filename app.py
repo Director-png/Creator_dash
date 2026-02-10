@@ -229,7 +229,6 @@ st.bar_chart(data=comparison_df, x='Niche', y='Score')
 
 # Show the raw data for the selected niches
 st.dataframe(comparison_df[['Niche', 'Score', 'Growth', 'Reason']])
-
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns([1, 1.5])
@@ -264,4 +263,5 @@ elif nav == "💎 Script Architect":
                 res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
 
