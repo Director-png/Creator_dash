@@ -69,15 +69,24 @@ if nav == "Dashboard":
     # --- MIDDLE ROW: STRATEGIC OVERVIEW ---
     col_left, col_right = st.columns([2, 1])
 
-    with col_left:
+with col_left:
         st.subheader("🚀 Active VOID Roadmap")
-        # Creating a professional roadmap table
+        
+        # Creating the roadmap data
         roadmap_data = {
             "Phase": ["VOID Intelligence", "Script Architect", "Real Estate AI", "Agency Client Portal"],
             "Status": ["Stable", "Stable", "In Development", "Planned"],
             "Priority": ["Completed", "Active", "High", "Critical"]
         }
+        
+        # Convert to DataFrame
         df_road = pd.DataFrame(roadmap_data)
+        
+        # FIX: Shift the index to start at 1 instead of 0
+        df_road.index = df_road.index + 1
+        
+        # Display the table
+        st.table(df_road)
         
         # Color-coded status for a premium feel
         def color_status(val):
@@ -241,4 +250,5 @@ elif nav == "Script Architect":
                 st.warning("Founder, a topic is required to generate intelligence.")
         else:
             st.info("Awaiting input parameters to begin architecture.")
+
 
