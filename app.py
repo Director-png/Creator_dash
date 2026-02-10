@@ -165,36 +165,55 @@ if nav == "📊 Dashboard":
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     data = load_market_data()
+    
     if not data.empty:
+        # Sort data by the score/value column descending and take top 10
+        chart_data = data.sort_values(by=data.columns[1], ascending=False).head(10)
+        
         # Check if we actually have data that isn't zero
-        if data.iloc[:, 1].sum() > 0:
-            fig = px.treemap(data.head(15), 
-                             path=[data.columns[0]], 
-                             values=data.columns[1],
-                             color=data.columns[1],
-                             color_continuous_scale='GnBu',
-                             template="plotly_dark")
+        if chart_data.iloc[:, 1].sum() > 0:
+            # Create a horizontal bar chart
+            # Light Blue (#ADD8E6) -> Blue (#0000FF) -> Navy (#000080)
+            fig = px.bar(
+                chart_data, 
+                x=chart_data.columns[1], 
+                y=chart_data.columns[0],
+                orientation='h',
+                color=chart_data.columns[1],
+                color_continuous_scale=[[0, '#ADD8E6'], [0.5, '#0000FF'], [1, '#000080']],
+                template="plotly_dark",
+                labels={chart_data.columns[1]: 'Intelligence Score', chart_data.columns[0]: 'Niche'}
+            )
+            
+            fig.update_layout(
+                yaxis={'categoryorder':'total ascending'}, # Keep highest at the top
+                showlegend=False,
+                coloraxis_showscale=False, # Keeps it clean
+                margin=dict(l=0, r=20, t=30, b=0),
+                height=450
+            )
+            
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.error("Data detected, but Column 2 contains non-numeric values. Verify your Sheet format.")
+            st.error("Data detected, but values are zero. Check your Sheet format.")
+    
+    st.divider()
     
     col_news, col_analysis = st.columns([2, 1])
     with col_news:
         st.subheader("📰 Live Tech Intelligence")
         feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
         for entry in feed.entries[:6]:
-            c_img, c_txt = st.columns([1, 2])
+            c_img, c_txt = st.columns([1, 2.5]) # Slightly wider text area
             with c_img:
                 img_url = get_intel_image(entry)
                 st.image(img_url, use_container_width=True)
             with c_txt:
-                st.markdown(f"### [{entry.title}]({entry.link})")
-                st.write(entry.summary[:150] + "...")
+                st.markdown(f"**[{entry.title}]({entry.link})**")
+                st.caption(f"Published: {entry.published[:16]}")
+                st.write(entry.summary[:120] + "...")
             st.divider()
-    with col_analysis:
-        st.subheader("⚡ AI Trend Analysis")
-        st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs\n- Groq LPUs")
-        st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400")
+
 
 elif nav == "⚔️ Trend Duel":
     st.subheader("⚔️ KEYWORD DUEL")
@@ -264,3 +283,4 @@ elif nav == "💎 Script Architect":
                 st.markdown(res.choices[0].message.content)
             except Exception as e:
                 st.error(f"Error: {e}")
+
