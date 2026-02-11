@@ -86,7 +86,7 @@ def load_market_pulse_data():
     try:
         df = pd.read_csv(PULSE_CSV_URL)
         df.columns = [str(c).strip().lower() for c in df.columns]
-        mapping = {'niche name': 'Niche', 'score': 'Score', 'news snipett': 'Reason'}
+        mapping = {'niche name': 'Niche', 'score': 'Score', 'news snipett': 'Reason', 'growth': 'Growth'}
         df = df.rename(columns=mapping)
         df['Score'] = pd.to_numeric(df['Score'], errors='coerce').fillna(0)
         return df.dropna(subset=['Niche'])
@@ -156,36 +156,74 @@ with st.sidebar:
     nav = st.radio("COMMAND CENTER", options, key="void_nav_main")
 
 # --- MODULES ---
-if nav == "📊 Dashboard":
+
+if nav == "📊 Dashboard" and st.session_state.user_role == "admin":
     st.markdown("<h1 style='color: white;'>🌑 VOID COMMAND CENTER</h1>", unsafe_allow_html=True)
+    with st.expander("🔮 THE WEEKLY ORACLE"):
+        if st.button("Generate Oracle Report"):
+            pulse_df = load_market_pulse_data()
+            top_trends = pulse_df.sort_values(by='Score', ascending=False).head(5)['Niche'].tolist()
+            report = f"VOID OS WEEKLY REPORT\nDATE: {time.strftime('%Y-%m-%d')}\nTOP 5 VIGOR NICHES: {', '.join(top_trends)}"
+            st.download_button("Download TXT Report", report, "void_report.txt")
+            
     with st.expander("🛠️ Customize Layout"):
         col_edit1, col_edit2 = st.columns(2)
         st.session_state.metric_1_label = col_edit1.text_input("Metric 1 Label", st.session_state.metric_1_label)
         st.session_state.metric_1_val = col_edit1.text_input("Metric 1 Value", st.session_state.metric_1_val)
         st.session_state.daily_directive = col_edit2.text_area("Edit Daily Directive", st.session_state.daily_directive)
-    
+
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric(st.session_state.metric_1_label, st.session_state.metric_1_val)
-    m2.metric("Scripts Ready", len(st.session_state.script_history))
-    m3.metric("Agency Leads", len(st.session_state.pitch_history))
-    m4.metric("Status", "Operational")
+    m1.metric(label=st.session_state.metric_1_label, value=st.session_state.metric_1_val)
+    m2.metric(label="Scripts Ready", value=str(len(st.session_state.script_history)), delta="+")
+    m3.metric(label="Agency Leads", value=str(len(st.session_state.pitch_history)), delta="Target: 10")
+    m4.metric(label="System Status", value="Operational")
 
     col_l, col_r = st.columns([2, 1])
     with col_l:
         st.subheader("🚀 Active VOID Roadmap")
-        st.table(pd.DataFrame({"Phase": ["VOID Intel", "Script Architect", "Client Pitcher"], "Status": ["Stable", "Stable", "Online"]}))
+        st.table(pd.DataFrame({"Phase": ["VOID Intel", "Script Architect", "Client Pitcher", "Agency Portal"], "Status": ["Stable", "Stable", "Online", "Planned"], "Priority": ["Done", "Active", "High", "Critical"]}))
     with col_r:
         st.subheader("💡 Daily Directive")
         st.info(st.session_state.daily_directive)
+        st.progress(45)
+
+    with st.expander("📝 GENERATE CLIENT WEEKLY REPORT"):
+        report_client = st.selectbox("Select Client for Report", [c['Creator'] for _, c in st.session_state.creator_db.iterrows()])
+        if st.button("Generate Intelligence"):
+            client_scripts = len([s for s in st.session_state.script_history if s.get('assigned_to') == report_client])
+            report_content = f"VOID OS INTEL REPORT: {report_client}\nDATE: {time.strftime('%Y-%m-%d')}\nSCRIPTS: {client_scripts}"
+            st.text_area("Report Preview", report_content, height=150)
+
+elif nav == "📡 My Growth Hub":
+    st.markdown(f"<h1 style='color: #00d4ff;'>📡 WELCOME, {st.session_state.user_name.upper()}</h1>", unsafe_allow_html=True)
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.subheader("Your Strategic Roadmap")
+        st.info("🚀 **Current Phase:** Phase 1 - Authority Building (Days 1-14)")
+        st.markdown("* **Focus:** Pattern Interrupt Hooks\n* **Target KPI:** 15% Increase in Average Watch Time")
+    with col2:
+        st.subheader("Performance Vigor")
+        st.metric("Profile Health", "Good", delta="+12% Vigor")
+        st.progress(65)
+
+elif nav == "💎 Assigned Scripts":
+    st.markdown("<h1 style='color: #00ff41;'>💎 YOUR ARCHITECTED SCRIPTS</h1>", unsafe_allow_html=True)
+    my_scripts = [s for s in st.session_state.script_history if s.get('assigned_to') == st.session_state.user_name or s.get('assigned_to') == "Public/General"]
+    if not my_scripts:
+        st.warning("The Director is currently architecting your next batch. Stand by.")
+    for s in reversed(my_scripts):
+        with st.expander(f"📜 {s['topic']} - {s['time']}"):
+            st.write(s['script'])
+            st.caption(f"DNA: {s.get('dna', 'Standard')}")
 
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     pulse_df = load_market_pulse_data()
     if not pulse_df.empty:
-        st.markdown('<div style="border: 1px solid #00d4ff; padding: 20px; border-radius: 10px; margin-bottom: 20px;">', unsafe_allow_html=True)
+        st.markdown('<div style="border: 1px solid #00d4ff; padding: 20px; border-radius: 10px; margin-bottom: 30px;">', unsafe_allow_html=True)
         st.markdown("<h3 style='color: #00d4ff;'>🚨 ELITE VIGOR SIGNALS</h3>", unsafe_allow_html=True)
         cols = st.columns(2)
-        high_heat = pulse_df[pulse_df['Score'] >= 85].head(6)
+        high_heat = pulse_df[pulse_df['Score'] >= 85].sort_values(by='Score', ascending=False).head(10)
         for i, (_, alert) in enumerate(high_heat.iterrows()):
             with cols[i%2]:
                 st.markdown(f"📡 **{alert['Niche']}** | `Score: {alert['Score']}`")
@@ -197,13 +235,17 @@ elif nav == "🌐 Global Pulse":
     with c_news:
         st.subheader("📰 Live Tech Intelligence")
         feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
-        for entry in feed.entries[:4]:
+        for entry in feed.entries[:6]:
             img_col, txt_col = st.columns([1, 2.5])
             with img_col: st.image(get_intel_image(entry), use_container_width=True)
             with txt_col:
                 st.markdown(f"**[{entry.title.upper()}]({entry.link})**")
                 st.write(BeautifulSoup(entry.summary, "html.parser").text[:120] + "...")
             st.divider()
+    with c_analysis:
+        st.subheader("⚡ AI Trend Analysis")
+        st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs")
+        st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400")
 
 elif nav == "⚔️ Trend Duel":
     st.title("⚔️ COMPETITIVE INTELLIGENCE MATRIX")
@@ -211,73 +253,70 @@ elif nav == "⚔️ Trend Duel":
     if not pulse_df.empty:
         st.subheader("🌑 Market Density Analysis")
         target = st.selectbox("Select Niche to Audit", pulse_df['Niche'].unique())
-        t_score = pulse_df[pulse_df['Niche'] == target]['Score'].values[0]
-        st.metric(f"{target} Entry Status", get_saturation_status(t_score))
+        row = pulse_df[pulse_df['Niche'] == target].iloc[0]
+        st.metric(label=f"{target} Entry Status", value=get_saturation_status(row['Score']))
         st.table(pulse_df[pulse_df['Niche'] == target][['Niche', 'Score', 'Reason']])
+        st.divider()
         sel = st.multiselect("Compare Niches", options=pulse_df['Niche'].unique().tolist(), default=pulse_df['Niche'].unique().tolist()[:5])
-        st.bar_chart(data=pulse_df[pulse_df['Niche'].isin(sel)], x='Niche', y='Score')
+        comp = pulse_df[pulse_df['Niche'].isin(sel)]
+        if not comp.empty: st.bar_chart(data=comp, x='Niche', y='Score')
 
 elif nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns([1, 1.5], gap="large")
     with c1:
         topic = st.text_input("Focus Topic")
-        target_client = st.selectbox("Assign to Client", ["Public/General"] + st.session_state.creator_db['Creator'].tolist())
+        target_client = st.selectbox("Assign to Client", ["Public/General"] + [c['Creator'] for _, c in st.session_state.creator_db.iterrows()])
         platform = st.selectbox("Platform", ["YouTube Shorts", "Instagram Reels", "Long-form"])
         tone = st.select_slider("Tone", options=["Aggressive", "Professional", "Storyteller"])
+        
         if st.button("🚀 Architect & Queue"):
             with st.spinner("🌑 ARCHITECTING..."):
                 groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Topic: {topic}, Platform: {platform}, Tone: {tone}"}])
+                prompt = f"Topic: {topic}, Platform: {platform}, Tone: {tone}. High retention script."
+                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 script_res = res.choices[0].message.content
                 dna_res = generate_visual_dna(topic, tone)
-                st.session_state.script_history.append({"time": time.strftime("%H:%M"), "topic": topic, "script": script_res, "dna": dna_res, "assigned_to": target_client})
+                
+                new_entry = {"time": time.strftime("%H:%M"), "topic": topic, "script": script_res, "dna": dna_res, "assigned_to": target_client}
+                st.session_state.script_history.append(new_entry)
                 with c2: typewriter_effect(script_res)
+
+elif nav == "💼 Client Pitcher" and st.session_state.user_role == "admin":
+    st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
+    client = st.text_input("Lead Name")
+    offer = st.text_area("Value Proposition")
+    if st.button("🔥 Generate VOID Pitch"):
+        groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+        res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Pitch for {client}: {offer}"}])
+        pitch_res = res.choices[0].message.content
+        st.session_state.pitch_history.append({"time": time.strftime("%H:%M"), "client": client, "pitch": pitch_res})
+        st.write(pitch_res)
 
 elif nav == "🧬 Creator Lab":
     st.markdown("<h1 style='color: #00d4ff;'>🧬 CREATOR VIGOR & ACQUISITION</h1>", unsafe_allow_html=True)
-    tab1, tab2 = st.tabs(["🛰️ Pipeline", "⚡ Vigor Calculator"])
-    with tab1:
+    tab_crm, tab_vigor = st.tabs(["🛰️ Acquisition Pipeline", "⚡ Vigor Calculator"])
+    with tab_crm:
         st.session_state.creator_db = st.data_editor(st.session_state.creator_db, num_rows="dynamic", use_container_width=True)
-    with tab2:
-        name = st.text_input("Name")
-        v, f = st.number_input("Views", 1), st.number_input("Followers", 1)
-        if st.button("Calculate"):
-            score = min(100, int((v/f) * 50))
+    with tab_vigor:
+        name = st.text_input("Creator Name")
+        avg_v = st.number_input("Avg Views", 1000)
+        foll = st.number_input("Followers", 5000)
+        if st.button("Calculate Vigor"):
+            score = min(100, int((avg_v / foll) * 50))
             st.metric("Vigor Score", f"{score}/100")
 
 elif nav == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ VOID LEAD SOURCE</h1>", unsafe_allow_html=True)
-    c1, c2 = st.columns(2)
-    with c1:
-        if st.button("Initialize Deep Scan"):
-            leads = [{"Handle": "@Nexus_AI", "Gap": "No Video", "Vigor": "Low"}]
-            st.session_state.found_leads = pd.DataFrame(leads)
-    with c2:
-        if 'found_leads' in st.session_state: st.table(st.session_state.found_leads)
-
-elif nav == "💼 Client Pitcher":
-    st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL</h1>", unsafe_allow_html=True)
-    client = st.text_input("Lead Name")
-    offer = st.text_area("Value Prop")
-    if st.button("🔥 Generate Pitch"):
-        groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-        res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Pitch for {client}: {offer}"}])
-        st.session_state.pitch_history.append({"time": time.strftime("%H:%M"), "client": client, "pitch": res.choices[0].message.content})
-        st.write(res.choices[0].message.content)
-
-elif nav == "📡 My Growth Hub":
-    st.title(f"📡 WELCOME, {st.session_state.user_name}")
-    st.info("Current Phase: Phase 1 - Authority Building")
-
-elif nav == "💎 Assigned Scripts":
-    st.title("💎 YOUR SCRIPTS")
-    my_s = [s for s in st.session_state.script_history if s.get('assigned_to') in [st.session_state.user_name, "Public/General"]]
-    for s in reversed(my_s):
-        with st.expander(f"{s['topic']} - {s['time']}"): st.write(s['script'])
+    if st.button("Initialize Deep Scan"):
+        leads = [{"Handle": "@Nexus_AI", "Platform": "IG", "Gap": "No Video", "Vigor": "Low"}]
+        st.session_state.found_leads = pd.DataFrame(leads)
+    if 'found_leads' in st.session_state:
+        st.table(st.session_state.found_leads)
 
 elif nav == "📜 History":
     st.title("📜 SYSTEM ARCHIVES")
-    if st.button("PURGE"): st.session_state.script_history = []; st.session_state.pitch_history = []; st.rerun()
+    if st.button("🔥 PURGE"): st.session_state.script_history = []; st.session_state.pitch_history = []; st.rerun()
     for s in reversed(st.session_state.script_history):
-        with st.expander(f"{s['time']} - {s['topic']}"): st.write(s['script'])
+        with st.expander(f"{s['time']} - {s['topic']} ({s.get('assigned_to', 'Public')})"):
+            st.write(s['script'])
