@@ -337,7 +337,7 @@ def generate_counter_strike(competitor_topic, user_topic):
                     st.info(f"🧬 **CONTENT DNA:**\n{dna_res}")
 
 
-elif nav == "📜 History":
+     elif nav == "📜 History":
     st.title("📜 SYSTEM ARCHIVES")
     with st.expander("⚠️ SYSTEM MAINTENANCE"):
         if st.button("🔥 PURGE ALL SYSTEM LOGS", use_container_width=True):
@@ -360,5 +360,6 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
 
 
