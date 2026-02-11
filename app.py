@@ -353,22 +353,78 @@ def transmit_script(client, platform, topic, script, dna):
     except:
         return False
 
-# --- UPDATED SCRIPT ARCHITECT ---
+# --- 2. THE RESTORED ARCHITECT SECTOR ---
 if nav == "💎 Script Architect":
-    # ... (Keep your existing UI code) ...
-    if st.button("🚀 Architect & Transmit"):
-        if topic:
-            # ... (Groq Logic) ...
-            txt = res.choices[0].message.content
-            dna_profile = generate_visual_dna(platform, tone_choice)
-            
-            # --- THE TRANSMISSION ---
-            success = transmit_script(target_client, platform, topic, txt, dna_profile)
-            
-            if success:
-                st.success(f"⚔️ SCRIPT BROADCASTED TO {target_client.upper()}")
+    st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
+    
+    # Force the UI to render by loading the DB first
+    users_df = load_user_db()
+    
+    # Layout Grid
+    c1, c2 = st.columns([1, 1.2], gap="large")
+    
+    with c1:
+        st.subheader("Configuration")
+        # 1. Target Selection
+        client_list = ["Public"]
+        if not users_df.empty:
+            client_list = ["Public"] + users_df.iloc[:, 1].tolist()
+        
+        target_client = st.selectbox("Assign To Client", client_list)
+        
+        # 2. Platform Selection
+        platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
+        
+        # 3. Topic & Tone
+        topic = st.text_input("Core Topic", placeholder="Enter the content focus...")
+        tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"])
+        
+        # 4. Competitor Logic
+        with st.expander("👤 COMPETITOR SHADOW"):
+            c_hook = st.text_area("Their Current Narrative", placeholder="What are they saying?")
+
+        # 5. EXECUTION BUTTON
+        if st.button("🚀 ARCHITECT & TRANSMIT", use_container_width=True):
+            if not topic:
+                st.error("Director, the Topic field cannot be empty.")
             else:
-                st.error("Transmission failed. Check Database connection.")
+                with st.spinner("🌑 ACCESSING GROQ LLAMA-3..."):
+                    try:
+                        groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                        
+                        # Build the context
+                        prompt = f"Architect a {platform} script about {topic}. Tone: {tone_choice}."
+                        if c_hook:
+                            prompt += f" This is a Counter-Strike. Disprove this narrative: {c_hook}"
+                        
+                        res = groq_c.chat.completions.create(
+                            model="llama-3.3-70b-versatile",
+                            messages=[{"role": "user", "content": prompt}]
+                        )
+                        
+                        script_content = res.choices[0].message.content
+                        dna_profile = generate_visual_dna(platform, tone_choice)
+                        
+                        # BROADCAST TO GOOGLE SHEET
+                        transmit_status = transmit_script(target_client, platform, topic, script_content, dna_profile)
+                        
+                        # Store in session for immediate preview
+                        st.session_state.script_history.append({
+                            "topic": topic, "script": script_content, "assigned_to": target_client, "dna": dna_profile
+                        })
+                        
+                        if transmit_status:
+                            st.success(f"⚔️ SCRIPT BROADCASTED TO {target_client.upper()}")
+                        else:
+                            st.warning("Script created but Transmission to Cloud failed. Check Form IDs.")
+                            
+                        with c2:
+                            st.subheader("💎 ARCHITECTED OUTPUT")
+                            st.markdown(script_content)
+                            st.info(f"🧬 **VISUAL DNA:** {dna_profile}")
+                            
+                    except Exception as e:
+                        st.error(f"Architectural Failure: {e}")
                     
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
@@ -474,6 +530,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
