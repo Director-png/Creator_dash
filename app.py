@@ -421,13 +421,7 @@ if nav == "💎 Script Architect":
         topic = st.text_input("Core Topic", key="topic_input")
         tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"], key="tone_slider")
         
-        # ... rest of your buttons and logic ...
-        
-        
-        platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
-        topic = st.text_input("Core Topic")
-        tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"])
-        
+ 
         with st.expander("👤 COMPETITOR SHADOW"):
             c_hook = st.text_area("Their Narrative")
 
@@ -561,6 +555,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
