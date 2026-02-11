@@ -47,15 +47,6 @@ def typewriter_effect(text):
         time.sleep(0.005) 
     container.markdown(full_text)
 
-# --- SIDEBAR ---
-with st.sidebar:
-    st.markdown(f"<p style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</p>", unsafe_allow_html=True)
-    if st.session_state.user_role == "admin":
-        options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "🧬 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
-    else:
-        options = ["📡 My Growth Hub", "💎 Assigned Scripts", "🌐 Global Pulse"]
-    nav = st.radio("COMMAND CENTER", options, key="void_nav_main")
-
 # --- 1. REFINED SYNC FUNCTION ---
 def load_user_db():
     try:
@@ -414,6 +405,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
