@@ -189,7 +189,7 @@ elif nav == "💎 Assigned Scripts":
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     # [Global Pulse Code Preserved...]
-pulse_df = load_market_pulse_data()
+    pulse_df = load_market_pulse_data()
     if not pulse_df.empty:
         st.markdown('<div style="border: 1px solid #00d4ff; padding: 20px; border-radius: 10px; margin-bottom: 30px;">', unsafe_allow_html=True)
         st.markdown("<h3 style='color: #00d4ff;'>🚨 ELITE VIGOR SIGNALS</h3>", unsafe_allow_html=True)
@@ -368,4 +368,5 @@ for s in reversed(st.session_state.script_history):
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
