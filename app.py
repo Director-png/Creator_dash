@@ -5,9 +5,8 @@ import plotly.express as px
 import requests
 import feedparser
 from bs4 import BeautifulSoup
-from gspread_pandas import Spread 
-from streamlit_lottie import st_lottie
 import time
+from streamlit_lottie import st_lottie
 
 # --- ANIMATION UTILITY ---
 def load_lottieurl(url: str):
@@ -60,7 +59,7 @@ MARKET_URL = "https://docs.google.com/spreadsheets/d/163haIuPIna3pEY9IDxncPM2kFF
 USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
 FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
 
-# --- CORE FUNCTIONS (Unchanged Logic) ---
+# --- CORE FUNCTIONS ---
 def load_market_pulse_data():
     try:
         df = pd.read_csv(PULSE_CSV_URL)
@@ -141,11 +140,9 @@ with st.sidebar:
     st.markdown("<h1 style='text-align: center; color: #00d4ff;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</p>", unsafe_allow_html=True)
     
-    # NAVIGATION LOGIC: Filtered by Role
     if st.session_state.user_role == "admin":
         options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
     else:
-        # Standard users lose access to Dashboard and Client Pitcher
         options = ["🌐 Global Pulse", "⚔️ Trend Duel", "💎 Script Architect", "📜 History"]
     
     nav = st.radio("COMMAND CENTER", options)
@@ -159,29 +156,6 @@ with st.sidebar:
 # Restricted to Admin
 if nav == "📊 Dashboard" and st.session_state.user_role == "admin":
     st.markdown("<h1 style='color: white;'>🌑 VOID COMMAND CENTER</h1>", unsafe_allow_html=True)
-    with st.expander("🛠️ Customize Layout"):
-        col_edit1, col_edit2 = st.columns(2)
-        st.session_state.metric_1_label = col_edit1.text_input("Metric 1 Label", st.session_state.metric_1_label)
-        st.session_state.metric_1_val = col_edit1.text_input("Metric 1 Value", st.session_state.metric_1_val)
-        st.session_state.daily_directive = col_edit2.text_area("Edit Daily Directive", st.session_state.daily_directive)
-
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric(label=st.session_state.metric_1_label, value=st.session_state.metric_1_val)
-    m2.metric(label="Scripts Ready", value=str(len(st.session_state.script_history)), delta="+")
-    m3.metric(label="Agency Leads", value=str(len(st.session_state.pitch_history)), delta="Target: 10")
-    m4.metric(label="System Status", value="Operational")
-
-    col_l, col_r = st.columns([2, 1])
-    with col_l:
-        st.subheader("🚀 Active VOID Roadmap")
-        st.table(pd.DataFrame({"Phase": ["VOID Intel", "Script Architect", "Client Pitcher", "Agency Portal"], "Status": ["Stable", "Stable", "Online", "Planned"], "Priority": ["Done", "Active", "High", "Critical"]}))
-    with col_r:
-        st.subheader("💡 Daily Directive")
-        st.info(st.session_state.daily_directive)
-        st.progress(45)
-
-elif nav == "🌐 Global Pulse":
-    # ... (Keep original logic: Market data charts, TechCrunch feed, and images)    st.markdown("<h1 style='color: white;'>🌑 VOID COMMAND CENTER</h1>", unsafe_allow_html=True)
     with st.expander("🛠️ Customize Layout"):
         col_edit1, col_edit2 = st.columns(2)
         st.session_state.metric_1_label = col_edit1.text_input("Metric 1 Label", st.session_state.metric_1_label)
@@ -277,8 +251,6 @@ elif nav == "💎 Script Architect":
 
 elif nav == "📜 History":
     st.title("📜 SYSTEM ARCHIVES")
-    
-    # --- PURGE LOGS BUTTON ---
     with st.expander("⚠️ SYSTEM MAINTENANCE"):
         st.warning("Action will permanently erase all local session logs.")
         if st.button("🔥 PURGE ALL SYSTEM LOGS", use_container_width=True):
@@ -288,7 +260,6 @@ elif nav == "📜 History":
             time.sleep(1)
             st.rerun()
     
-    # --- HISTORY VIEW ---
     if st.session_state.user_role == "admin":
         t_scripts, t_secret = st.tabs(["Script History", "Director Intelligence"])
         with t_scripts:
@@ -300,9 +271,7 @@ elif nav == "📜 History":
             for p in reversed(st.session_state.pitch_history):
                 with st.expander(f"🕒 {p['time']} - Lead: {p['client']}"): st.write(p['pitch'])
     else:
-        # Standard user only sees scripts, no tabs shown
         st.subheader("Script Archives")
         if not st.session_state.script_history: st.write("No scripts archived.")
         for s in reversed(st.session_state.script_history):
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): st.write(s['script'])
-
