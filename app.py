@@ -18,7 +18,7 @@ def load_lottieurl(url: str):
 lottie_loading = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_fcfjwiyb.json")
 
 
-    def load_user_db():
+def load_user_db():
     try:
         # The logic below must be indented 4 spaces (1 tab)
         df = pd.read_csv(f"{USER_DB_URL}&cache_bus={time.time()}")
@@ -546,6 +546,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
