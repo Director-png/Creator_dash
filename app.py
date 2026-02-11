@@ -137,14 +137,19 @@ if not st.session_state.logged_in:
     st.stop()
 
 # --- SIDEBAR & NAVIGATION ---
+# --- SIDEBAR & NAVIGATION ---
 with st.sidebar:
     st.markdown("<h1 style='text-align: center; color: #00d4ff;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</p>", unsafe_allow_html=True)
     
     if st.session_state.user_role == "admin":
-        options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
+        # ADD "🧬 Creator Lab" TO THIS LIST
+        options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "🧬 Creator Lab", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
     else:
-        options = ["🌐 Global Pulse", "⚔️ Trend Duel", "💎 Script Architect", "📜 History"]
+        # AND THIS LIST (If you want non-admins to see it too)
+        options = ["🌐 Global Pulse", "⚔️ Trend Duel", "🧬 Creator Lab", "💎 Script Architect", "📜 History"]
+    
+    nav = st.radio("COMMAND CENTER", options)
     
     nav = st.radio("COMMAND CENTER", options)
     st.divider()
@@ -337,5 +342,6 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
 
 
