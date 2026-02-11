@@ -27,14 +27,14 @@ def typewriter_effect(text):
         time.sleep(0.005) 
     container.markdown(full_text)
 
-# --- NEW: INTELLIGENCE UTILITIES (Integrated into logic) ---
-def analyze_trend_saturation(score):
-    if score > 85: return "🔴 SATURATED (High Competition)"
-    if score > 70: return "🟡 PEAK (Strategic Entry)"
+# --- 🛰️ NEW INTELLIGENCE UTILITIES (The "Fascinating" Layer) ---
+def get_saturation_status(score):
+    if score > 88: return "🔴 SATURATED (High Competition)"
+    if score > 75: return "🟡 PEAK (Strategic Entry)"
     return "🟢 EARLY (High Opportunity)"
 
 def generate_visual_dna(topic, tone):
-    return f"Cinematic AI Prompt: Hyper-realistic, {tone} lighting, 8k, futuristic aesthetic for {topic}"
+    return f"STYLE: Cinematic Noir / LIGHTING: Neon Cyber-blue / COMPOSITION: Wide-angle, 8k detail. PROMPT: A hyper-realistic representation of {topic} for {tone} content."
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -164,6 +164,16 @@ with st.sidebar:
 
 if nav == "📊 Dashboard" and st.session_state.user_role == "admin":
     st.markdown("<h1 style='color: white;'>🌑 VOID COMMAND CENTER</h1>", unsafe_allow_html=True)
+    
+    # 🔮 NEW FEATURE: THE WEEKLY ORACLE
+    with st.expander("🔮 THE WEEKLY ORACLE"):
+        st.write("Generate a curated Intelligence Report for Premium Clients.")
+        if st.button("Generate Oracle Report"):
+            pulse_df = load_market_pulse_data()
+            top_trends = pulse_df.sort_values(by='Score', ascending=False).head(5)['Niche'].tolist()
+            report = f"VOID OS WEEKLY REPORT\nDATE: {time.strftime('%Y-%m-%d')}\nTOP 5 VIGOR NICHES: {', '.join(top_trends)}\nPREDICTION: AI-Agentic volatility is increasing."
+            st.download_button("Download TXT Report", report, "void_report.txt")
+
     with st.expander("🛠️ Customize Layout"):
         col_edit1, col_edit2 = st.columns(2)
         st.session_state.metric_1_label = col_edit1.text_input("Metric 1 Label", st.session_state.metric_1_label)
@@ -188,77 +198,55 @@ if nav == "📊 Dashboard" and st.session_state.user_role == "admin":
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     
-    # --- INTERNAL LOGIC FOR EMPTY CELLS ---
-    def get_smart_reason(niche, reason, score):
-        if pd.isna(reason) or str(reason).strip() == "" or str(reason).lower() == "nan":
-            # Logic-based fallback if the spreadsheet is empty
-            if score >= 95: return f"Critical market gap detected in {niche}. High-intent consumer shift observed."
-            if score >= 90: return f"Algorithmic surge across social platforms. {niche} is currently over-performing baseline metrics."
-            return f"Strategic growth signal for {niche}. Recommend early content positioning."
-        return reason
-
-    # --- 1. CURATED PULSE ALERT SYSTEM (Elite 10) ---
+    # PULSE ALERT INTEGRATION (Top 10 Only)
     pulse_alert_df = load_market_pulse_data()
     if not pulse_alert_df.empty:
         high_heat_df = pulse_alert_df[pulse_alert_df['Score'] >= 85].sort_values(by='Score', ascending=False).head(10)
-        
         if not high_heat_df.empty:
             with st.container():
-                st.markdown("""
-                    <div style="background-color: rgba(0, 212, 255, 0.05); border: 1px solid #00d4ff; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
-                        <h3 style="color: #00d4ff; margin-top: 0; font-family: monospace; letter-spacing: 2px;">🚨 ELITE VIGOR SIGNALS (TOP 10)</h3>
-                """, unsafe_allow_html=True)
-                
-                cols = st.columns(2) 
+                st.markdown('<div style="background-color: rgba(0, 212, 255, 0.05); border: 1px solid #00d4ff; padding: 20px; border-radius: 10px; margin-bottom: 30px;">', unsafe_allow_html=True)
+                st.markdown("<h3 style='color: #00d4ff; margin-top: 0;'>🚨 ELITE VIGOR SIGNALS</h3>", unsafe_allow_html=True)
+                cols = st.columns(2)
                 for i, (_, alert) in enumerate(high_heat_df.iterrows()):
-                    col_choice = cols[0] if i % 2 == 0 else cols[1]
-                    
-                    # Apply the Smart Reason Logic here
-                    final_reason = get_smart_reason(alert['Niche'], alert['Reason'], alert['Score'])
-                    
-                    with col_choice:
-                        st.markdown(f"<span style='color: #00ff41;'>📡</span> **{alert['Niche']}**", unsafe_allow_html=True)
-                        st.markdown(f"**Velocity:** `{alert['Score']}` | {final_reason}")
-                        st.markdown("---")
+                    with cols[i%2]:
+                        # Handle Empty Reasons
+                        reason = alert['Reason'] if pd.notna(alert['Reason']) else "Deductive market vigor detected. Position for early dominance."
+                        st.markdown(f"📡 **{alert['Niche']}** | `Score: {alert['Score']}`")
+                        st.caption(reason)
+                        st.divider()
                 st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- 2. LIVE INTELLIGENCE FEED ---
-    c_news, c_analysis = st.columns([2.5, 1], gap="large")
-    
+    c_news, c_analysis = st.columns([2, 1])
     with c_news:
         st.subheader("📰 Live Tech Intelligence")
         feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
-        for entry in feed.entries[:8]:
-            img_col, txt_col = st.columns([1, 3])
-            with img_col: 
-                st.image(get_intel_image(entry), use_container_width=True)
+        for entry in feed.entries[:6]:
+            img_col, txt_col = st.columns([1, 2.5])
+            with img_col: st.image(get_intel_image(entry), use_container_width=True)
             with txt_col:
                 st.markdown(f"**[{entry.title.upper()}]({entry.link})**")
-                st.write(BeautifulSoup(entry.summary, "html.parser").text[:150] + "...")
+                st.write(BeautifulSoup(entry.summary, "html.parser").text[:120] + "...")
             st.divider()
-
     with c_analysis:
-        st.subheader("⚡ VOID Analysis")
-        st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs\n- Agentic Workflows")
-        st.divider()
-        st.subheader("🕵️ System Logic")
-        st.caption("VOID OS identifies 'Empty Intelligence' and generates deductive reasoning to maintain operational flow.")
+        st.subheader("⚡ AI Trend Analysis")
+        st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs")
+        st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400")
+
 elif nav == "⚔️ Trend Duel":
     st.title("⚔️ COMPETITIVE INTELLIGENCE MATRIX")
     pulse_df = load_market_pulse_data()
     if not pulse_df.empty:
-        # --- SATURATION METER INTEGRATION ---
-        st.subheader("🌑 VOID Saturation Analysis")
-        selected_n = st.selectbox("Analyze Market Density", pulse_df['Niche'].unique())
-        n_score = pulse_df[pulse_df['Niche'] == selected_n]['Score'].values[0]
-        st.metric(f"{selected_n} Status", analyze_trend_saturation(n_score))
-
-        st.subheader("📊 Comparative View")
+        # 📊 NEW FEATURE: SATURATION METER
+        st.subheader("🌑 Market Density Analysis")
+        target = st.selectbox("Select Niche to Audit", pulse_df['Niche'].unique())
+        t_score = pulse_df[pulse_df['Niche'] == target]['Score'].values[0]
+        st.metric(label=f"{target} Entry Status", value=get_saturation_status(t_score))
+        
+        st.divider()
         sel = st.multiselect("Compare Niches", options=pulse_df['Niche'].unique().tolist(), default=pulse_df['Niche'].unique().tolist()[:5])
         comp = pulse_df[pulse_df['Niche'].isin(sel)]
         if not comp.empty:
             st.bar_chart(data=comp, x='Niche', y='Score')
-            st.dataframe(comp)
 
 elif nav == "💼 Client Pitcher" and st.session_state.user_role == "admin":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
@@ -287,44 +275,36 @@ elif nav == "💎 Script Architect":
                 groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
                 res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Script: {topic}, {platform}, {tone}"}])
                 script_res = res.choices[0].message.content
-                # --- CONTENT DNA INTEGRATION ---
-                visual_dna = generate_visual_dna(topic, tone)
-                st.session_state.script_history.append({"time": time.strftime("%H:%M:%S"), "topic": topic, "script": script_res, "dna": visual_dna})
+                
+                # 🧬 NEW FEATURE: CONTENT DNA
+                dna_res = generate_visual_dna(topic, tone)
+                
+                st.session_state.script_history.append({"time": time.strftime("%H:%M:%S"), "topic": topic, "script": script_res, "dna": dna_res})
                 with c2: 
                     typewriter_effect(script_res)
-                    st.info(f"🧬 **CONTENT DNA:** {visual_dna}")
+                    st.divider()
+                    st.info(f"🧬 **CONTENT DNA (Visual Blueprint):**\n{dna_res}")
 
 elif nav == "📜 History":
     st.title("📜 SYSTEM ARCHIVES")
     with st.expander("⚠️ SYSTEM MAINTENANCE"):
-        st.warning("Action will permanently erase all local session logs.")
         if st.button("🔥 PURGE ALL SYSTEM LOGS", use_container_width=True):
             st.session_state.script_history = []
             st.session_state.pitch_history = []
-            st.success("Session logs annihilated.")
-            time.sleep(1)
-            st.rerun()
+            st.success("Session logs annihilated."); time.sleep(1); st.rerun()
     
     if st.session_state.user_role == "admin":
         t_scripts, t_secret = st.tabs(["Script History", "Director Intelligence"])
         with t_scripts:
-            if not st.session_state.script_history: st.write("No scripts archived.")
             for s in reversed(st.session_state.script_history):
                 with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                     st.write(s['script'])
                     if 'dna' in s: st.caption(f"DNA: {s['dna']}")
         with t_secret:
-            if not st.session_state.pitch_history: st.write("No intelligence logs found.")
             for p in reversed(st.session_state.pitch_history):
                 with st.expander(f"🕒 {p['time']} - Lead: {p['client']}"): st.write(p['pitch'])
     else:
-        st.subheader("Script Archives")
-        if not st.session_state.script_history: st.write("No scripts archived.")
         for s in reversed(st.session_state.script_history):
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
-
-
-
-
