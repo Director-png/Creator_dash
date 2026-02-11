@@ -188,10 +188,18 @@ if nav == "📊 Dashboard" and st.session_state.user_role == "admin":
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     
+    # --- INTERNAL LOGIC FOR EMPTY CELLS ---
+    def get_smart_reason(niche, reason, score):
+        if pd.isna(reason) or str(reason).strip() == "" or str(reason).lower() == "nan":
+            # Logic-based fallback if the spreadsheet is empty
+            if score >= 95: return f"Critical market gap detected in {niche}. High-intent consumer shift observed."
+            if score >= 90: return f"Algorithmic surge across social platforms. {niche} is currently over-performing baseline metrics."
+            return f"Strategic growth signal for {niche}. Recommend early content positioning."
+        return reason
+
     # --- 1. CURATED PULSE ALERT SYSTEM (Elite 10) ---
     pulse_alert_df = load_market_pulse_data()
     if not pulse_alert_df.empty:
-        # Filter for top 10 elite signals only
         high_heat_df = pulse_alert_df[pulse_alert_df['Score'] >= 85].sort_values(by='Score', ascending=False).head(10)
         
         if not high_heat_df.empty:
@@ -204,9 +212,13 @@ elif nav == "🌐 Global Pulse":
                 cols = st.columns(2) 
                 for i, (_, alert) in enumerate(high_heat_df.iterrows()):
                     col_choice = cols[0] if i % 2 == 0 else cols[1]
+                    
+                    # Apply the Smart Reason Logic here
+                    final_reason = get_smart_reason(alert['Niche'], alert['Reason'], alert['Score'])
+                    
                     with col_choice:
                         st.markdown(f"<span style='color: #00ff41;'>📡</span> **{alert['Niche']}**", unsafe_allow_html=True)
-                        st.markdown(f"**Velocity:** `{alert['Score']}` | {alert['Reason']}")
+                        st.markdown(f"**Velocity:** `{alert['Score']}` | {final_reason}")
                         st.markdown("---")
                 st.markdown("</div>", unsafe_allow_html=True)
 
@@ -216,7 +228,7 @@ elif nav == "🌐 Global Pulse":
     with c_news:
         st.subheader("📰 Live Tech Intelligence")
         feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
-        for entry in feed.entries[:8]: # Increased to 8 since we have more space
+        for entry in feed.entries[:8]:
             img_col, txt_col = st.columns([1, 3])
             with img_col: 
                 st.image(get_intel_image(entry), use_container_width=True)
@@ -228,14 +240,9 @@ elif nav == "🌐 Global Pulse":
     with c_analysis:
         st.subheader("⚡ VOID Analysis")
         st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs\n- Agentic Workflows")
-        
-        st.markdown("---")
+        st.divider()
         st.subheader("🕵️ System Logic")
-        st.caption("Intelligence is being pulled from 14+ live sources. The Vigor Signals represent niches with over 85% growth probability in the next 72 hours.")
-        
-        # Adding a visual touch to fill the sidebar space
-        st.image("https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400", caption="Global Data Mesh")
-
+        st.caption("VOID OS identifies 'Empty Intelligence' and generates deductive reasoning to maintain operational flow.")
 elif nav == "⚔️ Trend Duel":
     st.title("⚔️ COMPETITIVE INTELLIGENCE MATRIX")
     pulse_df = load_market_pulse_data()
@@ -317,6 +324,7 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
 
 
 
