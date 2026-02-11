@@ -54,11 +54,45 @@ if 'first_load' not in st.session_state:
 # --- 3. GLOBAL STYLES ---
 st.markdown("""
     <style>
-    .matrix-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: -1; }
-    .stApp { animation: fadeInPage 1.5s ease-in-out; }
-    @keyframes fadeInPage { 0% { opacity: 0; } 100% { opacity: 1; } }
-    [data-testid="stMetricValue"] { animation: neonPulse 2.5s infinite alternate; color: #00d4ff !important; }
-    @keyframes neonPulse { from { text-shadow: 0 0 5px #00d4ff; } to { text-shadow: 0 0 20px #00d4ff; } }
+    /* Gradient Background for the Sidebar */
+    [data-testid="stSidebar"] {
+        background-image: linear-gradient(180deg, #000000 0%, #080808 100%);
+        border-right: 1px solid #00d4ff33;
+    }
+    
+    /* Neon Borders for Cards (Expander) */
+    .streamlit-expanderHeader {
+        border: 1px solid #00ff4133 !important;
+        border-radius: 5px !important;
+        background-color: #000000 !important;
+    }
+
+    /* Custom Scrollbar for the Cyber look */
+    ::-webkit-scrollbar {
+        width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #000; 
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #00d4ff; 
+        border-radius: 10px;
+    }
+
+    /* Professionalizing Buttons */
+    .stButton>button {
+        border: 1px solid #00d4ff;
+        background-color: transparent;
+        color: #00d4ff;
+        transition: 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    .stButton>button:hover {
+        background-color: #00d4ff;
+        color: black;
+        box-shadow: 0 0 15px #00d4ff;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -376,6 +410,7 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
 
 
 
