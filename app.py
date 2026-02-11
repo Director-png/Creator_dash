@@ -332,54 +332,40 @@ elif nav == "⚔️ Trend Duel":
         comp = pulse_df[pulse_df['Niche'].isin(sel)]
         if not comp.empty: st.bar_chart(data=comp, x='Niche', y='Score')
 
-# --- 2. THE SCRIPT ARCHITECT (RE-ENGINEERED TO PUSH DATA) ---
-elif nav == "💎 Script Architect":
-    st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+# --- SECTOR: SCRIPT ARCHITECT (FIXED & TACTICAL) ---
+if nav == "💎 Script Architect":
+    st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
     users_df = load_user_db()
+    c1, c2 = st.columns([1, 1.5])
     
-    c1, c2 = st.columns([1, 1.5], gap="large")
     with c1:
-        target_client = st.selectbox("Assign to Client", ["Public/General"] + users_df.iloc[:, 1].tolist() if not users_df.empty else ["Public/General"])
-        platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
-        topic = st.text_input("Core Topic")
+        target_client = st.selectbox("Assign To", ["Public"] + users_df.iloc[:, 1].tolist() if not users_df.empty else ["Public"])
+        platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
+        topic = st.text_input("Topic")
+        tone_choice = st.select_slider("Tone", ["Professional", "Aggressive", "Elite"])
         
-        if st.button("🚀 Architect & Transmit"):
-            with st.spinner("🌑 TRANSMITTING TO VOID VAULT..."):
-                groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                prompt = f"Architect a {platform} script about {topic}."
-                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
-                script_text = res.choices[0].message.content
-                
-                # --- THE FIX: PERSISTENCE ---
-                # We need to send this to your Google Sheet so the client can pull it later.
-                # Logic: requests.post(SCRIPT_VAULT_FORM_URL, data={"entry.XXX": target_client, "entry.YYY": script_text})
-                
-                st.session_state.script_history.append({
-                    "topic": topic, 
-                    "script": script_text, 
-                    "assigned_to": target_client,
-                    "dna": generate_visual_dna(platform, "Elite")
-                })
-                
-                st.success(f"Script Locked for {target_client}. (Transmission Simulated)")
-                with c2: st.markdown(script_text)                
-               
-                # NEW: VISUAL DNA INTEGRATION
-                visual_dna = generate_visual_dna(platform, tone)
-                
-                st.session_state.script_history.append({
-                    "time": time.strftime("%H:%M"), 
-                    "topic": topic, 
-                    "script": script_text, 
-                    "assigned_to": target_client,
-                    "dna": visual_dna
-                })
-                with c2: 
-                    st.subheader("💎 THE ARCHITECTED SCRIPT")
-                    st.markdown(script_text)
-                    st.divider()
-                    st.info(f"🧬 **VISUAL DNA (FOR EDITORS):**\n{visual_dna}")
-                
+        with st.expander("👤 COMPETITOR SHADOW"):
+            c_hook = st.text_area("Their Narrative")
+
+        if st.button("🚀 Architect"):
+            if topic:
+                with st.spinner("🌑 PROCESSING..."):
+                    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                    prompt = f"Write a {platform} script about {topic}. Tone: {tone_choice}."
+                    if c_hook: prompt += f" Counter-strike this claim: {c_hook}"
+                    
+                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                    txt = res.choices[0].message.content
+                    
+                    # FIXED: Passing correct variables to DNA function
+                    dna_profile = generate_visual_dna(platform, tone_choice)
+                    
+                    st.session_state.script_history.append({
+                        "topic": topic, "script": txt, "assigned_to": target_client, "dna": dna_profile
+                    })
+                    with c2: 
+                        st.markdown(txt)
+                        st.info(f"🧬 **VISUAL DNA:** {dna_profile}")                
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
     
@@ -484,6 +470,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
