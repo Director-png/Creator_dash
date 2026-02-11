@@ -311,15 +311,52 @@ if nav == "💎 Script Architect":
         # --- INPUT 5: COMPETITOR LOGIC ---
         with st.expander("👤 COMPETITOR SHADOW"):
             c_hook = st.text_area("Their Narrative", key="arch_hook_final")
-
-        # --- THE EXECUTION BUTTON ---
+# --- THE EXECUTION BUTTON ---
         if st.button("🚀 ARCHITECT & TRANSMIT", use_container_width=True):
             if not topic:
                 st.error("Director, the Topic field cannot be empty.")
             else:
                 with st.spinner("🌑 ARCHITECTING..."):
-                    # [Your Groq logic here]
-                    st.success("Drafting script...")
+                    try:
+                        # 1. INITIALIZE GROQ
+                        groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                        
+                        # 2. CRAFT THE PROMPT
+                        prompt = f"""
+                        System: VOID OS Content Architect.
+                        Platform: {platform}
+                        Topic: {topic}
+                        Tone: {tone_choice}
+                        Competitor Angle: {c_hook if c_hook else 'None'}
+                        
+                        Task: Write a high-retention script with a 1-second hook.
+                        """
+                        
+                        # 3. CALL THE MODEL
+                        res = groq_c.chat.completions.create(
+                            model="llama-3.3-70b-versatile", 
+                            messages=[{"role": "user", "content": prompt}]
+                        )
+                        
+                        txt = res.choices[0].message.content
+                        dna_profile = generate_visual_dna(platform, tone_choice)
+                        
+                        # 4. TRANSMIT TO DATABASE
+                        transmit_status = transmit_script(target_client, platform, topic, txt, dna_profile)
+                        
+                        # 5. DISPLAY RESULTS IN THE SECOND COLUMN
+                        with c2:
+                            st.subheader("💎 GENERATED ARCHIVE")
+                            st.markdown(txt)
+                            st.divider()
+                            st.caption(f"🧬 DNA: {dna_profile}")
+                            if transmit_status:
+                                st.success("⚔️ BROADCAST COMPLETE: Script synced to Vault.")
+                            else:
+                                st.warning("⚠️ Script generated, but Transmission failed.")
+                                
+                    except Exception as e:
+                        st.error(f"Intelligence Failure: {e}")
 
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL</h1>", unsafe_allow_html=True)
@@ -424,6 +461,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
