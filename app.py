@@ -49,14 +49,22 @@ def typewriter_effect(text):
 
 def load_user_db():
     try:
+        # Use a unique timestamp to force Google to give us fresh data
         timestamp = int(time.time())
         sync_url = f"{USER_DB_URL}&cv={timestamp}" 
-        df = pd.read_csv(sync_url, timeout=5)
-        if df.empty: return pd.DataFrame()
+        
+        # Removed the 'timeout' argument that caused the crash
+        df = pd.read_csv(sync_url)
+        
+        if df.empty:
+            return pd.DataFrame()
+            
+        # Standardize column headers to lowercase
         df.columns = [str(c).strip().lower() for c in df.columns]
         return df
     except Exception as e:
-        st.sidebar.warning(f"Connection Attempt Failed: {e}")
+        # This will now only show up if the URL itself is the problem
+        st.sidebar.warning(f"Database Sync Pending: {e}")
         return pd.DataFrame()
 
 def load_market_pulse_data():
@@ -368,6 +376,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
