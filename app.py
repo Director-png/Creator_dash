@@ -194,7 +194,7 @@ if nav == "📊 Dashboard" and st.session_state.user_role == "admin":
             top_trends = pulse_df.sort_values(by='Score', ascending=False).head(5)['Niche'].tolist()
             report = f"VOID OS WEEKLY REPORT\nDATE: {time.strftime('%Y-%m-%d')}\nTOP 5 VIGOR NICHES: {', '.join(top_trends)}"
             st.download_button("Download TXT Report", report, "void_report.txt")
-
+            
     with st.expander("🛠️ Customize Layout"):
         col_edit1, col_edit2 = st.columns(2)
         st.session_state.metric_1_label = col_edit1.text_input("Metric 1 Label", st.session_state.metric_1_label)
@@ -215,6 +215,29 @@ if nav == "📊 Dashboard" and st.session_state.user_role == "admin":
         st.subheader("💡 Daily Directive")
         st.info(st.session_state.daily_directive)
         st.progress(45)
+with st.expander("📝 GENERATE CLIENT WEEKLY REPORT"):
+    report_client = st.selectbox("Select Client for Report", [c['Creator'] for c in st.session_state.creator_db])
+    if st.button("Generate PDF/Text Intelligence"):
+        # Logic to pull their specific stats
+        client_scripts = len([s for s in st.session_state.script_history if s.get('assigned_to') == report_client])
+        
+        report_content = f"""
+        VOID OS INTEL REPORT: {report_client}
+        WEEK ENDING: {time.strftime('%Y-%m-%d')}
+        ------------------------------------------
+        STRATEGY: Pattern Interruption & Vigor Scaling
+        SCRIPTS DELIVERED: {client_scripts}
+        MARKET VOLATILITY: High (AI/Tech focus)
+        
+        DIRECTOR'S NOTE: Your retention is stabilizing. 
+        Move to high-contrast visual DNA for next week's batch.
+        """
+        st.text_area("Report Preview", report_content, height=200)
+        st.download_button("Download Report", report_content, file_name=f"{report_client}_weekly_intel.txt")
+
+
+
+
 
 elif nav == "📡 My Growth Hub":
     st.markdown(f"<h1 style='color: #00d4ff;'>📡 WELCOME, {st.session_state.user_name.upper()}</h1>", unsafe_allow_html=True)
@@ -238,18 +261,16 @@ elif nav == "📡 My Growth Hub":
 elif nav == "💎 Assigned Scripts":
     st.markdown("<h1 style='color: #00ff41;'>💎 YOUR ARCHITECTED SCRIPTS</h1>", unsafe_allow_html=True)
     
-    if not st.session_state.script_history:
-        st.warning("The Director hasn't assigned any scripts to your queue yet. Check back shortly.")
-    else:
-        for i, s in enumerate(reversed(st.session_state.script_history)):
-            with st.expander(f"📜 SCRIPT {i+1}: {s['topic']} ({s['time']})"):
-                st.markdown(s['script'])
-                if 'dna' in s:
-                    st.divider()
-                    st.markdown(f"**🧬 Visual Blueprint:** {s['dna']}")
-                if st.button(f"Mark as Filmed - {i}"):
-                    st.success("Notification sent to the Director.")
+    # FILTER: Only show scripts where 'assigned_to' matches the user's name OR is 'Public'
+    my_scripts = [s for s in st.session_state.script_history if s.get('assigned_to') == st.session_state.user_name or s.get('assigned_to') == "Public/General"]
 
+    if not my_scripts:
+        st.warning("The Director is currently architecting your next batch. Stand by.")
+    else:
+        for s in reversed(my_scripts):
+            with st.expander(f"📜 {s['topic']} - {s['time']}"):
+                st.write(s['script'])
+                st.caption(f"DNA: {s['dna']}")
 
 
 elif nav == "🌐 Global Pulse":
@@ -327,6 +348,26 @@ elif nav == "💎 Script Architect":
                     typewriter_effect(script_res)
                     st.divider()
                     st.info(f"🧬 **CONTENT DNA:**\n{dna_res}")
+# Inside the Script Architect 'if st.button("🚀 Architect Tactical Script"):' block
+# After you generate the script_res:
+
+# ADD THIS DROPDOWN BEFORE THE BUTTON OR INSIDE THE SUCCESS AREA
+target_client = st.selectbox("Assign to Client", ["Public/General"] + [c['Creator'] for c in st.session_state.creator_db])
+
+if st.button("🚀 Architect & Queue"):
+    # ... (Keep your existing Groq generation code here) ...
+    
+    # NEW QUEUE LOGIC:
+    new_script_entry = {
+        "time": time.strftime("%Y-%m-%d %H:%M"),
+        "topic": topic,
+        "script": script_res,
+        "dna": dna_res,
+        "assigned_to": target_client  # This is the key link
+    }
+    st.session_state.script_history.append(new_script_entry)
+    st.success(f"Script queued for {target_client}")
+
 
 elif nav == "💼 Client Pitcher" and st.session_state.user_role == "admin":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
@@ -443,6 +484,7 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
 
 
 
