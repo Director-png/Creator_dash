@@ -274,36 +274,32 @@ elif nav == "⚔️ Trend Duel":
         if not comp.empty: st.bar_chart(data=comp, x='Niche', y='Score')
             
 
-elif nav == "💎 Script Architect":
+if nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
+    
     users_df = load_user_db()
     
-    if not users_df.empty:
-        with st.expander("🔍 DATA STATUS"): st.write(users_df.columns.tolist())
-    
+    # 1. THE CURE FOR 'ZERO ROWS'
+    if users_df.empty:
+        st.error("📡 VOID SIGNAL LOST: The URL is returning no data.")
+        st.info("Check: Is the 'User Database' sheet published as CSV? Does the URL end in output=csv?")
+    else:
+        st.success(f"✅ CONNECTION STABLE. {len(users_df)} Clients Found.")
+
+    # 2. CLIENT LIST LOGIC
     client_options = ["Public/General"]
     if not users_df.empty:
-        client_options += users_df.iloc[:, 1].dropna().unique().tolist()
+        # We try to grab the second column (Index 1) where names usually live
+        db_names = users_df.iloc[:, 1].dropna().unique().tolist()
+        client_options = ["Public/General"] + db_names
 
-    c1, c2 = st.columns([1, 1.2], gap="large")
-    with c1:
-        target_client = st.selectbox("Assign To Target", options=client_options, key="architect_target")
-        platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"], key="platform_selector")
-        topic = st.text_input("Core Topic", key="topic_input")
-        tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"], key="tone_slider")
-        
-        if st.button("🚀 ARCHITECT & TRANSMIT", use_container_width=True):
-            if topic:
-                with st.spinner("🌑 ARCHITECTING..."):
-                    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                    prompt = f"Architect a {platform} script about {topic}. Tone: {tone_choice}."
-                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
-                    txt = res.choices[0].message.content
-                    dna_profile = generate_visual_dna(platform, tone_choice)
-                    transmit_status = transmit_script(target_client, platform, topic, txt, dna_profile)
-                    if transmit_status: st.success("⚔️ BROADCAST COMPLETE")
-                    with c2: st.markdown(txt)
-
+    # 3. THE UI (With a UNIQUE key to stop the crash)
+    target_client = st.selectbox(
+        "Assign To Target", 
+        options=client_options, 
+        key="architect_target_unique_v3" # Change this key if it still crashes!
+    )
+    
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL</h1>", unsafe_allow_html=True)
     # [Pitcher Code Preserved...]
@@ -407,6 +403,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
