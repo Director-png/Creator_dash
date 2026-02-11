@@ -359,18 +359,19 @@ if nav == "💎 Script Architect":
     
     # 1. PULL LIVE CLIENTS FROM YOUR SHEET
     users_df = load_user_db()
+   
     def load_user_db():
     try:
-        # Adding a timestamp helps force Google to give us the freshest data
+        # The logic below must be indented 4 spaces (1 tab)
         df = pd.read_csv(f"{USER_DB_URL}&cache_bus={time.time()}")
         if df.empty:
             st.error("⚠️ The Sheet loaded, but it appears to be EMPTY.")
         df.columns = [str(c).strip().lower() for c in df.columns]
         return df
     except Exception as e:
+        # This part must also be indented
         st.error(f"❌ CONNECTION FAILED: {e}")
-        return pd.DataFrame()
-    
+        return pd.DataFrame()    
     # 2. CLIENT LIST LOGIC (FIXED)
     client_options = ["Public/General"]
     if not users_df.empty:
@@ -543,6 +544,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
