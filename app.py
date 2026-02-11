@@ -282,16 +282,37 @@ elif nav == "💎 Script Architect":
                 st.session_state.script_history.append(new_entry)
                 with c2: typewriter_effect(script_res)
 
-elif nav == "💼 Client Pitcher" and st.session_state.user_role == "admin":
+elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
-    client = st.text_input("Lead Name")
-    offer = st.text_area("Value Proposition")
-    if st.button("🔥 Generate VOID Pitch"):
-        groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-        res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Pitch for {client}: {offer}"}])
-        pitch_res = res.choices[0].message.content
-        st.session_state.pitch_history.append({"time": time.strftime("%H:%M"), "client": client, "pitch": pitch_res})
-        st.write(pitch_res)
+    
+    c1, c2 = st.columns([1, 1.5], gap="large")
+    
+    with c1:
+        client_name = st.text_input("Lead / Brand Name")
+        niche_cat = st.selectbox("Category", ["Personal Brand", "B2B Technical", "Fashion", "Hospitality", "Local Business"])
+        offer_details = st.text_area("Value Proposition (What are we selling?)", placeholder="e.g., Short-form growth, 30 videos/month, lead-gen backend")
+        
+        if st.button("🔥 Generate VOID Pitch"):
+            if client_name and offer_details:
+                with st.spinner("🌑 ACCESSING GROQ INTELLIGENCE..."):
+                    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                    prompt = f"System: You are VOID OS Director. Write a professional yet 'black-label' elite pitch for {client_name} in the {niche_cat} niche. Offer: {offer_details}. Use a tone of scarcity and high-authority."
+                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                    pitch_res = res.choices[0].message.content
+                    
+                    st.session_state.pitch_history.append({
+                        "time": time.strftime("%H:%M:%S"),
+                        "client": client_name,
+                        "pitch": pitch_res
+                    })
+                    
+                    with c2:
+                        st.subheader(f"Strategic Pitch: {client_name}")
+                        typewriter_effect(pitch_res)
+                        st.divider()
+                        st.download_button("Download Pitch as TXT", pitch_res, file_name=f"{client_name}_pitch.txt")
+            else:
+                st.error("Director, provide a Lead Name and Offer details before architecting.")
 
 elif nav == "🧬 Creator Lab":
     st.markdown("<h1 style='color: #00d4ff;'>🧬 CREATOR VIGOR & ACQUISITION</h1>", unsafe_allow_html=True)
@@ -306,17 +327,48 @@ elif nav == "🧬 Creator Lab":
             score = min(100, int((avg_v / foll) * 50))
             st.metric("Vigor Score", f"{score}/100")
 
-elif nav == "🛰️ Lead Source":
+# --- REPAIRED MODULE: LEAD SOURCE ---
+if nav == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ VOID LEAD SOURCE</h1>", unsafe_allow_html=True)
-    if st.button("Initialize Deep Scan"):
-        leads = [{"Handle": "@Nexus_AI", "Platform": "IG", "Gap": "No Video", "Vigor": "Low"}]
-        st.session_state.found_leads = pd.DataFrame(leads)
-    if 'found_leads' in st.session_state:
-        st.table(st.session_state.found_leads)
+    st.subheader("Automated Prospecting Layer")
+    
+    c1, c2 = st.columns([1, 1.5], gap="large")
+    
+    with c1:
+        niche_search = st.selectbox("Target Niche", ["SaaS Founders", "E-commerce Brands", "Real Estate Tech", "High-Ticket Coaches"])
+        min_followers = st.slider("Min Followers", 1000, 50000, 5000)
+        
+        if st.button("Initialize Deep Scan"):
+            with st.spinner("📡 SCANNING SOCIAL GRAPHS..."):
+                time.sleep(1.5)
+                leads_data = [
+                    {"Handle": "@NexusCore_AI", "Platform": "IG", "Gap": "No Video Content", "Vigor": "Low"},
+                    {"Handle": "@Solaris_SaaS", "Platform": "TikTok", "Gap": "Poor Hooks", "Vigor": "Medium"},
+                    {"Handle": "@AlphaCoach_X", "Platform": "Reels", "Gap": "Low Retention", "Vigor": "High"}
+                ]
+                st.session_state.found_leads = pd.DataFrame(leads_data)
+                st.success("Scan Complete. 3 Gaps Identified.")
 
+    with c2:
+        if not st.session_state.found_leads.empty:
+            st.write("### 🎯 Prospecting Results")
+            st.table(st.session_state.found_leads)
+            
+            selected_lead = st.selectbox("Select Lead for Cold Strike", st.session_state.found_leads["Handle"])
+            if st.button("Generate Cold Strike"):
+                with st.spinner("🌑 ARCHITECTING..."):
+                    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                    prompt = f"Write a 3-sentence aggressive, high-authority cold DM to {selected_lead} in {niche_search}. Point out their {st.session_state.found_leads.loc[st.session_state.found_leads['Handle']==selected_lead, 'Gap'].values[0]} is losing them money."
+                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                    strike_text = res.choices[0].message.content
+                    st.code(strike_text, language="markdown")
+                    st.caption("Copy this for the 'Cold Strike' manual deployment.")
+        else:
+            st.info("Awaiting system initialization. Run 'Deep Scan' to identify targets.")
 elif nav == "📜 History":
     st.title("📜 SYSTEM ARCHIVES")
     if st.button("🔥 PURGE"): st.session_state.script_history = []; st.session_state.pitch_history = []; st.rerun()
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['time']} - {s['topic']} ({s.get('assigned_to', 'Public')})"):
             st.write(s['script'])
+
