@@ -353,79 +353,81 @@ def transmit_script(client, platform, topic, script, dna):
     except:
         return False
 
-# --- 2. THE RESTORED ARCHITECT SECTOR ---
+# --- SCRIPT ARCHITECT (WITH LIVE CLIENT SYNC) ---
 if nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
     
-    # Force the UI to render by loading the DB first
+    # 1. PULL LIVE CLIENTS FROM YOUR SHEET
     users_df = load_user_db()
     
-    # Layout Grid
+    # 2. CLIENT LIST LOGIC (FIXED)
+    client_options = ["Public/General"]
+    if not users_df.empty:
+        try:
+            # We assume Column 1 (index 1) is the Name in your User DB Sheet
+            # Using .tolist() to feed the selectbox
+            db_names = users_df.iloc[:, 1].dropna().unique().tolist()
+            client_options = ["Public/General"] + db_names
+            st.success(f"🛰️ {len(db_names)} Client Profiles Synced from Cloud.")
+        except Exception as e:
+            st.error(f"⚠️ Column Sync Error: {e}")
+            client_options = ["Public/General", "Error Loading DB"]
+    else:
+        st.warning("📡 Connecting to User Database... (Ensure CSV URL is correct)")
+
+    # 3. THE RESTORED UI
     c1, c2 = st.columns([1, 1.2], gap="large")
     
     with c1:
-        st.subheader("Configuration")
-        # 1. Target Selection
-        client_list = ["Public"]
-        if not users_df.empty:
-            client_list = ["Public"] + users_df.iloc[:, 1].tolist()
+        target_client = st.selectbox("Assign To Target", client_options)
         
-        target_client = st.selectbox("Assign To Client", client_list)
-        
-        # 2. Platform Selection
+        # AUTO-NICHE DETECTION (The "Lead Form" Integration)
+        # If a client is selected, find their niche in the same row
+        current_niche = "Viral Growth" # Default
+        if target_client != "Public/General" and not users_df.empty:
+            try:
+                # Find the row where the name matches the target_client
+                client_row = users_df[users_df.iloc[:, 1] == target_client]
+                if not client_row.empty:
+                    # Column 3 (index 3) is usually the Niche
+                    current_niche = client_row.iloc[0, 3]
+                    st.caption(f"🎯 TARGET NICHE: **{current_niche}**")
+            except:
+                pass
+
         platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
-        
-        # 3. Topic & Tone
-        topic = st.text_input("Core Topic", placeholder="Enter the content focus...")
+        topic = st.text_input("Core Topic")
         tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"])
         
-        # 4. Competitor Logic
         with st.expander("👤 COMPETITOR SHADOW"):
-            c_hook = st.text_area("Their Current Narrative", placeholder="What are they saying?")
+            c_hook = st.text_area("Their Narrative")
 
-        # 5. EXECUTION BUTTON
         if st.button("🚀 ARCHITECT & TRANSMIT", use_container_width=True):
-            if not topic:
-                st.error("Director, the Topic field cannot be empty.")
-            else:
-                with st.spinner("🌑 ACCESSING GROQ LLAMA-3..."):
-                    try:
-                        groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                        
-                        # Build the context
-                        prompt = f"Architect a {platform} script about {topic}. Tone: {tone_choice}."
-                        if c_hook:
-                            prompt += f" This is a Counter-Strike. Disprove this narrative: {c_hook}"
-                        
-                        res = groq_c.chat.completions.create(
-                            model="llama-3.3-70b-versatile",
-                            messages=[{"role": "user", "content": prompt}]
-                        )
-                        
-                        script_content = res.choices[0].message.content
-                        dna_profile = generate_visual_dna(platform, tone_choice)
-                        
-                        # BROADCAST TO GOOGLE SHEET
-                        transmit_status = transmit_script(target_client, platform, topic, script_content, dna_profile)
-                        
-                        # Store in session for immediate preview
-                        st.session_state.script_history.append({
-                            "topic": topic, "script": script_content, "assigned_to": target_client, "dna": dna_profile
-                        })
-                        
-                        if transmit_status:
-                            st.success(f"⚔️ SCRIPT BROADCASTED TO {target_client.upper()}")
-                        else:
-                            st.warning("Script created but Transmission to Cloud failed. Check Form IDs.")
-                            
-                        with c2:
-                            st.subheader("💎 ARCHITECTED OUTPUT")
-                            st.markdown(script_content)
-                            st.info(f"🧬 **VISUAL DNA:** {dna_profile}")
-                            
-                    except Exception as e:
-                        st.error(f"Architectural Failure: {e}")
+            if topic:
+                with st.spinner("🌑 ARCHITECTING..."):
+                    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
                     
+                    # TACTICAL PROMPT USING THE CLIENT'S NICHE
+                    prompt = f"System: VOID OS. Architect a {platform} script for a client in the {current_niche} niche. Topic: {topic}. Tone: {tone_choice}."
+                    if c_hook: prompt += f" DISPROVE THIS: {c_hook}"
+                    
+                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                    txt = res.choices[0].message.content
+                    dna_profile = generate_visual_dna(platform, tone_choice)
+                    
+                    # BROADCAST
+                    transmit_status = transmit_script(target_client, platform, topic, txt, dna_profile)
+                    
+                    if transmit_status:
+                        st.success("⚔️ BROADCAST COMPLETE")
+                    
+                    with c2:
+                        st.subheader("💎 OUTPUT")
+                        st.markdown(txt)
+            else:
+                st.error("Topic Required.")
+
+
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
     
@@ -530,6 +532,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
