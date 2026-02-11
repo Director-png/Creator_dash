@@ -6,7 +6,25 @@ import requests
 import feedparser
 from bs4 import BeautifulSoup
 from gspread_pandas import Spread # Ensure this is installed
+from streamlit_lottie import st_lottie
+import time
 
+def load_lottieurl(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+# Matrix/System-style animation
+lottie_loading = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_fcfjwiyb.json")
+
+if 'first_load' not in st.session_state:
+    st_lottie(lottie_loading, height=300, key="initial_load")
+    st.markdown("<h2 style='text-align: center;'>INITIALIZING VOID OS...</h2>", unsafe_allow_html=True)
+    time.sleep(2.5) # Forced delay for "Cool Factor"
+    st.session_state.first_load = True
+    st.rerun()
+    
 # Replace the URL below with the "Published" CSV link from Step 1
 PULSE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
 
@@ -173,6 +191,7 @@ if nav == "📊 Dashboard":
         st.subheader("💡 Daily Directive")
         st.info(st.session_state.daily_directive)
         st.progress(45)
+        
 
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
@@ -302,6 +321,7 @@ elif nav == "💎 Script Architect":
                 res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
 
 
 
