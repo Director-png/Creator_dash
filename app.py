@@ -161,7 +161,6 @@ elif nav == "💎 Script Architect":
 
 elif nav == "💼 Client Pitcher" and st.session_state.user_role == "admin":
     st.title("💼 CLIENT PITCHER")
-    elif nav == "💼 Client Pitcher" and st.session_state.user_role == "admin":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns([1, 1.5])
     with c1:
@@ -185,3 +184,4 @@ elif nav == "📜 History":
         with st.expander(f"{s['time']} - {s['topic']}"):
             st.write(s['script'])
             st.caption(f"DNA: {s.get('dna', 'N/A')}")
+
