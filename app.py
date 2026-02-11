@@ -273,6 +273,48 @@ elif nav == "💼 Client Pitcher" and st.session_state.user_role == "admin":
                 pitch_res = res.choices[0].message.content
                 st.session_state.pitch_history.append({"time": time.strftime("%H:%M:%S"), "client": client, "pitch": pitch_res})
                 with c2: typewriter_effect(pitch_res)
+elif nav == "🧬 Creator Lab":
+    st.markdown("<h1 style='color: #00d4ff;'>🧬 CREATOR VIGOR & ACQUISITION</h1>", unsafe_allow_html=True)
+    
+    tab_crm, tab_vigor = st.tabs(["🛰️ Acquisition Pipeline", "⚡ Vigor Calculator"])
+    
+    with tab_crm:
+        st.subheader("Creator Acquisition Tracking")
+        # Placeholder for the CRM table
+        if 'creator_db' not in st.session_state:
+            st.session_state.creator_db = pd.DataFrame([
+                {"Creator": "TechVanguard", "Niche": "AI", "Status": "Scouted", "Vigor": 82},
+                {"Creator": "CyberStyle", "Niche": "Fashion", "Status": "Negotiation", "Vigor": 91}
+            ])
+        
+        edited_df = st.data_editor(st.session_state.creator_db, num_rows="dynamic", use_container_width=True)
+        st.session_state.creator_db = edited_df
+        st.caption("Double-click cells to edit status or add new leads. VOID saves changes locally for this session.")
+
+    with tab_vigor:
+        st.subheader("The Vigor Index Logic")
+        c1, c2 = st.columns([1, 1.5])
+        with c1:
+            name = st.text_input("Creator Name")
+            avg_views = st.number_input("Average Views (Last 5 videos)", value=1000)
+            followers = st.number_input("Follower Count", value=5000)
+            
+            if st.button("Calculate Vigor Score"):
+                # The "Director's Formula"
+                # Logic: We value views-to-follower ratio. High views with low followers = Viral Vigor.
+                ratio = avg_views / followers
+                vigor_score = min(100, int(ratio * 50)) # Weighted multiplier
+                
+                with c2:
+                    st.metric("Vigor Score", f"{vigor_score}/100")
+                    if vigor_score > 80:
+                        st.success(f"🔥 HIGH VIGOR: {name} is currently outperforming their weight class. Sign immediately.")
+                    elif vigor_score > 50:
+                        st.warning("🟡 STEADY: Consistent growth. Good for long-form stability.")
+                    else:
+                        st.error("🔴 STAGNANT: Low velocity. Avoid unless the niche is ultra-specific.")
+                    
+                    st.info("**Director's Insight:** This score measures 'Attention Leverage'. A high score means the creator's content is being pushed by the algorithm beyond their existing audience.")
 
 elif nav == "📜 History":
     st.title("📜 SYSTEM ARCHIVES")
@@ -294,3 +336,4 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
