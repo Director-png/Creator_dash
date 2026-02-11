@@ -250,7 +250,18 @@ elif nav == "💎 Script Architect":
 
 elif nav == "📜 History":
     st.title("📜 SYSTEM ARCHIVES")
-    # ONLY CREATE TABS IF ADMIN, OTHERWISE JUST SHOW SCRIPTS
+    
+    # --- PURGE LOGS BUTTON ---
+    with st.expander("⚠️ SYSTEM MAINTENANCE"):
+        st.warning("Action will permanently erase all local session logs.")
+        if st.button("🔥 PURGE ALL SYSTEM LOGS", use_container_width=True):
+            st.session_state.script_history = []
+            st.session_state.pitch_history = []
+            st.success("Session logs annihilated.")
+            time.sleep(1)
+            st.rerun()
+    
+    # --- HISTORY VIEW ---
     if st.session_state.user_role == "admin":
         t_scripts, t_secret = st.tabs(["Script History", "Director Intelligence"])
         with t_scripts:
@@ -262,7 +273,8 @@ elif nav == "📜 History":
             for p in reversed(st.session_state.pitch_history):
                 with st.expander(f"🕒 {p['time']} - Lead: {p['client']}"): st.write(p['pitch'])
     else:
-        # Standard user only sees this
+        # Standard user only sees scripts, no tabs shown
+        st.subheader("Script Archives")
         if not st.session_state.script_history: st.write("No scripts archived.")
         for s in reversed(st.session_state.script_history):
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): st.write(s['script'])
