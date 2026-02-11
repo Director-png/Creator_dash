@@ -144,42 +144,47 @@ if 'creator_db' not in st.session_state:
 
 # --- GATEKEEPER ---
 if not st.session_state.logged_in:
+    st.set_page_config(page_title="VOID LOGIN", page_icon="🌑")
     st.markdown("<h1 style='text-align: center; color: #00ff41;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
+    
     t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
     
     with t1:
-        c_l, c_mid, c_r = st.columns([1, 2, 1])
-        with c_mid:
-            email_in = st.text_input("Email").lower().strip()
-            pw_in = st.text_input("Password", type="password")
-            if st.button("Access System"):
-                users = load_user_db()
-                if email_in == "admin" and pw_in == "1234":
-                    st.session_state.logged_in = True; st.session_state.user_name = "Master Director"
-                    st.session_state.user_role = "admin"; st.rerun()
-                elif not users.empty:
-                    # Column 2 = Email, Column 4 = Password, Column 3 = Niche
-                    match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & (users.iloc[:, 4].astype(str) == pw_in)]
-                    if not match.empty:
-                        st.session_state.logged_in = True
-                        st.session_state.user_name = match.iloc[0, 1]
-                        st.session_state.user_niche = match.iloc[0, 3]
-                        st.session_state.user_role = "user"
-                        st.rerun()
-                    else: st.error("Access Denied: Invalid Credentials")
+        email_in = st.text_input("Email").lower().strip()
+        pw_in = st.text_input("Password", type="password")
+        if st.button("Access System", use_container_width=True):
+            users = load_user_db()
+            # Admin Bypass
+            if email_in == "admin" and pw_in == "1234":
+                st.session_state.logged_in = True
+                st.session_state.user_name = "Master Director"
+                st.session_state.user_role = "admin"
+                st.rerun()
+            # Database Match
+            elif not users.empty:
+                # Col 2: Email | Col 4: Password | Col 3: Niche
+                match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & (users.iloc[:, 4].astype(str) == pw_in)]
+                if not match.empty:
+                    st.session_state.logged_in = True
+                    st.session_state.user_name = match.iloc[0, 1]
+                    st.session_state.user_niche = match.iloc[0, 3]
+                    st.session_state.user_role = "user"
+                    st.rerun()
+                else: st.error("Credentials Rejected.")
 
     with t2:
-        c_l, c_mid, c_r = st.columns([1, 2, 1])
-        with c_mid:
-            with st.form("reg"):
-                n = st.text_input("Name"); e = st.text_input("Email")
-                ni = st.text_input("Niche (e.g., Real Estate, Fitness)"); p = st.text_input("Password", type="password")
-                if st.form_submit_button("Transmit Registration"):
-                    # Mapping to your Google Form entries
-                    payload = {"entry.483203499": n, "entry.1873870532": e, "entry.1906780868": ni, "entry.1396549807": p}
-                    requests.post(FORM_POST_URL, data=payload)
-                    st.success("Data Transmitted. Awaiting Director Approval.")
+        with st.form("reg"):
+            st.subheader("New Client Onboarding")
+            n = st.text_input("Name")
+            e = st.text_input("Email")
+            ni = st.text_input("Niche (Focus Area)")
+            p = st.text_input("Password", type="password")
+            if st.form_submit_button("Submit to VOID"):
+                payload = {"entry.483203499": n, "entry.1873870532": e, "entry.1906780868": ni, "entry.1396549807": p}
+                requests.post(FORM_POST_URL, data=payload)
+                st.success("Transmission Received. Try logging in after 5 seconds.")
     st.stop()
+
 # --- SIDEBAR ---
 with st.sidebar:
     st.markdown("<h1 style='text-align: center; color: #00d4ff;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
@@ -446,6 +451,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['time']} - {s['topic']} ({s.get('assigned_to', 'Public')})"):
             st.write(s['script'])
+
 
 
 
