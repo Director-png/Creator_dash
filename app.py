@@ -1,5 +1,5 @@
 import streamlit as st
-import pd as pd
+import pandas as pd
 from groq import Groq
 import plotly.express as px
 import requests
@@ -277,3 +277,4 @@ elif nav == "💎 Script Architect":
                     typewriter_effect(script_result)
                     st.session_state.script_history.append({"time": time.strftime("%H:%M:%S"), "topic": topic_input, "script": script_result})
                 except Exception as e: st.error(f"Error: {e}")
+
