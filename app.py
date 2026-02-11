@@ -20,16 +20,23 @@ lottie_loading = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_f
 
 def load_user_db():
     try:
-        # The logic below must be indented 4 spaces (1 tab)
-        df = pd.read_csv(f"{USER_DB_URL}&cache_bus={time.time()}")
+        # 1. Force refresh to bypass Google's cache
+        sync_url = f"{USER_DB_URL}&cache_bus={time.time()}"
+        df = pd.read_csv(sync_url)
+        
+        # DEBUG: Remove this line once it works
+        # st.write(f"Rows found: {len(df)}") 
+
         if df.empty:
-            st.error("⚠️ The Sheet loaded, but it appears to be EMPTY.")
+            return pd.DataFrame()
+            
+        # 2. Standardize column names
         df.columns = [str(c).strip().lower() for c in df.columns]
         return df
     except Exception as e:
-        # This part must also be indented
-        st.error(f"❌ CONNECTION FAILED: {e}")
-        return pd.DataFrame()   
+        # This will tell us if the URL is broken or the Sheet is private
+        st.sidebar.error(f"Sync Failure: {e}")
+        return pd.DataFrame()
         
 # --- 1. SESSION STATE (CRITICAL FIX: Initialize FIRST) ---
 if 'found_leads' not in st.session_state:
@@ -380,7 +387,7 @@ if nav == "💎 Script Architect":
         try:
             # We assume Column 1 (index 1) is the Name in your User DB Sheet
             # Using .tolist() to feed the selectbox
-            db_names = users_df.iloc[:, 1].dropna().unique().tolist()
+            db_names = users_df.iloc[:, 0].dropna().unique().tolist()
             client_options = ["Public/General"] + db_names
             st.success(f"🛰️ {len(db_names)} Client Profiles Synced from Cloud.")
         except Exception as e:
@@ -546,6 +553,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
