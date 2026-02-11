@@ -303,44 +303,49 @@ elif nav == "⚔️ Trend Duel":
 
 # ... (Keep your imports and data links at the top) ...
 
-# --- SCRIPT ARCHITECT (TACTICAL VERSION) ---
+# --- SCRIPT ARCHITECT (PLATFORM-AWARE VERSION) ---
 elif nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
     users_df = load_user_db()
     
     c1, c2 = st.columns([1, 1.5], gap="large")
     with c1:
-        # 1. THE TARGET
+        # 1. CLIENT & NICHE
         target_client = st.selectbox("Assign to Client", ["Public/General"] + users_df.iloc[:, 1].tolist() if not users_df.empty else ["Public/General"])
+        client_niche = users_df[users_df.iloc[:, 1] == target_client].iloc[0, 3] if (target_client != "Public/General" and not users_df.empty) else "High-Level Growth"
+
+        # 2. PLATFORM SELECTION (RESTORED)
+        platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form", "X/Twitter Thread"])
         
-        if target_client != "Public/General" and not users_df.empty:
-            client_niche = users_df[users_df.iloc[:, 1] == target_client].iloc[0, 3]
-            st.caption(f"Context: {client_niche}")
-        else:
-            client_niche = "High-Level Growth"
+        # 3. CORE TOPIC
+        topic = st.text_input("Core Topic")
 
-        # 2. THE TOPIC
-        topic = st.text_input("Core Topic", placeholder="e.g., The death of traditional SaaS")
-
-        # 3. THE COUNTER-STRIKE (RESTORED)
-        with st.expander("👤 COMPETITOR SHADOW (OPTIONAL)"):
-            comp_name = st.text_input("Competitor Name/Handle")
-            comp_hook = st.text_area("Their Current Narrative/Hook", placeholder="What are they saying that we need to disprove?")
-            st.info("VOID will architect a counter-narrative to position the client as the superior authority.")
+        # 4. COUNTER-STRIKE LOGIC
+        with st.expander("👤 COMPETITOR SHADOW"):
+            comp_name = st.text_input("Competitor Name")
+            comp_hook = st.text_area("Their Narrative")
 
         tone = st.select_slider("Vigor Level", ["Professional", "Aggressive", "Elite/Alpha"])
         
         if st.button("🚀 Architect Tactical Script"):
             if topic:
-                with st.spinner("🌑 ANALYZING COMPETITIVE GAPS..."):
+                with st.spinner(f"🌑 ARCHITECTING {platform.upper()} STRATEGY..."):
                     groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
                     
-                    # TACTICAL PROMPT INJECTION
+                    # PLATFORM-SPECIFIC INSTRUCTIONS
+                    platform_constraints = {
+                        "Instagram Reels": "Focus on a 3-second visual hook and rapid-fire pacing. Max 150 words.",
+                        "YouTube Shorts": "Focus on a loopable ending and high-curiosity gap. Max 140 words.",
+                        "TikTok": "Focus on 'raw' authenticity and trend-integration. Max 200 words.",
+                        "YouTube Long-form": "Structure with Intro, Body, and Outro. Include B-roll suggestions. 800+ words.",
+                        "X/Twitter Thread": "Format as a high-authority thread with hooks and bullet points."
+                    }
+                    
                     system_msg = f"You are VOID OS, a tactical content architect for {client_niche}."
-                    user_msg = f"Architect a high-retention script on '{topic}'. Tone: {tone}."
+                    user_msg = f"Platform: {platform}. Constraints: {platform_constraints[platform]}. Topic: {topic}. Tone: {tone}."
                     
                     if comp_hook:
-                        user_msg += f" IMPORTANT: This is a COUNTER-STRIKE. A competitor ({comp_name}) is claiming: '{comp_hook}'. Your job is to dismantle their logic and prove why our client's approach is the only viable path."
+                        user_msg += f" Counter-Strike vs {comp_name}: Disprove '{comp_hook}'."
                     
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
@@ -356,18 +361,15 @@ elif nav == "💎 Script Architect":
                         "topic": topic, 
                         "script": script_text, 
                         "assigned_to": target_client,
-                        "type": "Counter-Strike" if comp_hook else "Standard"
+                        "platform": platform
                     })
                     
                     with c2:
-                        if comp_hook:
-                            st.warning(f"⚔️ COUNTER-STRIKE ACTIVE: Subverting {comp_name}")
+                        st.subheader(f"⚡ {platform} Script")
                         st.markdown(script_text)
             else:
-                st.error("Topic is required to initialize the architect.")
-
-# ... (Keep the rest of the history and dashboard modules) ...
-
+                st.error("Topic required.")
+                
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
     
@@ -457,6 +459,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['time']} - {s['topic']} ({s.get('assigned_to', 'Public')})"):
             st.write(s['script'])
+
 
 
 
