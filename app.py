@@ -244,24 +244,36 @@ elif nav == "💼 Client Pitcher":
     c1, c2 = st.columns([1, 1.5])
     # ... rest of your code ...
 
-elif nav == "💼 Client Pitcher":
-    st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
-    c1, c2 = st.columns([1, 1.5])
-    with c1:
-        client_name = st.text_input("Business Name")
-        niche_choice = st.selectbox("Niche", ["Real Estate", "E-commerce", "SaaS", "Local Business"])
-        offer = st.text_area("What are you selling?")
-        pitch_btn = st.button("🔥 Generate Power Pitch")
-    with c2:
-        if pitch_btn and client_name:
-            try:
-                groq_client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                prompt = f"Write a cold DM for {client_name} in {niche_choice}. Offer: {offer}. Tone: Minimalist."
-                res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
-                st.markdown("### The Pitch")
-                st.write(res.choices[0].message.content)
-            except Exception as e: st.error(f"Sync Error: {e}")
+function injectMassMarketKeywords() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  
+  // The 'Pillars' you want to expand
+  const categories = "Fitness, Motivation, Discipline, Personal Finance, Mental Health";
+  
+  const prompt = `Generate a list of 50 high-growth sub-niches for 2026 based on these categories: ${categories}. 
+  Format: Return ONLY a comma-separated list of niche names. 
+  Example: AI Fitness Coaching, Digital Minimalism, etc.`;
 
+  const options = {
+    "method": "post",
+    "contentType": "application/json",
+    "headers": {"Authorization": "Bearer " + GROQ_API_KEY},
+    "payload": JSON.stringify({
+      "model": MODEL_NAME,
+      "messages": [{"role": "user", "content": prompt}]
+    })
+  };
+
+  const response = UrlFetchApp.fetch("https://api.groq.com/openai/v1/chat/completions", options);
+  const content = JSON.parse(response.getContentText()).choices[0].message.content;
+  const newKeywords = content.split(",").map(k => [k.trim()]);
+
+  // Append to the bottom of Column A
+  const lastRow = sheet.getLastRow();
+  sheet.getRange(lastRow + 1, 1, newKeywords.length, 1).setValues(newKeywords);
+  
+  Logger.log(newKeywords.length + " Mass Market keywords injected.");
+}
 elif nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
     col1, col2 = st.columns([1, 1.5], gap="large")
@@ -278,6 +290,7 @@ elif nav == "💎 Script Architect":
                 res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
 
 
 
