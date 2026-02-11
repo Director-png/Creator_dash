@@ -301,66 +301,72 @@ elif nav == "⚔️ Trend Duel":
         comp = pulse_df[pulse_df['Niche'].isin(sel)]
         if not comp.empty: st.bar_chart(data=comp, x='Niche', y='Score')
 
-# --- AUTOMATED SCRIPT ARCHITECT ---
-if nav == "💎 Script Architect":
-    st.markdown("<h1 style='color: #00ff41;'>✍️ CONTEXTUAL ARCHITECT</h1>", unsafe_allow_html=True)
-    
-    # 1. LOAD FULL PROFILES
-    user_df = load_user_profiles()
+# ... (Keep your imports and data links at the top) ...
+
+# --- SCRIPT ARCHITECT (TACTICAL VERSION) ---
+elif nav == "💎 Script Architect":
+    st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+    users_df = load_user_db()
     
     c1, c2 = st.columns([1, 1.5], gap="large")
-    
     with c1:
-        # 2. USER SELECTION
-        target_name = st.selectbox("Assign to Client", ["Public/General"] + user_df['name'].tolist())
+        # 1. THE TARGET
+        target_client = st.selectbox("Assign to Client", ["Public/General"] + users_df.iloc[:, 1].tolist() if not users_df.empty else ["Public/General"])
         
-        # 3. AUTO-NICHE IDENTIFICATION (The "Real View" Fix)
-        if target_name != "Public/General":
-            client_niche = user_df[user_df['name'] == target_name]['niche'].values[0]
-            st.success(f"Target Niche Identified: **{client_niche.upper()}**")
+        if target_client != "Public/General" and not users_df.empty:
+            client_niche = users_df[users_df.iloc[:, 1] == target_client].iloc[0, 3]
+            st.caption(f"Context: {client_niche}")
         else:
-            client_niche = "General Value"
-            st.info("No specific niche detected. Using General Context.")
+            client_niche = "High-Level Growth"
 
-        topic = st.text_input("Current Video Topic", placeholder="e.g., Why 99% of people fail")
-        platform = st.selectbox("Platform", ["YouTube Shorts", "Instagram Reels"])
-        tone = st.select_slider("Tone Vigor", options=["Professional", "Aggressive", "Elite"])
+        # 2. THE TOPIC
+        topic = st.text_input("Core Topic", placeholder="e.g., The death of traditional SaaS")
+
+        # 3. THE COUNTER-STRIKE (RESTORED)
+        with st.expander("👤 COMPETITOR SHADOW (OPTIONAL)"):
+            comp_name = st.text_input("Competitor Name/Handle")
+            comp_hook = st.text_area("Their Current Narrative/Hook", placeholder="What are they saying that we need to disprove?")
+            st.info("VOID will architect a counter-narrative to position the client as the superior authority.")
+
+        tone = st.select_slider("Vigor Level", ["Professional", "Aggressive", "Elite/Alpha"])
         
-        if st.button("🚀 Architect Bespoke Script"):
+        if st.button("🚀 Architect Tactical Script"):
             if topic:
-                with st.spinner(f"🌑 ANALYZING {client_niche.upper()} MARKET..."):
+                with st.spinner("🌑 ANALYZING COMPETITIVE GAPS..."):
                     groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
                     
-                    # 4. THE CONTEXTUAL PROMPT (Eliminates manual input)
-                    prompt = f"""
-                    SYSTEM: You are VOID OS. 
-                    CLIENT NICHE: {client_niche}
-                    TOPIC: {topic}
-                    PLATFORM: {platform}
-                    TONE: {tone}
+                    # TACTICAL PROMPT INJECTION
+                    system_msg = f"You are VOID OS, a tactical content architect for {client_niche}."
+                    user_msg = f"Architect a high-retention script on '{topic}'. Tone: {tone}."
                     
-                    TASK: Architect a high-retention script. 
-                    The script MUST be relevant to the {client_niche} industry. 
-                    Use industry-specific terminology to maintain authority.
-                    """
+                    if comp_hook:
+                        user_msg += f" IMPORTANT: This is a COUNTER-STRIKE. A competitor ({comp_name}) is claiming: '{comp_hook}'. Your job is to dismantle their logic and prove why our client's approach is the only viable path."
                     
-                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
-                    script_res = res.choices[0].message.content
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[
+                            {"role": "system", "content": system_msg},
+                            {"role": "user", "content": user_msg}
+                        ]
+                    )
                     
+                    script_text = res.choices[0].message.content
                     st.session_state.script_history.append({
-                        "time": time.strftime("%H:%M"),
-                        "topic": topic,
-                        "client": target_name,
-                        "niche": client_niche,
-                        "script": script_res
+                        "time": time.strftime("%H:%M"), 
+                        "topic": topic, 
+                        "script": script_text, 
+                        "assigned_to": target_client,
+                        "type": "Counter-Strike" if comp_hook else "Standard"
                     })
                     
                     with c2:
-                        st.markdown(f"### ⚡ Generated for {target_name} ({client_niche})")
-                        st.write(script_res)
+                        if comp_hook:
+                            st.warning(f"⚔️ COUNTER-STRIKE ACTIVE: Subverting {comp_name}")
+                        st.markdown(script_text)
             else:
-                st.error("Director, the Topic is required for generation.")
+                st.error("Topic is required to initialize the architect.")
 
+# ... (Keep the rest of the history and dashboard modules) ...
 
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
@@ -451,6 +457,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['time']} - {s['topic']} ({s.get('assigned_to', 'Public')})"):
             st.write(s['script'])
+
 
 
 
