@@ -9,63 +9,98 @@ from gspread_pandas import Spread # Ensure this is installed
 from streamlit_lottie import st_lottie
 import time
 
+# --- ANIMATION UTILITY ---
 def load_lottieurl(url: str):
     r = requests.get(url)
     if r.status_code != 200:
         return None
     return r.json()
 
-# Matrix/System-style animation
+# Lottie Animation Source (System Matrix style)
 lottie_loading = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_fcfjwiyb.json")
 
+# --- 1. CONFIG & CONNECTIONS ---
+st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
+
+# --- 2. STARTING ANIMATION (SPLASH SCREEN) ---
 if 'first_load' not in st.session_state:
-    st_lottie(lottie_loading, height=300, key="initial_load")
-    st.markdown("<h2 style='text-align: center;'>INITIALIZING VOID OS...</h2>", unsafe_allow_html=True)
-    time.sleep(2.5) # Forced delay for "Cool Factor"
+    st.markdown("""
+        <style>
+        .stApp { background-color: #000000; }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    empty_space = st.empty()
+    with empty_space.container():
+        st_lottie(lottie_loading, height=400, key="initial_load")
+        st.markdown("<h1 style='text-align: center; color: #00d4ff; font-family: monospace;'>INITIALIZING VOID OS...</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: #00ff41; font-family: monospace;'>DECRYPTING MARKET INTELLIGENCE LAYER</p>", unsafe_allow_html=True)
+        time.sleep(3.0) # Cinematic delay
+    
+    empty_space.empty()
     st.session_state.first_load = True
     st.rerun()
-    
-# Replace the URL below with the "Published" CSV link from Step 1
+
+# --- 3. GLOBAL CSS ANIMATIONS (Transitions & Glowing Effects) ---
+st.markdown("""
+    <style>
+    /* Global Page Fade-In */
+    .stApp {
+        animation: fadeInPage 1.5s ease-in-out;
+    }
+    @keyframes fadeInPage {
+        0% { opacity: 0; filter: blur(5px); }
+        100% { opacity: 1; filter: blur(0px); }
+    }
+
+    /* Neon Pulse for Metrics */
+    [data-testid="stMetricValue"] {
+        animation: neonPulse 2.5s infinite alternate;
+        color: #00d4ff !important;
+    }
+    @keyframes neonPulse {
+        from { text-shadow: 0 0 2px #00d4ff, 0 0 5px #00d4ff; }
+        to { text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff; }
+    }
+
+    /* Sidebar Smooth Slide */
+    [data-testid="stSidebar"] {
+        animation: slideInSidebar 0.8s ease-out;
+    }
+    @keyframes slideInSidebar {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(0); }
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# --- REST OF YOUR ORIGINAL FUNCTIONS ---
 PULSE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
 
 def load_market_pulse_data():
     try:
-        # 1. Read the CSV
         df = pd.read_csv(PULSE_CSV_URL)
-        
-        # 2. Map your specific Google Sheet headers to VOID OS standards
-        # We lowercase everything first to avoid "Niche" vs "niche" errors
         df.columns = [str(c).strip().lower() for c in df.columns]
-        
         mapping = {
             'niche name': 'Niche',
             'score': 'Score',
-            'news snipett': 'Reason', # Maps your snippet column to the 'Reason' slot
+            'news snipett': 'Reason',
             'growth': 'Growth'
         }
-        
         df = df.rename(columns=mapping)
-
-        # 3. Final safety check
         if 'Niche' not in df.columns:
             st.error(f"Mapping failed. Available: {list(df.columns)}")
             return pd.DataFrame()
-
-        # 4. Clean numeric data
         df['Score'] = pd.to_numeric(df['Score'], errors='coerce').fillna(0)
-        
         return df.dropna(subset=['Niche'])
-        
     except Exception as e:
         st.error(f"VOID Sync Error: {e}")
         return pd.DataFrame()
-
 
 def load_market_data():
     try:
         df = pd.read_csv(MARKET_URL)
         df.columns = [str(c).strip().capitalize() for c in df.columns]
-        # Clean currency/symbols and force numeric
         df.iloc[:, 1] = df.iloc[:, 1].astype(str).replace(r'[%\$,]', '', regex=True)
         df.iloc[:, 1] = pd.to_numeric(df.iloc[:, 1], errors='coerce').fillna(0)
         return df
@@ -91,9 +126,6 @@ def get_intel_image(entry):
             if img and img.get('src'): return img['src']
     except: pass
     return f"https://picsum.photos/seed/{len(entry.title)}/400/250"
-
-# --- 1. CONFIG & CONNECTIONS ---
-st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 
 MARKET_URL = "https://docs.google.com/spreadsheets/d/163haIuPIna3pEY9IDxncPM2kFFsuZ76HfKsULcMu1y4/export?format=csv"
 USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
@@ -191,7 +223,6 @@ if nav == "📊 Dashboard":
         st.subheader("💡 Daily Directive")
         st.info(st.session_state.daily_directive)
         st.progress(45)
-        
 
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
@@ -234,25 +265,19 @@ elif nav == "🌐 Global Pulse":
 
 elif nav == "⚔️ Trend Duel":
     st.title("⚔️ COMPETITIVE INTELLIGENCE MATRIX")
-    
-    # Load the data
     pulse_df = load_market_pulse_data()
     
     if pulse_df.empty:
         st.warning("VOID Sheet is empty. Please run the Apps Script.")
     else:
         st.subheader("🌑 VOID Market Pulse Integration")
-        # Ensure 'Niche' column exists before creating selectbox
         niche_list = pulse_df['Niche'].unique().tolist()
-        
         selected_niches = st.multiselect(
             "Select Niches to Compare",
             options=niche_list,
             default=niche_list[:5] if len(niche_list) > 5 else niche_list
         )
-        
         comparison_df = pulse_df[pulse_df['Niche'].isin(selected_niches)]
-        
         if not comparison_df.empty:
             st.bar_chart(data=comparison_df, x='Niche', y='Score')
             st.dataframe(comparison_df)
@@ -260,7 +285,6 @@ elif nav == "⚔️ Trend Duel":
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns([1, 1.5])
-    
     with c1:
         client_name = st.text_input("Lead Name / Handle")
         niche_category = st.selectbox("Category Type", [
@@ -275,13 +299,10 @@ elif nav == "💼 Client Pitcher":
 
     with c2:
         if pitch_btn and client_name:
-            with st.spinner("Analyzing psychological angle..."):
+            with st.spinner("🌑 ACCESSING VOID COGNITION..."):
                 try:
                     groq_client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                    
-                    # --- FIXED INDENTATION BLOCK ---
                     system_prompt = "You are a world-class high-ticket closer."
-                    
                     if "Fashion" in niche_category:
                         style = "Focus on aesthetic edge, viral trend-jacking, and scarcity. Tone: Sophisticated."
                     elif "Hospitality" in niche_category:
@@ -292,19 +313,14 @@ elif nav == "💼 Client Pitcher":
                         style = "Focus on ROI and efficiency. Tone: Cold and calculated."
                     
                     full_prompt = f"Write a pitch for {client_name}. Style: {style}. Offer: {offer}"
-                    # --- END OF FIXED BLOCK ---
-
                     res = groq_client.chat.completions.create(
                         model="llama-3.3-70b-versatile",
-                        messages=[
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": full_prompt}
-                        ]
+                        messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": full_prompt}]
                     )
                     st.success(res.choices[0].message.content)
                 except Exception as e:
                     st.error(f"Sync Error: {e}")
-                    
+                        
 elif nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
     col1, col2 = st.columns([1, 1.5], gap="large")
@@ -315,20 +331,10 @@ elif nav == "💎 Script Architect":
         generate_btn = st.button("🚀 Architect Script", type="primary")
     with col2:
         if generate_btn and topic_input:
-            try:
-                groq_client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                prompt = f"Write a {platform_choice} script about {topic_input}. Tone: {tone_choice}."
-                res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
-                st.markdown(res.choices[0].message.content)
-            except Exception as e: st.error(f"Error: {e}")
-
-
-
-
-
-
-
-
-
-
-
+            with st.spinner("🌑 COMPILING SCRIPT DATA..."):
+                try:
+                    groq_client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                    prompt = f"Write a {platform_choice} script about {topic_input}. Tone: {tone_choice}."
+                    res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                    st.markdown(res.choices[0].message.content)
+                except Exception as e: st.error(f"Error: {e}")
