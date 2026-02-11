@@ -193,39 +193,67 @@ elif nav == "🌐 Global Pulse":
 elif nav == "⚔️ Trend Duel":
     st.title("⚔️ COMPETITIVE INTELLIGENCE MATRIX")
     
-    # Integrated Market Pulse Data
+    # 1. Load the REAL data from your sheet
     pulse_df = load_market_pulse_data()
     
-    if not pulse_df.empty:
+    if pulse_df.empty:
+        st.warning("VOID Sheet is empty. Please run the Apps Script to generate intelligence.")
+    else:
+        # 2. TOP SECTION: THE LIVE COMPARISON (from Google Sheet)
         st.subheader("🌑 VOID Market Pulse Integration")
         selected_niches = st.multiselect(
-            "Select Niches to Compare (from Live Sheet)",
+            "Select Niches to Compare (Live Sheet Data)",
             options=pulse_df['Niche'].unique(),
-            default=pulse_df['Niche'].nlargest(5, 'Score').tolist()
+            default=pulse_df['Niche'].nlargest(5, 'Score')['Niche'].tolist()
         )
+        
         comparison_df = pulse_df[pulse_df['Niche'].isin(selected_niches)]
-        st.bar_chart(data=comparison_df, x='Niche', y='Score')
-        st.dataframe(comparison_df[['Niche', 'Score', 'Growth', 'Reason']])
+        if not comparison_df.empty:
+            st.bar_chart(data=comparison_df, x='Niche', y='Score')
+            st.dataframe(comparison_df[['Niche', 'Score', 'Growth', 'Reason']])
+        
         st.divider()
 
-    # Original Duel Logic
-    trend_df = pd.DataFrame({
-        'Keyword': ['AI Agents', 'Short-form SaaS', 'UGC Ads', 'Newsletter Alpha', 'Faceless YT', 'High-Ticket DM'],
-        'Growth_Score': [94, 82, 77, 65, 89, 72],
-        'Saturation': [20, 45, 80, 30, 60, 50],
-        'YT_Rank': [5, 4, 3, 4, 5, 2],
-        'IG_Rank': [4, 5, 5, 3, 4, 5],
-        'Monetization': ['High', 'Very High', 'Medium', 'High', 'Medium', 'Extreme']
-    })
-    col_search1, col_search2 = st.columns(2)
-    kw1 = col_search1.selectbox("Primary Keyword", trend_df['Keyword'].unique(), index=0)
-    kw2 = col_search2.selectbox("Challenger Keyword", trend_df['Keyword'].unique(), index=1)
-    d1 = trend_df[trend_df['Keyword'] == kw1].iloc[0]
-    d2 = trend_df[trend_df['Keyword'] == kw2].iloc[0]
-    c1, c2 = st.columns(2)
-    with c1: st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Rank', 'IG Rank'], y=[d1['Growth_Score'], d1['Saturation'], d1['YT_Rank']*20, d1['IG_Rank']*20], color_discrete_sequence=['#00d4ff'], title=f"Stats: {kw1}", height=300), use_container_width=True)
-    with c2: st.plotly_chart(px.bar(x=['Growth', 'Saturation', 'YT Rank', 'IG Rank'], y=[d2['Growth_Score'], d2['Saturation'], d2['YT_Rank']*20, d2['IG_Rank']*20], color_discrete_sequence=['#ff4b4b'], title=f"Stats: {kw2}", height=300), use_container_width=True)
-    st.table(trend_df)
+        # 3. THE DUEL: Head-to-Head Analysis
+        st.subheader("⚔️ Head-to-Head Duel")
+        
+        col_search1, col_search2 = st.columns(2)
+        
+        # Pull names directly from the sheet for the dropdowns
+        niche_list = pulse_df['Niche'].unique().tolist()
+        
+        kw1 = col_search1.selectbox("Primary Keyword", niche_list, index=0)
+        kw2 = col_search2.selectbox("Challenger Keyword", niche_list, index=min(1, len(niche_list)-1))
+        
+        # Extract the data for the two selected niches
+        d1 = pulse_df[pulse_df['Niche'] == kw1].iloc[0]
+        d2 = pulse_df[pulse_df['Niche'] == kw2].iloc[0]
+        
+        c1, c2 = st.columns(2)
+        
+        with c1:
+            st.plotly_chart(px.bar(
+                x=['Opportunity Score'], 
+                y=[d1['Score']], 
+                color_discrete_sequence=['#00d4ff'], 
+                title=f"Stats: {kw1}", 
+                height=300
+            ), use_container_width=True)
+            st.info(f"**Reasoning:** {d1['Reason']}")
+            
+        with c2:
+            st.plotly_chart(px.bar(
+                x=['Opportunity Score'], 
+                y=[d2['Score']], 
+                color_discrete_sequence=['#ff4b4b'], 
+                title=f"Stats: {kw2}", 
+                height=300
+            ), use_container_width=True)
+            st.info(f"**Reasoning:** {d2['Reason']}")
+
+        # 4. SHOW ENTIRE DATABASE FOR OVERVIEW
+        with st.expander("📂 View Complete Intelligence Database"):
+            st.table(pulse_df)
 
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
@@ -261,3 +289,4 @@ elif nav == "💎 Script Architect":
                 res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
