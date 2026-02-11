@@ -158,7 +158,9 @@ if 'user_email' not in st.session_state: st.session_state.user_email = ""
 if 'metric_1_label' not in st.session_state: st.session_state.metric_1_label = "Market Volatility"
 if 'metric_1_val' not in st.session_state: st.session_state.metric_1_val = "High"
 if 'daily_directive' not in st.session_state: st.session_state.daily_directive = "1. Code VOID OS\n2. Draft 3 Scripts\n3. 1 Client Lead\n4. Word is Law"
-
+if 'pitch_history' not in st.session_state: st.session_state.pitch_history = []
+if 'script_history' not in st.session_state: st.session_state.script_history = []
+    
 # --- 4. THE GATEKEEPER ---
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align: center;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
@@ -336,10 +338,16 @@ elif nav == "💼 Client Pitcher":
                         model="llama-3.3-70b-versatile",
                         messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": full_prompt}]
                     )
-                    # Instead of st.success(res.choices[0].message.content)
-                    typewriter_effect(res.choices[0].message.content)
-                except Exception as e:
-                    st.error(f"Sync Error: {e}")
+                   # Inside the 'if pitch_btn' block after getting 'res'
+pitch_result = res.choices[0].message.content
+typewriter_effect(pitch_result)
+
+# SAVE TO LOG
+st.session_state.pitch_history.append({
+    "time": time.strftime("%H:%M:%S"),
+    "client": client_name,
+    "pitch": pitch_result
+})
                         
 elif nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
@@ -356,7 +364,15 @@ elif nav == "💎 Script Architect":
                     groq_client = Groq(api_key=st.secrets["GROQ_API_KEY"])
                     prompt = f"Write a {platform_choice} script about {topic_input}. Tone: {tone_choice}."
                     res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
-                    # Instead of st.markdown(res.choices[0].message.content)
-                    typewriter_effect(res.choices[0].message.content)
-                except Exception as e: st.error(f"Error: {e}")
+                    # Inside the 'if generate_btn' block after getting 'res'
+script_result = res.choices[0].message.content
+typewriter_effect(script_result)
+
+# SAVE TO LOG
+st.session_state.script_history.append({
+    "time": time.strftime("%H:%M:%S"),
+    "topic": topic_input,
+    "script": script_result
+})
+                   
 
