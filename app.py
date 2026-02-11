@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from gspread_pandas import Spread # Ensure this is installed
 
 # Replace the URL below with the "Published" CSV link from Step 1
-PULSE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/YOUR_LONG_ID_HERE/pub?output=csv"
+PULSE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
 
 def load_market_pulse_data():
     try:
@@ -262,6 +262,8 @@ elif nav == "⚔️ Trend Duel":
         # 4. SHOW ENTIRE DATABASE FOR OVERVIEW
         with st.expander("📂 View Complete Intelligence Database"):
             st.table(pulse_df)
+            st.write(f"Debug: Found {len(pulse_df)} rows in the sheet.")
+st.write(pulse_df.head()) # Shows the first 5 rows
 
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
@@ -297,5 +299,6 @@ elif nav == "💎 Script Architect":
                 res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
 
 
