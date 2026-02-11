@@ -374,92 +374,56 @@ def transmit_script(client, platform, topic, script, dna):
     except:
         return False
 
-# --- SCRIPT ARCHITECT (WITH LIVE CLIENT SYNC) ---
-if nav == "💎 Script Architect":
-    st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
-
-    # --- 1. RE-ENGINEERED SYNC FUNCTION ---
-def load_user_db():
-    try:
-        # Force fresh data
-        df = pd.read_csv(f"{USER_DB_URL}&cache={time.time()}")
-        # Clean the column headers immediately
-        df.columns = [str(c).strip().lower() for c in df.columns]
-        return df
-    except Exception as e:
-        st.error(f"Database Offline: {e}")
-        return pd.DataFrame()
-
-# --- 2. THE UPDATED ARCHITECT DROPDOWN ---
+# --- SCRIPT ARCHITECT (WITH DUPLICATE ID FIX) ---
 if nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
     
     users_df = load_user_db()
     
-    # --- SAFETY INSPECTOR (TEMPORARY DEBUG) ---
+    # 1. DEBUG BOX (Only visible to help us fix the 'Public' issue)
     if not users_df.empty:
-        with st.expander("🔍 DEBUG: DATA STRUCTURE"):
-            st.write("Columns found:", users_df.columns.tolist())
-            st.dataframe(users_df.head(2)) # Shows first 2 rows
-    
-    # --- THE CLIENT LIST LOGIC ---
+        with st.expander("🔍 DATA STRUCTURE DIAGNOSTIC"):
+            st.write("Columns detected:", users_df.columns.tolist())
+            st.write("Raw Data Preview:", users_df.head(3))
+    else:
+        st.error("📡 DATA LINK SEVERED: Check your USER_DB_URL and ensure it is 'Published to Web'.")
+
+    # 2. CLIENT LIST LOGIC
     client_options = ["Public/General"]
-    
     if not users_df.empty:
-        # TACTICAL FIX: We look for a column that contains 'name' 
-        # instead of relying on a number like 1 or 2.
+        # Search for any column name that contains "name"
         name_col = [c for c in users_df.columns if 'name' in c]
-        
         if name_col:
             db_names = users_df[name_col[0]].dropna().unique().tolist()
             client_options = ["Public/General"] + db_names
         else:
-            # Fallback if no column is named 'name'
+            # Fallback to column index 1 if no 'name' header found
             db_names = users_df.iloc[:, 1].dropna().unique().tolist()
             client_options = ["Public/General"] + db_names
 
-    # --- RENDER THE UI ---
-    target_client = st.selectbox("Assign To Target", client_options)
-    # ... rest of your UI (Platform, Topic, etc.)
-    
-    # 1. PULL LIVE CLIENTS FROM YOUR SHEET
-    users_df = load_user_db()
-    
-    # 2. CLIENT LIST LOGIC (FIXED)
-    client_options = ["Public/General"]
-    if not users_df.empty:
-        try:
-            # We assume Column 1 (index 1) is the Name in your User DB Sheet
-            # Using .tolist() to feed the selectbox
-            db_names = users_df.iloc[:, 0].dropna().unique().tolist()
-            client_options = ["Public/General"] + db_names
-            st.success(f"🛰️ {len(db_names)} Client Profiles Synced from Cloud.")
-        except Exception as e:
-            st.error(f"⚠️ Column Sync Error: {e}")
-            client_options = ["Public/General", "Error Loading DB"]
-    else:
-        st.warning("📡 Connecting to User Database... (Ensure CSV URL is correct)")
-
-    # 3. THE RESTORED UI
+    # 3. THE UI (With Unique Key to fix the Duplicate ID error)
     c1, c2 = st.columns([1, 1.2], gap="large")
     
     with c1:
-        target_client = st.selectbox("Assign To Target", client_options)
+        # We add 'key="architect_target"' to make this unique
+        target_client = st.selectbox(
+            "Assign To Target", 
+            options=client_options, 
+            key="architect_target" 
+        )
         
-        # AUTO-NICHE DETECTION (The "Lead Form" Integration)
-        # If a client is selected, find their niche in the same row
-        current_niche = "Viral Growth" # Default
-        if target_client != "Public/General" and not users_df.empty:
-            try:
-                # Find the row where the name matches the target_client
-                client_row = users_df[users_df.iloc[:, 1] == target_client]
-                if not client_row.empty:
-                    # Column 3 (index 3) is usually the Niche
-                    current_niche = client_row.iloc[0, 3]
-                    st.caption(f"🎯 TARGET NICHE: **{current_niche}**")
-            except:
-                pass
-
+        platform = st.selectbox(
+            "Platform", 
+            ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"],
+            key="platform_selector"
+        )
+        
+        topic = st.text_input("Core Topic", key="topic_input")
+        tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"], key="tone_slider")
+        
+        # ... rest of your buttons and logic ...
+        
+        
         platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
         topic = st.text_input("Core Topic")
         tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"])
@@ -597,6 +561,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
