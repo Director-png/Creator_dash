@@ -222,7 +222,7 @@ elif nav == "🌐 Global Pulse":
 elif nav == "⚔️ Trend Duel":
     st.title("⚔️ TREND DUEL")
     # [Trend Duel Code Preserved...]
-pulse_df = load_market_pulse_data()
+    pulse_df = load_market_pulse_data()
     if not pulse_df.empty:
         st.subheader("🌑 Market Density Analysis")
         target = st.selectbox("Select Niche to Audit", pulse_df['Niche'].unique())
@@ -268,7 +268,7 @@ elif nav == "💎 Script Architect":
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL</h1>", unsafe_allow_html=True)
     # [Pitcher Code Preserved...]
-c1, c2 = st.columns([1, 1.5], gap="large")
+    c1, c2 = st.columns([1, 1.5], gap="large")
     
     with c1:
         client_name = st.text_input("Lead / Brand Name")
@@ -300,7 +300,7 @@ c1, c2 = st.columns([1, 1.5], gap="large")
 elif nav == "🧬 Creator Lab":
     st.markdown("<h1 style='color: #00d4ff;'>🧬 VIGOR AUDIT</h1>", unsafe_allow_html=True)
     # [Vigor Code Preserved...]
-col_a, col_b = st.columns([1, 1.5])
+    col_a, col_b = st.columns([1, 1.5])
     with col_a:
         st.subheader("Vigor Input")
         c_name = st.text_input("Creator Name")
@@ -324,7 +324,7 @@ col_a, col_b = st.columns([1, 1.5])
 elif nav == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE</h1>", unsafe_allow_html=True)
     # [Lead Source Code Preserved...]
-st.subheader("Automated Prospecting Layer")
+    st.subheader("Automated Prospecting Layer")
     
     c1, c2 = st.columns([1, 1.5], gap="large")
     
@@ -363,10 +363,11 @@ st.subheader("Automated Prospecting Layer")
 elif nav == "📜 History":
     st.title("📜 ARCHIVES")
     # [History Code Preserved...]
-for s in reversed(st.session_state.script_history):
+    for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
