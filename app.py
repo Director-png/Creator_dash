@@ -1,5 +1,5 @@
 import streamlit as st
-import pd as pd
+import pandas as pd
 from groq import Groq
 import plotly.express as px
 import requests
@@ -273,3 +273,4 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"🕒 {s['time']} - {s['topic']} (To: {s.get('assigned_to', 'N/A')})"):
             st.write(s['script'])
+
