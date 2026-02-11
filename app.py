@@ -7,19 +7,27 @@ import feedparser
 from bs4 import BeautifulSoup
 from gspread_pandas import Spread # Ensure this is installed
 
-# --- 2. DATA LOADING FUNCTIONS ---
+# Replace the URL below with the "Published" CSV link from Step 1
+PULSE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/YOUR_LONG_ID_HERE/pub?output=csv"
+
 def load_market_pulse_data():
     try:
-        # Connect to your VOID OS sheet
-        spread = Spread('Market Pulse') 
-        df = spread.sheet_to_df(index=0) # Pulls everything
+        # We use a 'cache_seed' to force a refresh every few minutes
+        df = pd.read_csv(PULSE_CSV_URL)
         
-        # Convert 'Score' to numeric so the charts work
-        df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
-        return df.dropna(subset=['Niche']) # Remove empty rows
-    except:
-        return pd.DataFrame(columns=['Niche', 'Score', 'Growth', 'Reason'])
-
+        # Clean column names (removes spaces and standardizes)
+        df.columns = [str(c).strip().capitalize() for c in df.columns]
+        
+        # Ensure 'Score' is a number
+        if 'Score' in df.columns:
+            df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
+        
+        # Keep only rows where a Niche exists
+        return df.dropna(subset=['Niche'])
+    except Exception as e:
+        st.error(f"Connection Error: {e}")
+        return pd.DataFrame()
+        
 def load_market_data():
     try:
         df = pd.read_csv(MARKET_URL)
@@ -289,4 +297,5 @@ elif nav == "💎 Script Architect":
                 res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
 
