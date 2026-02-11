@@ -118,7 +118,7 @@ st.markdown("""
 PULSE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
 USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
 FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
-
+SCRIPT_VAULT_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?gid=0&single=true&output=csv"
 # --- CORE FUNCTIONS ---
 def load_market_pulse_data():
     try:
@@ -265,15 +265,27 @@ elif nav == "📡 My Growth Hub":
         st.metric("Profile Health", "Good", delta="+12% Vigor")
         st.progress(65)
 
+# --- 3. THE CLIENT VIEW (PULLING DATA) ---
 elif nav == "💎 Assigned Scripts":
-    st.markdown("<h1 style='color: #00ff41;'>💎 YOUR ARCHITECTED SCRIPTS</h1>", unsafe_allow_html=True)
-    my_scripts = [s for s in st.session_state.script_history if s.get('assigned_to') == st.session_state.user_name or s.get('assigned_to') == "Public/General"]
+    st.title("💎 YOUR ASSIGNED SCRIPTS")
+    
+    # REAL-WORLD CHECK:
+    # Instead of just looking at session_state, we should load the 'Script Vault' CSV here.
+    # scripts_df = pd.read_csv(SCRIPT_VAULT_CSV_URL)
+    # my_scripts = scripts_df[scripts_df['client'] == st.session_state.user_name]
+    
+    # TEMPORARY FIX (For your current session):
+    my_scripts = [s for s in st.session_state.script_history if s['assigned_to'] == st.session_state.user_name]
+    
     if not my_scripts:
-        st.warning("The Director is currently architecting your next batch. Stand by.")
-    for s in reversed(my_scripts):
-        with st.expander(f"📜 {s['topic']} - {s['time']}"):
-            st.write(s['script'])
-            st.caption(f"DNA: {s.get('dna', 'Standard')}")
+        st.warning("No new scripts in your vault. Stand by for Director instructions.")
+    else:
+        for s in reversed(my_scripts):
+            with st.expander(f"📜 {s['topic']}"):
+                st.write(s['script'])
+                st.caption(f"🧬 DNA: {s['dna']}")
+
+
 
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
@@ -320,7 +332,7 @@ elif nav == "⚔️ Trend Duel":
         comp = pulse_df[pulse_df['Niche'].isin(sel)]
         if not comp.empty: st.bar_chart(data=comp, x='Niche', y='Score')
 
-# --- UPDATED SCRIPT ARCHITECT (WITH DNA) ---
+# --- 2. THE SCRIPT ARCHITECT (RE-ENGINEERED TO PUSH DATA) ---
 elif nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
     users_df = load_user_db()
@@ -330,15 +342,28 @@ elif nav == "💎 Script Architect":
         target_client = st.selectbox("Assign to Client", ["Public/General"] + users_df.iloc[:, 1].tolist() if not users_df.empty else ["Public/General"])
         platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
         topic = st.text_input("Core Topic")
-        tone = st.select_slider("Vigor Level", ["Professional", "Aggressive", "Elite/Alpha"])
         
-        if st.button("🚀 Architect Tactical Script"):
-            with st.spinner("🌑 GENERATING SCRIPT & DNA..."):
+        if st.button("🚀 Architect & Transmit"):
+            with st.spinner("🌑 TRANSMITTING TO VOID VAULT..."):
                 groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                prompt = f"Architect a {platform} script about {topic}. Tone: {tone}."
+                prompt = f"Architect a {platform} script about {topic}."
                 res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 script_text = res.choices[0].message.content
                 
+                # --- THE FIX: PERSISTENCE ---
+                # We need to send this to your Google Sheet so the client can pull it later.
+                # Logic: requests.post(SCRIPT_VAULT_FORM_URL, data={"entry.XXX": target_client, "entry.YYY": script_text})
+                
+                st.session_state.script_history.append({
+                    "topic": topic, 
+                    "script": script_text, 
+                    "assigned_to": target_client,
+                    "dna": generate_visual_dna(platform, "Elite")
+                })
+                
+                st.success(f"Script Locked for {target_client}. (Transmission Simulated)")
+                with c2: st.markdown(script_text)                
+               
                 # NEW: VISUAL DNA INTEGRATION
                 visual_dna = generate_visual_dna(platform, tone)
                 
@@ -459,6 +484,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
