@@ -236,10 +236,7 @@ with st.expander("📝 GENERATE CLIENT WEEKLY REPORT"):
         st.download_button("Download Report", report_content, file_name=f"{report_client}_weekly_intel.txt")
 
 
-
-
-
-elif nav == "📡 My Growth Hub":
+ elif nav == "📡 My Growth Hub":
     st.markdown(f"<h1 style='color: #00d4ff;'>📡 WELCOME, {st.session_state.user_name.upper()}</h1>", unsafe_allow_html=True)
     
     col1, col2 = st.columns([2, 1])
@@ -484,6 +481,7 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
 
 
 
