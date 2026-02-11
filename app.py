@@ -284,6 +284,60 @@ elif nav == "💎 Script Architect":
                     typewriter_effect(script_res)
                     st.divider()
                     st.info(f"🧬 **CONTENT DNA (Visual Blueprint):**\n{dna_res}")
+# --- ADD TO YOUR UTILITIES ---
+def generate_counter_strike(competitor_topic, user_topic):
+    # This logic creates the "Tactical Pivot"
+    return f"COMPETITOR SHADOW: They are targeting '{competitor_topic}'. Your 'Counter-Strike' angle: Focus on the hidden flaw of their argument regarding {user_topic} to siphon their audience."
+
+# --- UPDATE SCRIPT ARCHITECT MODULE ---
+elif nav == "💎 Script Architect":
+    st.markdown("<h1 style='color: #00ff41;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+    c1, c2 = st.columns([1, 1.5], gap="large")
+    
+    with c1:
+        topic = st.text_input("Focus Topic")
+        
+        # 🛡️ NEW: COMPETITOR SHADOW INPUTS
+        with st.expander("👤 COMPETITOR SHADOW (TACTICAL)"):
+            comp_handle = st.text_input("Competitor Handle/URL")
+            comp_recent_topic = st.text_input("Their Latest Topic")
+            st.caption("VOID will architect a script to counter their current narrative.")
+            
+        platform = st.selectbox("Platform", ["YouTube Shorts", "Instagram Reels", "Long-form"])
+        tone = st.select_slider("Tone", options=["Aggressive", "Professional", "Storyteller"])
+        
+        if st.button("🚀 Architect Tactical Script"):
+            with st.spinner("🌑 ANALYZING COMPETITOR SHADOW..."):
+                groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                
+                # Enhanced Prompt for Tactical Advantage
+                tactical_context = ""
+                if comp_recent_topic:
+                    tactical_context = f"The competitor is talking about {comp_recent_topic}. Create a script that counters or improves upon their points for the topic: {topic}."
+                
+                prompt = f"System: You are VOID OS. {tactical_context} Platform: {platform}. Tone: {tone}. Topic: {topic}. Output a high-retention script."
+                
+                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                script_res = res.choices[0].message.content
+                
+                dna_res = generate_visual_dna(topic, tone)
+                
+                st.session_state.script_history.append({
+                    "time": time.strftime("%H:%M:%S"), 
+                    "topic": topic, 
+                    "script": script_res, 
+                    "dna": dna_res,
+                    "shadow": comp_recent_topic if comp_recent_topic else "None"
+                })
+                
+                with c2: 
+                    if comp_recent_topic:
+                        st.warning(f"⚔️ **COUNTER-STRIKE ACTIVE**: Neutralizing {comp_handle}'s influence on {comp_recent_topic}")
+                    
+                    typewriter_effect(script_res)
+                    st.divider()
+                    st.info(f"🧬 **CONTENT DNA:**\n{dna_res}")
+
 
 elif nav == "📜 History":
     st.title("📜 SYSTEM ARCHIVES")
@@ -308,3 +362,4 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
