@@ -144,10 +144,10 @@ with st.sidebar:
     
     if st.session_state.user_role == "admin":
         # ADD "🧬 Creator Lab" TO THIS LIST
-        options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "🧬 Creator Lab", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
+        options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "🧬 Creator Lab", "💎 Script Architect", "💼 Client Pitcher", "🛰️ Lead Source","📜 History"]
     else:
         # AND THIS LIST (If you want non-admins to see it too)
-        options = ["🌐 Global Pulse", "⚔️ Trend Duel", "🧬 Creator Lab", "💎 Script Architect", "📜 History"]
+        options = ["🌐 Global Pulse", "⚔️ Trend Duel", "💎 Script Architect", "📜 History"]
     nav = st.radio("COMMAND CENTER", options)
     st.divider()
     if st.button("🔓 Terminate Session", use_container_width=True):
@@ -319,6 +319,43 @@ elif nav == "🧬 Creator Lab":
                     
                     st.info("**Director's Insight:** This score measures 'Attention Leverage'. A high score means the creator's content is being pushed by the algorithm beyond their existing audience.")
 
+elif nav == "🛰️ Lead Source":
+    st.markdown("<h1 style='color: #00ff41;'>🛰️ VOID LEAD SOURCE</h1>", unsafe_allow_html=True)
+    
+    st.subheader("Automated Prospecting Layer")
+    c1, c2 = st.columns([1, 1.5])
+    
+    with c1:
+        niche_search = st.selectbox("Target Niche", ["SaaS Founders", "E-commerce Brands", "Real Estate Tech", "High-Ticket Coaches"])
+        min_followers = st.slider("Min Followers", 1000, 50000, 5000)
+        
+        if st.button("Initialize Deep Scan"):
+            with st.spinner("📡 SCANNING SOCIAL GRAPHS..."):
+                time.sleep(2) # Simulating a search
+                # Mock Data for Prospecting
+                leads = [
+                    {"Handle": "@NexusCore_AI", "Platform": "IG", "Gap": "No Video Content", "Vigor": "Low"},
+                    {"Handle": "@Solaris_SaaS", "Platform": "TikTok", "Gap": "Poor Hooks", "Vigor": "Medium"},
+                    {"Handle": "@AlphaCoach_X", "Platform": "Reels", "Gap": "Low Retention", "Vigor": "High"}
+                ]
+                st.session_state.found_leads = pd.DataFrame(leads)
+                st.success("Scan Complete. 3 High-Value Gaps Identified.")
+
+    with c2:
+        if 'found_leads' in st.session_state:
+            st.write("### Target Analysis")
+            st.table(st.session_state.found_leads)
+            
+            selected_lead = st.selectbox("Select Lead to Generate Outreach", st.session_state.found_leads["Handle"])
+            if st.button("Generate Cold Strike"):
+                with st.spinner("🌑 ARCHITECTING OUTREACH..."):
+                    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                    prompt = f"Write a 3-sentence aggressive cold DM to {selected_lead} in the {niche_search} niche. Point out that their video retention is failing and VOID OS can fix it."
+                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                    outreach = res.choices[0].message.content
+                    st.code(outreach, language="markdown")
+                    st.caption("Copy this to your clipboard for the 'Cold Strike'.")
+
 elif nav == "📜 History":
     st.title("📜 SYSTEM ARCHIVES")
     if st.button("🔥 PURGE ALL SYSTEM LOGS", use_container_width=True):
@@ -339,6 +376,7 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
 
 
 
