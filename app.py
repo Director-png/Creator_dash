@@ -142,24 +142,40 @@ if 'creator_db' not in st.session_state:
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align: center; color: #00ff41;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
     t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
+    
     with t1:
         c_l, c_mid, c_r = st.columns([1, 2, 1])
         with c_mid:
             email_in = st.text_input("Email").lower().strip()
             pw_in = st.text_input("Password", type="password")
-            if st.button("Access System", use_container_width=True):
+            if st.button("Access System"):
                 users = load_user_db()
                 if email_in == "admin" and pw_in == "1234":
-                    st.session_state.logged_in = True; st.session_state.user_name = "Master Director"; st.session_state.user_role = "admin"; st.rerun()
+                    st.session_state.logged_in = True; st.session_state.user_name = "Master Director"
+                    st.session_state.user_role = "admin"; st.rerun()
                 elif not users.empty:
+                    # Column 2 = Email, Column 4 = Password, Column 3 = Niche
                     match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & (users.iloc[:, 4].astype(str) == pw_in)]
                     if not match.empty:
-                        st.session_state.logged_in = True; st.session_state.user_name = match.iloc[0, 1]
-                        niche_val = str(match.iloc[0, 3]).lower()
-                        st.session_state.user_role = "admin" if any(x in niche_val for x in ["fitness", "admin"]) else "user"
+                        st.session_state.logged_in = True
+                        st.session_state.user_name = match.iloc[0, 1]
+                        st.session_state.user_niche = match.iloc[0, 3]
+                        st.session_state.user_role = "user"
                         st.rerun()
-    st.stop()
+                    else: st.error("Access Denied: Invalid Credentials")
 
+    with t2:
+        c_l, c_mid, c_r = st.columns([1, 2, 1])
+        with c_mid:
+            with st.form("reg"):
+                n = st.text_input("Name"); e = st.text_input("Email")
+                ni = st.text_input("Niche (e.g., Real Estate, Fitness)"); p = st.text_input("Password", type="password")
+                if st.form_submit_button("Transmit Registration"):
+                    # Mapping to your Google Form entries
+                    payload = {"entry.483203499": n, "entry.1873870532": e, "entry.1906780868": ni, "entry.1396549807": p}
+                    requests.post(FORM_POST_URL, data=payload)
+                    st.success("Data Transmitted. Awaiting Director Approval.")
+    st.stop()
 # --- SIDEBAR ---
 with st.sidebar:
     st.markdown("<h1 style='text-align: center; color: #00d4ff;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
@@ -276,26 +292,66 @@ elif nav == "⚔️ Trend Duel":
         comp = pulse_df[pulse_df['Niche'].isin(sel)]
         if not comp.empty: st.bar_chart(data=comp, x='Niche', y='Score')
 
-elif nav == "💎 Script Architect":
-    st.markdown("<h1 style='color: #00ff41;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+# --- AUTOMATED SCRIPT ARCHITECT ---
+if nav == "💎 Script Architect":
+    st.markdown("<h1 style='color: #00ff41;'>✍️ CONTEXTUAL ARCHITECT</h1>", unsafe_allow_html=True)
+    
+    # 1. LOAD FULL PROFILES
+    user_df = load_user_profiles()
+    
     c1, c2 = st.columns([1, 1.5], gap="large")
+    
     with c1:
-        topic = st.text_input("Focus Topic")
-        target_client = st.selectbox("Assign to Client", ["Public/General"] + [c['Creator'] for _, c in st.session_state.creator_db.iterrows()])
-        platform = st.selectbox("Platform", ["YouTube Shorts", "Instagram Reels", "Long-form"])
-        tone = st.select_slider("Tone", options=["Aggressive", "Professional", "Storyteller"])
+        # 2. USER SELECTION
+        target_name = st.selectbox("Assign to Client", ["Public/General"] + user_df['name'].tolist())
         
-        if st.button("🚀 Architect & Queue"):
-            with st.spinner("🌑 ARCHITECTING..."):
-                groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                prompt = f"Topic: {topic}, Platform: {platform}, Tone: {tone}. High retention script."
-                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
-                script_res = res.choices[0].message.content
-                dna_res = generate_visual_dna(topic, tone)
-                
-                new_entry = {"time": time.strftime("%H:%M"), "topic": topic, "script": script_res, "dna": dna_res, "assigned_to": target_client}
-                st.session_state.script_history.append(new_entry)
-                with c2: typewriter_effect(script_res)
+        # 3. AUTO-NICHE IDENTIFICATION (The "Real View" Fix)
+        if target_name != "Public/General":
+            client_niche = user_df[user_df['name'] == target_name]['niche'].values[0]
+            st.success(f"Target Niche Identified: **{client_niche.upper()}**")
+        else:
+            client_niche = "General Value"
+            st.info("No specific niche detected. Using General Context.")
+
+        topic = st.text_input("Current Video Topic", placeholder="e.g., Why 99% of people fail")
+        platform = st.selectbox("Platform", ["YouTube Shorts", "Instagram Reels"])
+        tone = st.select_slider("Tone Vigor", options=["Professional", "Aggressive", "Elite"])
+        
+        if st.button("🚀 Architect Bespoke Script"):
+            if topic:
+                with st.spinner(f"🌑 ANALYZING {client_niche.upper()} MARKET..."):
+                    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                    
+                    # 4. THE CONTEXTUAL PROMPT (Eliminates manual input)
+                    prompt = f"""
+                    SYSTEM: You are VOID OS. 
+                    CLIENT NICHE: {client_niche}
+                    TOPIC: {topic}
+                    PLATFORM: {platform}
+                    TONE: {tone}
+                    
+                    TASK: Architect a high-retention script. 
+                    The script MUST be relevant to the {client_niche} industry. 
+                    Use industry-specific terminology to maintain authority.
+                    """
+                    
+                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                    script_res = res.choices[0].message.content
+                    
+                    st.session_state.script_history.append({
+                        "time": time.strftime("%H:%M"),
+                        "topic": topic,
+                        "client": target_name,
+                        "niche": client_niche,
+                        "script": script_res
+                    })
+                    
+                    with c2:
+                        st.markdown(f"### ⚡ Generated for {target_name} ({client_niche})")
+                        st.write(script_res)
+            else:
+                st.error("Director, the Topic is required for generation.")
+
 
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
@@ -386,5 +442,6 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['time']} - {s['topic']} ({s.get('assigned_to', 'Public')})"):
             st.write(s['script'])
+
 
 
