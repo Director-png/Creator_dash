@@ -60,7 +60,7 @@ MARKET_URL = "https://docs.google.com/spreadsheets/d/163haIuPIna3pEY9IDxncPM2kFF
 USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
 FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
 
-# --- CORE FUNCTIONS (Logic Untouched) ---
+# --- CORE FUNCTIONS (Unchanged Logic) ---
 def load_market_pulse_data():
     try:
         df = pd.read_csv(PULSE_CSV_URL)
@@ -142,13 +142,13 @@ with st.sidebar:
     st.markdown(f"<p style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</p>", unsafe_allow_html=True)
     
     options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "💎 Script Architect"]
+    # ONLY SHOW CLIENT PITCHER TO ADMIN
     if st.session_state.user_role == "admin": options.append("💼 Client Pitcher")
-    options.append("📜 History") # History tab added here
+    options.append("📜 History") 
     
     nav = st.radio("COMMAND CENTER", options)
     st.divider()
     
-    # History button and Terminate session button placement
     if st.button("🔓 Terminate Session", use_container_width=True):
         st.session_state.logged_in = False; st.rerun()
 
@@ -250,14 +250,19 @@ elif nav == "💎 Script Architect":
 
 elif nav == "📜 History":
     st.title("📜 SYSTEM ARCHIVES")
-    t_scripts, t_secret = st.tabs(["Script History", "Director Intelligence"])
-    with t_scripts:
-        if not st.session_state.script_history: st.write("No scripts archived.")
-        for s in reversed(st.session_state.script_history):
-            with st.expander(f"🕒 {s['time']} - {s['topic']}"): st.write(s['script'])
-    with t_secret:
-        if st.session_state.user_role == "admin":
+    # ONLY CREATE TABS IF ADMIN, OTHERWISE JUST SHOW SCRIPTS
+    if st.session_state.user_role == "admin":
+        t_scripts, t_secret = st.tabs(["Script History", "Director Intelligence"])
+        with t_scripts:
+            if not st.session_state.script_history: st.write("No scripts archived.")
+            for s in reversed(st.session_state.script_history):
+                with st.expander(f"🕒 {s['time']} - {s['topic']}"): st.write(s['script'])
+        with t_secret:
             if not st.session_state.pitch_history: st.write("No intelligence logs found.")
             for p in reversed(st.session_state.pitch_history):
                 with st.expander(f"🕒 {p['time']} - Lead: {p['client']}"): st.write(p['pitch'])
-        else: st.warning("Unauthorized Access.")
+    else:
+        # Standard user only sees this
+        if not st.session_state.script_history: st.write("No scripts archived.")
+        for s in reversed(st.session_state.script_history):
+            with st.expander(f"🕒 {s['time']} - {s['topic']}"): st.write(s['script'])
