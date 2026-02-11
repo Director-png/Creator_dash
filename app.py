@@ -343,7 +343,7 @@ def transmit_script(client, platform, topic, script, dna):
     payload = {
         "entry.546765267": client,   # Client Name Field
         "entry.1077052292": platform, # Platform Field
-        "entry.415250537: topic,    # Topic Field
+        "entry.415250537": topic,    # Topic Field
         "entry.1437097100": script,   # The Script itself
         "entry.1608255172": dna       # Visual DNA
     }
@@ -474,6 +474,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
