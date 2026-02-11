@@ -238,42 +238,63 @@ elif nav == "⚔️ Trend Duel":
             st.bar_chart(data=comparison_df, x='Niche', y='Score')
             st.dataframe(comparison_df)
 
-# --- ENSURE THIS LINE IS ALIGNED WITH THE 'elif' ABOVE ---
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
+    
     c1, c2 = st.columns([1, 1.5])
-    # ... rest of your code ...
+    
+    with c1:
+        client_name = st.text_input("Lead Name / Handle")
+        # Added broader niche categories
+        niche_category = st.selectbox("Category Type", [
+            "Personal Brand (Fitness/Mindset/Discipline)", 
+            "B2B Technical (AI/SaaS/Automation)",
+            "Local Business (Real Estate/Gyms/Dentists)",
+            "Content Creator (YouTube/Newsletter)"
+        ])
+        offer = st.text_area("What's the unique value proposition?")
+        pitch_btn = st.button("🔥 Generate VOID Pitch", type="primary")
 
-function injectMassMarketKeywords() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  
-  // The 'Pillars' you want to expand
-  const categories = "Fitness, Motivation, Discipline, Personal Finance, Mental Health";
-  
-  const prompt = `Generate a list of 50 high-growth sub-niches for 2026 based on these categories: ${categories}. 
-  Format: Return ONLY a comma-separated list of niche names. 
-  Example: AI Fitness Coaching, Digital Minimalism, etc.`;
+    with c2:
+        if pitch_btn and client_name:
+            with st.spinner("Analyzing psychological angle..."):
+                try:
+                    groq_client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                    
+                    # Tactical prompt engineering based on category
+                    system_prompt = "You are a world-class high-ticket closer."
+                    if "Personal Brand" in niche_category:
+                        style = "Focus on community, transformation, and reducing burnout. Tone: Relatable but elite."
+                    elif "B2B" in niche_category:
+                        style = "Focus on ROI, efficiency, and market edge. Tone: Cold, calculated, and professional."
+                    else:
+                        style = "Focus on attention, growth, and monetization. Tone: High energy."
 
-  const options = {
-    "method": "post",
-    "contentType": "application/json",
-    "headers": {"Authorization": "Bearer " + GROQ_API_KEY},
-    "payload": JSON.stringify({
-      "model": MODEL_NAME,
-      "messages": [{"role": "user", "content": prompt}]
-    })
-  };
+                    full_prompt = f"""
+                    Write a 3-part 'Power Pitch' for {client_name}.
+                    Category: {niche_category}
+                    Offer: {offer}
+                    Requirement: {style}
+                    
+                    Structure:
+                    1. The Hook (Pattern Interrupt)
+                    2. The Gap (The problem they don't see yet)
+                    3. The Bridge (How your offer is the only solution)
+                    """
 
-  const response = UrlFetchApp.fetch("https://api.groq.com/openai/v1/chat/completions", options);
-  const content = JSON.parse(response.getContentText()).choices[0].message.content;
-  const newKeywords = content.split(",").map(k => [k.trim()]);
-
-  // Append to the bottom of Column A
-  const lastRow = sheet.getLastRow();
-  sheet.getRange(lastRow + 1, 1, newKeywords.length, 1).setValues(newKeywords);
-  
-  Logger.log(newKeywords.length + " Mass Market keywords injected.");
-}
+                    res = groq_client.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": full_prompt}
+                        ]
+                    )
+                    
+                    st.markdown("### 🌑 Target Intelligence: The Pitch")
+                    st.success(res.choices[0].message.content)
+                    st.caption("Tip: Send this via DM or Email for maximum pattern interrupt.")
+                except Exception as e:
+                    st.error(f"Sync Error: {e}")
 elif nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
     col1, col2 = st.columns([1, 1.5], gap="large")
@@ -290,6 +311,7 @@ elif nav == "💎 Script Architect":
                 res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
 
 
 
