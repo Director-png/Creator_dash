@@ -172,21 +172,18 @@ if not st.session_state.logged_in:
 
 # --- SIDEBAR & NAVIGATION ---
 # --- SIDEBAR & NAVIGATION ---
+# --- SIDEBAR & NAVIGATION ---
 with st.sidebar:
     st.markdown("<h1 style='text-align: center; color: #00d4ff;'>🌑 VOID OS</h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</p>", unsafe_allow_html=True)
     
     if st.session_state.user_role == "admin":
-        # ADD "🧬 Creator Lab" TO THIS LIST
-        options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "🧬 Creator Lab", "💎 Script Architect", "💼 Client Pitcher", "🛰️ Lead Source","📜 History"]
+        options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "🧬 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
     else:
-        # AND THIS LIST (If you want non-admins to see it too)
-        options = ["🌐 Global Pulse", "⚔️ Trend Duel", "💎 Script Architect", "📜 History"]
-    nav = st.radio("COMMAND CENTER", options)
-    st.divider()
-    if st.button("🔓 Terminate Session", use_container_width=True):
-        st.session_state.logged_in = False; st.rerun()
-
+        # THE CLIENT VIEW (Focused only on their growth)
+        options = ["📡 My Growth Hub", "💎 Assigned Scripts", "🌐 Global Pulse"]
+    
+    nav = st.radio("COMMAND CENTER", options, key="void_nav_main")
 # --- MODULES ---
 
 if nav == "📊 Dashboard" and st.session_state.user_role == "admin":
@@ -218,6 +215,42 @@ if nav == "📊 Dashboard" and st.session_state.user_role == "admin":
         st.subheader("💡 Daily Directive")
         st.info(st.session_state.daily_directive)
         st.progress(45)
+
+elif nav == "📡 My Growth Hub":
+    st.markdown(f"<h1 style='color: #00d4ff;'>📡 WELCOME, {st.session_state.user_name.upper()}</h1>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.subheader("Your Strategic Roadmap")
+        st.info("🚀 **Current Phase:** Phase 1 - Authority Building (Days 1-14)")
+        st.markdown("""
+        * **Focus:** Pattern Interrupt Hooks
+        * **Target KPI:** 15% Increase in Average Watch Time
+        * **Visual Direction:** High-contrast, Neon-Cyber (Refer to DNA)
+        """)
+        
+    with col2:
+        st.subheader("Performance Vigor")
+        st.metric("Profile Health", "Good", delta="+12% Vigor")
+        st.progress(65)
+        st.caption("Next Milestone: 10k Viral Reach")
+
+elif nav == "💎 Assigned Scripts":
+    st.markdown("<h1 style='color: #00ff41;'>💎 YOUR ARCHITECTED SCRIPTS</h1>", unsafe_allow_html=True)
+    
+    if not st.session_state.script_history:
+        st.warning("The Director hasn't assigned any scripts to your queue yet. Check back shortly.")
+    else:
+        for i, s in enumerate(reversed(st.session_state.script_history)):
+            with st.expander(f"📜 SCRIPT {i+1}: {s['topic']} ({s['time']})"):
+                st.markdown(s['script'])
+                if 'dna' in s:
+                    st.divider()
+                    st.markdown(f"**🧬 Visual Blueprint:** {s['dna']}")
+                if st.button(f"Mark as Filmed - {i}"):
+                    st.success("Notification sent to the Director.")
+
+
 
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
@@ -410,6 +443,7 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
 
 
 
