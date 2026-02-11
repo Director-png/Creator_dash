@@ -240,51 +240,40 @@ elif nav == "⚔️ Trend Duel":
 
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
-    
     c1, c2 = st.columns([1, 1.5])
     
-   # Inside your elif nav == "💼 Client Pitcher": block
-with c1:
-    client_name = st.text_input("Lead Name / Handle")
-    niche_category = st.selectbox("Category Type", [
-        "Personal Brand (Fitness/Mindset)", 
-        "B2B Technical (AI/SaaS)",
-        "Fashion & Luxury (Apparel/E-com)", # NEW
-        "Hospitality (Restaurants/Cafes)",   # NEW
-        "Local Business (Real Estate/Gyms)"
-    ])
-    offer = st.text_area("What's the unique value proposition?")
-    pitch_btn = st.button("🔥 Generate VOID Pitch", type="primary")
+    with c1:
+        client_name = st.text_input("Lead Name / Handle")
+        niche_category = st.selectbox("Category Type", [
+            "Personal Brand (Fitness/Mindset)", 
+            "B2B Technical (AI/SaaS)",
+            "Fashion & Luxury (Apparel/E-com)",
+            "Hospitality (Restaurants/Cafes)",
+            "Local Business (Real Estate/Gyms)"
+        ])
+        offer = st.text_area("What's the unique value proposition?")
+        pitch_btn = st.button("🔥 Generate VOID Pitch", type="primary")
 
-with c2:
-    if pitch_btn and client_name:
-        # Custom logic for the new industries
-        if "Fashion" in niche_category:
-            style = "Focus on aesthetic edge, viral trend-jacking, and scarcity. Tone: Sophisticated and 'In-the-know'."
-        elif "Hospitality" in niche_category:
-            style = "Focus on floor-traffic, automated bookings, and reputation management. Tone: High-energy and growth-obsessed."
-        # ... (rest of the previous logic)
+    with c2:
+        if pitch_btn and client_name:
+            with st.spinner("Analyzing psychological angle..."):
+                try:
+                    groq_client = Groq(api_key=st.secrets["GROQ_API_KEY"])
                     
-                    # Tactical prompt engineering based on category
+                    # --- FIXED INDENTATION BLOCK ---
                     system_prompt = "You are a world-class high-ticket closer."
-                    if "Personal Brand" in niche_category:
-                        style = "Focus on community, transformation, and reducing burnout. Tone: Relatable but elite."
-                    elif "B2B" in niche_category:
-                        style = "Focus on ROI, efficiency, and market edge. Tone: Cold, calculated, and professional."
-                    else:
-                        style = "Focus on attention, growth, and monetization. Tone: High energy."
-
-                    full_prompt = f"""
-                    Write a 3-part 'Power Pitch' for {client_name}.
-                    Category: {niche_category}
-                    Offer: {offer}
-                    Requirement: {style}
                     
-                    Structure:
-                    1. The Hook (Pattern Interrupt)
-                    2. The Gap (The problem they don't see yet)
-                    3. The Bridge (How your offer is the only solution)
-                    """
+                    if "Fashion" in niche_category:
+                        style = "Focus on aesthetic edge, viral trend-jacking, and scarcity. Tone: Sophisticated."
+                    elif "Hospitality" in niche_category:
+                        style = "Focus on floor-traffic and automated bookings. Tone: High-energy."
+                    elif "Personal Brand" in niche_category:
+                        style = "Focus on community and transformation. Tone: Relatable but elite."
+                    else:
+                        style = "Focus on ROI and efficiency. Tone: Cold and calculated."
+                    
+                    full_prompt = f"Write a pitch for {client_name}. Style: {style}. Offer: {offer}"
+                    # --- END OF FIXED BLOCK ---
 
                     res = groq_client.chat.completions.create(
                         model="llama-3.3-70b-versatile",
@@ -293,10 +282,7 @@ with c2:
                             {"role": "user", "content": full_prompt}
                         ]
                     )
-                    
-                    st.markdown("### 🌑 Target Intelligence: The Pitch")
                     st.success(res.choices[0].message.content)
-                    st.caption("Tip: Send this via DM or Email for maximum pattern interrupt.")
                 except Exception as e:
                     st.error(f"Sync Error: {e}")
                     
@@ -316,6 +302,7 @@ elif nav == "💎 Script Architect":
                 res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
 
 
 
