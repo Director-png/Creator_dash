@@ -17,26 +17,6 @@ def load_lottieurl(url: str):
 
 lottie_loading = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_fcfjwiyb.json")
 
-
-def load_user_db():
-    try:
-        # 1. Force refresh to bypass Google's cache
-        sync_url = f"{USER_DB_URL}&cache_bus={time.time()}"
-        df = pd.read_csv(sync_url)
-        
-        # DEBUG: Remove this line once it works
-        # st.write(f"Rows found: {len(df)}") 
-
-        if df.empty:
-            return pd.DataFrame()
-            
-        # 2. Standardize column names
-        df.columns = [str(c).strip().lower() for c in df.columns]
-        return df
-    except Exception as e:
-        # This will tell us if the URL is broken or the Sheet is private
-        st.sidebar.error(f"Sync Failure: {e}")
-        return pd.DataFrame()
         
 # --- 1. SESSION STATE (CRITICAL FIX: Initialize FIRST) ---
 if 'found_leads' not in st.session_state:
@@ -377,7 +357,26 @@ def transmit_script(client, platform, topic, script, dna):
 # --- SCRIPT ARCHITECT (WITH DUPLICATE ID FIX) ---
 if nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
-    
+ 
+def load_user_db():
+    try:
+        # We add a unique timestamp to the URL to force a fresh pull
+        timestamp = int(time.time())
+        sync_url = f"{USER_DB_URL}&cv={timestamp}" 
+        
+        # Adding a timeout so the app doesn't hang forever
+        df = pd.read_csv(sync_url, timeout=5)
+        
+        if df.empty:
+            return pd.DataFrame()
+            
+        df.columns = [str(c).strip().lower() for c in df.columns]
+        return df
+    except Exception as e:
+        # If this shows up, the URL is definitely wrong or not published
+        st.sidebar.warning(f"Connection Attempt Failed: {e}")
+        return pd.DataFrame()
+        
     users_df = load_user_db()
     
     # 1. DEBUG BOX (Only visible to help us fix the 'Public' issue)
@@ -555,6 +554,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
