@@ -17,6 +17,21 @@ def load_lottieurl(url: str):
 
 lottie_loading = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_fcfjwiyb.json")
 
+# --- 1. SESSION STATE (CRITICAL FIX: Initialize FIRST) ---
+if 'found_leads' not in st.session_state:
+    st.session_state.found_leads = pd.DataFrame()
+if 'script_history' not in st.session_state:
+    st.session_state.script_history = []
+if 'pitch_history' not in st.session_state:
+    st.session_state.pitch_history = []
+if 'creator_db' not in st.session_state:
+    st.session_state.creator_db = pd.DataFrame([
+        {"Creator": "TechVanguard", "Niche": "AI", "Status": "Scouted", "Vigor": 82},
+        {"Creator": "CyberStyle", "Niche": "Fashion", "Status": "Negotiation", "Vigor": 91}
+    ])
+if 'logged_in' not in st.session_state: st.session_state.logged_in = False
+
+
 # --- TYPEWRITER UTILITY ---
 def typewriter_effect(text):
     container = st.empty()
@@ -371,4 +386,5 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['time']} - {s['topic']} ({s.get('assigned_to', 'Public')})"):
             st.write(s['script'])
+
 
