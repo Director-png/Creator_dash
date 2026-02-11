@@ -377,6 +377,50 @@ def transmit_script(client, platform, topic, script, dna):
 # --- SCRIPT ARCHITECT (WITH LIVE CLIENT SYNC) ---
 if nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
+
+    # --- 1. RE-ENGINEERED SYNC FUNCTION ---
+def load_user_db():
+    try:
+        # Force fresh data
+        df = pd.read_csv(f"{USER_DB_URL}&cache={time.time()}")
+        # Clean the column headers immediately
+        df.columns = [str(c).strip().lower() for c in df.columns]
+        return df
+    except Exception as e:
+        st.error(f"Database Offline: {e}")
+        return pd.DataFrame()
+
+# --- 2. THE UPDATED ARCHITECT DROPDOWN ---
+if nav == "💎 Script Architect":
+    st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
+    
+    users_df = load_user_db()
+    
+    # --- SAFETY INSPECTOR (TEMPORARY DEBUG) ---
+    if not users_df.empty:
+        with st.expander("🔍 DEBUG: DATA STRUCTURE"):
+            st.write("Columns found:", users_df.columns.tolist())
+            st.dataframe(users_df.head(2)) # Shows first 2 rows
+    
+    # --- THE CLIENT LIST LOGIC ---
+    client_options = ["Public/General"]
+    
+    if not users_df.empty:
+        # TACTICAL FIX: We look for a column that contains 'name' 
+        # instead of relying on a number like 1 or 2.
+        name_col = [c for c in users_df.columns if 'name' in c]
+        
+        if name_col:
+            db_names = users_df[name_col[0]].dropna().unique().tolist()
+            client_options = ["Public/General"] + db_names
+        else:
+            # Fallback if no column is named 'name'
+            db_names = users_df.iloc[:, 1].dropna().unique().tolist()
+            client_options = ["Public/General"] + db_names
+
+    # --- RENDER THE UI ---
+    target_client = st.selectbox("Assign To Target", client_options)
+    # ... rest of your UI (Platform, Topic, etc.)
     
     # 1. PULL LIVE CLIENTS FROM YOUR SHEET
     users_df = load_user_db()
@@ -553,6 +597,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
