@@ -177,62 +177,38 @@ if nav == "📊 Dashboard" and st.session_state.user_role == "admin":
         st.info(st.session_state.daily_directive)
         st.progress(45)
 
+# --- NEW: INTELLIGENCE UTILITIES ---
+
+def analyze_trend_saturation(score):
+    """Calculates how 'crowded' a trend is based on its score."""
+    if score > 90: return "🔴 SATURATED (High Competition)"
+    if score > 75: return "🟡 PEAK (Strategic Entry)"
+    return "🟢 EARLY (High Opportunity)"
+
+def generate_visual_dna(topic, tone):
+    """Generates AI prompts for visuals based on script tone."""
+    if "Aggressive" in tone:
+        return f"Hyper-realistic, high contrast, cinematic lighting, 8k, industrial tech aesthetic for {topic}"
+    return f"Clean, minimalist, soft bokeh, professional studio lighting for {topic}"
+
+# --- UPDATED GLOBAL PULSE ---
+
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
-    data = load_market_data()
-    if not data.empty:
-        st.subheader("🔥 TOP MARKET OPPORTUNITIES")
-        top = data.sort_values(by=data.columns[1], ascending=False).head(3)
-        cols = st.columns(3)
-        for i, (idx, row) in enumerate(top.iterrows()):
-            with cols[i]:
-                st.metric(label=row.iloc[0], value=f"{row.iloc[1]}%", delta="High Heat")
-                st.caption(f"**Why:** {row.iloc[2]}")
-        st.divider()
-        fig = px.bar(data.head(10), x=data.columns[1], y=data.columns[0], orientation='h', color=data.columns[1], template="plotly_dark")
-        st.plotly_chart(fig, use_container_width=True)
     
-    c_news, c_analysis = st.columns([2, 1])
-    with c_news:
-        st.subheader("📰 Live Tech Intelligence")
-        feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
-        for entry in feed.entries[:6]:
-            img_col, txt_col = st.columns([1, 2.5])
-            with img_col: st.image(get_intel_image(entry), use_container_width=True)
-            with txt_col:
-                st.markdown(f"**[{entry.title.upper()}]({entry.link})**")
-                st.write(BeautifulSoup(entry.summary, "html.parser").text[:120] + "...")
-            st.divider()
-    with c_analysis:
-        st.subheader("⚡ AI Trend Analysis")
-        st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs")
-        st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400")
-
-elif nav == "⚔️ Trend Duel":
-    st.title("⚔️ COMPETITIVE INTELLIGENCE MATRIX")
+    # --- PULSE ALERT SYSTEM (NEW) ---
     pulse_df = load_market_pulse_data()
     if not pulse_df.empty:
-        st.subheader("🌑 VOID Market Pulse Integration")
-        sel = st.multiselect("Compare Niches", options=pulse_df['Niche'].unique().tolist(), default=pulse_df['Niche'].unique().tolist()[:5])
-        comp = pulse_df[pulse_df['Niche'].isin(sel)]
-        if not comp.empty:
-            st.bar_chart(data=comp, x='Niche', y='Score')
-            st.dataframe(comp)
+        # Define 'Vigorous' as any score over 85
+        high_heat = pulse_df[pulse_df['Score'] >= 85]
+        if not high_heat.empty:
+            for _, alert in high_heat.iterrows():
+                st.toast(f"🚨 ALERT: {alert['Niche']} is spiking!", icon="🔥")
+                st.error(f"⚠️ **VIGOROUS TREND DETECTED**: {alert['Niche']} has hit a score of {alert['Score']}. Advantage: {alert['Reason']}")
 
-elif nav == "💼 Client Pitcher" and st.session_state.user_role == "admin":
-    st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
-    c1, c2 = st.columns([1, 1.5])
-    with c1:
-        client = st.text_input("Lead Name")
-        niche_cat = st.selectbox("Category", ["Personal Brand", "B2B Technical", "Fashion", "Hospitality", "Local Business"])
-        offer = st.text_area("Value Proposition")
-        if st.button("🔥 Generate VOID Pitch"):
-            with st.spinner("🌑 ACCESSING VOID COGNITION..."):
-                groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Pitch for {client} in {niche_cat}: {offer}"}])
-                pitch_res = res.choices[0].message.content
-                st.session_state.pitch_history.append({"time": time.strftime("%H:%M:%S"), "client": client, "pitch": pitch_res})
-                with c2: typewriter_effect(pitch_res)
+    # ... (Rest of your original Market Data & TechCrunch logic) ...
+
+# --- UPDATED SCRIPT ARCHITECT (CONTENT DNA) ---
 
 elif nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
@@ -241,14 +217,46 @@ elif nav == "💎 Script Architect":
         topic = st.text_input("Focus Topic")
         platform = st.selectbox("Platform", ["YouTube Shorts", "Instagram Reels", "Long-form"])
         tone = st.select_slider("Tone", options=["Aggressive", "Professional", "Storyteller"])
+        
+        # New Feature: Competitor Shadow
+        comp_topic = st.text_input("Competitor Focus (Optional)", placeholder="What are they posting?")
+        
         if st.button("🚀 Architect Script"):
             with st.spinner("🌑 COMPILING SCRIPT DATA..."):
+                prompt = f"Script: {topic}, {platform}, {tone}. "
+                if comp_topic:
+                    prompt += f"Counter-strategy against competitor posting about {comp_topic}."
+                
                 groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Script: {topic}, {platform}, {tone}"}])
+                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 script_res = res.choices[0].message.content
-                st.session_state.script_history.append({"time": time.strftime("%H:%M:%S"), "topic": topic, "script": script_res})
-                with c2: typewriter_effect(script_res)
+                
+                # DNA Generation
+                visual_dna = generate_visual_dna(topic, tone)
+                st.session_state.script_history.append({"time": time.strftime("%H:%M:%S"), "topic": topic, "script": script_res, "dna": visual_dna})
+                with c2: 
+                    typewriter_effect(script_res)
+                    st.divider()
+                    st.markdown(f"🧬 **CONTENT DNA (Visual Prompt):**\n`{visual_dna}`")
 
+# --- UPDATED TREND DUEL (SATURATION METER) ---
+
+elif nav == "⚔️ Trend Duel":
+    st.title("⚔️ COMPETITIVE INTELLIGENCE MATRIX")
+    pulse_df = load_market_pulse_data()
+    if not pulse_df.empty:
+        st.subheader("🌑 VOID Saturation Analysis")
+        selected_niche = st.selectbox("Analyze Saturation for:", pulse_df['Niche'].unique())
+        niche_data = pulse_df[pulse_df['Niche'] == selected_niche].iloc[0]
+        
+        status = analyze_trend_saturation(niche_data['Score'])
+        st.metric(label=f"{selected_niche} Status", value=status)
+        
+        # Display the bar chart below as per original logic
+        sel = st.multiselect("Compare Niches", options=pulse_df['Niche'].unique().tolist(), default=pulse_df['Niche'].unique().tolist()[:5])
+        comp = pulse_df[pulse_df['Niche'].isin(sel)]
+        if not comp.empty:
+            st.bar_chart(data=comp, x='Niche', y='Score')
 elif nav == "📜 History":
     st.title("📜 SYSTEM ARCHIVES")
     with st.expander("⚠️ SYSTEM MAINTENANCE"):
@@ -275,3 +283,4 @@ elif nav == "📜 History":
         if not st.session_state.script_history: st.write("No scripts archived.")
         for s in reversed(st.session_state.script_history):
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): st.write(s['script'])
+
