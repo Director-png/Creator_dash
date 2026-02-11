@@ -289,8 +289,6 @@ def generate_counter_strike(competitor_topic, user_topic):
     # This logic creates the "Tactical Pivot"
     return f"COMPETITOR SHADOW: They are targeting '{competitor_topic}'. Your 'Counter-Strike' angle: Focus on the hidden flaw of their argument regarding {user_topic} to siphon their audience."
 
-# --- UPDATE SCRIPT ARCHITECT MODULE ---
-elif nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>✍️ VOID SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns([1, 1.5], gap="large")
     
@@ -362,4 +360,5 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
 
