@@ -265,26 +265,27 @@ elif nav == "📡 My Growth Hub":
         st.metric("Profile Health", "Good", delta="+12% Vigor")
         st.progress(65)
 
-# --- 3. THE CLIENT VIEW (PULLING DATA) ---
+# --- UPDATED CLIENT VIEW (THE RECEIVER) ---
 elif nav == "💎 Assigned Scripts":
-    st.title("💎 YOUR ASSIGNED SCRIPTS")
+    st.title("💎 YOUR SECURE VAULT")
     
-    # REAL-WORLD CHECK:
-    # Instead of just looking at session_state, we should load the 'Script Vault' CSV here.
-    # scripts_df = pd.read_csv(SCRIPT_VAULT_CSV_URL)
-    # my_scripts = scripts_df[scripts_df['client'] == st.session_state.user_name]
-    
-    # TEMPORARY FIX (For your current session):
-    my_scripts = [s for s in st.session_state.script_history if s['assigned_to'] == st.session_state.user_name]
-    
-    if not my_scripts:
-        st.warning("No new scripts in your vault. Stand by for Director instructions.")
-    else:
-        for s in reversed(my_scripts):
-            with st.expander(f"📜 {s['topic']}"):
-                st.write(s['script'])
-                st.caption(f"🧬 DNA: {s['dna']}")
-
+    # We pull from the LIVE Google Sheet now, not the session memory
+    try:
+        scripts_df = pd.read_csv(SCRIPT_VAULT_CSV_URL)
+        scripts_df.columns = [str(c).strip().lower() for c in scripts_df.columns]
+        
+        # Filter by the logged-in user's name
+        my_vault = scripts_df[scripts_df.iloc[:, 1].astype(str) == st.session_state.user_name]
+        
+        if my_vault.empty:
+            st.warning("The Director has not assigned any scripts to this frequency yet.")
+        else:
+            for _, row in my_vault.iterrows():
+                with st.expander(f"📜 {row.iloc[3]}"): # Adjust index based on your sheet
+                    st.write(row.iloc[4])
+                    st.caption(f"DNA: {row.iloc[5]}")
+    except:
+        st.error("Vault Connection Offline. Director must publish the Script CSV.")
 
 
 elif nav == "🌐 Global Pulse":
@@ -332,40 +333,43 @@ elif nav == "⚔️ Trend Duel":
         comp = pulse_df[pulse_df['Niche'].isin(sel)]
         if not comp.empty: st.bar_chart(data=comp, x='Niche', y='Score')
 
-# --- SECTOR: SCRIPT ARCHITECT (FIXED & TACTICAL) ---
-if nav == "💎 Script Architect":
-    st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
-    users_df = load_user_db()
-    c1, c2 = st.columns([1, 1.5])
-    
-    with c1:
-        target_client = st.selectbox("Assign To", ["Public"] + users_df.iloc[:, 1].tolist() if not users_df.empty else ["Public"])
-        platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
-        topic = st.text_input("Topic")
-        tone_choice = st.select_slider("Tone", ["Professional", "Aggressive", "Elite"])
-        
-        with st.expander("👤 COMPETITOR SHADOW"):
-            c_hook = st.text_area("Their Narrative")
+# --- 🛰️ NEW DATA LINK (The Mailbox) ---
+# Replace this with the link to the CSV of the sheet where your scripts are stored
+SCRIPT_VAULT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
 
-        if st.button("🚀 Architect"):
-            if topic:
-                with st.spinner("🌑 PROCESSING..."):
-                    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                    prompt = f"Write a {platform} script about {topic}. Tone: {tone_choice}."
-                    if c_hook: prompt += f" Counter-strike this claim: {c_hook}"
+def transmit_script(client, platform, topic, script, dna):
+    """Pushes the architected script to the Google Form/Sheet database"""
+    # Replace these entry IDs with your actual Google Form entry IDs
+    payload = {
+        "entry.546765267": client,   # Client Name Field
+        "entry.1077052292": platform, # Platform Field
+        "entry.415250537: topic,    # Topic Field
+        "entry.1437097100": script,   # The Script itself
+        "entry.1608255172": dna       # Visual DNA
+    }
+    try:
+        requests.post(FORM_POST_URL, data=payload) # Using your existing Form URL or a new one
+        return True
+    except:
+        return False
+
+# --- UPDATED SCRIPT ARCHITECT ---
+if nav == "💎 Script Architect":
+    # ... (Keep your existing UI code) ...
+    if st.button("🚀 Architect & Transmit"):
+        if topic:
+            # ... (Groq Logic) ...
+            txt = res.choices[0].message.content
+            dna_profile = generate_visual_dna(platform, tone_choice)
+            
+            # --- THE TRANSMISSION ---
+            success = transmit_script(target_client, platform, topic, txt, dna_profile)
+            
+            if success:
+                st.success(f"⚔️ SCRIPT BROADCASTED TO {target_client.upper()}")
+            else:
+                st.error("Transmission failed. Check Database connection.")
                     
-                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
-                    txt = res.choices[0].message.content
-                    
-                    # FIXED: Passing correct variables to DNA function
-                    dna_profile = generate_visual_dna(platform, tone_choice)
-                    
-                    st.session_state.script_history.append({
-                        "topic": topic, "script": txt, "assigned_to": target_client, "dna": dna_profile
-                    })
-                    with c2: 
-                        st.markdown(txt)
-                        st.info(f"🧬 **VISUAL DNA:** {dna_profile}")                
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
     
@@ -470,6 +474,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
