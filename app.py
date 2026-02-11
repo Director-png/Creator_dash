@@ -47,25 +47,54 @@ def typewriter_effect(text):
         time.sleep(0.005) 
     container.markdown(full_text)
 
+# --- 1. REFINED SYNC FUNCTION ---
 def load_user_db():
     try:
-        # Use a unique timestamp to force Google to give us fresh data
-        timestamp = int(time.time())
-        sync_url = f"{USER_DB_URL}&cv={timestamp}" 
-        
-        # Removed the 'timeout' argument that caused the crash
+        # Force fresh data from the CSV link
+        sync_url = f"{USER_DB_URL}&cache_bus={time.time()}"
         df = pd.read_csv(sync_url)
         
         if df.empty:
             return pd.DataFrame()
             
-        # Standardize column headers to lowercase
+        # Standardize headers to lowercase to avoid "Name" vs "name" issues
         df.columns = [str(c).strip().lower() for c in df.columns]
         return df
     except Exception as e:
-        # This will now only show up if the URL itself is the problem
-        st.sidebar.warning(f"Database Sync Pending: {e}")
+        st.sidebar.error(f"Sync Failure: {e}")
         return pd.DataFrame()
+
+# --- 2. THE DROPDOWN LOGIC (WITH PROBE) ---
+if nav == "💎 Script Architect":
+    st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
+    
+    users_df = load_user_db()
+    
+    # --- THE DEEP PROBE (Temporary) ---
+    st.write("### 🔍 SYSTEM DIAGNOSTIC")
+    if users_df.empty:
+        st.error("❌ The Database is returning ZERO rows. Check if the 'Publish to Web' link is still active.")
+    else:
+        st.success(f"✅ Connection Stable. Found Columns: {list(users_df.columns)}")
+        # This shows you the first 3 names found in the sheet
+        st.write("Sample Data Found:", users_df.head(3)) 
+
+    # --- CLIENT LIST LOGIC ---
+    client_options = ["Public/General"]
+    if not users_df.empty:
+        # We try to find the 'name' column automatically
+        name_col = [c for c in users_df.columns if 'name' in c]
+        if name_col:
+            db_names = users_df[name_col[0]].dropna().unique().tolist()
+            client_options = ["Public/General"] + db_names
+        else:
+            # If 'name' isn't found, we grab the 2nd column (Index 1)
+            db_names = users_df.iloc[:, 1].dropna().unique().tolist()
+            client_options = ["Public/General"] + db_names
+
+    # THE UI
+    target_client = st.selectbox("Assign To Target", options=client_options, key="architect_target")
+
 
 def load_market_pulse_data():
     try:
@@ -376,6 +405,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
