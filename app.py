@@ -15,30 +15,34 @@ def load_market_pulse_data():
         # 1. Read the CSV
         df = pd.read_csv(PULSE_CSV_URL)
         
-        # 2. FORCE CLEAN HEADERS: This removes hidden spaces and makes them lowercase
+        # 2. Map your specific Google Sheet headers to VOID OS standards
+        # We lowercase everything first to avoid "Niche" vs "niche" errors
         df.columns = [str(c).strip().lower() for c in df.columns]
         
-        # 3. Rename back to standard for the rest of your app
-        # This maps whatever you named them to what the script expects
-        rename_map = {
-            'niche': 'Niche',
+        mapping = {
+            'niche name': 'Niche',
             'score': 'Score',
-            'growth': 'Growth',
-            'reason': 'Reason'
+            'news snipett': 'Reason', # Maps your snippet column to the 'Reason' slot
+            'growth': 'Growth'
         }
-        df = df.rename(columns=rename_map)
+        
+        df = df.rename(columns=mapping)
 
-        # 4. Check if 'Niche' exists now
+        # 3. Final safety check
         if 'Niche' not in df.columns:
-            st.error(f"Column 'Niche' not found. Actual columns: {list(df.columns)}")
+            st.error(f"Mapping failed. Available: {list(df.columns)}")
             return pd.DataFrame()
 
-        # 5. Clean Data
-        df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
+        # 4. Clean numeric data
+        df['Score'] = pd.to_numeric(df['Score'], errors='coerce').fillna(0)
+        
         return df.dropna(subset=['Niche'])
+        
     except Exception as e:
         st.error(f"VOID Sync Error: {e}")
-        return pd.DataFrame()        
+        return pd.DataFrame()
+
+
 def load_market_data():
     try:
         df = pd.read_csv(MARKET_URL)
@@ -274,6 +278,7 @@ elif nav == "💎 Script Architect":
                 res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
 
 
 
