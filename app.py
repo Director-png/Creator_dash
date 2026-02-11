@@ -12,22 +12,33 @@ PULSE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMn
 
 def load_market_pulse_data():
     try:
-        # We use a 'cache_seed' to force a refresh every few minutes
+        # 1. Read the CSV
         df = pd.read_csv(PULSE_CSV_URL)
         
-        # Clean column names (removes spaces and standardizes)
-        df.columns = [str(c).strip().capitalize() for c in df.columns]
+        # 2. FORCE CLEAN HEADERS: This removes hidden spaces and makes them lowercase
+        df.columns = [str(c).strip().lower() for c in df.columns]
         
-        # Ensure 'Score' is a number
-        if 'Score' in df.columns:
-            df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
-        
-        # Keep only rows where a Niche exists
+        # 3. Rename back to standard for the rest of your app
+        # This maps whatever you named them to what the script expects
+        rename_map = {
+            'niche': 'Niche',
+            'score': 'Score',
+            'growth': 'Growth',
+            'reason': 'Reason'
+        }
+        df = df.rename(columns=rename_map)
+
+        # 4. Check if 'Niche' exists now
+        if 'Niche' not in df.columns:
+            st.error(f"Column 'Niche' not found. Actual columns: {list(df.columns)}")
+            return pd.DataFrame()
+
+        # 5. Clean Data
+        df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
         return df.dropna(subset=['Niche'])
     except Exception as e:
-        st.error(f"Connection Error: {e}")
-        return pd.DataFrame()
-        
+        st.error(f"VOID Sync Error: {e}")
+        return pd.DataFrame()        
 def load_market_data():
     try:
         df = pd.read_csv(MARKET_URL)
@@ -263,6 +274,7 @@ elif nav == "💎 Script Architect":
                 res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
 
 
 
