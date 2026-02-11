@@ -189,10 +189,51 @@ elif nav == "💎 Assigned Scripts":
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     # [Global Pulse Code Preserved...]
+pulse_df = load_market_pulse_data()
+    if not pulse_df.empty:
+        st.markdown('<div style="border: 1px solid #00d4ff; padding: 20px; border-radius: 10px; margin-bottom: 30px;">', unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #00d4ff;'>🚨 ELITE VIGOR SIGNALS</h3>", unsafe_allow_html=True)
+        cols = st.columns(2)
+        high_heat = pulse_df[pulse_df['Score'] >= 85].sort_values(by='Score', ascending=False).head(10)
+        for i, (_, alert) in enumerate(high_heat.iterrows()):
+            with cols[i%2]:
+                st.markdown(f"📡 **{alert['Niche']}** | `Score: {alert['Score']}`")
+                st.caption(alert['Reason'])
+                st.divider()
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    c_news, c_analysis = st.columns([2, 1])
+    with c_news:
+        st.subheader("📰 Live Tech Intelligence")
+        feed = feedparser.parse("https://techcrunch.com/category/artificial-intelligence/feed/")
+        for entry in feed.entries[:6]:
+            img_col, txt_col = st.columns([1, 2.5])
+            with img_col: st.image(get_intel_image(entry), use_container_width=True)
+            with txt_col:
+                st.markdown(f"**[{entry.title.upper()}]({entry.link})**")
+                st.write(BeautifulSoup(entry.summary, "html.parser").text[:120] + "...")
+            st.divider()
+    with c_analysis:
+        st.subheader("⚡ AI Trend Analysis")
+        st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs")
+        st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400")
+        
 
 elif nav == "⚔️ Trend Duel":
     st.title("⚔️ TREND DUEL")
     # [Trend Duel Code Preserved...]
+pulse_df = load_market_pulse_data()
+    if not pulse_df.empty:
+        st.subheader("🌑 Market Density Analysis")
+        target = st.selectbox("Select Niche to Audit", pulse_df['Niche'].unique())
+        row = pulse_df[pulse_df['Niche'] == target].iloc[0]
+        st.metric(label=f"{target} Entry Status", value=get_saturation_status(row['Score']))
+        st.table(pulse_df[pulse_df['Niche'] == target][['Niche', 'Score', 'Reason']])
+        st.divider()
+        sel = st.multiselect("Compare Niches", options=pulse_df['Niche'].unique().tolist(), default=pulse_df['Niche'].unique().tolist()[:5])
+        comp = pulse_df[pulse_df['Niche'].isin(sel)]
+        if not comp.empty: st.bar_chart(data=comp, x='Niche', y='Score')
+            
 
 elif nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
@@ -227,15 +268,104 @@ elif nav == "💎 Script Architect":
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL</h1>", unsafe_allow_html=True)
     # [Pitcher Code Preserved...]
-
+c1, c2 = st.columns([1, 1.5], gap="large")
+    
+    with c1:
+        client_name = st.text_input("Lead / Brand Name")
+        niche_cat = st.selectbox("Category", ["Personal Brand", "B2B Technical", "Fashion", "Hospitality", "Local Business"])
+        offer_details = st.text_area("Value Proposition (What are we selling?)", placeholder="e.g., Short-form growth, 30 videos/month, lead-gen backend")
+        
+        if st.button("🔥 Generate VOID Pitch"):
+            if client_name and offer_details:
+                with st.spinner("🌑 ACCESSING GROQ INTELLIGENCE..."):
+                    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                    prompt = f"System: You are VOID OS Director. Write a professional yet 'black-label' elite pitch for {client_name} in the {niche_cat} niche. Offer: {offer_details}. Use a tone of scarcity and high-authority."
+                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                    pitch_res = res.choices[0].message.content
+                    
+                    st.session_state.pitch_history.append({
+                        "time": time.strftime("%H:%M:%S"),
+                        "client": client_name,
+                        "pitch": pitch_res
+                    })
+                    
+                    with c2:
+                        st.subheader(f"Strategic Pitch: {client_name}")
+                        typewriter_effect(pitch_res)
+                        st.divider()
+                        st.download_button("Download Pitch as TXT", pitch_res, file_name=f"{client_name}_pitch.txt")
+            else:
+                st.error("Director, provide a Lead Name and Offer details before architecting.")
+                
 elif nav == "🧬 Creator Lab":
     st.markdown("<h1 style='color: #00d4ff;'>🧬 VIGOR AUDIT</h1>", unsafe_allow_html=True)
     # [Vigor Code Preserved...]
+col_a, col_b = st.columns([1, 1.5])
+    with col_a:
+        st.subheader("Vigor Input")
+        c_name = st.text_input("Creator Name")
+        c_views = st.number_input("Avg Views (Last 5 Videos)", min_value=0, value=5000)
+        c_subs = st.number_input("Follower Count", min_value=1, value=10000)
+        
+        if st.button("⚡ Calculate Vigor"):
+            score = calculate_vigor(c_views, c_subs)
+            with col_b:
+                st.metric("VIGOR SCORE", f"{score}/100")
+                if score > 80:
+                    st.success(f"🔥 **HIGH VIGOR:** {c_name} is viral-prone. Sign immediately.")
+                elif score > 50:
+                    st.warning("⚖️ **STABLE:** Consistent growth, but needs better hooks.")
+                else:
+                    st.error("📉 **STAGNANT:** Low organic reach. Proceed with caution.")
+                
+                # Logic visualization
+                st.caption("Director's Logic: We value Attention Leverage. A creator who gets 50k views with 1k followers is a 'Vigor God'.")
 
 elif nav == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE</h1>", unsafe_allow_html=True)
     # [Lead Source Code Preserved...]
+st.subheader("Automated Prospecting Layer")
+    
+    c1, c2 = st.columns([1, 1.5], gap="large")
+    
+    with c1:
+        niche_search = st.selectbox("Target Niche", ["SaaS Founders", "E-commerce Brands", "Real Estate Tech", "High-Ticket Coaches"])
+        min_followers = st.slider("Min Followers", 1000, 50000, 5000)
+        
+        if st.button("Initialize Deep Scan"):
+            with st.spinner("📡 SCANNING SOCIAL GRAPHS..."):
+                time.sleep(1.5)
+                leads_data = [
+                    {"Handle": "@NexusCore_AI", "Platform": "IG", "Gap": "No Video Content", "Vigor": "Low"},
+                    {"Handle": "@Solaris_SaaS", "Platform": "TikTok", "Gap": "Poor Hooks", "Vigor": "Medium"},
+                    {"Handle": "@AlphaCoach_X", "Platform": "Reels", "Gap": "Low Retention", "Vigor": "High"}
+                ]
+                st.session_state.found_leads = pd.DataFrame(leads_data)
+                st.success("Scan Complete. 3 Gaps Identified.")
+
+    with c2:
+        if not st.session_state.found_leads.empty:
+            st.write("### 🎯 Prospecting Results")
+            st.table(st.session_state.found_leads)
+            
+            selected_lead = st.selectbox("Select Lead for Cold Strike", st.session_state.found_leads["Handle"])
+            if st.button("Generate Cold Strike"):
+                with st.spinner("🌑 ARCHITECTING..."):
+                    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                    prompt = f"Write a 3-sentence aggressive, high-authority cold DM to {selected_lead} in {niche_search}. Point out their {st.session_state.found_leads.loc[st.session_state.found_leads['Handle']==selected_lead, 'Gap'].values[0]} is losing them money."
+                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                    strike_text = res.choices[0].message.content
+                    st.code(strike_text, language="markdown")
+                    st.caption("Copy this for the 'Cold Strike' manual deployment.")
+        else:
+            st.info("Awaiting system initialization. Run 'Deep Scan' to identify targets.")
 
 elif nav == "📜 History":
     st.title("📜 ARCHIVES")
     # [History Code Preserved...]
+for s in reversed(st.session_state.script_history):
+        with st.expander(f"{s['assigned_to']} | {s['topic']}"):
+            st.write(s['script'])
+            if 'dna' in s:
+                st.caption(f"🧬 DNA: {s['dna']}")
+
