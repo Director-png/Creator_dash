@@ -54,7 +54,26 @@ def get_saturation_status(score):
 
 def generate_visual_dna(topic, tone):
     return f"STYLE: Cinematic Noir / LIGHTING: Neon Cyber-blue / COMPOSITION: Wide-angle, 8k detail. PROMPT: A hyper-realistic representation of {topic} for {tone} content."
+# --- ADD THESE TO YOUR UTILITIES SECTION ---
 
+def calculate_vigor(views, followers):
+    """The Director's Formula: Views-to-Follower Leverage"""
+    if followers == 0: return 0
+    ratio = views / followers
+    score = min(100, int(ratio * 50)) # Higher ratio = Higher Algorithmic Vigor
+    return score
+
+def generate_visual_dna(platform, tone):
+    """Generates specific aesthetic prompts for editors"""
+    styles = {
+        "Instagram Reels": "High-contrast, 0.5s jump cuts, Glow-on-dark aesthetics.",
+        "YouTube Shorts": "Center-framed, bold captions, neon-accent lighting.",
+        "YouTube Long-form": "Cinematic 4k, shallow depth of field, 24fps motion blur.",
+        "TikTok": "Raw mobile-style, high-saturation, fast-paced text overlays."
+    }
+    aesthetic = styles.get(platform, "Professional cinematic.")
+    return f"DNA PROFILE: {aesthetic} | TONE: {tone} | LIGHTING: Cyber-Noir"
+    
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 
@@ -301,74 +320,40 @@ elif nav == "⚔️ Trend Duel":
         comp = pulse_df[pulse_df['Niche'].isin(sel)]
         if not comp.empty: st.bar_chart(data=comp, x='Niche', y='Score')
 
-# ... (Keep your imports and data links at the top) ...
-
-# --- SCRIPT ARCHITECT (PLATFORM-AWARE VERSION) ---
+# --- UPDATED SCRIPT ARCHITECT (WITH DNA) ---
 elif nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
     users_df = load_user_db()
     
     c1, c2 = st.columns([1, 1.5], gap="large")
     with c1:
-        # 1. CLIENT & NICHE
         target_client = st.selectbox("Assign to Client", ["Public/General"] + users_df.iloc[:, 1].tolist() if not users_df.empty else ["Public/General"])
-        client_niche = users_df[users_df.iloc[:, 1] == target_client].iloc[0, 3] if (target_client != "Public/General" and not users_df.empty) else "High-Level Growth"
-
-        # 2. PLATFORM SELECTION (RESTORED)
-        platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form", "X/Twitter Thread"])
-        
-        # 3. CORE TOPIC
+        platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
         topic = st.text_input("Core Topic")
-
-        # 4. COUNTER-STRIKE LOGIC
-        with st.expander("👤 COMPETITOR SHADOW"):
-            comp_name = st.text_input("Competitor Name")
-            comp_hook = st.text_area("Their Narrative")
-
         tone = st.select_slider("Vigor Level", ["Professional", "Aggressive", "Elite/Alpha"])
         
         if st.button("🚀 Architect Tactical Script"):
-            if topic:
-                with st.spinner(f"🌑 ARCHITECTING {platform.upper()} STRATEGY..."):
-                    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                    
-                    # PLATFORM-SPECIFIC INSTRUCTIONS
-                    platform_constraints = {
-                        "Instagram Reels": "Focus on a 3-second visual hook and rapid-fire pacing. Max 150 words.",
-                        "YouTube Shorts": "Focus on a loopable ending and high-curiosity gap. Max 140 words.",
-                        "TikTok": "Focus on 'raw' authenticity and trend-integration. Max 200 words.",
-                        "YouTube Long-form": "Structure with Intro, Body, and Outro. Include B-roll suggestions. 800+ words.",
-                        "X/Twitter Thread": "Format as a high-authority thread with hooks and bullet points."
-                    }
-                    
-                    system_msg = f"You are VOID OS, a tactical content architect for {client_niche}."
-                    user_msg = f"Platform: {platform}. Constraints: {platform_constraints[platform]}. Topic: {topic}. Tone: {tone}."
-                    
-                    if comp_hook:
-                        user_msg += f" Counter-Strike vs {comp_name}: Disprove '{comp_hook}'."
-                    
-                    res = groq_c.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=[
-                            {"role": "system", "content": system_msg},
-                            {"role": "user", "content": user_msg}
-                        ]
-                    )
-                    
-                    script_text = res.choices[0].message.content
-                    st.session_state.script_history.append({
-                        "time": time.strftime("%H:%M"), 
-                        "topic": topic, 
-                        "script": script_text, 
-                        "assigned_to": target_client,
-                        "platform": platform
-                    })
-                    
-                    with c2:
-                        st.subheader(f"⚡ {platform} Script")
-                        st.markdown(script_text)
-            else:
-                st.error("Topic required.")
+            with st.spinner("🌑 GENERATING SCRIPT & DNA..."):
+                groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                prompt = f"Architect a {platform} script about {topic}. Tone: {tone}."
+                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                script_text = res.choices[0].message.content
+                
+                # NEW: VISUAL DNA INTEGRATION
+                visual_dna = generate_visual_dna(platform, tone)
+                
+                st.session_state.script_history.append({
+                    "time": time.strftime("%H:%M"), 
+                    "topic": topic, 
+                    "script": script_text, 
+                    "assigned_to": target_client,
+                    "dna": visual_dna
+                })
+                with c2: 
+                    st.subheader("💎 THE ARCHITECTED SCRIPT")
+                    st.markdown(script_text)
+                    st.divider()
+                    st.info(f"🧬 **VISUAL DNA (FOR EDITORS):**\n{visual_dna}")
                 
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
@@ -402,18 +387,30 @@ elif nav == "💼 Client Pitcher":
             else:
                 st.error("Director, provide a Lead Name and Offer details before architecting.")
 
+# --- NEW SECTOR: CREATOR LAB (VIGOR CALCULATOR) ---
 elif nav == "🧬 Creator Lab":
-    st.markdown("<h1 style='color: #00d4ff;'>🧬 CREATOR VIGOR & ACQUISITION</h1>", unsafe_allow_html=True)
-    tab_crm, tab_vigor = st.tabs(["🛰️ Acquisition Pipeline", "⚡ Vigor Calculator"])
-    with tab_crm:
-        st.session_state.creator_db = st.data_editor(st.session_state.creator_db, num_rows="dynamic", use_container_width=True)
-    with tab_vigor:
-        name = st.text_input("Creator Name")
-        avg_v = st.number_input("Avg Views", 1000)
-        foll = st.number_input("Followers", 5000)
-        if st.button("Calculate Vigor"):
-            score = min(100, int((avg_v / foll) * 50))
-            st.metric("Vigor Score", f"{score}/100")
+    st.markdown("<h1 style='color: #00d4ff;'>🧬 CREATOR VIGOR AUDIT</h1>", unsafe_allow_html=True)
+    
+    col_a, col_b = st.columns([1, 1.5])
+    with col_a:
+        st.subheader("Vigor Input")
+        c_name = st.text_input("Creator Name")
+        c_views = st.number_input("Avg Views (Last 5 Videos)", min_value=0, value=5000)
+        c_subs = st.number_input("Follower Count", min_value=1, value=10000)
+        
+        if st.button("⚡ Calculate Vigor"):
+            score = calculate_vigor(c_views, c_subs)
+            with col_b:
+                st.metric("VIGOR SCORE", f"{score}/100")
+                if score > 80:
+                    st.success(f"🔥 **HIGH VIGOR:** {c_name} is viral-prone. Sign immediately.")
+                elif score > 50:
+                    st.warning("⚖️ **STABLE:** Consistent growth, but needs better hooks.")
+                else:
+                    st.error("📉 **STAGNANT:** Low organic reach. Proceed with caution.")
+                
+                # Logic visualization
+                st.caption("Director's Logic: We value Attention Leverage. A creator who gets 50k views with 1k followers is a 'Vigor God'.")
 
 # --- REPAIRED MODULE: LEAD SOURCE ---
 if nav == "🛰️ Lead Source":
@@ -453,12 +450,15 @@ if nav == "🛰️ Lead Source":
                     st.caption("Copy this for the 'Cold Strike' manual deployment.")
         else:
             st.info("Awaiting system initialization. Run 'Deep Scan' to identify targets.")
+
+# --- UPDATED HISTORY (TO SHOW DNA) ---
 elif nav == "📜 History":
-    st.title("📜 SYSTEM ARCHIVES")
-    if st.button("🔥 PURGE"): st.session_state.script_history = []; st.session_state.pitch_history = []; st.rerun()
+    st.title("📜 ARCHIVES")
     for s in reversed(st.session_state.script_history):
-        with st.expander(f"{s['time']} - {s['topic']} ({s.get('assigned_to', 'Public')})"):
+        with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+            if 'dna' in s:
+                st.caption(f"🧬 DNA: {s['dna']}")
 
 
 
