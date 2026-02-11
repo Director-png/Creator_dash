@@ -277,29 +277,50 @@ elif nav == "⚔️ Trend Duel":
 if nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
     
+    # 1. DATA PULL
     users_df = load_user_db()
     
-    # 1. THE CURE FOR 'ZERO ROWS'
-    if users_df.empty:
-        st.error("📡 VOID SIGNAL LOST: The URL is returning no data.")
-        st.info("Check: Is the 'User Database' sheet published as CSV? Does the URL end in output=csv?")
+    if not users_df.empty:
+        st.success(f"📡 CONNECTION STABLE: {len(users_df)} Clients Synced.")
     else:
-        st.success(f"✅ CONNECTION STABLE. {len(users_df)} Clients Found.")
+        st.warning("⚠️ Using local mode (Public/General). Database sync pending.")
 
     # 2. CLIENT LIST LOGIC
     client_options = ["Public/General"]
     if not users_df.empty:
-        # We try to grab the second column (Index 1) where names usually live
+        # Grabbing names from Column 2 (Index 1)
         db_names = users_df.iloc[:, 1].dropna().unique().tolist()
         client_options = ["Public/General"] + db_names
 
-    # 3. THE UI (With a UNIQUE key to stop the crash)
-    target_client = st.selectbox(
-        "Assign To Target", 
-        options=client_options, 
-        key="architect_target_unique_v3" # Change this key if it still crashes!
-    )
+    # 3. THE UI ELEMENTS (FORCED TO APPEAR)
+    c1, c2 = st.columns([1, 1.5], gap="large")
     
+    with c1:
+        # --- INPUT 1: CLIENT ---
+        target_client = st.selectbox("Assign To Target", options=client_options, key="arch_target_final")
+        
+        # --- INPUT 2: PLATFORM ---
+        platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"], key="arch_plat_final")
+        
+        # --- INPUT 3: TOPIC ---
+        topic = st.text_input("Core Topic", placeholder="e.g., The Future of AI in 2026", key="arch_topic_final")
+        
+        # --- INPUT 4: SLIDER ---
+        tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"], key="arch_tone_final")
+        
+        # --- INPUT 5: COMPETITOR LOGIC ---
+        with st.expander("👤 COMPETITOR SHADOW"):
+            c_hook = st.text_area("Their Narrative", key="arch_hook_final")
+
+        # --- THE EXECUTION BUTTON ---
+        if st.button("🚀 ARCHITECT & TRANSMIT", use_container_width=True):
+            if not topic:
+                st.error("Director, the Topic field cannot be empty.")
+            else:
+                with st.spinner("🌑 ARCHITECTING..."):
+                    # [Your Groq logic here]
+                    st.success("Drafting script...")
+
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL</h1>", unsafe_allow_html=True)
     # [Pitcher Code Preserved...]
@@ -403,6 +424,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
