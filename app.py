@@ -188,14 +188,30 @@ if nav == "📊 Dashboard" and st.session_state.user_role == "admin":
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     
-    # --- PULSE ALERT INTEGRATION ---
+    # --- CONSOLIDATED PULSE ALERT SYSTEM ---
     pulse_alert_df = load_market_pulse_data()
     if not pulse_alert_df.empty:
-        high_heat = pulse_alert_df[pulse_alert_df['Score'] >= 85]
-        if not high_heat.empty:
-            for _, alert in high_heat.iterrows():
-                st.error(f"🚨 **VIGOROUS TREND DETECTED**: {alert['Niche']} has spiked to Score {alert['Score']}!")
+        # Filter for vigorous trends (Score >= 85)
+        high_heat_df = pulse_alert_df[pulse_alert_df['Score'] >= 85]
+        
+        if not high_heat_df.empty:
+            with st.container():
+                st.markdown("""
+                    <div style="background-color: rgba(255, 75, 75, 0.1); border: 1px solid #ff4b4b; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <h3 style="color: #ff4b4b; margin-top: 0;">🚨 VIGOROUS TRENDS DETECTED</h3>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                # List all alerts in one clean area
+                cols = st.columns(len(high_heat_df) if len(high_heat_df) <= 3 else 3)
+                for i, (_, alert) in enumerate(high_heat_df.iterrows()):
+                    with cols[i % 3]:
+                        st.markdown(f"**Niche:** {alert['Niche']}")
+                        st.markdown(f"**Velocity:** `{alert['Score']}`")
+                        st.caption(f"Reason: {alert['Reason']}")
+                st.divider()
 
+    # --- REST OF THE UI (Opportunities, News, Analysis) ---
     data = load_market_data()
     if not data.empty:
         st.subheader("🔥 TOP MARKET OPPORTUNITIES")
@@ -224,7 +240,6 @@ elif nav == "🌐 Global Pulse":
         st.subheader("⚡ AI Trend Analysis")
         st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs")
         st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400")
-
 elif nav == "⚔️ Trend Duel":
     st.title("⚔️ COMPETITIVE INTELLIGENCE MATRIX")
     pulse_df = load_market_pulse_data()
@@ -306,3 +321,4 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
