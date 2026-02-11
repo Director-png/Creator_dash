@@ -42,9 +42,19 @@ if 'first_load' not in st.session_state:
     st.rerun()
 
 # --- 3. GLOBAL CSS ANIMATIONS (Transitions & Glowing Effects) ---
+# --- GLOBAL CSS & MATRIX ANIMATION ---
 st.markdown("""
     <style>
-    /* Global Page Fade-In */
+    /* Matrix Rain Background (Only on Login) */
+    .matrix-bg {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: black;
+        overflow: hidden;
+        z-index: -1;
+    }
+    
+    /* Fade-In Page Transition */
     .stApp {
         animation: fadeInPage 1.5s ease-in-out;
     }
@@ -53,7 +63,7 @@ st.markdown("""
         100% { opacity: 1; filter: blur(0px); }
     }
 
-    /* Neon Pulse for Metrics */
+    /* Glowing Metric pulse */
     [data-testid="stMetricValue"] {
         animation: neonPulse 2.5s infinite alternate;
         color: #00d4ff !important;
@@ -62,18 +72,27 @@ st.markdown("""
         from { text-shadow: 0 0 2px #00d4ff, 0 0 5px #00d4ff; }
         to { text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff; }
     }
-
-    /* Sidebar Smooth Slide */
-    [data-testid="stSidebar"] {
-        animation: slideInSidebar 0.8s ease-out;
-    }
-    @keyframes slideInSidebar {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(0); }
-    }
     </style>
 """, unsafe_allow_html=True)
 
+# --- TYPEWRITER UTILITY ---
+def typewriter_effect(text):
+    container = st.empty()
+    full_text = ""
+    for char in text:
+        full_text += char
+        container.markdown(full_text + "▌")
+        time.sleep(0.005) # Speed of "decoding"
+    container.markdown(full_text)
+
+# --- 4. THE GATEKEEPER (With Matrix Aesthetic) ---
+if not st.session_state.logged_in:
+    # Adding the Matrix background div
+    st.markdown('<div class="matrix-bg"></div>', unsafe_allow_html=True)
+    
+    st.markdown("<h1 style='text-align: center; color: #00ff41; text-shadow: 0 0 10px #00ff41;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
+    
+    # ... keep your existing Login/Register Tabs logic here ...
 # --- REST OF YOUR ORIGINAL FUNCTIONS ---
 PULSE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
 
@@ -317,7 +336,8 @@ elif nav == "💼 Client Pitcher":
                         model="llama-3.3-70b-versatile",
                         messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": full_prompt}]
                     )
-                    st.success(res.choices[0].message.content)
+                    # Instead of st.success(res.choices[0].message.content)
+                    typewriter_effect(res.choices[0].message.content)
                 except Exception as e:
                     st.error(f"Sync Error: {e}")
                         
@@ -336,5 +356,7 @@ elif nav == "💎 Script Architect":
                     groq_client = Groq(api_key=st.secrets["GROQ_API_KEY"])
                     prompt = f"Write a {platform_choice} script about {topic_input}. Tone: {tone_choice}."
                     res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
-                    st.markdown(res.choices[0].message.content)
+                    # Instead of st.markdown(res.choices[0].message.content)
+                    typewriter_effect(res.choices[0].message.content)
                 except Exception as e: st.error(f"Error: {e}")
+
