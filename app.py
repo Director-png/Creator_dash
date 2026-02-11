@@ -189,14 +189,30 @@ def get_saturation_status(score):
     return "🟢 EARLY (High Opportunity)"
 
 def transmit_script(client, platform, topic, script, dna):
+    """Pushes the architected script to the Google Form/Sheet database"""
+    # Ensure this ends in /formResponse
+    url = FORM_POST_URL.replace("viewform", "formResponse")
+    
+    # ⚠️ CRITICAL: These Entry IDs must match your specific Google Form exactly
     payload = {
-        "entry.546765267": client, "entry.1077052292": platform,
-        "entry.415250537": topic, "entry.1437097100": script, "entry.1608255172": dna
+        "entry.546765267": client,    # Client Name
+        "entry.1077052292": platform, # Platform
+        "entry.415250537": topic,     # Topic
+        "entry.1437097100": script,   # The Script
+        "entry.1608255172": dna       # Visual DNA
     }
+    
     try:
-        requests.post(FORM_POST_URL, data=payload)
-        return True
-    except: return False
+        response = requests.post(url, data=payload)
+        if response.status_code == 200:
+            return True
+        else:
+            # This will show us if it's a 404 (Wrong URL) or 400 (Wrong Entry IDs)
+            st.sidebar.error(f"Post Error: {response.status_code}")
+            return False
+    except Exception as e:
+        st.sidebar.error(f"Transmission Failed: {e}")
+        return False
 
 
 
@@ -461,6 +477,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
