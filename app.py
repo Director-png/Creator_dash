@@ -201,69 +201,33 @@ elif nav == "🌐 Global Pulse":
 elif nav == "⚔️ Trend Duel":
     st.title("⚔️ COMPETITIVE INTELLIGENCE MATRIX")
     
-    # 1. Load the REAL data from your sheet
+    # Load the data
     pulse_df = load_market_pulse_data()
     
     if pulse_df.empty:
-        st.warning("VOID Sheet is empty. Please run the Apps Script to generate intelligence.")
+        st.warning("VOID Sheet is empty. Please run the Apps Script.")
     else:
-        # 2. TOP SECTION: THE LIVE COMPARISON (from Google Sheet)
         st.subheader("🌑 VOID Market Pulse Integration")
+        # Ensure 'Niche' column exists before creating selectbox
+        niche_list = pulse_df['Niche'].unique().tolist()
+        
         selected_niches = st.multiselect(
-            "Select Niches to Compare (Live Sheet Data)",
-            options=pulse_df['Niche'].unique(),
-            default=pulse_df['Niche'].nlargest(5, 'Score')['Niche'].tolist()
+            "Select Niches to Compare",
+            options=niche_list,
+            default=niche_list[:5] if len(niche_list) > 5 else niche_list
         )
         
         comparison_df = pulse_df[pulse_df['Niche'].isin(selected_niches)]
+        
         if not comparison_df.empty:
             st.bar_chart(data=comparison_df, x='Niche', y='Score')
-            st.dataframe(comparison_df[['Niche', 'Score', 'Growth', 'Reason']])
-        
-        st.divider()
+            st.dataframe(comparison_df)
 
-        # 3. THE DUEL: Head-to-Head Analysis
-        st.subheader("⚔️ Head-to-Head Duel")
-        
-        col_search1, col_search2 = st.columns(2)
-        
-        # Pull names directly from the sheet for the dropdowns
-        niche_list = pulse_df['Niche'].unique().tolist()
-        
-        kw1 = col_search1.selectbox("Primary Keyword", niche_list, index=0)
-        kw2 = col_search2.selectbox("Challenger Keyword", niche_list, index=min(1, len(niche_list)-1))
-        
-        # Extract the data for the two selected niches
-        d1 = pulse_df[pulse_df['Niche'] == kw1].iloc[0]
-        d2 = pulse_df[pulse_df['Niche'] == kw2].iloc[0]
-        
-        c1, c2 = st.columns(2)
-        
-        with c1:
-            st.plotly_chart(px.bar(
-                x=['Opportunity Score'], 
-                y=[d1['Score']], 
-                color_discrete_sequence=['#00d4ff'], 
-                title=f"Stats: {kw1}", 
-                height=300
-            ), use_container_width=True)
-            st.info(f"**Reasoning:** {d1['Reason']}")
-            
-        with c2:
-            st.plotly_chart(px.bar(
-                x=['Opportunity Score'], 
-                y=[d2['Score']], 
-                color_discrete_sequence=['#ff4b4b'], 
-                title=f"Stats: {kw2}", 
-                height=300
-            ), use_container_width=True)
-            st.info(f"**Reasoning:** {d2['Reason']}")
-
-        # 4. SHOW ENTIRE DATABASE FOR OVERVIEW
-        with st.expander("📂 View Complete Intelligence Database"):
-            st.table(pulse_df)
-            st.write(f"Debug: Found {len(pulse_df)} rows in the sheet.")
-st.write(pulse_df.head()) # Shows the first 5 rows
+# --- ENSURE THIS LINE IS ALIGNED WITH THE 'elif' ABOVE ---
+elif nav == "💼 Client Pitcher":
+    st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
+    c1, c2 = st.columns([1, 1.5])
+    # ... rest of your code ...
 
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH GENERATOR</h1>", unsafe_allow_html=True)
@@ -299,6 +263,7 @@ elif nav == "💎 Script Architect":
                 res = groq_client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                 st.markdown(res.choices[0].message.content)
             except Exception as e: st.error(f"Error: {e}")
+
 
 
 
