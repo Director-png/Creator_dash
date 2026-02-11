@@ -273,6 +273,7 @@ elif nav == "💼 Client Pitcher" and st.session_state.user_role == "admin":
                 pitch_res = res.choices[0].message.content
                 st.session_state.pitch_history.append({"time": time.strftime("%H:%M:%S"), "client": client, "pitch": pitch_res})
                 with c2: typewriter_effect(pitch_res)
+
 elif nav == "🧬 Creator Lab":
     st.markdown("<h1 style='color: #00d4ff;'>🧬 CREATOR VIGOR & ACQUISITION</h1>", unsafe_allow_html=True)
     
@@ -336,4 +337,5 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
 
