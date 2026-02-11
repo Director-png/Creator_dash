@@ -148,9 +148,6 @@ with st.sidebar:
     else:
         # AND THIS LIST (If you want non-admins to see it too)
         options = ["🌐 Global Pulse", "⚔️ Trend Duel", "🧬 Creator Lab", "💎 Script Architect", "📜 History"]
-    
-    nav = st.radio("COMMAND CENTER", options)
-    
     nav = st.radio("COMMAND CENTER", options)
     st.divider()
     if st.button("🔓 Terminate Session", use_container_width=True):
@@ -342,6 +339,7 @@ elif nav == "📜 History":
             with st.expander(f"🕒 {s['time']} - {s['topic']}"): 
                 st.write(s['script'])
                 if 'dna' in s: st.caption(f"DNA: {s['dna']}")
+
 
 
 
