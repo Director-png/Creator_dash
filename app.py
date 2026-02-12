@@ -275,7 +275,7 @@ chart_df = pd.DataFrame({
 
 # --- THE CHART FIX ---
     # Everything below is indented exactly 4 spaces from the 'elif'
-    chart_df = pd.DataFrame({
+chart_df = pd.DataFrame({
         "Status": st.session_state.chart_data["labels"],
         "Subscribers": st.session_state.chart_data["values"]
     })
@@ -589,6 +589,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
