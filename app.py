@@ -472,41 +472,40 @@ elif nav == "📡 My Growth Hub":
             report = generate_oracle_report(context, "Cross-Platform", "Elite")
             st.info(report)
 
-# 1. The button and the scan logic
-if st.button("🛰️ EXECUTE VISION SCAN"):
-    if uploaded_img is not None:
-        with st.spinner("🌑 SCANNING..."):
-            # We wrap the risky AI call in a try/except block properly
-            try:
-                result = analyze_analytics_screenshot(uploaded_img)
-                st.session_state.last_analysis = result
-                
-                # Extract numbers to update the chart
-                nums = re.findall(r'\d+', result.replace(',', ''))
-                if nums:
-                    st.session_state.chart_data["values"][0] = int(nums[0])
-            except Exception as e:
-                st.error(f"Scan failed: {e}")
+# 1. The button and the scan logic (This is all part of the Growth Hub module)
+    if st.button("🛰️ EXECUTE VISION SCAN"):
+        if uploaded_img is not None:
+            with st.spinner("🌑 SCANNING..."):
+                try:
+                    result = analyze_analytics_screenshot(uploaded_img)
+                    st.session_state.last_analysis = result
+                    
+                    # Extract numbers to update the chart
+                    nums = re.findall(r'\d+', result.replace(',', ''))
+                    if nums:
+                        st.session_state.chart_data["values"][0] = int(nums[0])
+                except Exception as e:
+                    st.error(f"Scan failed: {e}")
 
-# 2. THE CHART FIX (Outside of the try/except block)
-st.subheader("📈 Progress Visualization")
+    # 2. THE CHART FIX (Still indented so it belongs to the same module)
+    st.subheader("📈 Progress Visualization")
 
-# We turn the data into a DataFrame to stop the 'StreamlitAPIException'
-chart_df = pd.DataFrame({
-    "Status": st.session_state.chart_data["labels"],
-    "Subscribers": st.session_state.chart_data["values"]
-})
+    chart_df = pd.DataFrame({
+        "Status": st.session_state.chart_data["labels"],
+        "Subscribers": st.session_state.chart_data["values"]
+    })
 
-st.bar_chart(data=chart_df, x="Status", y="Subscribers")
+    st.bar_chart(data=chart_df, x="Status", y="Subscribers")
 
 # --- MODULE 3: ASSIGNED SCRIPTS ---
+# This is NOT indented, so it starts the next section of the navigation
 elif nav == "💎 Assigned Scripts":
     st.title("💎 YOUR SECURE VAULT")
     try:
         scripts_df = pd.read_csv(VAULT_SHEET_CSV_URL)
         scripts_df.columns = [str(c).strip().lower() for c in scripts_df.columns]
         my_vault = scripts_df[scripts_df.iloc[:, 1].astype(str) == st.session_state.user_name]
-        
+        # ... rest of your vault code ...        
         if my_vault.empty: 
             st.warning("No scripts assigned yet. Awaiting Director transmission.")
         else:
@@ -648,6 +647,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
