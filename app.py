@@ -232,33 +232,25 @@ def analyze_analytics_screenshot(uploaded_file):
     return None
 
 def analyze_analytics_screenshot(uploaded_file):
-    if uploaded_file is not None:
-        try:
-            # Check if key exists
-            if "GEMINI_API_KEY" not in st.secrets:
-                return "ERROR: Uplink denied. GEMINI_API_KEY missing from Secrets."
-                
-            # Initialize Client
-            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-            
-            img = Image.open(uploaded_file)
-            
-            prompt = """
-            Director, analyze this neural data screenshot. 
-            Extract the exact Subscriber count and the 'Director's Directive' for scaling.
-            Format as: COUNT: [X] | DIRECTIVE: [Y]
-            """
-            
-            # Using the new SDK's unified call
-            response = client.models.generate_content(
-                model="gemini-2.0-flash", 
-                contents=[prompt, img]
-            )
-            return response.text
-        except Exception as e:
-            return f"Uplink Error: {e}"
-    return None
-
+    # ... (Key check logic) ...
+    try:
+        # 1. Use 1.5 Flash (Most stable for Free Tier)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        # 2. Add a tiny 1-second delay to prevent 'Burst' errors
+        time.sleep(1)
+        
+        img = Image.open(uploaded_file)
+        
+        # 3. Super-short prompt to save 'Input Tokens'
+        prompt = "Extract from image: Subscriber count and Views. Summary: 1 sentence."
+        
+        response = model.generate_content([prompt, img])
+        return response.text
+    except Exception as e:
+        if "429" in str(e):
+            return "🌑 VOID ERROR: Neural path congested (Rate Limit). Please wait 60s."
+        return f"Uplink Error: {e}"
 
 
 # --- 1. CONFIG ---
@@ -558,6 +550,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
