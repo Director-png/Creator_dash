@@ -247,9 +247,10 @@ def analyze_analytics_screenshot(uploaded_file):
         
         # 4. Execute the Vision Scan (Modern Syntax)
         # We use gemini-1.5-flash for free-tier stability
+       # Try the fully qualified model name
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
-            contents=["Extract the subscriber count and views from this image. Format: SUBS: [X], VIEWS: [Y]", img]
+            model="gemini-1.5-flash", # If this fails, try "models/gemini-1.5-flash"
+            contents=["Analyze this analytics screenshot. Extract Subscriber count and Views.", img]
         )
         
         return response.text
@@ -557,6 +558,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
