@@ -256,13 +256,13 @@ with st.expander("🔮 ACCESS ORACLE INTELLIGENCE", expanded=True):
         with st.spinner("📡 SCANNING GLOBAL TRENDS..."):
             # We pull the last topic generated from the session state or database
             report = generate_oracle_report(st.session_state.last_topic, platform, tone_choice)
-            st.info(report):
+            st.info(report)
             
             # Save this to your 'Oracle Archive' in the sheet
             # (We can use the same Bridge we just built!)
 
 
-elif nav == "💎 Assigned Scripts":
+    elif nav == "💎 Assigned Scripts":
     st.title("💎 YOUR SECURE VAULT")
     try:
         scripts_df = pd.read_csv(SCRIPT_VAULT_CSV_URL)
@@ -512,6 +512,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
