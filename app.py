@@ -218,6 +218,25 @@ def transmit_script(client, platform, topic, script, dna):
         st.sidebar.error(f"Transmission Failed: {e}")
         return False
 
+def generate_oracle_report(topic, platform, tone):
+    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+    
+    prompt = f"""
+    System: You are the VOID OS Oracle. Analyze content architecture for {platform}.
+    Topic: {topic} | Tone: {tone}
+    
+    Provide a 'Growth Intelligence Report' with:
+    1. 📈 VIRAL VELOCITY: Why this topic is peaking now.
+    2. 🧠 PSYCHOLOGICAL HOOK: The specific 'Human Bias' this script exploits.
+    3. 🚀 SCALING STRATEGY: How to turn this one video into a 5-part series.
+    """
+    
+    res = groq_c.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return res.choices[0].message.content
+
 
 
 # --- MODULES ---
@@ -230,6 +249,18 @@ if nav == "📊 Dashboard" and st.session_state.user_role == "admin":
 
 elif nav == "📡 My Growth Hub":
     st.markdown(f"<h1 style='color: #00d4ff;'>📡 WELCOME, {st.session_state.user_name.upper()}</h1>", unsafe_allow_html=True)
+# Inside your 'My Growth' Tab logic:
+with st.expander("🔮 ACCESS ORACLE INTELLIGENCE", expanded=True):
+    st.markdown("### 🧬 Strategic Growth Vectors")
+    if st.button("RUN ORACLE ANALYSIS"):
+        with st.spinner("📡 SCANNING GLOBAL TRENDS..."):
+            # We pull the last topic generated from the session state or database
+            report = generate_oracle_report(st.session_state.last_topic, platform, tone_choice)
+            st.info(report)
+            
+            # Save this to your 'Oracle Archive' in the sheet
+            # (We can use the same Bridge we just built!)
+
 
 elif nav == "💎 Assigned Scripts":
     st.title("💎 YOUR SECURE VAULT")
@@ -481,6 +512,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
