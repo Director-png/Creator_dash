@@ -303,19 +303,18 @@ if uploaded_img is not None:
             st.session_state.chart_data["values"][0] = int(nums[0])
             st.success(f"Detected {nums[0]} Subscribers!")
 
-            # --- THE CHART FIX ---
-            # We convert the data to a DataFrame so the chart doesn't crash
-           chart_df = pd.DataFrame({
-                     "Status": st.session_state.chart_data["labels"],
-                     "Subscribers": st.session_state.chart_data["values"]
-                     })
+# --- THE CHART FIX ---
+    # Everything below is indented exactly 4 spaces from the 'elif'
+    chart_df = pd.DataFrame({
+        "Status": st.session_state.chart_data["labels"],
+        "Subscribers": st.session_state.chart_data["values"]
+    })
 
-                     st.bar_chart(data=chart_df, x="Status", y="Subscribers")
+    st.bar_chart(data=chart_df, x="Status", y="Subscribers")
 
-          # 1. First, create the uploader and name the variable correctly
-          # Note: Ensure the variable name here matches exactly what you use in the function call
-         uploaded_img = st.file_uploader("📤 UPLOAD ANALYTICS SCREENSHOT", type=['png', 'jpg', 'jpeg'])
-
+    # 1. First, create the uploader and name the variable correctly
+    uploaded_img = st.file_uploader("📤 UPLOAD ANALYTICS SCREENSHOT", type=['png', 'jpg', 'jpeg'])
+    
 # 2. Only show the scan button if an image is actually present
 if uploaded_img is not None:
     if st.button("🛰️ EXECUTE VISION SCAN"):
@@ -649,6 +648,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
