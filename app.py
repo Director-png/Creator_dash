@@ -263,7 +263,7 @@ with st.expander("🔮 ACCESS ORACLE INTELLIGENCE", expanded=True):
 
 
     elif nav == "💎 Assigned Scripts":
-    st.title("💎 YOUR SECURE VAULT")
+        st.title("💎 YOUR SECURE VAULT")
     try:
         scripts_df = pd.read_csv(SCRIPT_VAULT_CSV_URL)
         scripts_df.columns = [str(c).strip().lower() for c in scripts_df.columns]
@@ -512,6 +512,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
