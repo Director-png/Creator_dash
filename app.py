@@ -408,26 +408,31 @@ if nav == "📊 Dashboard":
         st.subheader("🛡️ Security Audit")
         st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
 
-# --- UPDATED MY GROWTH HUB MODULE ---
+# --- UPDATED MY GROWTH HUB MODULE (CLEANED) ---
 elif nav == "📡 My Growth Hub":
     st.markdown(f"<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
     
-    # NEW: Vision Upload Section
+    # 1. VISION UPLOAD SECTION
     with st.expander("📷 UPLOAD ANALYTICS SCREENSHOT", expanded=True):
         st.write("Drop a screenshot of your YT/IG/X dashboard to sync real data.")
-        uploaded_img = st.file_uploader("Upload Node Data", type=['png', 'jpg', 'jpeg'])
+        uploaded_img = st.file_uploader("Upload Node Data", type=['png', 'jpg', 'jpeg'], key="growth_uploader")
         
         if st.button("🛰️ ANALYZE & SYNC"):
             if uploaded_img:
                 with st.spinner("🌑 SCANNING NEURAL DATA..."):
+                    # Use the consistent variable name
                     result = analyze_analytics_screenshot(uploaded_img)
                     st.session_state.last_analysis = result
-                    st.success("Intelligence Extracted.")
-                    # Logic to parse 'result' and update st.session_state.current_subs goes here
+                    
+                    # Extraction logic
+                    nums = re.findall(r'\d+', result.replace(',', ''))
+                    if nums:
+                        st.session_state.current_subs = int(nums[0])
+                        st.success(f"Intelligence Extracted: {nums[0]} Subscribers.")
             else:
                 st.warning("Director, provide a data visual for scanning.")
 
-    # Show the results of the scan if it exists
+    # 2. ANALYSIS FEEDBACK
     if 'last_analysis' in st.session_state:
         st.info(f"**ORACLE FEEDBACK:** {st.session_state.last_analysis}")
         
@@ -436,8 +441,6 @@ elif nav == "📡 My Growth Hub":
         with g_col1:
             st.markdown("#### 🎯 TARGETS")
             goal = st.number_input("End Goal", value=10000)
-            
-            # Using the fixed variable name from session state
             curr = st.session_state.current_subs
             
             prog = curr / goal if goal > 0 else 0
@@ -447,7 +450,6 @@ elif nav == "📡 My Growth Hub":
         
         with g_col2:
             st.markdown("#### 📈 GROWTH TRACE")
-            # Using 'curr' to generate the chart data points
             growth_df = pd.DataFrame({
                 'Timeline': ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'LIVE'],
                 'Reach': [int(curr*0.8), int(curr*0.85), int(curr*0.9), int(curr*0.95), curr]
@@ -468,34 +470,9 @@ elif nav == "📡 My Growth Hub":
     st.divider()
     if st.button("🔮 ANALYZE PERSONALIZED ORACLE REPORT"):
         with st.spinner("🌑 ORACLE IS CONSULTING THE VOID..."):
-            context = f"Creator {st.session_state.get('yt_handle', 'Unknown')} at {st.session_state.current_subs} followers."
+            context = f"Creator at {st.session_state.current_subs} followers."
             report = generate_oracle_report(context, "Cross-Platform", "Elite")
             st.info(report)
-
-# 1. The button and the scan logic (This is all part of the Growth Hub module)
-    if st.button("🛰️ EXECUTE VISION SCAN"):
-        if uploaded_img is not None:
-            with st.spinner("🌑 SCANNING..."):
-                try:
-                    result = analyze_analytics_screenshot(uploaded_img)
-                    st.session_state.last_analysis = result
-                    
-                    # Extract numbers to update the chart
-                    nums = re.findall(r'\d+', result.replace(',', ''))
-                    if nums:
-                        st.session_state.chart_data["values"][0] = int(nums[0])
-                except Exception as e:
-                    st.error(f"Scan failed: {e}")
-
-    # 2. THE CHART FIX (Still indented so it belongs to the same module)
-    st.subheader("📈 Progress Visualization")
-
-    chart_df = pd.DataFrame({
-        "Status": st.session_state.chart_data["labels"],
-        "Subscribers": st.session_state.chart_data["values"]
-    })
-
-    st.bar_chart(data=chart_df, x="Status", y="Subscribers")
 
 # --- MODULE 3: ASSIGNED SCRIPTS ---
 # This is NOT indented, so it starts the next section of the navigation
@@ -647,6 +624,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
