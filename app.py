@@ -276,8 +276,8 @@ with st.expander("🔮 ACCESS ORACLE INTELLIGENCE", expanded=True):
                     st.caption(f"DNA: {row.iloc[5]}")
     except: st.error("Vault Offline.")
 
-elif nav == "🌐 Global Pulse":
-    st.title("🌐 GLOBAL INTELLIGENCE PULSE")
+    elif nav == "🌐 Global Pulse":
+        st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     # [Global Pulse Code Preserved...]
     pulse_df = load_market_pulse_data()
     if not pulse_df.empty:
@@ -309,8 +309,8 @@ elif nav == "🌐 Global Pulse":
         st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400")
         
 
-elif nav == "⚔️ Trend Duel":
-    st.title("⚔️ TREND DUEL")
+   elif nav == "⚔️ Trend Duel":
+       st.title("⚔️ TREND DUEL")
     # [Trend Duel Code Preserved...]
     pulse_df = load_market_pulse_data()
     if not pulse_df.empty:
@@ -325,8 +325,8 @@ elif nav == "⚔️ Trend Duel":
         if not comp.empty: st.bar_chart(data=comp, x='Niche', y='Score')
             
 
-if nav == "💎 Script Architect":
-    st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
+   if nav == "💎 Script Architect":
+     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
     
     # 1. DATA PULL
     users_df = load_user_db()
@@ -409,8 +409,8 @@ if nav == "💎 Script Architect":
                     except Exception as e:
                         st.error(f"Intelligence Failure: {e}")
 
-elif nav == "💼 Client Pitcher":
-    st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL</h1>", unsafe_allow_html=True)
+   elif nav == "💼 Client Pitcher":
+       st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL</h1>", unsafe_allow_html=True)
     # [Pitcher Code Preserved...]
     c1, c2 = st.columns([1, 1.5], gap="large")
     
@@ -441,8 +441,8 @@ elif nav == "💼 Client Pitcher":
             else:
                 st.error("Director, provide a Lead Name and Offer details before architecting.")
                 
-elif nav == "🧬 Creator Lab":
-    st.markdown("<h1 style='color: #00d4ff;'>🧬 VIGOR AUDIT</h1>", unsafe_allow_html=True)
+   elif nav == "🧬 Creator Lab":
+       st.markdown("<h1 style='color: #00d4ff;'>🧬 VIGOR AUDIT</h1>", unsafe_allow_html=True)
     # [Vigor Code Preserved...]
     col_a, col_b = st.columns([1, 1.5])
     with col_a:
@@ -465,8 +465,8 @@ elif nav == "🧬 Creator Lab":
                 # Logic visualization
                 st.caption("Director's Logic: We value Attention Leverage. A creator who gets 50k views with 1k followers is a 'Vigor God'.")
 
-elif nav == "🛰️ Lead Source":
-    st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE</h1>", unsafe_allow_html=True)
+   elif nav == "🛰️ Lead Source":
+       st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE</h1>", unsafe_allow_html=True)
     # [Lead Source Code Preserved...]
     st.subheader("Automated Prospecting Layer")
     
@@ -504,14 +504,15 @@ elif nav == "🛰️ Lead Source":
         else:
             st.info("Awaiting system initialization. Run 'Deep Scan' to identify targets.")
 
-elif nav == "📜 History":
-    st.title("📜 ARCHIVES")
+   elif nav == "📜 History":
+       st.title("📜 ARCHIVES")
     # [History Code Preserved...]
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
