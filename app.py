@@ -231,6 +231,7 @@ import google.generativeai as genai # Note the name change
 # --- GLOBAL SETUP ---
 client = None
 if "GEMINI_API_KEY" in st.secrets:
+   client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
     # This creates the 'client' that was missing before
 def analyze_analytics_screenshot(uploaded_file):
     try:
@@ -626,6 +627,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
