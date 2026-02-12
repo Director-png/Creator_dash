@@ -216,6 +216,60 @@ def analyze_analytics_screenshot(uploaded_file):
             return f"Uplink Error: {e}"
     return None
 
+# --- ADD THIS TO YOUR UTILITIES SECTION ---
+def analyze_analytics_screenshot(uploaded_file):
+    if uploaded_file is not None:
+        try:
+            # Check if key exists in secrets
+            if "GEMINI_API_KEY" not in st.secrets:
+                return "ERROR: GEMINI_API_KEY missing from Secrets."
+                
+            genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            
+            img = Image.open(uploaded_file)
+            
+            prompt = """
+            Analyze this social media analytics screenshot. 
+            Extract: 
+            1. Total Followers/Subscribers
+            2. Top Niche identified
+            3. A strategic 'Next Move' for the creator.
+            Keep it concise and professional.
+            """
+            
+            response = model.generate_content([prompt, img])
+            return response.text
+        except Exception as e:
+            return f"Uplink Error: {e}"
+    return None
+
+# --- UPDATED NAVIGATION BLOCK ---
+elif nav == "📡 My Growth Hub":
+    st.markdown(f"<h1 style='color: #00d4ff;'>📡 GROWTH HUB</h1>", unsafe_allow_html=True)
+    
+    col_input, col_display = st.columns([1, 1.5])
+    
+    with col_input:
+        st.subheader("🛰️ Intelligence Input")
+        uploaded_img = st.file_uploader("Upload Analytics Screenshot", type=['png', 'jpg', 'jpeg'])
+        
+        if st.button("📡 SCAN & SYNC"):
+            if uploaded_img:
+                with st.spinner("🌑 INITIALIZING VISION SCAN..."):
+                    analysis = analyze_analytics_screenshot(uploaded_img)
+                    st.session_state.last_analysis = analysis
+                    st.success("Scan Complete.")
+            else:
+                st.warning("Please provide a visual data node (screenshot).")
+
+    with col_display:
+        st.subheader("🧠 Oracle Interpretation")
+        if 'last_analysis' in st.session_state:
+            st.info(st.session_state.last_analysis)
+        else:
+            st.write("Awaiting data uplink...")
+
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -514,6 +568,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
