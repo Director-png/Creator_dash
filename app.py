@@ -209,39 +209,28 @@ def fetch_live_metrics(platform, handle):
 
 # --- UTILITY: AI STUDIO VISION ENGINE ---
 def analyze_analytics_screenshot(uploaded_file):
-    global client
     if client is None:
-        return "🚨 ERROR: API Key not configured in Secrets."
-
+        return "🚨 ERROR: System Offline. Check API Key."
     try:
         img = Image.open(uploaded_file)
-        # Using 2.0-flash for 2026 stability
+        # Using the most stable 2026 model
         response = client.models.generate_content(
             model="gemini-2.0-flash", 
-            contents=["How many subscribers are in this image? Just give me the number.", img]
+            contents=["Extract the subscriber count as a number.", img]
         )
         return response.text
     except Exception as e:
         return f"Uplink Error: {e}"
 
-
 # 1. At the TOP of your script (Global Space)
 # --- GLOBAL SETUP ---
-client = None
 # Line 242
+# Line 243
 if "GEMINI_API_KEY" in st.secrets:
-# Line 244 (This is the line causing the error because it's not pushed in)
-# FIX for Line 234: The New 2026 Syntax
+    # Ensure there are 4 SPACES before 'client'
     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-def analyze_analytics_screenshot(uploaded_file):
-    try:
-        # Old library uses this style:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        img = Image.open(uploaded_file)
-        response = model.generate_content(["Read sub count", img])
-        return response.text
-    except Exception as e:
-        return f"Error: {e}"
+else:
+    client = None
 
 # This prevents the chart from being empty when you first open the app
 if 'chart_data' not in st.session_state:
@@ -634,6 +623,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
