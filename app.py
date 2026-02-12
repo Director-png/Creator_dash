@@ -242,8 +242,7 @@ if nav == "📊 Dashboard":
         st.subheader("🛡️ Security Audit")
         st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
 
-
-        elif nav == "📡 My Growth Hub":
+elif nav == "📡 My Growth Hub":
     st.markdown(f"<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE: {st.session_state.user_name.upper()}</h1>", unsafe_allow_html=True)
     
     with st.expander("👤 NEURAL IDENTITY & OBJECTIVES", expanded=True):
@@ -481,6 +480,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
