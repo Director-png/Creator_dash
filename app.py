@@ -392,6 +392,7 @@ if nav == "📊 Dashboard":
         st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
 
 # --- UPDATED MY GROWTH HUB MODULE (CLEANED) ---
+# --- UPDATED MY GROWTH HUB MODULE (CLEANED & SECURED) ---
 elif nav == "📡 My Growth Hub":
     st.markdown(f"<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
     
@@ -400,22 +401,24 @@ elif nav == "📡 My Growth Hub":
         st.write("Drop a screenshot of your YT/IG/X dashboard to sync real data.")
         uploaded_img = st.file_uploader("Upload Node Data", type=['png', 'jpg', 'jpeg'], key="growth_uploader")
         
-        if st.button("🛰️ ANALYZE & SYNC"):
+        # This button is now INSIDE the Growth Hub tab only
+        if st.button("🛰️ EXECUTE VISION SCAN"):
             if uploaded_img:
                 with st.spinner("🌑 SCANNING NEURAL DATA..."):
-                    # Use the consistent variable name
                     result = analyze_analytics_screenshot(uploaded_img)
                     st.session_state.last_analysis = result
                     
-                    # Extraction logic
+                    # Extraction logic for the chart
                     nums = re.findall(r'\d+', result.replace(',', ''))
                     if nums:
                         st.session_state.current_subs = int(nums[0])
+                        # Sync to chart data
+                        st.session_state.chart_data["values"] = [int(nums[0])]
                         st.success(f"Intelligence Extracted: {nums[0]} Subscribers.")
             else:
                 st.warning("Director, provide a data visual for scanning.")
 
-    # 2. ANALYSIS FEEDBACK
+    # 2. ANALYSIS FEEDBACK & VISUALS
     if 'last_analysis' in st.session_state:
         st.info(f"**ORACLE FEEDBACK:** {st.session_state.last_analysis}")
         
@@ -433,22 +436,12 @@ elif nav == "📡 My Growth Hub":
         
         with g_col2:
             st.markdown("#### 📈 GROWTH TRACE")
-            growth_df = pd.DataFrame({
-                'Timeline': ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'LIVE'],
-                'Reach': [int(curr*0.8), int(curr*0.85), int(curr*0.9), int(curr*0.95), curr]
+            # We only show the chart here, inside the Growth Hub logic
+            chart_df = pd.DataFrame({
+                "Status": st.session_state.chart_data["labels"],
+                "Subscribers": st.session_state.chart_data["values"]
             })
-            
-            fig = px.line(growth_df, x='Timeline', y='Reach', markers=True)
-            fig.update_traces(line_color='#00ff41', line_width=4, marker=dict(size=12, color='#00d4ff', symbol='diamond'))
-            fig.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)', 
-                plot_bgcolor='rgba(0,0,0,0)', 
-                height=250, 
-                xaxis=dict(showgrid=True, gridcolor='#111'),
-                yaxis=dict(showgrid=True, gridcolor='#111'),
-                font=dict(color="#00ff41", family="monospace")
-            )
-            st.plotly_chart(fig, use_container_width=True)
+            st.bar_chart(data=chart_df, x="Status", y="Subscribers")
 
     st.divider()
     if st.button("🔮 ANALYZE PERSONALIZED ORACLE REPORT"):
@@ -457,6 +450,8 @@ elif nav == "📡 My Growth Hub":
             report = generate_oracle_report(context, "Cross-Platform", "Elite")
             st.info(report)
 
+# --- THE NEXT MODULE STARTS HERE ---
+elif nav == "💎 Assigned Scripts":
 # --- MODULE 3: ASSIGNED SCRIPTS ---
 # This is NOT indented, so it starts the next section of the navigation
 elif nav == "💎 Assigned Scripts":
@@ -607,6 +602,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
