@@ -224,6 +224,15 @@ def analyze_analytics_screenshot(uploaded_file):
     except Exception as e:
         return f"Uplink Error: {e}"
 
+def analyze_analytics_screenshot(uploaded_file):
+    try:
+        # We use the 'GenerativeModel' style for the old library
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        img = Image.open(uploaded_file)
+        response = model.generate_content(["Extract the subscriber count number from this image.", img])
+        return response.text
+    except Exception as e:
+        return f"Uplink Error: {e}"
 
 import google.generativeai as genai # Note the name change
 
@@ -231,7 +240,8 @@ import google.generativeai as genai # Note the name change
 # --- GLOBAL SETUP ---
 client = None
 if "GEMINI_API_KEY" in st.secrets:
-   client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+ # FIX for Line 234
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
     # This creates the 'client' that was missing before
 def analyze_analytics_screenshot(uploaded_file):
     try:
@@ -285,12 +295,12 @@ if st.button("🛰️ EXECUTE VISION SCAN"):
             numbers = re.findall(r'\d+', analysis_result)
             if numbers:
                 new_val = int(numbers[0])
-                # Update the session state
-                st.session_state.chart_data = {
-                    "labels": ["Current", "Target"],
-                    "values": [new_val, 10000] # Assuming 10k is your goal
-                }
-                st.success(f"Chart calibrated to {new_val} subs!")
+                # Update the session state# FIX for Line 292
+chart_df = pd.DataFrame({
+    "Metric": st.session_state.chart_data["labels"],
+    "Subscribers": st.session_state.chart_data["values"]
+})
+st.bar_chart(data=chart_df, x="Metric", y="Subscribers")
         except:
             st.error("Failed to parse numbers for the chart.")
 
@@ -627,6 +637,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
