@@ -231,35 +231,23 @@ def analyze_analytics_screenshot(uploaded_file):
             return f"Uplink Error: {e}"
     return None
 
+
+import google.generativeai as genai # Note the name change
+
 def analyze_analytics_screenshot(uploaded_file):
-    # 1. Pull the key safely
     final_key = st.session_state.get('active_gemini_key') or st.secrets.get("GEMINI_API_KEY")
     
-    if not final_key:
-        return "ERROR: No API Key found."
-
     try:
-        # 2. Initialize the Modern Client
-        client = genai.Client(api_key=final_key)
+        genai.configure(api_key=final_key)
+        # We use the 'v1' stable model
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
-        # 3. Process the Image
         img = Image.open(uploaded_file)
-        
-        # 4. Execute the Vision Scan (Modern Syntax)
-        # We use gemini-1.5-flash for free-tier stability
-       # Try the fully qualified model name
-        response = client.models.generate_content(
-            model="gemini-1.5-flash", # If this fails, try "models/gemini-1.5-flash"
-            contents=["Analyze this analytics screenshot. Extract Subscriber count and Views.", img]
-        )
+        response = model.generate_content(["Extract Subscriber count and Views.", img])
         
         return response.text
-        
     except Exception as e:
-        if "429" in str(e):
-            return "🌑 VOID ERROR: Neural path congested. Wait 60s."
         return f"Uplink Error: {e}"
-        
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -558,6 +546,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
