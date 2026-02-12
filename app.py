@@ -260,6 +260,41 @@ def analyze_analytics_screenshot(uploaded_file):
         if "429" in str(e):
             return "🌑 VOID CONGESTION: Google has set your quota to 0. Please wait 24hrs for account activation or use a different Google Account."
         return f"Uplink Error: {e}"
+# 1. Initialize the storage at the top of your app
+if 'chart_data' not in st.session_state:
+    st.session_state.chart_data = {"labels": ["Target"], "values": [0]}
+
+# 2. Inside your "Execute Vision Scan" button logic:
+if st.button("🛰️ EXECUTE VISION SCAN"):
+    with st.spinner("🌑 SCANNING..."):
+        analysis_result = analyze_analytics_screenshot(uploaded_file)
+        
+        # --- THE DATA BRIDGE ---
+        # Let's say Gemini returns "SUBS: 1200"
+        # we extract the number and save it to the chart
+        try:
+            # Simple logic to find numbers in the text
+            import re
+            numbers = re.findall(r'\d+', analysis_result)
+            if numbers:
+                new_val = int(numbers[0])
+                # Update the session state
+                st.session_state.chart_data = {
+                    "labels": ["Current", "Target"],
+                    "values": [new_val, 10000] # Assuming 10k is your goal
+                }
+                st.success(f"Chart calibrated to {new_val} subs!")
+        except:
+            st.error("Failed to parse numbers for the chart.")
+
+# 3. The Chart (now it reads from session_state)
+st.subheader("📈 Progress Visualization")
+st.bar_chart(
+    data=st.session_state.chart_data["values"], 
+    x=st.session_state.chart_data["labels"]
+)
+
+
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -558,6 +593,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
