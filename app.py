@@ -231,57 +231,67 @@ elif nav == "📡 My Growth Hub":
     with st.expander("👤 NEURAL IDENTITY & OBJECTIVES", expanded=True):
         c1, c2, c3 = st.columns(3)
         with c1:
-            yt_h = st.text_input("YouTube", placeholder="@handle", value=st.session_state.get('yt_handle', ""))
-            st.session_state.yt_handle = yt_h
+            st.session_state.yt_handle = st.text_input("YouTube", placeholder="@handle", value=st.session_state.get('yt_handle', ""))
         with c2:
-            ig_h = st.text_input("Instagram", placeholder="@handle", value=st.session_state.get('ig_handle', ""))
-            st.session_state.ig_handle = ig_h
+            st.session_state.ig_handle = st.text_input("Instagram", placeholder="@handle", value=st.session_state.get('ig_handle', ""))
         with c3:
-            x_h = st.text_input("X (Twitter)", placeholder="@handle", value=st.session_state.get('x_handle', ""))
-            st.session_state.x_handle = x_h
+            st.session_state.x_handle = st.text_input("X (Twitter)", placeholder="@handle", value=st.session_state.get('x_handle', ""))
         
         st.divider()
         
         g_col1, g_col2 = st.columns([1, 2])
         with g_col1:
-            st.markdown("#### 🎯 Set Targets")
-            target_subs = st.number_input("Goal: Followers/Subs", value=10000, step=1000)
+            st.markdown("<p style='color: #00ff41; font-weight: bold;'>🎯 TARGET CALIBRATION</p>", unsafe_allow_html=True)
+            target_subs = st.number_input("Goal: Followers", value=10000, step=1000)
             current_subs = st.number_input("Current Count", value=1500, step=100)
             
             progress = current_subs / target_subs if target_subs > 0 else 0
-            st.metric("Path to Mastery", f"{int(progress*100)}%", delta=f"{target_subs - current_subs} to go")
+            st.metric("Mastery Level", f"{int(progress*100)}%", delta=f"{target_subs - current_subs} units remaining")
+            st.progress(min(progress, 1.0))
         
         with g_col2:
-            st.markdown("#### 📈 Growth Velocity")
-            # Replace with real data logic later; currently visualizes the climb
+            st.markdown("<p style='color: #00ff41; font-weight: bold;'>📈 GROWTH VELOCITY TRACE</p>", unsafe_allow_html=True)
+            
+            # --- TACTICAL CHART LOGIC ---
             growth_df = pd.DataFrame({
-                'Week': ['W1', 'W2', 'W3', 'W4', 'W5'],
-                'Reach': [current_subs*0.7, current_subs*0.8, current_subs*0.85, current_subs*0.9, current_subs]
+                'Timeline': ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
+                'Reach': [current_subs*0.6, current_subs*0.75, current_subs*0.8, current_subs*0.95, current_subs]
             })
-            st.line_chart(growth_df, x='Week', y='Reach', height=180)
+
+            # Create an Elite Plotly Chart
+            fig = px.line(growth_df, x='Timeline', y='Reach', markers=True)
+            
+            fig.update_traces(
+                line_color='#00ff41', 
+                line_width=3,
+                marker=dict(size=8, color='#00d4ff', symbol='diamond'),
+                hovertemplate="<b>%{x}</b><br>Reach: %{y}<extra></extra>"
+            )
+            
+            fig.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                margin=dict(l=0, r=0, t=10, b=0),
+                height=250,
+                xaxis=dict(showgrid=True, gridcolor='#111', color='#00d4ff', title=""),
+                yaxis=dict(showgrid=True, gridcolor='#111', color='#00d4ff', title=""),
+                font=dict(family="Courier New, monospace", color="#00ff41")
+            )
+            
+            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
     # --- SECTION 2: PERSONALIZED ORACLE ---
     st.divider()
     st.subheader("🔮 PERSONALIZED ORACLE ANALYSIS")
     
-    if st.button("GENERATE CUSTOM STRATEGY", use_container_width=True):
+    if st.button("RUN CUSTOM DIAGNOSTIC", use_container_width=True):
         if not st.session_state.yt_handle and not st.session_state.ig_handle:
-            st.warning("Director, link your handles above so the Oracle can calibrate to your specific audience.")
+            st.warning("Director, link your handles to calibrate the diagnostic.")
         else:
-            with st.spinner("📡 ANALYZING YOUR DIGITAL FOOTPRINT..."):
-                # Tailoring the prompt based on their specific handles/stats
-                custom_context = f"""
-                User Profile:
-                - YouTube: {st.session_state.yt_handle}
-                - Instagram: {st.session_state.ig_handle}
-                - Current Reach: {current_subs}
-                - Target: {target_subs}
-                """
-                
-                # Using the Oracle function with the added context
-                report = generate_oracle_report(f"{st.session_state.last_topic} (Context: {custom_context})", "All Platforms", "Elite")
+            with st.spinner("📡 ANALYZING DIGITAL FOOTPRINT..."):
+                custom_context = f"Creator: {st.session_state.yt_handle} | Reach: {current_subs} | Goal: {target_subs}"
+                report = generate_oracle_report(f"Growth Strategy for {custom_context}", "Omni-Channel", "Elite")
                 st.info(report)
-
 
 # --- MODULE 3: ASSIGNED SCRIPTS ---
 elif nav == "💎 Assigned Scripts":
@@ -432,4 +442,5 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
