@@ -11,7 +11,7 @@ from google import genai  # Modern way to import
 from PIL import Image
 import streamlit as st
 import os
-
+import re 
 # --- PARTNER'S BYPASS: FORCE SECRET RECOGNITION ---
 # If Streamlit is being stubborn, we manually inject the key into the environment
 if "GEMINI_API_KEY" in st.secrets:
@@ -291,10 +291,11 @@ if st.button("🛰️ EXECUTE VISION SCAN"):
         # we extract the number and save it to the chart
         try:
             # Simple logic to find numbers in the text
-            import re
             numbers = re.findall(r'\d+', analysis_result)
             if numbers:
-                new_val = int(numbers[0])
+                new_val = int(numbers[0])= int(numbers[0])
+except Exception as e:
+    st.error(f"Data extraction failed: {e}")
                 # Update the session state# FIX for Line 292
 chart_df = pd.DataFrame({
     "Metric": st.session_state.chart_data["labels"],
@@ -637,6 +638,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
