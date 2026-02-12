@@ -9,6 +9,17 @@ import time
 from streamlit_lottie import st_lottie
 from google import genai  # Modern way to import
 from PIL import Image
+import streamlit as st
+import os
+
+# --- PARTNER'S BYPASS: FORCE SECRET RECOGNITION ---
+# If Streamlit is being stubborn, we manually inject the key into the environment
+if "GEMINI_API_KEY" in st.secrets:
+    os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
+else:
+    # If it's STILL missing, we create a visible warning for the Director
+    st.sidebar.error("⚠️ DATA LINK BROKEN: Secrets not syncing.")
+
 # --- INITIALIZE ALL KEYS ---
 if 'current_subs' not in st.session_state:
     st.session_state.current_subs = 0  # Or your starting number
@@ -547,6 +558,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
