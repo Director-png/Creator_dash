@@ -6,5 +6,6 @@ requests
 feedparser
 beautifulsoup4
 streamlit-lottie
-google-genai
+google-generativeai
 Pillow
+
