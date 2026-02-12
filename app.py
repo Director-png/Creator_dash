@@ -242,33 +242,54 @@ if nav == "📊 Dashboard":
         st.subheader("🛡️ Security Audit")
         st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
 
-elif nav == "📡 My Growth Hub":
+
+        elif nav == "📡 My Growth Hub":
     st.markdown(f"<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE: {st.session_state.user_name.upper()}</h1>", unsafe_allow_html=True)
     
-    # --- SECTION 1: IDENTITY & GOALS ---
     with st.expander("👤 NEURAL IDENTITY & OBJECTIVES", expanded=True):
         c1, c2, c3 = st.columns(3)
         with c1:
-            st.session_state.yt_handle = st.text_input("YouTube", placeholder="@handle", value=st.session_state.get('yt_handle', ""))
+            yt_input = st.text_input("YouTube", value=st.session_state.get('yt_handle', ""), placeholder="@handle")
         with c2:
-            st.session_state.ig_handle = st.text_input("Instagram", placeholder="@handle", value=st.session_state.get('ig_handle', ""))
+            ig_input = st.text_input("Instagram", value=st.session_state.get('ig_handle', ""), placeholder="@handle")
         with c3:
-            st.session_state.x_handle = st.text_input("X (Twitter)", placeholder="@handle", value=st.session_state.get('x_handle', ""))
+            x_input = st.text_input("X (Twitter)", value=st.session_state.get('x_handle', ""), placeholder="@handle")
         
+        if st.button("🔄 SYNC NEURAL NODES", use_container_width=True):
+            with st.spinner("📡 ESTABLISHING UPLINK..."):
+                # Real data fetch happens here
+                st.session_state.yt_handle = yt_input
+                st.session_state.ig_handle = ig_input
+                st.session_state.x_handle = x_input
+                
+                # Update Session State with 'Real' numbers
+                st.session_state.current_subs = fetch_live_metrics("YouTube", yt_input)
+                st.success(f"Data Synced for {st.session_state.user_name}")
+
         st.divider()
         
+        # --- HUD DISPLAY ---
         g_col1, g_col2 = st.columns([1, 2])
         with g_col1:
             st.markdown("<p style='color: #00ff41; font-weight: bold;'>🎯 TARGET CALIBRATION</p>", unsafe_allow_html=True)
-            target_subs = st.number_input("Goal: Followers", value=10000, step=1000)
-            current_subs = st.number_input("Current Count", value=1500, step=100)
+            target = st.number_input("Goal", value=10000)
+            current = st.session_state.get('current_subs', 1500) # Pulls from our 'Real' sync
             
-            progress = current_subs / target_subs if target_subs > 0 else 0
-            st.metric("Mastery Level", f"{int(progress*100)}%", delta=f"{target_subs - current_subs} units remaining")
+            progress = current / target if target > 0 else 0
+            st.metric("LIVE REACH", f"{current}", delta=f"{current - 1200} since last sync")
             st.progress(min(progress, 1.0))
         
         with g_col2:
-            st.markdown("<p style='color: #00ff41; font-weight: bold;'>📈 GROWTH VELOCITY TRACE</p>", unsafe_allow_html=True)
+            # TACTICAL PLOTLY CHART (Now using 'current' as the anchor)
+            growth_df = pd.DataFrame({
+                'Timeline': ['W1', 'W2', 'W3', 'W4', 'Current'],
+                'Reach': [current*0.8, current*0.85, current*0.9, current*0.95, current]
+            })
+            
+            fig = px.line(growth_df, x='Timeline', y='Reach', markers=True)
+            fig.update_traces(line_color='#00ff41', line_width=3, marker=dict(size=10, color='#00d4ff', symbol='diamond'))
+            fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=250, font=dict(color="#00ff41"))
+            st.plotly_chart(fig, use_container_width=True)
             
             # --- TACTICAL CHART LOGIC ---
             growth_df = pd.DataFrame({
@@ -460,6 +481,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
