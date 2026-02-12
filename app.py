@@ -133,6 +133,14 @@ def generate_oracle_report(topic, platform, tone):
     except Exception as e:
         return f"Oracle connection interrupted: {e}"
 
+if 'user_profiles' not in st.session_state:
+    st.session_state.user_profiles = {
+        "youtube": "",
+        "instagram": "",
+        "x": "",
+        "goals": {"followers": 0, "current": 0}
+    }
+
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 
@@ -216,23 +224,64 @@ if nav == "📊 Dashboard":
         st.subheader("🛡️ Security Audit")
         st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
 
-# --- MODULE 2: MY GROWTH HUB ---
 elif nav == "📡 My Growth Hub":
-    st.markdown(f"<h1 style='color: #00d4ff;'>📡 WELCOME, {st.session_state.user_name.upper()}</h1>", unsafe_allow_html=True)
-    with st.expander("🔮 ACCESS ORACLE INTELLIGENCE", expanded=True):
-        st.markdown("### 🧬 Strategic Growth Vectors")
-        if st.button("RUN ORACLE ANALYSIS", use_container_width=True):
-            if 'last_topic' in st.session_state:
-                with st.spinner("📡 SCANNING GLOBAL TRENDS..."):
-                    report = generate_oracle_report(st.session_state.last_topic, "Global", "Elite")
-                    st.info(report)
-            else:
-                st.warning("Director, architect a script in the Command Center first to provide training data.")
+    st.markdown(f"<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE: {st.session_state.user_name.upper()}</h1>", unsafe_allow_html=True)
     
-    st.subheader("📈 Performance Metrics")
-    col1, col2 = st.columns(2)
-    col1.metric("Current Vigor", "88/100", "+5%")
-    col2.metric("Audience Retention", "62%", "+2.1%")
+    # --- SECTION 1: IDENTITY & GOALS ---
+    with st.expander("👤 NEURAL IDENTITY & OBJECTIVES", expanded=True):
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            yt_h = st.text_input("YouTube", placeholder="@handle", value=st.session_state.get('yt_handle', ""))
+            st.session_state.yt_handle = yt_h
+        with c2:
+            ig_h = st.text_input("Instagram", placeholder="@handle", value=st.session_state.get('ig_handle', ""))
+            st.session_state.ig_handle = ig_h
+        with c3:
+            x_h = st.text_input("X (Twitter)", placeholder="@handle", value=st.session_state.get('x_handle', ""))
+            st.session_state.x_handle = x_h
+        
+        st.divider()
+        
+        g_col1, g_col2 = st.columns([1, 2])
+        with g_col1:
+            st.markdown("#### 🎯 Set Targets")
+            target_subs = st.number_input("Goal: Followers/Subs", value=10000, step=1000)
+            current_subs = st.number_input("Current Count", value=1500, step=100)
+            
+            progress = current_subs / target_subs if target_subs > 0 else 0
+            st.metric("Path to Mastery", f"{int(progress*100)}%", delta=f"{target_subs - current_subs} to go")
+        
+        with g_col2:
+            st.markdown("#### 📈 Growth Velocity")
+            # Replace with real data logic later; currently visualizes the climb
+            growth_df = pd.DataFrame({
+                'Week': ['W1', 'W2', 'W3', 'W4', 'W5'],
+                'Reach': [current_subs*0.7, current_subs*0.8, current_subs*0.85, current_subs*0.9, current_subs]
+            })
+            st.line_chart(growth_df, x='Week', y='Reach', height=180)
+
+    # --- SECTION 2: PERSONALIZED ORACLE ---
+    st.divider()
+    st.subheader("🔮 PERSONALIZED ORACLE ANALYSIS")
+    
+    if st.button("GENERATE CUSTOM STRATEGY", use_container_width=True):
+        if not st.session_state.yt_handle and not st.session_state.ig_handle:
+            st.warning("Director, link your handles above so the Oracle can calibrate to your specific audience.")
+        else:
+            with st.spinner("📡 ANALYZING YOUR DIGITAL FOOTPRINT..."):
+                # Tailoring the prompt based on their specific handles/stats
+                custom_context = f"""
+                User Profile:
+                - YouTube: {st.session_state.yt_handle}
+                - Instagram: {st.session_state.ig_handle}
+                - Current Reach: {current_subs}
+                - Target: {target_subs}
+                """
+                
+                # Using the Oracle function with the added context
+                report = generate_oracle_report(f"{st.session_state.last_topic} (Context: {custom_context})", "All Platforms", "Elite")
+                st.info(report)
+
 
 # --- MODULE 3: ASSIGNED SCRIPTS ---
 elif nav == "💎 Assigned Scripts":
@@ -383,3 +432,4 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
