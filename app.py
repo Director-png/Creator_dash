@@ -37,6 +37,11 @@ PULSE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMn
 USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?gid=989182688&single=true&output=csv"
 FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
 SCRIPT_VAULT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
+# The URL from the NEW form (ending in /formResponse)
+VAULT_FORM_URL = "https://docs.google.com/forms/d/e//1FAIpQLSfeDAY3gnWYlpH90EaJirxUc8d4obYUgiX72WJIah7Cya1VNQ/formResponse"
+
+# The CSV URL from the NEW sheet (for the "Client Portal" to read back from)
+VAULT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQTrDvNWe810s55puzBodFKvfUbfMV_l-QoQIfbdPxeQknClGGCQT33UQ471NyGTw4aHLrDTw/pub?output=csv"
 
 # --- 🛰️ UTILITIES ---
 def typewriter_effect(text):
@@ -195,11 +200,11 @@ def transmit_script(client, platform, topic, script, dna):
     
     # ⚠️ CRITICAL: These Entry IDs must match your specific Google Form exactly
     payload = {
-        "entry.546765267": client,    # Client Name
-        "entry.1077052292": platform, # Platform
-        "entry.415250537": topic,     # Topic
-        "entry.1437097100": script,   # The Script
-        "entry.1608255172": dna       # Visual DNA
+        "entry.1242144184": client,    # Client Name
+        "entry.558458420": platform, # Platform
+        "entry.1417525948": topic,     # Topic
+        "entry.792925901": script,   # The Script
+        "entry.2061925132": dna       # Visual DNA
     }
     
     try:
@@ -477,6 +482,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
