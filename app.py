@@ -224,17 +224,6 @@ def analyze_analytics_screenshot(uploaded_file):
     except Exception as e:
         return f"Uplink Error: {e}"
 
-def analyze_analytics_screenshot(uploaded_file):
-    try:
-        # We use the 'GenerativeModel' style for the old library
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        img = Image.open(uploaded_file)
-        response = model.generate_content(["Extract the subscriber count number from this image.", img])
-        return response.text
-    except Exception as e:
-        return f"Uplink Error: {e}"
-
-import google.generativeai as genai # Note the name change
 
 # 1. At the TOP of your script (Global Space)
 # --- GLOBAL SETUP ---
@@ -644,6 +633,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
