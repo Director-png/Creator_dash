@@ -450,9 +450,6 @@ elif nav == "📡 My Growth Hub":
             report = generate_oracle_report(context, "Cross-Platform", "Elite")
             st.info(report)
 
-# --- THE NEXT MODULE STARTS HERE ---
-elif nav == "💎 Assigned Scripts":
-# --- MODULE 3: ASSIGNED SCRIPTS ---
 # This is NOT indented, so it starts the next section of the navigation
 elif nav == "💎 Assigned Scripts":
     st.title("💎 YOUR SECURE VAULT")
@@ -602,6 +599,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
