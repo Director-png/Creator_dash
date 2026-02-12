@@ -7,6 +7,8 @@ import feedparser
 from bs4 import BeautifulSoup
 import time
 from streamlit_lottie import st_lottie
+import google.generativeai as genai
+from PIL import Image
 
 # --- ANIMATION UTILITY ---
 def load_lottieurl(url: str):
@@ -190,6 +192,30 @@ def fetch_live_metrics(platform, handle):
         except:
             return st.session_state.current_subs
 
+# --- UTILITY: AI STUDIO VISION ENGINE ---
+def analyze_analytics_screenshot(uploaded_file):
+    if uploaded_file is not None:
+        try:
+            # Configure Gemini with your AI Studio Key
+            genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            
+            img = Image.open(uploaded_file)
+            
+            prompt = """
+            Analyze this social media analytics screenshot. 
+            1. Extract the current Subscriber/Follower count.
+            2. Identify the top performing metric (views, watch time, etc).
+            3. Give a 1-sentence 'Director's Directive' on what to improve.
+            Format as: COUNT: [number] | FOCUS: [metric] | DIRECTIVE: [text]
+            """
+            
+            response = model.generate_content([prompt, img])
+            return response.text
+        except Exception as e:
+            return f"Uplink Error: {e}"
+    return None
+
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -274,23 +300,28 @@ if nav == "📊 Dashboard":
         st.subheader("🛡️ Security Audit")
         st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
 
+# --- UPDATED MY GROWTH HUB MODULE ---
 elif nav == "📡 My Growth Hub":
     st.markdown(f"<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
     
-    with st.expander("👤 IDENTITY & TARGETS", expanded=True):
-        c1, c2, c3 = st.columns(3)
-        with c1: yt_in = st.text_input("YouTube", value=st.session_state.get('yt_handle', ""), placeholder="@handle")
-        with c2: ig_in = st.text_input("Instagram", value=st.session_state.get('ig_handle', ""), placeholder="@handle")
-        with c3: x_in = st.text_input("X (Twitter)", value=st.session_state.get('x_handle', ""), placeholder="@handle")
+    # NEW: Vision Upload Section
+    with st.expander("📷 UPLOAD ANALYTICS SCREENSHOT", expanded=True):
+        st.write("Drop a screenshot of your YT/IG/X dashboard to sync real data.")
+        uploaded_img = st.file_uploader("Upload Node Data", type=['png', 'jpg', 'jpeg'])
         
-        if st.button("🔄 SYNC NEURAL DATA"):
-            with st.spinner("📡 PULLING REAL-TIME METRICS..."):
-                st.session_state.yt_handle, st.session_state.ig_handle, st.session_state.x_handle = yt_in, ig_in, x_in
-                # Update current_subs based on the "fetch"
-                st.session_state.current_subs = fetch_live_metrics("YouTube", yt_in)
-                st.success("Data Nodes Synchronized.")
+        if st.button("🛰️ ANALYZE & SYNC"):
+            if uploaded_img:
+                with st.spinner("🌑 SCANNING NEURAL DATA..."):
+                    result = analyze_analytics_screenshot(uploaded_img)
+                    st.session_state.last_analysis = result
+                    st.success("Intelligence Extracted.")
+                    # Logic to parse 'result' and update st.session_state.current_subs goes here
+            else:
+                st.warning("Director, provide a data visual for scanning.")
 
-        st.divider()
+    # Show the results of the scan if it exists
+    if 'last_analysis' in st.session_state:
+        st.info(f"**ORACLE FEEDBACK:** {st.session_state.last_analysis}")
         
         # --- HUD DATA VISUALIZATION ---
         g_col1, g_col2 = st.columns([1, 2])
@@ -483,6 +514,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
