@@ -321,7 +321,7 @@ if nav == "💎 Script Architect":
         target_client = st.selectbox("Assign To Target", options=client_options, key="arch_target_final")
         
         # --- INPUT 2: PLATFORM ---
-        platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"], key="arch_plat_final")
+        platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "X-Thread", "YouTube Long-form"], key="arch_plat_final")
         
         # --- INPUT 3: TOPIC ---
         topic = st.text_input("Core Topic", placeholder="e.g., The Future of AI in 2026", key="arch_topic_final")
@@ -482,6 +482,7 @@ elif nav == "📜 History":
             st.write(s['script'])
             if 'dna' in s:
                 st.caption(f"🧬 DNA: {s['dna']}")
+
 
 
 
