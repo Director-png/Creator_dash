@@ -289,20 +289,28 @@ if st.button("🛰️ EXECUTE VISION SCAN"):
         # --- THE DATA BRIDGE ---
         # Let's say Gemini returns "SUBS: 1200"
         # we extract the number and save it to the chart
-        try:
-            # Simple logic to find numbers in the text
-            numbers = re.findall(r'\d+', analysis_result)
-            if numbers:
-                new_val = int(numbers[0])
-                # Update the session state# FIX for Line 292
-chart_df = pd.DataFrame({
-    "Metric": st.session_state.chart_data["labels"],
-    "Subscribers": st.session_state.chart_data["values"]
-})
-st.bar_chart(data=chart_df, x="Metric", y="Subscribers")
-        except:
-            st.error("Failed to parse numbers for the chart.")
+# --- THE RIGHT WAY (Fixed Structure) ---
+try:
+    # 1. Run the AI Scan
+    analysis_result = analyze_analytics_screenshot(uploaded_img)
+    st.session_state.analysis_output = analysis_result
+    
+    # 2. Extract numbers for the chart
+    numbers = re.findall(r'\d+', analysis_result.replace(',', ''))
+    if numbers:
+        st.session_state.chart_data["values"][0] = int(numbers[0])
 
+# 3. THIS IS THE MISSING PIECE (The Plan B)
+except Exception as e:
+    st.error(f"Oracle Connection Interrupted: {e}")
+
+# 4. Now the chart is OUTSIDE the try/except block, so it's safe
+st.subheader("📈 Progress Visualization")
+chart_df = pd.DataFrame({
+    "Category": st.session_state.chart_data["labels"],
+    "Count": st.session_state.chart_data["values"]
+})
+st.bar_chart(data=chart_df, x="Category", y="Count")
 # Create the uploader
 uploaded_img = st.file_uploader("Upload Analytics", type=['png', 'jpg', 'jpeg'])
 
@@ -636,6 +644,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
