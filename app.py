@@ -293,9 +293,7 @@ if st.button("🛰️ EXECUTE VISION SCAN"):
             # Simple logic to find numbers in the text
             numbers = re.findall(r'\d+', analysis_result)
             if numbers:
-                new_val = int(numbers[0])=int(numbers[0])
-except Exception as e:
-    st.error(f"Data extraction failed: {e}")
+                new_val = int(numbers[0])
                 # Update the session state# FIX for Line 292
 chart_df = pd.DataFrame({
     "Metric": st.session_state.chart_data["labels"],
@@ -638,6 +636,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
