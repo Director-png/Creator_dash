@@ -232,26 +232,33 @@ def analyze_analytics_screenshot(uploaded_file):
     return None
 
 def analyze_analytics_screenshot(uploaded_file):
-    # ... (Key check logic) ...
+    # 1. Pull the key safely
+    final_key = st.session_state.get('active_gemini_key') or st.secrets.get("GEMINI_API_KEY")
+    
+    if not final_key:
+        return "ERROR: No API Key found."
+
     try:
-        # 1. Use 1.5 Flash (Most stable for Free Tier)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # 2. Initialize the Modern Client
+        client = genai.Client(api_key=final_key)
         
-        # 2. Add a tiny 1-second delay to prevent 'Burst' errors
-        time.sleep(1)
-        
+        # 3. Process the Image
         img = Image.open(uploaded_file)
         
-        # 3. Super-short prompt to save 'Input Tokens'
-        prompt = "Extract from image: Subscriber count and Views. Summary: 1 sentence."
+        # 4. Execute the Vision Scan (Modern Syntax)
+        # We use gemini-1.5-flash for free-tier stability
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=["Extract the subscriber count and views from this image. Format: SUBS: [X], VIEWS: [Y]", img]
+        )
         
-        response = model.generate_content([prompt, img])
         return response.text
+        
     except Exception as e:
         if "429" in str(e):
-            return "🌑 VOID ERROR: Neural path congested (Rate Limit). Please wait 60s."
+            return "🌑 VOID ERROR: Neural path congested. Wait 60s."
         return f"Uplink Error: {e}"
-
+        
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -550,6 +557,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
