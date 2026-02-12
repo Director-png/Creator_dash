@@ -243,93 +243,64 @@ if nav == "📊 Dashboard":
         st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
 
 elif nav == "📡 My Growth Hub":
-    st.markdown(f"<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE: {st.session_state.user_name.upper()}</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
     
-    with st.expander("👤 NEURAL IDENTITY & OBJECTIVES", expanded=True):
+    with st.expander("👤 IDENTITY & TARGETS", expanded=True):
         c1, c2, c3 = st.columns(3)
-        with c1:
-            yt_input = st.text_input("YouTube", value=st.session_state.get('yt_handle', ""), placeholder="@handle")
-        with c2:
-            ig_input = st.text_input("Instagram", value=st.session_state.get('ig_handle', ""), placeholder="@handle")
-        with c3:
-            x_input = st.text_input("X (Twitter)", value=st.session_state.get('x_handle', ""), placeholder="@handle")
+        with c1: yt_in = st.text_input("YouTube", value=st.session_state.get('yt_handle', ""), placeholder="@handle")
+        with c2: ig_in = st.text_input("Instagram", value=st.session_state.get('ig_handle', ""), placeholder="@handle")
+        with c3: x_in = st.text_input("X (Twitter)", value=st.session_state.get('x_handle', ""), placeholder="@handle")
         
-        if st.button("🔄 SYNC NEURAL NODES", use_container_width=True):
-            with st.spinner("📡 ESTABLISHING UPLINK..."):
-                # Real data fetch happens here
-                st.session_state.yt_handle = yt_input
-                st.session_state.ig_handle = ig_input
-                st.session_state.x_handle = x_input
-                
-                # Update Session State with 'Real' numbers
-                st.session_state.current_subs = fetch_live_metrics("YouTube", yt_input)
-                st.success(f"Data Synced for {st.session_state.user_name}")
+        if st.button("🔄 SYNC NEURAL DATA"):
+            with st.spinner("📡 PULLING REAL-TIME METRICS..."):
+                st.session_state.yt_handle, st.session_state.ig_handle, st.session_state.x_handle = yt_in, ig_in, x_in
+                # Update current_subs based on the "fetch"
+                st.session_state.current_subs = fetch_live_metrics("YouTube", yt_in)
+                st.success("Data Nodes Synchronized.")
 
         st.divider()
         
-        # --- HUD DISPLAY ---
+        # --- HUD DATA VISUALIZATION ---
         g_col1, g_col2 = st.columns([1, 2])
         with g_col1:
-            st.markdown("<p style='color: #00ff41; font-weight: bold;'>🎯 TARGET CALIBRATION</p>", unsafe_allow_html=True)
-            target = st.number_input("Goal", value=10000)
-            current = st.session_state.get('current_subs', 1500) # Pulls from our 'Real' sync
+            st.markdown("#### 🎯 TARGETS")
+            goal = st.number_input("End Goal", value=10000)
             
-            progress = current / target if target > 0 else 0
-            st.metric("LIVE REACH", f"{current}", delta=f"{current - 1200} since last sync")
-            st.progress(min(progress, 1.0))
+            # Using the fixed variable name from session state
+            curr = st.session_state.current_subs
+            
+            prog = curr / goal if goal > 0 else 0
+            st.metric("CURRENT REACH", f"{curr}", delta=f"{curr - 1500} Total Growth")
+            st.progress(min(prog, 1.0))
+            st.caption(f"Director, you are {int(prog*100)}% closer to your objective.")
         
         with g_col2:
-            # TACTICAL PLOTLY CHART (Now using 'current' as the anchor)
+            st.markdown("#### 📈 GROWTH TRACE")
+            # Using 'curr' to generate the chart data points
             growth_df = pd.DataFrame({
-                'Timeline': ['W1', 'W2', 'W3', 'W4', 'Current'],
-                'Reach': [current*0.8, current*0.85, current*0.9, current*0.95, current]
+                'Timeline': ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'LIVE'],
+                'Reach': [int(curr*0.8), int(curr*0.85), int(curr*0.9), int(curr*0.95), curr]
             })
             
             fig = px.line(growth_df, x='Timeline', y='Reach', markers=True)
-            fig.update_traces(line_color='#00ff41', line_width=3, marker=dict(size=10, color='#00d4ff', symbol='diamond'))
-            fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=250, font=dict(color="#00ff41"))
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # --- TACTICAL CHART LOGIC ---
-            growth_df = pd.DataFrame({
-                'Timeline': ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
-                'Reach': [current_subs*0.6, current_subs*0.75, current_subs*0.8, current_subs*0.95, current_subs]
-            })
-
-            # Create an Elite Plotly Chart
-            fig = px.line(growth_df, x='Timeline', y='Reach', markers=True)
-            
-            fig.update_traces(
-                line_color='#00ff41', 
-                line_width=3,
-                marker=dict(size=8, color='#00d4ff', symbol='diamond'),
-                hovertemplate="<b>%{x}</b><br>Reach: %{y}<extra></extra>"
-            )
-            
+            fig.update_traces(line_color='#00ff41', line_width=4, marker=dict(size=12, color='#00d4ff', symbol='diamond'))
             fig.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                margin=dict(l=0, r=0, t=10, b=0),
-                height=250,
-                xaxis=dict(showgrid=True, gridcolor='#111', color='#00d4ff', title=""),
-                yaxis=dict(showgrid=True, gridcolor='#111', color='#00d4ff', title=""),
-                font=dict(family="Courier New, monospace", color="#00ff41")
+                paper_bgcolor='rgba(0,0,0,0)', 
+                plot_bgcolor='rgba(0,0,0,0)', 
+                height=250, 
+                xaxis=dict(showgrid=True, gridcolor='#111'),
+                yaxis=dict(showgrid=True, gridcolor='#111'),
+                font=dict(color="#00ff41", family="monospace")
             )
-            
-            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig, use_container_width=True)
 
-    # --- SECTION 2: PERSONALIZED ORACLE ---
     st.divider()
-    st.subheader("🔮 PERSONALIZED ORACLE ANALYSIS")
-    
-    if st.button("RUN CUSTOM DIAGNOSTIC", use_container_width=True):
-        if not st.session_state.yt_handle and not st.session_state.ig_handle:
-            st.warning("Director, link your handles to calibrate the diagnostic.")
-        else:
-            with st.spinner("📡 ANALYZING DIGITAL FOOTPRINT..."):
-                custom_context = f"Creator: {st.session_state.yt_handle} | Reach: {current_subs} | Goal: {target_subs}"
-                report = generate_oracle_report(f"Growth Strategy for {custom_context}", "Omni-Channel", "Elite")
-                st.info(report)
+    if st.button("🔮 ANALYZE PERSONALIZED ORACLE REPORT"):
+        with st.spinner("🌑 ORACLE IS CONSULTING THE VOID..."):
+            context = f"Creator {st.session_state.get('yt_handle', 'Unknown')} at {st.session_state.current_subs} followers."
+            report = generate_oracle_report(context, "Cross-Platform", "Elite")
+            st.info(report)
+
 
 # --- MODULE 3: ASSIGNED SCRIPTS ---
 elif nav == "💎 Assigned Scripts":
@@ -480,6 +451,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
