@@ -9,6 +9,10 @@ import time
 from streamlit_lottie import st_lottie
 import google.generativeai as genai
 from PIL import Image
+# --- INITIALIZE ALL KEYS ---
+if 'current_subs' not in st.session_state:
+    st.session_state.current_subs = 0  # Or your starting number
+
 
 # --- ANIMATION UTILITY ---
 def load_lottieurl(url: str):
@@ -543,6 +547,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
