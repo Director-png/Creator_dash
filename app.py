@@ -242,7 +242,7 @@ client = None
 # Line 242
 if "GEMINI_API_KEY" in st.secrets:
 # Line 244 (This is the line causing the error because it's not pushed in)
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 def analyze_analytics_screenshot(uploaded_file):
     try:
         # Old library uses this style:
@@ -637,6 +637,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
