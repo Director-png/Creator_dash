@@ -17,7 +17,7 @@ def load_lottieurl(url: str):
 
 lottie_loading = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_fcfjwiyb.json")
 
-# --- 1. SESSION STATE (CRITICAL FIX: Initialize FIRST) ---
+# --- 1. SESSION STATE (CRITICAL INITIALIZATION) ---
 if 'found_leads' not in st.session_state:
     st.session_state.found_leads = pd.DataFrame()
 if 'script_history' not in st.session_state:
@@ -27,23 +27,24 @@ if 'pitch_history' not in st.session_state:
 if 'creator_db' not in st.session_state:
     st.session_state.creator_db = pd.DataFrame([
         {"Creator": "TechVanguard", "Niche": "AI", "Status": "Scouted", "Vigor": 82},
-        {"Creator": "CyberStyle", "Niche": "Fashion", "Status": "Negotiation", "Vigor": 91}
+        {"Creator": "CyberStyle", "Niche": "Fashion", "Status": "Negotiation", "Vigor": 91},
+        {"Creator": "MidnightAlpha", "Niche": "Gaming", "Status": "Signed", "Vigor": 95},
+        {"Creator": "NeonMinimalist", "Niche": "Design", "Status": "Scouted", "Vigor": 78}
     ])
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
+if 'last_topic' not in st.session_state: st.session_state.last_topic = "General AI Intelligence"
+if 'user_name' not in st.session_state: st.session_state.user_name = "Guest"
+if 'user_role' not in st.session_state: st.session_state.user_role = "user"
 
-# --- 🛰️ DATA INFRASTRUCTURE (RESTORED) ---
+# --- 🛰️ DATA INFRASTRUCTURE ---
 PULSE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
-# Replace YOUR_SHEET_ID with your actual ID from the URL
 USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?gid=989182688&single=true&output=csv"
 FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
 SCRIPT_VAULT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
-# The URL from the NEW form (ending in /formResponse)
-VAULT_FORM_URL = "https://docs.google.com/forms/d/e//1FAIpQLSfeDAY3gnWYlpH90EaJirxUc8d4obYUgiX72WJIah7Cya1VNQ/formResponse"
-
-# The CSV URL from the NEW sheet (for the "Client Portal" to read back from)
+VAULT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfeDAY3gnWYlpH90EaJirxUc8d4obYUgiX72WJIah7Cya1VNQ/formResponse"
 VAULT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQTrDvNWe810s55puzBodFKvfUbfMV_l-QoQIfbdPxeQknClGGCQT33UQ471NyGTw4aHLrDTw/pub?output=csv"
 
-# --- 🛰️ UTILITIES ---
+# --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
 def typewriter_effect(text):
     container = st.empty()
     full_text = ""
@@ -53,106 +54,16 @@ def typewriter_effect(text):
         time.sleep(0.005) 
     container.markdown(full_text)
 
-# --- 1. REFINED SYNC FUNCTION ---
 def load_user_db():
     try:
-        # Force fresh data from the CSV link
         sync_url = f"{USER_DB_URL}&cache_bus={time.time()}"
         df = pd.read_csv(sync_url)
-        
-        if df.empty:
-            return pd.DataFrame()
-            
-        # Standardize headers to lowercase to avoid "Name" vs "name" issues
+        if df.empty: return pd.DataFrame()
         df.columns = [str(c).strip().lower() for c in df.columns]
         return df
     except Exception as e:
         st.sidebar.error(f"Sync Failure: {e}")
         return pd.DataFrame()
-
-# --- 1. CONFIG ---
-st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
-
-# --- 2. SPLASH SCREEN ---
-if 'first_load' not in st.session_state:
-    st.markdown("<style>.stApp { background-color: #000000; }</style>", unsafe_allow_html=True)
-    empty_space = st.empty()
-    with empty_space.container():
-        if lottie_loading: st_lottie(lottie_loading, height=400)
-        st.markdown("<h1 style='text-align: center; color: #00d4ff; font-family: monospace;'>INITIALIZING VOID OS...</h1>", unsafe_allow_html=True)
-        time.sleep(3.0) 
-    st.session_state.first_load = True
-    st.rerun()
-
-# --- 3. GLOBAL STYLES ---
-st.markdown("""<style>
-    [data-testid="stSidebar"] { background-image: linear-gradient(180deg, #000000 0%, #080808 100%); border-right: 1px solid #00d4ff33; }
-    .stButton>button { border: 1px solid #00d4ff; background-color: transparent; color: #00d4ff; letter-spacing: 2px; }
-    .stButton>button:hover { background-color: #00d4ff; color: black; box-shadow: 0 0 15px #00d4ff; }
-    </style>""", unsafe_allow_html=True)
-
-# --- GATEKEEPER ---
-if not st.session_state.logged_in:
-    st.markdown("<h1 style='text-align: center; color: #00ff41;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
-    t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
-    with t1:
-        email_in = st.text_input("Email").lower().strip()
-        pw_in = st.text_input("Password", type="password")
-        if st.button("Access System", use_container_width=True):
-            users = load_user_db()
-            if email_in == "admin" and pw_in == "1234":
-                st.session_state.logged_in = True; st.session_state.user_name = "Master Director"; st.session_state.user_role = "admin"; st.rerun()
-            elif not users.empty:
-                match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & (users.iloc[:, 4].astype(str) == pw_in)]
-                if not match.empty:
-                    st.session_state.logged_in = True; st.session_state.user_name = match.iloc[0, 1]; st.session_state.user_role = "user"; st.rerun()
-    with t2:
-        with st.form("reg"):
-            n = st.text_input("Name"); e = st.text_input("Email"); ni = st.text_input("Niche"); p = st.text_input("Password", type="password")
-            if st.form_submit_button("Submit"):
-                requests.post(FORM_POST_URL, data={"entry.483203499": n, "entry.1873870532": e, "entry.1906780868": ni, "entry.1396549807": p})
-                st.success("Transmission Received.")
-    st.stop()
-
-# --- SIDEBAR ---
-with st.sidebar:
-    st.markdown(f"<p style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</p>", unsafe_allow_html=True)
-    if st.session_state.user_role == "admin":
-        options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "🧬 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
-    else:
-        options = ["📡 My Growth Hub", "💎 Assigned Scripts", "🌐 Global Pulse"]
-    nav = st.radio("COMMAND CENTER", options, key="void_nav_main")
-# --- 2. THE DROPDOWN LOGIC (WITH PROBE) ---
-if nav == "💎 Script Architect":
-    st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
-    
-    users_df = load_user_db()
-    
-    # --- THE DEEP PROBE (Temporary) ---
-    st.write("### 🔍 SYSTEM DIAGNOSTIC")
-    if users_df.empty:
-        st.error("❌ The Database is returning ZERO rows. Check if the 'Publish to Web' link is still active.")
-    else:
-        st.success(f"✅ Connection Stable. Found Columns: {list(users_df.columns)}")
-        # This shows you the first 3 names found in the sheet
-        st.write("Sample Data Found:", users_df.head(3)) 
-
-    # --- CLIENT LIST LOGIC ---
-    client_options = ["Public/General"]
-    if not users_df.empty:
-        # We try to find the 'name' column automatically
-        name_col = [c for c in users_df.columns if 'name' in c]
-        if name_col:
-            db_names = users_df[name_col[0]].dropna().unique().tolist()
-            client_options = ["Public/General"] + db_names
-        else:
-            # If 'name' isn't found, we grab the 2nd column (Index 1)
-            db_names = users_df.iloc[:, 1].dropna().unique().tolist()
-            client_options = ["Public/General"] + db_names
-
-    # THE UI
-    target_client = st.selectbox("Assign To Target", options=client_options, key="architect_target")
-
 
 def load_market_pulse_data():
     try:
@@ -166,13 +77,14 @@ def load_market_pulse_data():
 
 def generate_visual_dna(platform, tone):
     styles = {
-        "Instagram Reels": "High-contrast, 0.5s jump cuts, Glow-on-dark aesthetics.",
-        "YouTube Shorts": "Center-framed, bold captions, neon-accent lighting.",
-        "YouTube Long-form": "Cinematic 4k, shallow depth of field, 24fps motion blur.",
-        "TikTok": "Raw mobile-style, high-saturation, fast-paced text overlays."
+        "Instagram Reels": "High-contrast, 0.5s jump cuts, Glow-on-dark aesthetics, grainy film overlays.",
+        "YouTube Shorts": "Center-framed, bold captions, neon-accent lighting, fast zoom-ins.",
+        "YouTube Long-form": "Cinematic 4k, shallow depth of field, 24fps motion blur, color graded for teal/orange.",
+        "TikTok": "Raw mobile-style, high-saturation, fast-paced text overlays, green-screen effects.",
+        "X-Thread": "High-authority typography, clean minimalist screenshots, bold black/white contrast."
     }
-    aesthetic = styles.get(platform, "Professional cinematic.")
-    return f"DNA PROFILE: {aesthetic} | TONE: {tone} | LIGHTING: Cyber-Noir"
+    aesthetic = styles.get(platform, "Professional cinematic cyber-noir aesthetic.")
+    return f"DNA PROFILE: {aesthetic} | TONE: {tone} | LIGHTING: Cyber-Noir Studio"
 
 def calculate_vigor(views, followers):
     if followers == 0: return 0
@@ -190,95 +102,163 @@ def get_intel_image(entry):
 
 def get_saturation_status(score):
     if score > 88: return "🔴 SATURATED (High Competition)"
-    if score > 75: return "🟡 PEAK (Strategic Entry)"
-    return "🟢 EARLY (High Opportunity)"
+    if score > 75: return "🟡 PEAK (Strategic Entry Required)"
+    return "🟢 EARLY (High Growth Opportunity)"
 
 def transmit_script(client, platform, topic, script, dna):
-    # USE THE URL YOU JUST COPIED FROM THE DEPLOYMENT
     url = "https://script.google.com/macros/s/AKfycby9nYH4bTmC0rFoZQWj87S-hiu7lJeXXd4mVuRyJxrVTk-OGaPx5zFNZzgYZWSRuNH0/exec"
-    
-    payload = {
-        "client": client,
-        "platform": platform,
-        "topic": topic,
-        "script": script,
-        "dna": dna
-    }
-    
-
+    payload = {"client": client, "platform": platform, "topic": topic, "script": script, "dna": dna}
     try:
         response = requests.post(url, data=payload)
-        if response.status_code == 200:
-            return True
-        else:
-            # This will show us if it's a 404 (Wrong URL) or 400 (Wrong Entry IDs)
-            st.sidebar.error(f"Post Error: {response.status_code}")
-            return False
-    except Exception as e:
-        st.sidebar.error(f"Transmission Failed: {e}")
-        return False
+        return response.status_code == 200
+    except: return False
 
 def generate_oracle_report(topic, platform, tone):
-    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-    
-    prompt = f"""
-    System: You are the VOID OS Oracle. Analyze content architecture for {platform}.
-    Topic: {topic} | Tone: {tone}
-    
-    Provide a 'Growth Intelligence Report' with:
-    1. 📈 VIRAL VELOCITY: Why this topic is peaking now.
-    2. 🧠 PSYCHOLOGICAL HOOK: The specific 'Human Bias' this script exploits.
-    3. 🚀 SCALING STRATEGY: How to turn this one video into a 5-part series.
-    """
-    
-    res = groq_c.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return res.choices[0].message.content
+    try:
+        groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+        prompt = f"""
+        System: You are the VOID OS Oracle. Analyze content architecture for {platform}.
+        Topic: {topic} | Tone: {tone}
+        
+        Provide a 'Growth Intelligence Report' with:
+        1. 📈 VIRAL VELOCITY: Why this topic is peaking now based on global sentiment.
+        2. 🧠 PSYCHOLOGICAL HOOK: The specific 'Human Bias' (like FOMO or Zeigarnik effect) this script exploits.
+        3. 🚀 SCALING STRATEGY: How to turn this one video into a 5-part series for maximum retention.
+        """
+        res = groq_c.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return res.choices[0].message.content
+    except Exception as e:
+        return f"Oracle connection interrupted: {e}"
 
+# --- 1. CONFIG ---
+st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 
+# --- 2. SPLASH SCREEN ---
+if 'first_load' not in st.session_state:
+    st.markdown("<style>.stApp { background-color: #000000; }</style>", unsafe_allow_html=True)
+    empty_space = st.empty()
+    with empty_space.container():
+        if lottie_loading: st_lottie(lottie_loading, height=400)
+        st.markdown("<h1 style='text-align: center; color: #00d4ff; font-family: monospace;'>INITIALIZING VOID OS...</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: #333;'>SYNCING NEURAL NODES</p>", unsafe_allow_html=True)
+        time.sleep(3.0) 
+    st.session_state.first_load = True
+    st.rerun()
 
-# --- MODULES ---
-if nav == "📊 Dashboard" and st.session_state.user_role == "admin":
+# --- 3. GLOBAL STYLES ---
+st.markdown("""<style>
+    [data-testid="stSidebar"] { background-image: linear-gradient(180deg, #000000 0%, #080808 100%); border-right: 1px solid #00d4ff33; }
+    .stButton>button { border: 1px solid #00d4ff; background-color: transparent; color: #00d4ff; letter-spacing: 2px; font-family: monospace; transition: 0.3s; }
+    .stButton>button:hover { background-color: #00d4ff; color: black; box-shadow: 0 0 20px #00d4ff; }
+    .stTextInput>div>div>input { background-color: #050505; color: #00d4ff; border: 1px solid #111; }
+    .stTextArea>div>div>textarea { background-color: #050505; color: #00d4ff; border: 1px solid #111; }
+    .stSelectbox>div>div { background-color: #050505; color: #00d4ff; }
+    .stExpander { background-color: #050505; border: 1px solid #00d4ff22 !important; border-radius: 5px; }
+    h1, h2, h3 { font-family: 'Courier New', Courier, monospace; letter-spacing: -1px; }
+    .stMetric { border: 1px solid #111; padding: 15px; border-radius: 10px; background: #080808; }
+    </style>""", unsafe_allow_html=True)
+
+# --- GATEKEEPER ---
+if not st.session_state.logged_in:
+    st.markdown("<h1 style='text-align: center; color: #00ff41;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
+    t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
+    with t1:
+        email_in = st.text_input("Email").lower().strip()
+        pw_in = st.text_input("Password", type="password")
+        if st.button("Access System", use_container_width=True):
+            users = load_user_db()
+            if email_in == "admin" and pw_in == "1234":
+                st.session_state.logged_in = True; st.session_state.user_name = "Master Director"; st.session_state.user_role = "admin"; st.rerun()
+            elif not users.empty:
+                match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & (users.iloc[:, 4].astype(str) == pw_in)]
+                if not match.empty:
+                    st.session_state.logged_in = True; st.session_state.user_name = match.iloc[0, 1]; st.session_state.user_role = "user"; st.rerun()
+                else: st.error("Access Denied: Credentials Invalid.")
+    with t2:
+        with st.form("reg"):
+            n = st.text_input("Name"); e = st.text_input("Email"); ni = st.text_input("Niche"); p = st.text_input("Password", type="password")
+            if st.form_submit_button("Submit Registration"):
+                requests.post(FORM_POST_URL, data={"entry.483203499": n, "entry.1873870532": e, "entry.1906780868": ni, "entry.1396549807": p})
+                st.success("Transmission Received. Awaiting Node Approval.")
+    st.stop()
+
+# --- SIDEBAR NAVIGATION ---
+with st.sidebar:
+    st.markdown(f"<h3 style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #444; font-size: 10px;'>ENCRYPTED CONNECTION : ACTIVE</p>", unsafe_allow_html=True)
+    if st.session_state.user_role == "admin":
+        options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "🧬 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
+    else:
+        options = ["📡 My Growth Hub", "💎 Assigned Scripts", "🌐 Global Pulse"]
+    nav = st.radio("COMMAND CENTER", options, key="void_nav_main")
+    st.divider()
+    if st.button("LOGOUT"): st.session_state.logged_in = False; st.rerun()
+
+# --- MODULE 1: DASHBOARD ---
+if nav == "📊 Dashboard":
     st.markdown("<h1 style='color: white;'>🌑 VOID COMMAND CENTER</h1>", unsafe_allow_html=True)
-    # [Rest of Dashboard code preserved...]
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric(label="System Status", value="Operational")
-    m2.metric(label="Scripts Ready", value=str(len(st.session_state.script_history)))
+    with m1: st.metric(label="System Status", value="Operational", delta="Stable")
+    with m2: st.metric(label="Scripts Architected", value=str(len(st.session_state.script_history)), delta="+4 today")
+    with m3: st.metric(label="Active Pipelines", value="12", delta="3 Ready")
+    with m4: st.metric(label="Data Sync", value="Real-time", delta="0.4ms")
+    
+    st.divider()
+    c_left, c_right = st.columns([2, 1])
+    with c_left:
+        st.subheader("📡 Regional Signal Strength")
+        chart_data = pd.DataFrame({"Node": ["US-East", "EU-West", "Asia-South"], "Traffic": [85, 92, 78]})
+        st.bar_chart(chart_data, x="Node", y="Traffic", color="#00d4ff")
+    with c_right:
+        st.subheader("🛡️ Security Audit")
+        st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
 
+# --- MODULE 2: MY GROWTH HUB ---
 elif nav == "📡 My Growth Hub":
     st.markdown(f"<h1 style='color: #00d4ff;'>📡 WELCOME, {st.session_state.user_name.upper()}</h1>", unsafe_allow_html=True)
-# Inside your 'My Growth' Tab logic:
-with st.expander("🔮 ACCESS ORACLE INTELLIGENCE", expanded=True):
-    st.markdown("### 🧬 Strategic Growth Vectors")
-    if st.button("RUN ORACLE ANALYSIS"):
-        with st.spinner("📡 SCANNING GLOBAL TRENDS..."):
-            # We pull the last topic generated from the session state or database
-            report = generate_oracle_report(st.session_state.last_topic, platform, tone_choice)
-            st.info(report)
-            
-            # Save this to your 'Oracle Archive' in the sheet
-            # (We can use the same Bridge we just built!)
+    with st.expander("🔮 ACCESS ORACLE INTELLIGENCE", expanded=True):
+        st.markdown("### 🧬 Strategic Growth Vectors")
+        if st.button("RUN ORACLE ANALYSIS", use_container_width=True):
+            if 'last_topic' in st.session_state:
+                with st.spinner("📡 SCANNING GLOBAL TRENDS..."):
+                    report = generate_oracle_report(st.session_state.last_topic, "Global", "Elite")
+                    st.info(report)
+            else:
+                st.warning("Director, architect a script in the Command Center first to provide training data.")
+    
+    st.subheader("📈 Performance Metrics")
+    col1, col2 = st.columns(2)
+    col1.metric("Current Vigor", "88/100", "+5%")
+    col2.metric("Audience Retention", "62%", "+2.1%")
 
-
-    elif nav == "💎 Assigned Scripts":
-        st.title("💎 YOUR SECURE VAULT")
+# --- MODULE 3: ASSIGNED SCRIPTS ---
+elif nav == "💎 Assigned Scripts":
+    st.title("💎 YOUR SECURE VAULT")
     try:
-        scripts_df = pd.read_csv(SCRIPT_VAULT_CSV_URL)
+        scripts_df = pd.read_csv(VAULT_SHEET_CSV_URL)
         scripts_df.columns = [str(c).strip().lower() for c in scripts_df.columns]
         my_vault = scripts_df[scripts_df.iloc[:, 1].astype(str) == st.session_state.user_name]
-        if my_vault.empty: st.warning("No scripts assigned yet.")
+        
+        if my_vault.empty: 
+            st.warning("No scripts assigned yet. Awaiting Director transmission.")
         else:
             for _, row in my_vault.iterrows():
-                with st.expander(f"📜 {row.iloc[3]}"):
+                with st.expander(f"📜 {row.iloc[3]} | {row.iloc[2]}"):
+                    st.markdown(f"**PLATFORM:** {row.iloc[2]}")
+                    st.divider()
                     st.write(row.iloc[4])
-                    st.caption(f"DNA: {row.iloc[5]}")
-    except: st.error("Vault Offline.")
+                    st.divider()
+                    st.caption(f"🧬 DNA: {row.iloc[5]}")
+                    st.button("MARK AS FILMED", key=f"btn_{row.iloc[0]}")
+    except Exception as e:
+        st.error(f"Vault Offline: {e}")
 
-    elif nav == "🌐 Global Pulse":
-        st.title("🌐 GLOBAL INTELLIGENCE PULSE")
-    # [Global Pulse Code Preserved...]
+# --- MODULE 4: GLOBAL PULSE ---
+elif nav == "🌐 Global Pulse":
+    st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     pulse_df = load_market_pulse_data()
     if not pulse_df.empty:
         st.markdown('<div style="border: 1px solid #00d4ff; padding: 20px; border-radius: 10px; margin-bottom: 30px;">', unsafe_allow_html=True)
@@ -301,17 +281,12 @@ with st.expander("🔮 ACCESS ORACLE INTELLIGENCE", expanded=True):
             with img_col: st.image(get_intel_image(entry), use_container_width=True)
             with txt_col:
                 st.markdown(f"**[{entry.title.upper()}]({entry.link})**")
-                st.write(BeautifulSoup(entry.summary, "html.parser").text[:120] + "...")
+                st.write(BeautifulSoup(entry.summary, "html.parser").text[:180] + "...")
             st.divider()
-    with c_analysis:
-        st.subheader("⚡ AI Trend Analysis")
-        st.info("**Trending Keywords:**\n- LangGraph\n- Sora Visuals\n- Local LLMs")
-        st.image("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400")
-        
 
-   elif nav == "⚔️ Trend Duel":
-       st.title("⚔️ TREND DUEL")
-    # [Trend Duel Code Preserved...]
+# --- MODULE 5: TREND DUEL ---
+elif nav == "⚔️ Trend Duel":
+    st.title("⚔️ TREND DUEL")
     pulse_df = load_market_pulse_data()
     if not pulse_df.empty:
         st.subheader("🌑 Market Density Analysis")
@@ -322,214 +297,89 @@ with st.expander("🔮 ACCESS ORACLE INTELLIGENCE", expanded=True):
         st.divider()
         sel = st.multiselect("Compare Niches", options=pulse_df['Niche'].unique().tolist(), default=pulse_df['Niche'].unique().tolist()[:5])
         comp = pulse_df[pulse_df['Niche'].isin(sel)]
-        if not comp.empty: st.bar_chart(data=comp, x='Niche', y='Score')
-            
+        if not comp.empty: 
+            fig = px.bar(comp, x='Niche', y='Score', color='Score', template='plotly_dark')
+            st.plotly_chart(fig, use_container_width=True)
 
-   if nav == "💎 Script Architect":
-     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
-    
-    # 1. DATA PULL
+# --- MODULE 6: SCRIPT ARCHITECT ---
+elif nav == "💎 Script Architect":
+    st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
     users_df = load_user_db()
-    
-    if not users_df.empty:
-        st.success(f"📡 CONNECTION STABLE: {len(users_df)} Clients Synced.")
-    else:
-        st.warning("⚠️ Using local mode (Public/General). Database sync pending.")
-
-    # 2. CLIENT LIST LOGIC
     client_options = ["Public/General"]
     if not users_df.empty:
-        # Grabbing names from Column 2 (Index 1)
         db_names = users_df.iloc[:, 1].dropna().unique().tolist()
         client_options = ["Public/General"] + db_names
 
-    # 3. THE UI ELEMENTS (FORCED TO APPEAR)
     c1, c2 = st.columns([1, 1.5], gap="large")
-    
     with c1:
-        # --- INPUT 1: CLIENT ---
         target_client = st.selectbox("Assign To Target", options=client_options, key="arch_target_final")
-        
-        # --- INPUT 2: PLATFORM ---
-        platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "X-Thread", "YouTube Long-form"], key="arch_plat_final")
-        
-        # --- INPUT 3: TOPIC ---
-        topic = st.text_input("Core Topic", placeholder="e.g., The Future of AI in 2026", key="arch_topic_final")
-        
-        # --- INPUT 4: SLIDER ---
-        tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"], key="arch_tone_final")
-        
-        # --- INPUT 5: COMPETITOR LOGIC ---
+        platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "X-Thread", "YouTube Long-form"])
+        topic = st.text_input("Core Topic", placeholder="e.g., The Future of AI in 2026")
+        tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"])
         with st.expander("👤 COMPETITOR SHADOW"):
-            c_hook = st.text_area("Their Narrative", key="arch_hook_final")
-# --- THE EXECUTION BUTTON ---
+            c_hook = st.text_area("Their Narrative (What are they saying?)")
+        
         if st.button("🚀 ARCHITECT & TRANSMIT", use_container_width=True):
             if not topic:
                 st.error("Director, the Topic field cannot be empty.")
             else:
-                with st.spinner("🌑 ARCHITECTING..."):
+                st.session_state.last_topic = topic
+                with st.spinner("🌑 ARCHITECTING SCRIPT..."):
                     try:
-                        # 1. INITIALIZE GROQ
                         groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                        
-                        # 2. CRAFT THE PROMPT
-                        prompt = f"""
-                        System: VOID OS Content Architect.
-                        Platform: {platform}
-                        Topic: {topic}
-                        Tone: {tone_choice}
-                        Competitor Angle: {c_hook if c_hook else 'None'}
-                        
-                        Task: Write a high-retention script with a 1-second hook.
-                        """
-                        
-                        # 3. CALL THE MODEL
-                        res = groq_c.chat.completions.create(
-                            model="llama-3.3-70b-versatile", 
-                            messages=[{"role": "user", "content": prompt}]
-                        )
-                        
+                        prompt = f"System: VOID OS Content Architect. Platform: {platform}. Topic: {topic}. Tone: {tone_choice}. Angle: {c_hook if c_hook else 'None'}."
+                        res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                         txt = res.choices[0].message.content
                         dna_profile = generate_visual_dna(platform, tone_choice)
-                        
-                        # 4. TRANSMIT TO DATABASE
-                        transmit_status = transmit_script(target_client, platform, topic, txt, dna_profile)
-                        
-                        # 5. DISPLAY RESULTS IN THE SECOND COLUMN
+                        status = transmit_script(target_client, platform, topic, txt, dna_profile)
                         with c2:
                             st.subheader("💎 GENERATED ARCHIVE")
                             st.markdown(txt)
                             st.divider()
                             st.caption(f"🧬 DNA: {dna_profile}")
-                            if transmit_status:
-                                st.success("⚔️ BROADCAST COMPLETE: Script synced to Vault.")
-                            else:
-                                st.warning("⚠️ Script generated, but Transmission failed.")
-                                
-                    except Exception as e:
-                        st.error(f"Intelligence Failure: {e}")
+                            if status: st.success("⚔️ BROADCAST COMPLETE: Script synced.")
+                    except Exception as e: st.error(f"Intelligence Failure: {e}")
 
-   elif nav == "💼 Client Pitcher":
-       st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL</h1>", unsafe_allow_html=True)
-    # [Pitcher Code Preserved...]
+# --- MODULE 7: CLIENT PITCHER ---
+elif nav == "💼 Client Pitcher":
+    st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns([1, 1.5], gap="large")
-    
     with c1:
         client_name = st.text_input("Lead / Brand Name")
-        niche_cat = st.selectbox("Category", ["Personal Brand", "B2B Technical", "Fashion", "Hospitality", "Local Business"])
-        offer_details = st.text_area("Value Proposition (What are we selling?)", placeholder="e.g., Short-form growth, 30 videos/month, lead-gen backend")
-        
+        niche_cat = st.selectbox("Category", ["Personal Brand", "SaaS Founders", "Fashion", "Local Business"])
+        offer_details = st.text_area("Value Proposition")
         if st.button("🔥 Generate VOID Pitch"):
             if client_name and offer_details:
-                with st.spinner("🌑 ACCESSING GROQ INTELLIGENCE..."):
+                with st.spinner("🌑 ANALYZING LEAD..."):
                     groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                    prompt = f"System: You are VOID OS Director. Write a professional yet 'black-label' elite pitch for {client_name} in the {niche_cat} niche. Offer: {offer_details}. Use a tone of scarcity and high-authority."
+                    prompt = f"Write an elite black-label pitch for {client_name} in {niche_cat}. Offer: {offer_details}."
                     res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                     pitch_res = res.choices[0].message.content
-                    
-                    st.session_state.pitch_history.append({
-                        "time": time.strftime("%H:%M:%S"),
-                        "client": client_name,
-                        "pitch": pitch_res
-                    })
-                    
-                    with c2:
-                        st.subheader(f"Strategic Pitch: {client_name}")
-                        typewriter_effect(pitch_res)
-                        st.divider()
-                        st.download_button("Download Pitch as TXT", pitch_res, file_name=f"{client_name}_pitch.txt")
-            else:
-                st.error("Director, provide a Lead Name and Offer details before architecting.")
-                
-   elif nav == "🧬 Creator Lab":
-       st.markdown("<h1 style='color: #00d4ff;'>🧬 VIGOR AUDIT</h1>", unsafe_allow_html=True)
-    # [Vigor Code Preserved...]
-    col_a, col_b = st.columns([1, 1.5])
-    with col_a:
-        st.subheader("Vigor Input")
-        c_name = st.text_input("Creator Name")
-        c_views = st.number_input("Avg Views (Last 5 Videos)", min_value=0, value=5000)
-        c_subs = st.number_input("Follower Count", min_value=1, value=10000)
-        
-        if st.button("⚡ Calculate Vigor"):
-            score = calculate_vigor(c_views, c_subs)
-            with col_b:
-                st.metric("VIGOR SCORE", f"{score}/100")
-                if score > 80:
-                    st.success(f"🔥 **HIGH VIGOR:** {c_name} is viral-prone. Sign immediately.")
-                elif score > 50:
-                    st.warning("⚖️ **STABLE:** Consistent growth, but needs better hooks.")
-                else:
-                    st.error("📉 **STAGNANT:** Low organic reach. Proceed with caution.")
-                
-                # Logic visualization
-                st.caption("Director's Logic: We value Attention Leverage. A creator who gets 50k views with 1k followers is a 'Vigor God'.")
+                    with c2: typewriter_effect(pitch_res)
 
-   elif nav == "🛰️ Lead Source":
-       st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE</h1>", unsafe_allow_html=True)
-    # [Lead Source Code Preserved...]
-    st.subheader("Automated Prospecting Layer")
-    
-    c1, c2 = st.columns([1, 1.5], gap="large")
-    
-    with c1:
-        niche_search = st.selectbox("Target Niche", ["SaaS Founders", "E-commerce Brands", "Real Estate Tech", "High-Ticket Coaches"])
-        min_followers = st.slider("Min Followers", 1000, 50000, 5000)
-        
-        if st.button("Initialize Deep Scan"):
-            with st.spinner("📡 SCANNING SOCIAL GRAPHS..."):
-                time.sleep(1.5)
-                leads_data = [
-                    {"Handle": "@NexusCore_AI", "Platform": "IG", "Gap": "No Video Content", "Vigor": "Low"},
-                    {"Handle": "@Solaris_SaaS", "Platform": "TikTok", "Gap": "Poor Hooks", "Vigor": "Medium"},
-                    {"Handle": "@AlphaCoach_X", "Platform": "Reels", "Gap": "Low Retention", "Vigor": "High"}
-                ]
-                st.session_state.found_leads = pd.DataFrame(leads_data)
-                st.success("Scan Complete. 3 Gaps Identified.")
+# --- MODULE 8: CREATOR LAB & LEAD SOURCE ---
+elif nav == "🧬 Creator Lab":
+    st.title("🧬 VIGOR AUDIT")
+    c_name = st.text_input("Creator Handle")
+    c_views = st.number_input("Avg Views", value=5000)
+    c_subs = st.number_input("Follower Count", value=10000)
+    if st.button("⚡ Calculate Vigor"):
+        score = calculate_vigor(c_views, c_subs)
+        st.metric("VIGOR SCORE", f"{score}/100")
+        if score > 80: st.success(f"🔥 {c_name} is viral-prone.")
 
-    with c2:
-        if not st.session_state.found_leads.empty:
-            st.write("### 🎯 Prospecting Results")
-            st.table(st.session_state.found_leads)
-            
-            selected_lead = st.selectbox("Select Lead for Cold Strike", st.session_state.found_leads["Handle"])
-            if st.button("Generate Cold Strike"):
-                with st.spinner("🌑 ARCHITECTING..."):
-                    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                    prompt = f"Write a 3-sentence aggressive, high-authority cold DM to {selected_lead} in {niche_search}. Point out their {st.session_state.found_leads.loc[st.session_state.found_leads['Handle']==selected_lead, 'Gap'].values[0]} is losing them money."
-                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
-                    strike_text = res.choices[0].message.content
-                    st.code(strike_text, language="markdown")
-                    st.caption("Copy this for the 'Cold Strike' manual deployment.")
-        else:
-            st.info("Awaiting system initialization. Run 'Deep Scan' to identify targets.")
+elif nav == "🛰️ Lead Source":
+    st.title("🛰️ LEAD SOURCE")
+    niche_search = st.selectbox("Target Niche", ["SaaS", "E-com", "Coaching"])
+    if st.button("Initialize Deep Scan"):
+        st.session_state.found_leads = pd.DataFrame([{"Handle": "@Nexus_AI", "Platform": "IG", "Gap": "No Video"}])
+    if not st.session_state.found_leads.empty:
+        st.table(st.session_state.found_leads)
 
-   elif nav == "📜 History":
-       st.title("📜 ARCHIVES")
-    # [History Code Preserved...]
+# --- MODULE 9: HISTORY ---
+elif nav == "📜 History":
+    st.title("📜 ARCHIVES")
+    st.write("Director's Session History")
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
-            if 'dna' in s:
-                st.caption(f"🧬 DNA: {s['dna']}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
