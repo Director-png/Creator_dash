@@ -294,6 +294,25 @@ st.bar_chart(
     x=st.session_state.chart_data["labels"]
 )
 
+# 1. Convert the session state dictionary into a DataFrame
+df_for_chart = pd.DataFrame({
+    "Category": st.session_state.chart_data["labels"],
+    "Count": st.session_state.chart_data["values"]
+})
+
+# 2. Plot the chart using the column names we just created
+st.subheader("📈 Progress Visualization")
+st.bar_chart(
+    data=df_for_chart, 
+    x="Category", 
+    y="Count"
+)
+
+# Ensure the session state is updated like this inside your button logic:
+st.session_state.chart_data = {
+    "labels": ["Current", "Target"],
+    "values": [new_val, 10000]
+}
 
 
 # --- 1. CONFIG ---
@@ -593,6 +612,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
