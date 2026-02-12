@@ -473,6 +473,32 @@ elif nav == "📡 My Growth Hub":
             report = generate_oracle_report(context, "Cross-Platform", "Elite")
             st.info(report)
 
+# 1. The button and the scan logic
+if st.button("🛰️ EXECUTE VISION SCAN"):
+    if uploaded_img is not None:
+        with st.spinner("🌑 SCANNING..."):
+            # We wrap the risky AI call in a try/except block properly
+            try:
+                result = analyze_analytics_screenshot(uploaded_img)
+                st.session_state.last_analysis = result
+                
+                # Extract numbers to update the chart
+                nums = re.findall(r'\d+', result.replace(',', ''))
+                if nums:
+                    st.session_state.chart_data["values"][0] = int(nums[0])
+            except Exception as e:
+                st.error(f"Scan failed: {e}")
+
+# 2. THE CHART FIX (Outside of the try/except block)
+st.subheader("📈 Progress Visualization")
+
+# We turn the data into a DataFrame to stop the 'StreamlitAPIException'
+chart_df = pd.DataFrame({
+    "Status": st.session_state.chart_data["labels"],
+    "Subscribers": st.session_state.chart_data["values"]
+})
+
+st.bar_chart(data=chart_df, x="Status", y="Subscribers")
 
 # --- MODULE 3: ASSIGNED SCRIPTS ---
 elif nav == "💎 Assigned Scripts":
@@ -623,6 +649,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
