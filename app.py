@@ -392,64 +392,37 @@ if nav == "📊 Dashboard":
         st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
 
 # --- UPDATED MY GROWTH HUB MODULE (CLEANED) ---
-# --- UPDATED MY GROWTH HUB MODULE (CLEANED & SECURED) ---
+# --- MODULE: MY GROWTH HUB (The ONLY place this code should exist) ---
 elif nav == "📡 My Growth Hub":
     st.markdown(f"<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
     
-    # 1. VISION UPLOAD SECTION
-    with st.expander("📷 UPLOAD ANALYTICS SCREENSHOT", expanded=True):
-        st.write("Drop a screenshot of your YT/IG/X dashboard to sync real data.")
-        uploaded_img = st.file_uploader("Upload Node Data", type=['png', 'jpg', 'jpeg'], key="growth_uploader")
-        
-        # This button is now INSIDE the Growth Hub tab only
-        if st.button("🛰️ EXECUTE VISION SCAN"):
-            if uploaded_img:
-                with st.spinner("🌑 SCANNING NEURAL DATA..."):
-                    result = analyze_analytics_screenshot(uploaded_img)
-                    st.session_state.last_analysis = result
-                    
-                    # Extraction logic for the chart
-                    nums = re.findall(r'\d+', result.replace(',', ''))
-                    if nums:
-                        st.session_state.current_subs = int(nums[0])
-                        # Sync to chart data
-                        st.session_state.chart_data["values"] = [int(nums[0])]
-                        st.success(f"Intelligence Extracted: {nums[0]} Subscribers.")
-            else:
-                st.warning("Director, provide a data visual for scanning.")
+    # 1. Define the uploader FIRST so the button can see it
+    uploaded_img = st.file_uploader("📤 UPLOAD ANALYTICS SCREENSHOT", type=['png', 'jpg', 'jpeg'], key="hub_uploader")
+    
+    if uploaded_img is not None:
+        # 2. The Button (Give it a unique KEY to prevent the Duplicate ID error)
+        if st.button("🛰️ EXECUTE VISION SCAN", key="unique_scan_button"):
+            with st.spinner("🌑 SCANNING NEURAL NODES..."):
+                # Now 'uploaded_img' is defined, so the error disappears
+                analysis_result = analyze_analytics_screenshot(uploaded_img)
+                st.session_state.last_analysis = analysis_result
+                
+                # Extract numbers
+                nums = re.findall(r'\d+', analysis_result.replace(',', ''))
+                if nums:
+                    st.session_state.current_subs = int(nums[0])
+                    st.session_state.chart_data["values"] = [int(nums[0])]
+                    st.success(f"Detected {nums[0]} Subscribers!")
 
-    # 2. ANALYSIS FEEDBACK & VISUALS
+    # 3. Show the feedback and chart ONLY if we have data
     if 'last_analysis' in st.session_state:
         st.info(f"**ORACLE FEEDBACK:** {st.session_state.last_analysis}")
         
-        # --- HUD DATA VISUALIZATION ---
-        g_col1, g_col2 = st.columns([1, 2])
-        with g_col1:
-            st.markdown("#### 🎯 TARGETS")
-            goal = st.number_input("End Goal", value=10000)
-            curr = st.session_state.current_subs
-            
-            prog = curr / goal if goal > 0 else 0
-            st.metric("CURRENT REACH", f"{curr}", delta=f"{curr - 1500} Total Growth")
-            st.progress(min(prog, 1.0))
-            st.caption(f"Director, you are {int(prog*100)}% closer to your objective.")
-        
-        with g_col2:
-            st.markdown("#### 📈 GROWTH TRACE")
-            # We only show the chart here, inside the Growth Hub logic
-            chart_df = pd.DataFrame({
-                "Status": st.session_state.chart_data["labels"],
-                "Subscribers": st.session_state.chart_data["values"]
-            })
-            st.bar_chart(data=chart_df, x="Status", y="Subscribers")
-
-    st.divider()
-    if st.button("🔮 ANALYZE PERSONALIZED ORACLE REPORT"):
-        with st.spinner("🌑 ORACLE IS CONSULTING THE VOID..."):
-            context = f"Creator at {st.session_state.current_subs} followers."
-            report = generate_oracle_report(context, "Cross-Platform", "Elite")
-            st.info(report)
-
+        chart_df = pd.DataFrame({
+            "Status": st.session_state.chart_data["labels"],
+            "Subscribers": st.session_state.chart_data["values"]
+        })
+        st.bar_chart(data=chart_df, x="Status", y="Subscribers")
 # This is NOT indented, so it starts the next section of the navigation
 elif nav == "💎 Assigned Scripts":
     st.title("💎 YOUR SECURE VAULT")
@@ -599,6 +572,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
