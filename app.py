@@ -7,7 +7,7 @@ import feedparser
 from bs4 import BeautifulSoup
 import time
 from streamlit_lottie import st_lottie
-from google import generativeai  # Modern way to import
+from google import genai  # Modern way to import
 from PIL import Image
 import streamlit as st
 import os
@@ -554,6 +554,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
