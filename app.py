@@ -237,7 +237,8 @@ import google.generativeai as genai # Note the name change
 # --- GLOBAL INITIALIZATION ---
 # This ensures 'client' is defined before any other code runs
 if "GEMINI_API_KEY" in st.secrets:
-    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+# You don't need a 'client' object here; you call genai directly
 else:
     # Fallback so the app doesn't crash if secrets are missing
     client = None 
@@ -555,6 +556,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
