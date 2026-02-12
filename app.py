@@ -234,30 +234,28 @@ def analyze_analytics_screenshot(uploaded_file):
 
 import google.generativeai as genai # Note the name change
 
-# --- GLOBAL INITIALIZATION ---
-# This ensures 'client' is defined before any other code runs
+# 1. At the TOP of your script (Global Space)
+client = None
 if "GEMINI_API_KEY" in st.secrets:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-# You don't need a 'client' object here; you call genai directly
-else:
-    # Fallback so the app doesn't crash if secrets are missing
-    client = None 
+    from google import genai
+    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 
 def analyze_analytics_screenshot(uploaded_file):
+    global client  # <--- ADD THIS LINE
+    
     if client is None:
-        return "🚨 ERROR: System Offline. Check your Gemini API Key in Secrets."
+        return "🚨 ERROR: System Offline. Key missing from global scope."
 
     try:
-        img = Image.open(uploaded_file)
-        
-        # Using the February 2026 stable workhorse model
+        # Use the stable 2026 model
         response = client.models.generate_content(
-            model="gemini-2.5-flash", 
-            contents=["Extract the exact subscriber count from this image.", img]
+            model="gemini-2.0-flash", 
+            contents=["Read sub count from this image.", Image.open(uploaded_file)]
         )
         return response.text
     except Exception as e:
         return f"Uplink Error: {e}"
+
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -556,6 +554,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
