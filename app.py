@@ -272,19 +272,6 @@ chart_df = pd.DataFrame({
     "Category": st.session_state.chart_data["labels"],
     "Count": st.session_state.chart_data["values"]
 })
-st.bar_chart(data=chart_df, x="Category", y="Count")
-# Create the uploader
-uploaded_img = st.file_uploader("Upload Analytics", type=['png', 'jpg', 'jpeg'])
-
-if uploaded_img is not None:
-    if st.button("🚀 EXECUTE SCAN"):
-        result = analyze_analytics_screenshot(uploaded_img)
-        
-        # This part extracts the number from the AI's text
-        nums = re.findall(r'\d+', result.replace(',', ''))
-        if nums:
-            st.session_state.chart_data["values"][0] = int(nums[0])
-            st.success(f"Detected {nums[0]} Subscribers!")
 
 # --- THE CHART FIX ---
     # Everything below is indented exactly 4 spaces from the 'elif'
@@ -298,15 +285,6 @@ if uploaded_img is not None:
     # 1. First, create the uploader and name the variable correctly
     uploaded_img = st.file_uploader("📤 UPLOAD ANALYTICS SCREENSHOT", type=['png', 'jpg', 'jpeg'])
     
-# 2. Only show the scan button if an image is actually present
-if uploaded_img is not None:
-    if st.button("🛰️ EXECUTE VISION SCAN"):
-        with st.spinner("🌑 SCANNING NEURAL NODES..."):
-            # Use 'uploaded_img' because that is what we named it above
-            analysis_result = analyze_analytics_screenshot(uploaded_img)
-            st.write(analysis_result)
-else:
-    st.info("Waiting for data uplink... Please upload an image to begin.")
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -391,39 +369,78 @@ if nav == "📊 Dashboard":
         st.subheader("🛡️ Security Audit")
         st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
 
-# --- UPDATED MY GROWTH HUB MODULE (CLEANED) ---
-# --- MODULE: MY GROWTH HUB (The ONLY place this code should exist) ---
+# --- MODULE: MY GROWTH HUB (Optimized & Cleaned) ---
 elif nav == "📡 My Growth Hub":
     st.markdown(f"<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
     
-    # 1. Define the uploader FIRST so the button can see it
-    uploaded_img = st.file_uploader("📤 UPLOAD ANALYTICS SCREENSHOT", type=['png', 'jpg', 'jpeg'], key="hub_uploader")
-    
-    if uploaded_img is not None:
-        # 2. The Button (Give it a unique KEY to prevent the Duplicate ID error)
-        if st.button("🛰️ EXECUTE VISION SCAN", key="unique_scan_button"):
-            with st.spinner("🌑 SCANNING NEURAL NODES..."):
-                # Now 'uploaded_img' is defined, so the error disappears
-                analysis_result = analyze_analytics_screenshot(uploaded_img)
-                st.session_state.last_analysis = analysis_result
-                
-                # Extract numbers
-                nums = re.findall(r'\d+', analysis_result.replace(',', ''))
-                if nums:
-                    st.session_state.current_subs = int(nums[0])
-                    st.session_state.chart_data["values"] = [int(nums[0])]
-                    st.success(f"Detected {nums[0]} Subscribers!")
+    # 1. VISION UPLOAD SECTION
+    with st.expander("📷 UPLOAD ANALYTICS SCREENSHOT", expanded=True):
+        st.write("Drop a screenshot of your YT/IG/X dashboard to sync real data.")
+        
+        # We define the variable HERE first.
+        uploaded_img = st.file_uploader("Upload Node Data", type=['png', 'jpg', 'jpeg'], key="growth_uploader")
+        
+        # The button only executes if the image exists
+        if st.button("🛰️ ANALYZE & SYNC"):
+            if uploaded_img is not None:
+                with st.spinner("🌑 SCANNING NEURAL DATA..."):
+                    # Pass the correct variable to your vision function
+                    result = analyze_analytics_screenshot(uploaded_img)
+                    st.session_state.last_analysis = result
+                    
+                    # Extraction logic (Keep your regex)
+                    nums = re.findall(r'\d+', result.replace(',', ''))
+                    if nums:
+                        st.session_state.current_subs = int(nums[0])
+                        st.success(f"Intelligence Extracted: {nums[0]} Subscribers.")
+            else:
+                st.warning("Director, provide a data visual for scanning.")
 
-    # 3. Show the feedback and chart ONLY if we have data
+    # 2. ANALYSIS FEEDBACK & HUD
     if 'last_analysis' in st.session_state:
         st.info(f"**ORACLE FEEDBACK:** {st.session_state.last_analysis}")
         
-        chart_df = pd.DataFrame({
-            "Status": st.session_state.chart_data["labels"],
-            "Subscribers": st.session_state.chart_data["values"]
-        })
-        st.bar_chart(data=chart_df, x="Status", y="Subscribers")
-# This is NOT indented, so it starts the next section of the navigation
+        # --- HUD DATA VISUALIZATION ---
+        g_col1, g_col2 = st.columns([1, 2])
+        with g_col1:
+            st.markdown("#### 🎯 TARGETS")
+            goal = st.number_input("End Goal", value=10000, key="goal_input")
+            curr = st.session_state.current_subs
+            
+            prog = curr / goal if goal > 0 else 0
+            st.metric("CURRENT REACH", f"{curr}", delta=f"{curr - 1500} Total Growth")
+            st.progress(min(prog, 1.0))
+            st.caption(f"Director, you are {int(prog*100)}% closer to your objective.")
+        
+        with g_col2:
+            st.markdown("#### 📈 GROWTH TRACE")
+            # This is your specific diamond-marker line chart logic
+            growth_df = pd.DataFrame({
+                'Timeline': ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'LIVE'],
+                'Reach': [int(curr*0.8), int(curr*0.85), int(curr*0.9), int(curr*0.95), curr]
+            })
+            
+            fig = px.line(growth_df, x='Timeline', y='Reach', markers=True)
+            fig.update_traces(line_color='#00ff41', line_width=4, 
+                              marker=dict(size=12, color='#00d4ff', symbol='diamond'))
+            fig.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)', 
+                plot_bgcolor='rgba(0,0,0,0)', 
+                height=250, 
+                xaxis=dict(showgrid=True, gridcolor='#111'),
+                yaxis=dict(showgrid=True, gridcolor='#111'),
+                font=dict(color="#00ff41", family="monospace")
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+    st.divider()
+    if st.button("🔮 ANALYZE PERSONALIZED ORACLE REPORT"):
+        with st.spinner("🌑 ORACLE IS CONSULTING THE VOID..."):
+            context = f"Creator at {st.session_state.current_subs} followers."
+            report = generate_oracle_report(context, "Cross-Platform", "Elite")
+            st.info(report)
+
+
 elif nav == "💎 Assigned Scripts":
     st.title("💎 YOUR SECURE VAULT")
     try:
@@ -572,6 +589,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
