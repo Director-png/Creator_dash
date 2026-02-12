@@ -280,7 +280,7 @@ chart_df = pd.DataFrame({
         "Subscribers": st.session_state.chart_data["values"]
     })
 
-    st.bar_chart(data=chart_df, x="Status", y="Subscribers")
+st.bar_chart(data=chart_df, x="Status", y="Subscribers")
 
     # 1. First, create the uploader and name the variable correctly
     uploaded_img = st.file_uploader("📤 UPLOAD ANALYTICS SCREENSHOT", type=['png', 'jpg', 'jpeg'])
@@ -589,6 +589,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
