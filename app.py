@@ -243,7 +243,11 @@ def analyze_analytics_screenshot(uploaded_file):
         model = genai.GenerativeModel('gemini-1.5-flash')
         
         img = Image.open(uploaded_file)
-        response = model.generate_content(["Extract Subscriber count and Views.", img])
+       # Use the 2026 stable model string
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", 
+            contents=["Analyze this screenshot and extract: SUBS: [X], VIEWS: [Y]", img]
+        )
         
         return response.text
     except Exception as e:
@@ -546,6 +550,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
