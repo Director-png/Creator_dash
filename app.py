@@ -241,21 +241,25 @@ if "GEMINI_API_KEY" in st.secrets:
     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 
 def analyze_analytics_screenshot(uploaded_file):
-    global client  # <--- ADD THIS LINE
-    
+    global client
     if client is None:
-        return "🚨 ERROR: System Offline. Key missing from global scope."
+        return "🚨 ERROR: System Offline."
 
     try:
-        # Use the stable 2026 model
+        img = Image.open(uploaded_file)
+        
+        # TRY THIS MODEL: gemini-2.5-flash-lite (Highest Free Tier Quota in 2026)
         response = client.models.generate_content(
-            model="gemini-2.0-flash", 
-            contents=["Read sub count from this image.", Image.open(uploaded_file)]
+            model="gemini-2.5-flash-lite", 
+            contents=["Analyze stats from this image: Subs and Views.", img]
         )
         return response.text
+        
     except Exception as e:
+        # If still 429, we'll give the Director a clear countdown
+        if "429" in str(e):
+            return "🌑 VOID CONGESTION: Google has set your quota to 0. Please wait 24hrs for account activation or use a different Google Account."
         return f"Uplink Error: {e}"
-
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -554,6 +558,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
