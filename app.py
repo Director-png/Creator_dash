@@ -234,21 +234,26 @@ def analyze_analytics_screenshot(uploaded_file):
 
 import google.generativeai as genai # Note the name change
 
+# --- GLOBAL INITIALIZATION ---
+# This ensures 'client' is defined before any other code runs
+if "GEMINI_API_KEY" in st.secrets:
+    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+else:
+    # Fallback so the app doesn't crash if secrets are missing
+    client = None 
+
 def analyze_analytics_screenshot(uploaded_file):
-    final_key = st.session_state.get('active_gemini_key') or st.secrets.get("GEMINI_API_KEY")
-    
+    if client is None:
+        return "🚨 ERROR: System Offline. Check your Gemini API Key in Secrets."
+
     try:
-        genai.configure(api_key=final_key)
-        # We use the 'v1' stable model
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        
         img = Image.open(uploaded_file)
-       # Use the 2026 stable model string
-        response = client.models.generate_content(
-            model="gemini-2.0-flash", 
-            contents=["Analyze this screenshot and extract: SUBS: [X], VIEWS: [Y]", img]
-        )
         
+        # Using the February 2026 stable workhorse model
+        response = client.models.generate_content(
+            model="gemini-2.5-flash", 
+            contents=["Extract the exact subscriber count from this image.", img]
+        )
         return response.text
     except Exception as e:
         return f"Uplink Error: {e}"
@@ -550,6 +555,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
