@@ -209,36 +209,34 @@ def fetch_live_metrics(platform, handle):
 
 # --- UTILITY: AI STUDIO VISION ENGINE ---
 def analyze_analytics_screenshot(uploaded_file):
-    if uploaded_file is not None:
-        try:
-            # Configure Gemini with your AI Studio Key
-            genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            
-            img = Image.open(uploaded_file)
-            
-            prompt = """
-            Analyze this social media analytics screenshot. 
-            1. Extract the current Subscriber/Follower count.
-            2. Identify the top performing metric (views, watch time, etc).
-            3. Give a 1-sentence 'Director's Directive' on what to improve.
-            Format as: COUNT: [number] | FOCUS: [metric] | DIRECTIVE: [text]
-            """
-            
-            response = model.generate_content([prompt, img])
-            return response.text
-        except Exception as e:
-            return f"Uplink Error: {e}"
-    return None
+    global client
+    if client is None:
+        return "🚨 ERROR: API Key not configured in Secrets."
+
+    try:
+        img = Image.open(uploaded_file)
+        # Using 2.0-flash for 2026 stability
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", 
+            contents=["How many subscribers are in this image? Just give me the number.", img]
+        )
+        return response.text
+    except Exception as e:
+        return f"Uplink Error: {e}"
 
 
 import google.generativeai as genai # Note the name change
 
 # 1. At the TOP of your script (Global Space)
+# --- GLOBAL SETUP ---
 client = None
 if "GEMINI_API_KEY" in st.secrets:
-    from google import genai
+    # This creates the 'client' that was missing before
     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+
+# This prevents the chart from being empty when you first open the app
+if 'chart_data' not in st.session_state:
+    st.session_state.chart_data = {"labels": ["Current", "Target"], "values": [0, 10000]}
 
 def analyze_analytics_screenshot(uploaded_file):
     global client
@@ -287,32 +285,27 @@ if st.button("🛰️ EXECUTE VISION SCAN"):
         except:
             st.error("Failed to parse numbers for the chart.")
 
-# 3. The Chart (now it reads from session_state)
-st.subheader("📈 Progress Visualization")
-st.bar_chart(
-    data=st.session_state.chart_data["values"], 
-    x=st.session_state.chart_data["labels"]
-)
+# Create the uploader
+uploaded_img = st.file_uploader("Upload Analytics", type=['png', 'jpg', 'jpeg'])
 
-# 1. Convert the session state dictionary into a DataFrame
-df_for_chart = pd.DataFrame({
-    "Category": st.session_state.chart_data["labels"],
-    "Count": st.session_state.chart_data["values"]
+if uploaded_img is not None:
+    if st.button("🚀 EXECUTE SCAN"):
+        result = analyze_analytics_screenshot(uploaded_img)
+        
+        # This part extracts the number from the AI's text
+        nums = re.findall(r'\d+', result.replace(',', ''))
+        if nums:
+            st.session_state.chart_data["values"][0] = int(nums[0])
+            st.success(f"Detected {nums[0]} Subscribers!")
+
+# --- THE CHART FIX ---
+# We convert the data to a DataFrame so the chart doesn't crash
+chart_df = pd.DataFrame({
+    "Status": st.session_state.chart_data["labels"],
+    "Subscribers": st.session_state.chart_data["values"]
 })
 
-# 2. Plot the chart using the column names we just created
-st.subheader("📈 Progress Visualization")
-st.bar_chart(
-    data=df_for_chart, 
-    x="Category", 
-    y="Count"
-)
-
-# Ensure the session state is updated like this inside your button logic:
-st.session_state.chart_data = {
-    "labels": ["Current", "Target"],
-    "values": [new_val, 10000]
-}
+st.bar_chart(data=chart_df, x="Status", y="Subscribers")
 
 # 1. First, create the uploader and name the variable correctly
 # Note: Ensure the variable name here matches exactly what you use in the function call
@@ -625,6 +618,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
