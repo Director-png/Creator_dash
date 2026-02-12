@@ -314,6 +314,19 @@ st.session_state.chart_data = {
     "values": [new_val, 10000]
 }
 
+# 1. First, create the uploader and name the variable correctly
+# Note: Ensure the variable name here matches exactly what you use in the function call
+uploaded_img = st.file_uploader("📤 UPLOAD ANALYTICS SCREENSHOT", type=['png', 'jpg', 'jpeg'])
+
+# 2. Only show the scan button if an image is actually present
+if uploaded_img is not None:
+    if st.button("🛰️ EXECUTE VISION SCAN"):
+        with st.spinner("🌑 SCANNING NEURAL NODES..."):
+            # Use 'uploaded_img' because that is what we named it above
+            analysis_result = analyze_analytics_screenshot(uploaded_img)
+            st.write(analysis_result)
+else:
+    st.info("Waiting for data uplink... Please upload an image to begin.")
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -612,6 +625,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
