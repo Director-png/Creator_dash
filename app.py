@@ -92,15 +92,17 @@ def load_user_db():
         st.sidebar.error(f"Sync Failure: {e}")
         return pd.DataFrame()
 
-def load_market_pulse_data():
+def load_market_pulse_data(url):
     try:
-        df = pd.read_csv(PULSE_CSV_URL)
-        df.columns = [str(c).strip().lower() for c in df.columns]
-        mapping = {'niche name': 'Niche', 'score': 'Score', 'news snipett': 'Reason', 'growth': 'Growth'}
-        df = df.rename(columns=mapping)
-        df['Score'] = pd.to_numeric(df['Score'], errors='coerce').fillna(0)
-        return df.dropna(subset=['Niche'])
-    except: return pd.DataFrame()
+        df = pd.read_csv(url)
+        # --- THE FIX: NORMALIZE COLUMNS ---
+        # This converts all column names to Title Case (Reason, Score, etc.)
+        # so alert['Reason'] will always find its target.
+        df.columns = [str(c).strip().title() for c in df.columns] 
+        return df
+    except Exception as e:
+        st.error(f"Sync Error: {e}")
+        return pd.DataFrame()
 
 def generate_visual_dna(platform, tone):
     styles = {
@@ -823,6 +825,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
