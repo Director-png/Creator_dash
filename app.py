@@ -826,6 +826,7 @@ elif page == "🧪 Creator Lab":
                 st.info(res.choices[0].message.content)
 
 
+# --- MODULE 9: LEAD SOURCE (INTEGRATED) ---
 elif page == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
     
@@ -836,25 +837,55 @@ elif page == "🛰️ Lead Source":
         scan_depth = st.select_slider("Scan Intensity", ["Surface", "Deep", "Quantum"])
         
         if st.button("📡 INITIALIZE DEEP SCAN", use_container_width=True):
-            with st.spinner("🌑 SCANNING SOCIAL LAYERS..."):
-                time.sleep(2) 
-                # Scanned data with added "Vigor" (Growth potential)
-                data = [
-                    {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Vigor": 85, "Value": "High"},
-                    {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Vigor": 94, "Value": "Critical"},
-                    {"Handle": "@PropTech_India", "Platform": "LI", "Followers": "12K", "Gap": "Poor Visual DNA", "Vigor": 62, "Value": "Medium"},
-                    {"Handle": "@WealthVector", "Platform": "TT", "Followers": "250K", "Gap": "High Views / Low Conversion", "Vigor": 98, "Value": "Extreme"}
-                ]
-                st.session_state.found_leads = pd.DataFrame(data)
-                st.success(f"Scan Complete. {len(data)} High-Value Gaps Detected.")
+            with st.spinner("🌑 PENETRATING SOCIAL LAYERS..."):
+                try:
+                    # CHECK FOR LIVE API KEY
+                    if "RAPIDAPI_KEY" in st.secrets:
+                        url = "https://instagram-scraper-api2.p.rapidapi.com/v1/search_users"
+                        headers = {
+                            "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
+                            "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
+                        }
+                        response = requests.get(url, headers=headers, params={"search_query": niche_target})
+                        raw_users = response.json().get('data', {}).get('users', [])
+                        
+                        data = []
+                        limit = 5 if scan_depth == "Surface" else 10
+                        for user in raw_users[:limit]:
+                            # Groq Brain analyzes the name for a likely "Gap"
+                            analysis = f"Briefly identify a content gap for {user.get('username')} in {niche_target}."
+                            gap_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": analysis}])
+                            
+                            data.append({
+                                "Handle": f"@{user['username']}",
+                                "Platform": "IG",
+                                "Followers": "LIVE",
+                                "Gap": gap_res.choices[0].message.content[:50] + "...",
+                                "Vigor": random.randint(70, 99),
+                                "Value": "High" if user.get('is_verified') else "Medium"
+                            })
+                    else:
+                        # FALLBACK TO SIMULATION IF NO KEY
+                        time.sleep(1.5)
+                        data = [
+                            {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Vigor": 85, "Value": "High"},
+                            {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Vigor": 94, "Value": "Critical"},
+                            {"Handle": "@PropTech_India", "Platform": "LI", "Followers": "12K", "Gap": "Poor Visual DNA", "Vigor": 62, "Value": "Medium"},
+                            {"Handle": "@WealthVector", "Platform": "TT", "Followers": "250K", "Gap": "High Views / Low Conversion", "Vigor": 98, "Value": "Extreme"}
+                        ]
+                    
+                    st.session_state.found_leads = pd.DataFrame(data)
+                    st.success(f"Scan Complete. {len(data)} Targets Identified.")
+                except Exception as e:
+                    st.error(f"Uplink Error: {e}")
 
     with col_stats:
         if not st.session_state.found_leads.empty:
-            # Show a quick vigor distribution chart
             fig = px.pie(st.session_state.found_leads, values='Vigor', names='Handle', 
                          title="Lead Vigor Distribution", hole=.4,
                          color_discrete_sequence=px.colors.sequential.Greens_r)
-            fig.update_layout(showlegend=False, height=250, margin=dict(t=30, b=0, l=0, r=0))
+            fig.update_layout(showlegend=False, height=250, margin=dict(t=30, b=0, l=0, r=0),
+                              paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color="white")
             st.plotly_chart(fig, use_container_width=True)
 
     # --- LEAD MANAGEMENT ---
@@ -862,7 +893,6 @@ elif page == "🛰️ Lead Source":
         st.divider()
         st.subheader("🎯 IDENTIFIED TARGETS")
         
-        # Interactive Editor
         edited_df = st.data_editor(
             st.session_state.found_leads,
             column_config={
@@ -870,13 +900,10 @@ elif page == "🛰️ Lead Source":
                 "Value": st.column_config.SelectboxColumn("Priority", options=["Medium", "High", "Critical", "Extreme"]),
             },
             disabled=["Handle", "Platform", "Followers", "Gap"],
-            hide_index=True,
-            use_container_width=True
+            hide_index=True, use_container_width=True
         )
 
-        # Tactical Actions
         c1, c2 = st.columns(2)
-        
         with c1:
             selected_lead = st.selectbox("Select Target for Action", edited_df["Handle"])
             if st.button(f"🚀 PORT TO PITCHER", use_container_width=True):
@@ -889,15 +916,13 @@ elif page == "🛰️ Lead Source":
                 st.toast(f"Data for {selected_lead} beamed to Client Pitcher.")
 
         with c2:
-            st.write("") # Alignment
+            st.write("") 
             if st.button("💎 SYNC ALL TO MASTER VAULT", use_container_width=True):
-                # Using your existing Feedback API as a bridge to save data
                 for _, row in edited_df.iterrows():
                     sync_msg = f"LEAD:{row['Handle']}|GAP:{row['Gap']}|VAL:{row['Value']}"
                     payload = {"email": "SYSTEM_SCAN", "category": "LEAD_GEN", "message": sync_msg}
                     requests.post(FEEDBACK_API_URL, json=payload)
-                st.success("Archive Synchronized. All leads pushed to Google Sheets.")
-
+                st.success("Archive Synchronized. Leads pushed to Google Sheets.")
 
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
 elif page == "📜 History":
@@ -974,6 +999,7 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
+
 
 
 
