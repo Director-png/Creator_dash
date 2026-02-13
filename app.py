@@ -209,12 +209,20 @@ def analyze_analytics_screenshot(uploaded_file):
 # --- GLOBAL SETUP ---
 # Line 242
 # Line 243
+# --- GLOBAL AI INITIALIZATION ---
 if "GEMINI_API_KEY" in st.secrets:
-    # Ensure there are 4 SPACES before 'client'
     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 else:
     client = None
 
+# GROQ HANDSHAKE: This fixes the 401 error
+if "GROQ_API_KEY" in st.secrets:
+    try:
+        groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+    except Exception:
+        groq_c = None
+else:
+    groq_c = None
 # This prevents the chart from being empty when you first open the app
 if 'chart_data' not in st.session_state:
     st.session_state.chart_data = {"labels": ["Current", "Target"], "values": [0, 10000]}
@@ -369,26 +377,18 @@ if nav == "📊 Dashboard":
         st.subheader("🛡️ Security Audit")
         st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
 
-# --- MODULE: MY GROWTH HUB (Optimized & Cleaned) ---
 elif nav == "📡 My Growth Hub":
     st.markdown(f"<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
     
-    # 1. VISION UPLOAD SECTION
     with st.expander("📷 UPLOAD ANALYTICS SCREENSHOT", expanded=True):
         st.write("Drop a screenshot of your YT/IG/X dashboard to sync real data.")
-        
-        # We define the variable HERE first.
         uploaded_img = st.file_uploader("Upload Node Data", type=['png', 'jpg', 'jpeg'], key="growth_uploader")
         
-        # The button only executes if the image exists
         if st.button("🛰️ ANALYZE & SYNC"):
             if uploaded_img is not None:
                 with st.spinner("🌑 SCANNING NEURAL DATA..."):
-                    # Pass the correct variable to your vision function
                     result = analyze_analytics_screenshot(uploaded_img)
                     st.session_state.last_analysis = result
-                    
-                    # Extraction logic (Keep your regex)
                     nums = re.findall(r'\d+', result.replace(',', ''))
                     if nums:
                         st.session_state.current_subs = int(nums[0])
@@ -396,41 +396,28 @@ elif nav == "📡 My Growth Hub":
             else:
                 st.warning("Director, provide a data visual for scanning.")
 
-    # 2. ANALYSIS FEEDBACK & HUD
     if 'last_analysis' in st.session_state:
         st.info(f"**ORACLE FEEDBACK:** {st.session_state.last_analysis}")
         
-        # --- HUD DATA VISUALIZATION ---
         g_col1, g_col2 = st.columns([1, 2])
         with g_col1:
             st.markdown("#### 🎯 TARGETS")
-            goal = st.number_input("End Goal", value=10000, key="goal_input")
+            goal = st.number_input("End Goal", value=10000)
             curr = st.session_state.current_subs
-            
             prog = curr / goal if goal > 0 else 0
             st.metric("CURRENT REACH", f"{curr}", delta=f"{curr - 1500} Total Growth")
             st.progress(min(prog, 1.0))
-            st.caption(f"Director, you are {int(prog*100)}% closer to your objective.")
         
         with g_col2:
             st.markdown("#### 📈 GROWTH TRACE")
-            # This is your specific diamond-marker line chart logic
-            growth_df = pd.DataFrame({
+            # --- STRICT ALIGNMENT FOR THE CHART ---
+            chart_df = pd.DataFrame({
                 'Timeline': ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'LIVE'],
                 'Reach': [int(curr*0.8), int(curr*0.85), int(curr*0.9), int(curr*0.95), curr]
             })
-            
-            fig = px.line(growth_df, x='Timeline', y='Reach', markers=True)
-            fig.update_traces(line_color='#00ff41', line_width=4, 
-                              marker=dict(size=12, color='#00d4ff', symbol='diamond'))
-            fig.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)', 
-                plot_bgcolor='rgba(0,0,0,0)', 
-                height=250, 
-                xaxis=dict(showgrid=True, gridcolor='#111'),
-                yaxis=dict(showgrid=True, gridcolor='#111'),
-                font=dict(color="#00ff41", family="monospace")
-            )
+            fig = px.line(chart_df, x='Timeline', y='Reach', markers=True)
+            fig.update_traces(line_color='#00ff41', line_width=4, marker=dict(size=12, color='#00d4ff', symbol='diamond'))
+            fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=250, font=dict(color="#00ff41", family="monospace"))
             st.plotly_chart(fig, use_container_width=True)
 
     st.divider()
@@ -589,6 +576,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
