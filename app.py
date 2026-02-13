@@ -662,14 +662,60 @@ elif nav == "🧪 Creator Lab":
                 res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": blueprint_prompt}])
                 st.info(res.choices[0].message.content)
 
-
 elif nav == "🛰️ Lead Source":
-    st.title("🛰️ LEAD SOURCE")
-    niche_search = st.selectbox("Target Niche", ["SaaS", "E-com", "Coaching"])
-    if st.button("Initialize Deep Scan"):
-        st.session_state.found_leads = pd.DataFrame([{"Handle": "@Nexus_AI", "Platform": "IG", "Gap": "No Video"}])
+    st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
+    
+    col_input, col_stats = st.columns([1, 1])
+    
+    with col_input:
+        niche_target = st.selectbox("Target Niche to Scan", ["SaaS Founders", "AI Educators", "Luxury Real Estate", "E-com Brands"])
+        scan_depth = st.select_slider("Scan Intensity", ["Surface", "Deep", "Quantum"])
+        
+        if st.button("📡 INITIALIZE DEEP SCAN", use_container_width=True):
+            with st.spinner("🌑 SCANNING SOCIAL LAYERS..."):
+                time.sleep(2) # Simulate data retrieval
+                # Simulated high-value leads with "Gaps" identified
+                data = [
+                    {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Value": "High"},
+                    {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Value": "Critical"},
+                    {"Handle": "@PropTech_India", "Platform": "LI", "Followers": "12K", "Gap": "Poor Visual DNA", "Value": "Medium"},
+                    {"Handle": "@WealthVector", "Platform": "TT", "Followers": "250K", "Gap": "High Views / Low Conversion", "Value": "Extreme"}
+                ]
+                st.session_state.found_leads = pd.DataFrame(data)
+                st.success(f"Scan Complete. {len(data)} High-Value Gaps Detected.")
+
+    # Display Leads
     if not st.session_state.found_leads.empty:
-        st.table(st.session_state.found_leads)
+        st.divider()
+        st.subheader("🎯 IDENTIFIED TARGETS")
+        
+        # We use a dataframe with a "Select" capability
+        edited_df = st.data_editor(
+            st.session_state.found_leads,
+            column_config={
+                "Value": st.column_config.SelectboxColumn(
+                    "Priority",
+                    options=["Medium", "High", "Critical", "Extreme"],
+                )
+            },
+            disabled=["Handle", "Platform", "Followers", "Gap"],
+            hide_index=True,
+            use_container_width=True
+        )
+
+        # Tactical Action
+        selected_lead = st.selectbox("Select Target for Immediate Pitch", st.session_state.found_leads["Handle"])
+        if st.button(f"🚀 PORT DATA TO PITCHER: {selected_lead}"):
+            # Transfer data to session state for the Pitcher module to pick up
+            lead_info = st.session_state.found_leads[st.session_state.found_leads["Handle"] == selected_lead].iloc[0]
+            st.session_state.active_pitch_target = {
+                "name": selected_lead,
+                "gap": lead_info["Gap"],
+                "niche": niche_target
+            }
+            st.toast(f"Data for {selected_lead} beamed to Client Pitcher.")
+
+
 
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
 elif nav == "📜 History":
@@ -699,6 +745,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
