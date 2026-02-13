@@ -599,31 +599,70 @@ elif nav == "💼 Client Pitcher":
 
 # --- MODULE 8: CREATOR LAB & LEAD SOURCE ---
 elif nav == "🧪 Creator Lab":
-    st.markdown("<h1 style='color: #00d4ff;'>🧪 ROI ENGINE</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #00d4ff;'>🧪 ROI ENGINE v2.0</h1>", unsafe_allow_html=True)
     
+    # --- 🛰️ NICHE CPM DATABASE ---
+    # These are industry-standard mainstream CPMs
+    niche_data = {
+        "🎮 Gaming & Entertainment": 3.0,
+        "🧘 Lifestyle & Vlogging": 5.0,
+        "👗 Fashion & Beauty": 8.0,
+        "🤖 AI & Tech": 15.0,
+        "💼 Business & SaaS": 22.0,
+        "💰 Finance & Crypto": 35.0
+    }
+
     with st.container():
-        st.subheader("💰 REVENUE PROJECTION")
-        views = st.slider("Projected Views (Weekly)", 1000, 1000000, 50000)
-        cpm = st.number_input("Est. CPM ($)", value=15.0)
-        conversion_rate = st.slider("Product Conversion Rate (%)", 0.1, 5.0, 1.0)
-        product_price = st.number_input("Product/Service Price ($)", value=497)
+        st.subheader("📊 PROFIT PROJECTION")
         
-        # Logic
-        ad_rev = (views / 1000) * cpm
-        sales_rev = (views * (conversion_rate / 100)) * product_price
-        total_value = ad_rev + sales_rev
+        # Inputs
+        col1, col2 = st.columns(2)
+        with col1:
+            selected_niche = st.selectbox("Select Target Niche", list(niche_data.keys()))
+            views = st.number_input("Projected Weekly Views", min_value=0, value=50000, step=5000)
+            product_price = st.number_input("Product/Service Price ($)", value=100)
+            
+        with col2:
+            # Auto-populated based on niche but remains editable
+            default_cpm = niche_data[selected_niche]
+            cpm = st.number_input(f"Est. {selected_niche} CPM ($)", value=default_cpm)
+            conv_rate = st.slider("Conversion Rate (%)", 0.1, 5.0, 1.0)
+            conversion_factor = st.number_input("USD to INR Rate", value=83.0)
+
+        # 🧬 CALCULATIONS
+        ad_rev_usd = (views / 1000) * cpm
+        sales_rev_usd = (views * (conv_rate / 100)) * product_price
+        total_usd = ad_rev_usd + sales_rev_usd
         
-        st.markdown(f"### **ESTIMATED ROI: ${total_value:,.2f}**")
-        st.progress(0.75) # Aesthetic progress bar
-        st.caption("ROI is calculated based on AdRev + Digital Sales Conversion.")
+        # Currency Conversion
+        total_inr = total_usd * conversion_factor
+
+        st.divider()
+        
+        # Display Results
+        res_col1, res_col2 = st.columns(2)
+        with res_col1:
+            st.metric("TOTAL VALUE (USD)", f"${total_usd:,.2f}")
+            st.caption(f"AdRev: ${ad_rev_usd:,.2f} | Sales: ${sales_rev_usd:,.2f}")
+        
+        with res_col2:
+            st.markdown(f"<h2 style='color: #00ff41;'>₹ {total_inr:,.2f}</h2>", unsafe_allow_html=True)
+            st.caption("TOTAL PROJECTED REVENUE (INR)")
 
     st.divider()
-    if st.button("🧬 GENERATE PROFIT BLUEPRINT"):
-        # Uses Groq to give a strategy based on these numbers
+    if st.button("🧬 GENERATE PROFIT BLUEPRINT", use_container_width=True):
         if groq_c:
-            blueprint_prompt = f"Create a strategy to hit ${total_value} revenue for a creator getting {views} views."
-            res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": blueprint_prompt}])
-            st.success(res.choices[0].message.content)
+            with st.spinner("🌑 ORACLE CALCULATING..."):
+                blueprint_prompt = f"""
+                Analyze ROI for a {selected_niche} creator. 
+                Views: {views} | CPM: ${cpm} | Product Price: ${product_price}
+                Target Revenue: ${total_usd} (approx ₹{total_inr}).
+                Provide a 3-step elite strategy to ensure that {conv_rate}% conversion rate is met.
+                """
+                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": blueprint_prompt}])
+                st.info(res.choices[0].message.content)
+
+
 elif nav == "🛰️ Lead Source":
     st.title("🛰️ LEAD SOURCE")
     niche_search = st.selectbox("Target Niche", ["SaaS", "E-com", "Coaching"])
@@ -660,6 +699,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
