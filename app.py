@@ -282,95 +282,101 @@ if nav == "📊 Dashboard":
         st.subheader("🛡️ Security Audit")
         st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
 
+# --- MODULE 8: GROWTH HUB (HARDENED VERSION) ---
 elif nav == "📡 My Growth Hub":
     st.markdown("<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
     
-    # --- FAILOVER LOGIC ---
-    def get_gemini_client(use_backup=False):
-        key_name = "GEMINI_API_KEY_BACKUP" if use_backup else "GEMINI_API_KEY"
-        if key_name in st.secrets:
-            from google import genai
-            return genai.Client(api_key=st.secrets[key_name].strip())
-        return None
+    # 🧬 INTERNAL UTILITY: Image Compressor to save Tokens/Quota
+    def compress_for_ai(uploaded_file):
+        img = Image.open(uploaded_file)
+        if img.mode in ("RGBA", "P"): img = img.convert("RGB")
+        img.thumbnail((800, 800)) # Scale down to save 70% of token weight
+        buffer = io.BytesIO()
+        img.save(buffer, format="JPEG", quality=85)
+        return Image.open(buffer)
 
+    # 🛡️ INTERNAL UTILITY: Triple-Core Failover
+    def run_analysis(image_input):
+        # List all possible keys from your Secrets
+        keys = [
+            st.secrets.get("GEMINI_API_KEY"),
+            st.secrets.get("GEMINI_API_KEY_BACKUP"),
+            st.secrets.get("GEMINI_API_KEY_3") # Engine Gamma
+        ]
+        
+        for i, k in enumerate(keys):
+            if not k: continue
+            try:
+                from google import genai
+                temp_client = genai.Client(api_key=k.strip())
+                core_name = ["Alpha", "Beta", "Gamma"][i]
+                
+                with st.spinner(f"🌑 ANALYZING VIA CORE {core_name}..."):
+                    response = temp_client.models.generate_content(
+                        model="gemini-2.0-flash", 
+                        contents=["Extract total subscriber/follower count as a number only.", image_input]
+                    )
+                    return response.text, core_name
+            except Exception as e:
+                if "429" in str(e):
+                    st.warning(f"⚠️ Core {['Alpha', 'Beta', 'Gamma'][i]} Exhausted. Switching...")
+                    continue
+                else:
+                    st.error(f"Core Error: {e}")
+        return None, None
+
+    # --- UI LAYOUT ---
     with st.expander("📷 UPLOAD ANALYTICS SCREENSHOT", expanded=True):
         uploaded_img = st.file_uploader("Upload Node Data", type=['png', 'jpg', 'jpeg'])
         
-        if st.button("🛰️ ANALYZE & SYNC"):
+        if st.button("🛰️ SCAN & TRANSMIT", use_container_width=True):
             if uploaded_img:
-                img = Image.open(uploaded_img)
-                # Attempt 1: Primary Key
-                clients_to_try = [get_gemini_client(False), get_gemini_client(True)]
+                # 1. Compress first to avoid 429
+                ready_img = compress_for_ai(uploaded_img)
                 
-                analysis_complete = False
-                for idx, active_client in enumerate(clients_to_try):
-                    if not active_client: continue
+                # 2. Run Failover Analysis
+                result_text, core_used = run_analysis(ready_img)
+                
+                if result_text:
+                    st.session_state.last_analysis = result_text
+                    st.success(f"✅ Success via {core_used}")
                     
-                    try:
-                        with st.spinner(f"🌑 SCANNING (Engine {'Alpha' if idx==0 else 'Beta'})..."):
-                            response = active_client.models.generate_content(
-                                model="gemini-2.0-flash", 
-                                contents=["Extract total subscriber count as a number only.", img]
-                            )
-                            st.session_state.last_analysis = response.text
-                            # Numeric Extraction
-                            nums = re.findall(r'\d+', response.text.replace(',', ''))
-                            if nums: st.session_state.current_subs = int(nums[0])
-                            analysis_complete = True
-                            st.success(f"Handshake Successful via Engine {'Alpha' if idx==0 else 'Beta'}")
-                            break
-                    except Exception as e:
-                        if "429" in str(e) and idx == 0:
-                            st.warning("⚠️ Engine Alpha Exhausted. Diverting to Backup Core...")
-                            continue # Try the next client in the list
-                        else:
-                            st.error(f"System Critical Failure: {e}")
-                
-                if not analysis_complete:
-                    st.error("🚨 ALL CORES EXHAUSTED. System requires 60s cooldown or manual reset.")
+                    # Clean the number
+                    nums = re.findall(r'\d+', result_text.replace(',', ''))
+                    if nums:
+                        st.session_state.current_subs = int(nums[0])
+                else:
+                    st.error("🚨 BLACKOUT: All 3 Google accounts have exhausted their daily quota.")
 
-    # --- ARCHIVE DISPLAY ---
+    # --- DATA VISUALIZATION ---
     if 'last_analysis' in st.session_state:
-        st.info(f"**DATA EXTRACTED:** {st.session_state.last_analysis}")
-        c1, c2 = st.columns(2)
-        c1.metric("REACH", f"{st.session_state.current_subs:,}")
-        c2.progress(min(st.session_state.current_subs / 10000, 1.0), text="Progress to 10k")
-
-    # --- DISPLAY ANALYTICS ---
-    if 'last_analysis' in st.session_state:
-        st.info(f"**ORACLE FEEDBACK:** {st.session_state.last_analysis}")
+        st.divider()
+        col_left, col_right = st.columns([1, 2])
         
-        g_col1, g_col2 = st.columns([1, 2])
-        with g_col1:
+        with col_left:
             st.metric("CURRENT REACH", f"{st.session_state.current_subs:,}")
-            # Progress bar towards a 10k goal
-            st.progress(min(st.session_state.current_subs / 10000, 1.0))
-        
-        with g_col2:
-            # Visualization of Growth
-            chart_df = pd.DataFrame({
-                'Timeline': ['Wk 1', 'Wk 2', 'Wk 3', 'Wk 4', 'LIVE'],
-                'Reach': [
-                    int(st.session_state.current_subs*0.8), 
-                    int(st.session_state.current_subs*0.85), 
-                    int(st.session_state.current_subs*0.9), 
-                    int(st.session_state.current_subs*0.95), 
-                    st.session_state.current_subs
-                ]
+            st.caption(f"Raw Feed: {st.session_state.last_analysis}")
+            
+        with col_right:
+            # Growth Simulation based on real data
+            s = st.session_state.current_subs
+            chart_data = pd.DataFrame({
+                'Phase': ['Base', 'Target', 'Launch'],
+                'Reach': [int(s*0.9), s, int(s*1.2)]
             })
-            st.line_chart(chart_df, x='Timeline', y='Reach')
+            st.area_chart(chart_data, x='Phase', y='Reach', color="#00d4ff")
 
-    st.divider()
-    if st.button("🔮 GENERATE ORACLE REPORT"):
-        # This uses Groq (Llama), which has a separate quota!
+    if st.button("🔮 GENERATE STRATEGY REPORT"):
+        # This part uses GROQ (which is still online!)
         if groq_c:
-            with st.spinner("🌑 ORACLE IS CONSULTING THE VOID..."):
-                context = f"Creator at {st.session_state.current_subs} followers."
-                report = generate_oracle_report(context, "Cross-Platform", "Elite")
-                st.info(report)
-        else:
-            st.error("Groq key missing. Cannot generate report.")
-
+            with st.spinner("🌑 ORACLE CONSULTING..."):
+                prompt = f"Creator has {st.session_state.current_subs} subs. Give 3 elite growth tactics."
+                res = groq_c.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                st.info(res.choices[0].message.content)
+                
 
 elif nav == "💎 Assigned Scripts":
     st.title("💎 YOUR SECURE VAULT")
@@ -592,6 +598,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
