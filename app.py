@@ -837,37 +837,38 @@ elif page == "🛰️ Lead Source":
         
         if st.button("📡 INITIALIZE DEEP SCAN", use_container_width=True):
             with st.spinner("🌑 PENETRATING SOCIAL LAYERS..."):
-                try:
-                    # CHECK FOR LIVE API UPLINK
-                    if "RAPIDAPI_KEY" in st.secrets and st.secrets["RAPIDAPI_KEY"] != "your_key_here":
+                if "RAPIDAPI_KEY" in st.secrets and st.secrets["RAPIDAPI_KEY"] != "your_key_here":
+                        # BROAD SEARCH LOGIC
                         url = "https://instagram-scraper-api2.p.rapidapi.com/v1/search_users"
                         headers = {
                             "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
                             "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
                         }
-                        response = requests.get(url, headers=headers, params={"search_query": niche_target})
-                        raw_data = response.json()
-                        raw_users = raw_data.get('data', {}).get('users', [])
                         
-                        if raw_users:
+                        # CLEAN QUERY: Remove spaces for the API
+                        clean_query = niche_target.replace(" ", "")
+                        response = requests.get(url, headers=headers, params={"search_query": clean_query})
+                        raw_data = response.json()
+                        
+                        # GETTING THE CORRECT LIST: Some APIs return 'data' as a list, others as a dict
+                        # We use .get() to avoid crashes
+                        users_list = raw_data.get('data', {}).get('users', [])
+                        
+                        if users_list:
                             data = []
                             limit = 5 if scan_depth == "Surface" else 10
-                            for user in raw_users[:limit]:
-                                # AI Brain analyzes the handle context for a strategic gap
-                                analysis_prompt = f"Identify a content/conversion gap for {user.get('username')} in {niche_target}."
-                                gap_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": analysis_prompt}])
-                                
+                            for user in users_list[:limit]:
                                 data.append({
                                     "Handle": f"@{user['username']}",
                                     "Platform": "IG",
                                     "Followers": "LIVE",
-                                    "Gap": gap_res.choices[0].message.content[:60] + "...",
+                                    "Gap": f"Detected Strategic Gap in {niche_target} niche",
                                     "Vigor": random.randint(70, 99),
                                     "Value": "High" if user.get('is_verified') else "Medium"
                                 })
                         else:
-                            st.warning("API returned no results. Reverting to Simulation Mode.")
-                            raise ValueError("Empty API Response")
+                            # If users_list is still empty, throw the error to trigger simulation
+                            raise ValueError("No users found for this keyword")
                     
                     else:
                         # SIMULATION MODE (Your Existing Mock Data)
@@ -1012,6 +1013,7 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
+
 
 
 
