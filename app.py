@@ -285,44 +285,56 @@ if nav == "📊 Dashboard":
 elif nav == "📡 My Growth Hub":
     st.markdown("<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
     
+    # --- FAILOVER LOGIC ---
+    def get_gemini_client(use_backup=False):
+        key_name = "GEMINI_API_KEY_BACKUP" if use_backup else "GEMINI_API_KEY"
+        if key_name in st.secrets:
+            from google import genai
+            return genai.Client(api_key=st.secrets[key_name].strip())
+        return None
+
     with st.expander("📷 UPLOAD ANALYTICS SCREENSHOT", expanded=True):
-        uploaded_img = st.file_uploader("Upload Node Data", type=['png', 'jpg', 'jpeg'], key="growth_uploader")
+        uploaded_img = st.file_uploader("Upload Node Data", type=['png', 'jpg', 'jpeg'])
         
         if st.button("🛰️ ANALYZE & SYNC"):
-            if uploaded_img and client:
-                with st.spinner("🌑 SCANNING... (Avoiding Rate Limits)"):
-                    # --- RATE LIMIT PROTECTION LOGIC ---
-                    success = False
-                    retries = 3
-                    for i in range(retries):
-                        try:
-                            img = Image.open(uploaded_img)
-                            response = client.models.generate_content(
+            if uploaded_img:
+                img = Image.open(uploaded_img)
+                # Attempt 1: Primary Key
+                clients_to_try = [get_gemini_client(False), get_gemini_client(True)]
+                
+                analysis_complete = False
+                for idx, active_client in enumerate(clients_to_try):
+                    if not active_client: continue
+                    
+                    try:
+                        with st.spinner(f"🌑 SCANNING (Engine {'Alpha' if idx==0 else 'Beta'})..."):
+                            response = active_client.models.generate_content(
                                 model="gemini-2.0-flash", 
                                 contents=["Extract total subscriber count as a number only.", img]
                             )
-                            result = response.text
-                            st.session_state.last_analysis = result
-                            
-                            # Clean the numeric data
-                            nums = re.findall(r'\d+', result.replace(',', ''))
-                            if nums:
-                                st.session_state.current_subs = int(nums[0])
-                            
-                            success = True
-                            break # Exit the loop if successful
-                            
-                        except Exception as e:
-                            if "429" in str(e):
-                                wait_time = (i + 1) * 10  # Wait 10s, then 20s
-                                st.warning(f"⚠️ Rate Limit Hit. Cooling down nodes... Retrying in {wait_time}s")
-                                time.sleep(wait_time)
-                            else:
-                                st.error(f"Scan Failed: {e}")
-                                break
-                    
-                    if not success:
-                        st.error("🌑 VOID OFFLINE: Google Quota Exhausted. Try again in 60 seconds.")
+                            st.session_state.last_analysis = response.text
+                            # Numeric Extraction
+                            nums = re.findall(r'\d+', response.text.replace(',', ''))
+                            if nums: st.session_state.current_subs = int(nums[0])
+                            analysis_complete = True
+                            st.success(f"Handshake Successful via Engine {'Alpha' if idx==0 else 'Beta'}")
+                            break
+                    except Exception as e:
+                        if "429" in str(e) and idx == 0:
+                            st.warning("⚠️ Engine Alpha Exhausted. Diverting to Backup Core...")
+                            continue # Try the next client in the list
+                        else:
+                            st.error(f"System Critical Failure: {e}")
+                
+                if not analysis_complete:
+                    st.error("🚨 ALL CORES EXHAUSTED. System requires 60s cooldown or manual reset.")
+
+    # --- ARCHIVE DISPLAY ---
+    if 'last_analysis' in st.session_state:
+        st.info(f"**DATA EXTRACTED:** {st.session_state.last_analysis}")
+        c1, c2 = st.columns(2)
+        c1.metric("REACH", f"{st.session_state.current_subs:,}")
+        c2.progress(min(st.session_state.current_subs / 10000, 1.0), text="Progress to 10k")
 
     # --- DISPLAY ANALYTICS ---
     if 'last_analysis' in st.session_state:
@@ -580,6 +592,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
