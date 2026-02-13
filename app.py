@@ -839,45 +839,48 @@ elif page == "🛰️ Lead Source":
         if st.button("📡 INITIALIZE DEEP SCAN", use_container_width=True):
             with st.spinner("🌑 PENETRATING SOCIAL LAYERS..."):
                 try:
-                    # CHECK FOR LIVE API KEY
                     if "RAPIDAPI_KEY" in st.secrets:
+                        # DEBUG: Let's see what the API actually says
                         url = "https://instagram-scraper-api2.p.rapidapi.com/v1/search_users"
                         headers = {
                             "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
                             "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
                         }
-                        response = requests.get(url, headers=headers, params={"search_query": niche_target})
-                        raw_users = response.json().get('data', {}).get('users', [])
                         
-                        data = []
-                        limit = 5 if scan_depth == "Surface" else 10
-                        for user in raw_users[:limit]:
-                            # Groq Brain analyzes the name for a likely "Gap"
-                            analysis = f"Briefly identify a content gap for {user.get('username')} in {niche_target}."
-                            gap_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": analysis}])
-                            
-                            data.append({
-                                "Handle": f"@{user['username']}",
-                                "Platform": "IG",
-                                "Followers": "LIVE",
-                                "Gap": gap_res.choices[0].message.content[:50] + "...",
-                                "Vigor": random.randint(70, 99),
-                                "Value": "High" if user.get('is_verified') else "Medium"
-                            })
+                        # Use a broader search query
+                        response = requests.get(url, headers=headers, params={"search_query": niche_target})
+                        raw_data = response.json()
+                        
+                        # UNCOMMENT THIS LINE TO SEE THE RAW ERROR IF IT FAILS AGAIN:
+                        # st.write(raw_data) 
+
+                        raw_users = raw_data.get('data', {}).get('users', [])
+                        
+                        if not raw_users:
+                            st.warning(f"No live nodes found for '{niche_target}'. Attempting Simulation Mode...")
+                            # FALLBACK TO MOCK DATA
+                            data = [
+                                {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Vigor": 85, "Value": "High"},
+                                {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Vigor": 94, "Value": "Critical"}
+                            ]
+                        else:
+                            data = []
+                            limit = 5 if scan_depth == "Surface" else 10
+                            for user in raw_users[:limit]:
+                                data.append({
+                                    "Handle": f"@{user['username']}",
+                                    "Platform": "IG",
+                                    "Followers": "LIVE",
+                                    "Gap": f"Detected Growth Gap in {niche_target}",
+                                    "Vigor": random.randint(70, 99),
+                                    "Value": "High" if user.get('is_verified') else "Medium"
+                                })
                     else:
-                        # FALLBACK TO SIMULATION IF NO KEY
-                        time.sleep(1.5)
-                        data = [
-                            {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Vigor": 85, "Value": "High"},
-                            {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Vigor": 94, "Value": "Critical"},
-                            {"Handle": "@PropTech_India", "Platform": "LI", "Followers": "12K", "Gap": "Poor Visual DNA", "Vigor": 62, "Value": "Medium"},
-                            {"Handle": "@WealthVector", "Platform": "TT", "Followers": "250K", "Gap": "High Views / Low Conversion", "Vigor": 98, "Value": "Extreme"}
-                        ]
-                    
+                        st.error("API KEY MISSING IN SECRETS. TOML")
+                        return
+
                     st.session_state.found_leads = pd.DataFrame(data)
                     st.success(f"Scan Complete. {len(data)} Targets Identified.")
-                except Exception as e:
-                    st.error(f"Uplink Error: {e}")
 
     with col_stats:
         if not st.session_state.found_leads.empty:
@@ -999,6 +1002,7 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
+
 
 
 
