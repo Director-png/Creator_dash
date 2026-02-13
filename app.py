@@ -212,7 +212,60 @@ def fetch_live_metrics(platform, handle):
             return st.session_state.current_subs + 5
         except:
             return st.session_state.current_subs
+
+def display_feedback_tab():
+    st.header("📩 Neural Feedback")
+    st.caption("Tell the Director how to calibrate the VOID OS.")
     
+    with st.form("feedback_form", clear_on_submit=True):
+        user_email = st.text_input("Email (Optional)")
+        feedback_type = st.selectbox("Category", ["Bug Report", "Feature Request", "General Praise", "Market Suggestion"])
+        message = st.text_area("Your Message")
+        
+        submit = st.form_submit_button("Transmit to VOID")
+        
+        if submit:
+            if message:
+                # We will write the logic to send this to Google Sheets next
+                st.success("Message received. The VOID is processing your input.")
+            else:
+                st.warning("Please enter a message before transmitting.")
+
+# Put your Web App URL here
+FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbz-jeNRRC1jNKSbVzb_KRkMSGxq931WBFRWMaYDslH81sb2lB9eCPZCF_eOu0sOWhVS/exec"
+
+def display_feedback_tab():
+    st.header("🧠 Neural Feedback Loop")
+    st.write("Is the VOID OS performing to your standards? Submit your logs below.")
+    
+    with st.form("feedback_form", clear_on_submit=True):
+        email = st.text_input("Contact Email (Optional)")
+        category = st.selectbox("Intelligence Type", ["Bug Report", "Feature Request", "Market Suggestion", "General Praise"])
+        message = st.text_area("Detail your transmission...")
+        
+        submitted = st.form_submit_button("TRANSMIT")
+        
+        if submitted:
+            if message:
+                # The Payload
+                payload = {
+                    "email": email,
+                    "category": category,
+                    "message": message
+                }
+                
+                try:
+                    # Sending the data to Google Sheets
+                    response = requests.post(FEEDBACK_API_URL, json=payload)
+                    if response.status_code == 200:
+                        st.success("✅ Transmission Successful. The Director has been notified.")
+                        st.balloons()
+                    else:
+                        st.error("❌ Transmission Interrupted. The VOID is out of reach.")
+                except Exception as e:
+                    st.error(f"Critical System Error: {e}")
+            else:
+                st.warning("Cannot transmit an empty message.")
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -837,6 +890,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
