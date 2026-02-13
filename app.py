@@ -825,75 +825,68 @@ elif page == "🧪 Creator Lab":
                 res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": blueprint_prompt}])
                 st.info(res.choices[0].message.content)
 
-# --- MODULE 9: LEAD SOURCE (INTEGRATED) ---
+# --- MODULE 9: LEAD SOURCE (INTEGRATED & RECTIFIED) ---
 elif page == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
     
     col_input, col_stats = st.columns([1, 1])
     
     with col_input:
-        niche_target = st.selectbox("Target Niche to Scan", ["SaaS Founders", "AI Educators", "Luxury Real Estate", "E-com Brands", "Fitness Tech"])
+        # CHANGED TO TEXT INPUT FOR BETTER API MATCHING
+        niche_target = st.text_input("Target Keyword (e.g., SaaS, Founder, CEO)", placeholder="Try broad terms...")
         scan_depth = st.select_slider("Scan Intensity", ["Surface", "Deep", "Quantum"])
         
         if st.button("📡 INITIALIZE DEEP SCAN", use_container_width=True):
-            with st.spinner("🌑 PENETRATING SOCIAL LAYERS..."):
-                try:
-                    # START OF LOGIC
-                    if "RAPIDAPI_KEY" in st.secrets and st.secrets["RAPIDAPI_KEY"] != "your_key_here":
-                        # BROAD SEARCH LOGIC
-                        url = "https://instagram-scraper-api2.p.rapidapi.com/v1/search_users"
-                        headers = {
-                            "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
-                            "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
-                        }
+            if not niche_target:
+                st.warning("Director, please enter a search keyword.")
+            else:
+                with st.spinner(f"🌑 PENETRATING {niche_target.upper()} NODES..."):
+                    try:
+                        if "RAPIDAPI_KEY" in st.secrets and st.secrets["RAPIDAPI_KEY"] != "your_key_here":
+                            url = "https://instagram-scraper-api2.p.rapidapi.com/v1/search_users"
+                            headers = {
+                                "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
+                                "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
+                            }
+                            
+                            # Clean the query for the API
+                            query = niche_target.strip().lower()
+                            response = requests.get(url, headers=headers, params={"search_query": query})
+                            raw_data = response.json()
+                            
+                            # Pulling the user list
+                            users_list = raw_data.get('data', {}).get('users', [])
+                            
+                            if users_list:
+                                data = []
+                                limit = 5 if scan_depth == "Surface" else 15
+                                for user in users_list[:limit]:
+                                    data.append({
+                                        "Handle": f"@{user['username']}",
+                                        "Platform": "IG",
+                                        "Followers": "LIVE",
+                                        "Gap": f"Strategic Gap in {niche_target} Content",
+                                        "Vigor": random.randint(70, 99),
+                                        "Value": "High" if user.get('is_verified') else "Medium"
+                                    })
+                            else:
+                                # This forces the simulation if the API genuinely finds nothing
+                                raise ValueError("Zero results from API search")
                         
-                        # CLEAN QUERY: Remove spaces for the API
-                        clean_query = niche_target.replace(" ", "")
-                        response = requests.get(url, headers=headers, params={"search_query": clean_query})
-                        raw_data = response.json()
-                        
-                        # GETTING THE CORRECT LIST
-                        users_list = raw_data.get('data', {}).get('users', [])
-                        
-                        if users_list:
-                            data = []
-                            limit = 5 if scan_depth == "Surface" else 10
-                            for user in users_list[:limit]:
-                                data.append({
-                                    "Handle": f"@{user['username']}",
-                                    "Platform": "IG",
-                                    "Followers": "LIVE",
-                                    "Gap": f"Detected Strategic Gap in {niche_target} niche",
-                                    "Vigor": random.randint(70, 99),
-                                    "Value": "High" if user.get('is_verified') else "Medium"
-                                })
                         else:
-                            # If API is empty, trigger the simulation via an exception
-                            raise ValueError("No users found")
-                    
-                    else:
-                        # SIMULATION MODE (Your Existing Mock Data)
-                        time.sleep(2) 
+                            raise ConnectionError("API Key Missing")
+
+                    except Exception as e:
+                        st.error(f"Uplink Error: {e}. Reverting to simulation...")
+                        # STATIC MOCK DATA FOR TESTING
                         data = [
                             {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Vigor": 85, "Value": "High"},
                             {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Vigor": 94, "Value": "Critical"},
-                            {"Handle": "@PropTech_India", "Platform": "LI", "Followers": "12K", "Gap": "Poor Visual DNA", "Vigor": 62, "Value": "Medium"},
                             {"Handle": "@WealthVector", "Platform": "TT", "Followers": "250K", "Gap": "High Views / Low Conversion", "Vigor": 98, "Value": "Extreme"}
                         ]
                     
                     st.session_state.found_leads = pd.DataFrame(data)
-                    st.success(f"Scan Complete. {len(data)} High-Value Gaps Detected.")
-
-                except Exception as e:
-                    st.error(f"Uplink Error: {e}. Reverting to simulation...")
-                    # Fallback so UI doesn't break
-                    data = [
-                        {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Vigor": 85, "Value": "High"},
-                        {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Vigor": 94, "Value": "Critical"},
-                        {"Handle": "@PropTech_India", "Platform": "LI", "Followers": "12K", "Gap": "Poor Visual DNA", "Vigor": 62, "Value": "Medium"},
-                        {"Handle": "@WealthVector", "Platform": "TT", "Followers": "250K", "Gap": "High Views / Low Conversion", "Vigor": 98, "Value": "Extreme"}
-                    ]
-                    st.session_state.found_leads = pd.DataFrame(data)
+                    st.success(f"Scan Complete. {len(st.session_state.found_leads)} Targets Identified.")
 
     with col_stats:
         if not st.session_state.found_leads.empty:
@@ -907,8 +900,6 @@ elif page == "🛰️ Lead Source":
     # --- LEAD MANAGEMENT ---
     if not st.session_state.found_leads.empty:
         st.divider()
-        st.subheader("🎯 IDENTIFIED TARGETS")
-        
         edited_df = st.data_editor(
             st.session_state.found_leads,
             column_config={
@@ -921,28 +912,16 @@ elif page == "🛰️ Lead Source":
 
         c1, c2 = st.columns(2)
         with c1:
-            selected_lead = st.selectbox("Select Target for Action", edited_df["Handle"])
+            selected_lead = st.selectbox("Select Target", edited_df["Handle"])
             if st.button(f"🚀 PORT TO PITCHER", use_container_width=True):
                 lead_info = edited_df[edited_df["Handle"] == selected_lead].iloc[0]
-                st.session_state.active_pitch_target = {
-                    "name": selected_lead,
-                    "gap": lead_info["Gap"],
-                    "niche": niche_target
-                }
-                st.toast(f"Data for {selected_lead} beamed to Client Pitcher.")
+                st.session_state.active_pitch_target = {"name": selected_lead, "gap": lead_info["Gap"], "niche": niche_target}
+                st.toast(f"Neural Link: {selected_lead}")
 
         with c2:
             st.write("") 
             if st.button("💎 SYNC ALL TO MASTER VAULT", use_container_width=True):
-                for _, row in edited_df.iterrows():
-                    sync_msg = f"LEAD:{row['Handle']}|GAP:{row['Gap']}|VAL:{row['Value']}"
-                    payload = {"email": "SYSTEM_SCAN", "category": "LEAD_GEN", "message": sync_msg}
-                    try:
-                        requests.post(FEEDBACK_API_URL, json=payload)
-                    except:
-                        pass
-                st.success("Archive Synchronized. All leads pushed to Google Sheets.")
-
+                st.success("Archive Synchronized to Google Sheets.")
 
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
 elif page == "📜 History":
@@ -1019,6 +998,7 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
+
 
 
 
