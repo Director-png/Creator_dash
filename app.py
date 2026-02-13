@@ -866,9 +866,7 @@ elif page == "🛰️ Lead Source":
                                     "Vigor": random.randint(70, 99),
                                     "Value": "High" if user.get('is_verified') else "Medium"
                                 })
-                        else:
-                            # If users_list is still empty, throw the error to trigger simulation
-                            raise ValueError("No users found for this keyword")
+        
                     
                     else:
                         # SIMULATION MODE (Your Existing Mock Data)
@@ -1013,6 +1011,7 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
+
 
 
 
