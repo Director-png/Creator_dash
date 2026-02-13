@@ -198,80 +198,6 @@ def fetch_live_metrics(platform, handle):
             return st.session_state.current_subs + 5
         except:
             return st.session_state.current_subs
-
-# --- UTILITY: AI STUDIO VISION ENGINE ---
-# 1. At the TOP of your script (Global Space)
-# --- GLOBAL SETUP ---
-# Line 242
-# Line 243
-# --- GLOBAL AI INITIALIZATION ---
-if "GEMINI_API_KEY" in st.secrets:
-    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-else:
-    client = None
-
-# GROQ HANDSHAKE: This fixes the 401 error
-if "GROQ_API_KEY" in st.secrets:
-    try:
-        groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-    except Exception:
-        groq_c = None
-else:
-    groq_c = None
-# This prevents the chart from being empty when you first open the app
-if 'chart_data' not in st.session_state:
-    st.session_state.chart_data = {"labels": ["Current", "Target"], "values": [0, 10000]}
-
-def analyze_analytics_screenshot(uploaded_file):
-    global client
-    if client is None:
-        return "🚨 ERROR: System Offline."
-
-    try:
-        img = Image.open(uploaded_file)
-        
-        # TRY THIS MODEL: gemini-2.5-flash-lite (Highest Free Tier Quota in 2026)
-        response = client.models.generate_content(
-            model="gemini-2.5-flash-lite", 
-            contents=["Analyze stats from this image: Subs and Views.", img]
-        )
-        return response.text
-        
-    except Exception as e:
-        # If still 429, we'll give the Director a clear countdown
-        if "429" in str(e):
-            return "🌑 VOID CONGESTION: Google has set your quota to 0. Please wait 24hrs for account activation or use a different Google Account."
-        return f"Uplink Error: {e}"
-# 1. Initialize the storage at the top of your app
-if 'chart_data' not in st.session_state:
-    st.session_state.chart_data = {"labels": ["Target"], "values": [0]}
-
-# 2. Inside your "Execute Vision Scan" button logic:
-if st.button("🛰️ EXECUTE VISION SCAN"):
-    with st.spinner("🌑 SCANNING..."):
-        analysis_result = analyze_analytics_screenshot(uploaded_file)
-        
-        # --- THE DATA BRIDGE ---
-        # Let's say Gemini returns "SUBS: 1200"
-        # we extract the number and save it to the chart
-# --- THE RIGHT WAY (Fixed Structure) ---
-try:
-    # 1. Run the AI Scan
-    analysis_result = analyze_analytics_screenshot(uploaded_img)
-    st.session_state.analysis_output = analysis_result
-    
-    # 2. Extract numbers for the chart
-    numbers = re.findall(r'\d+', analysis_result.replace(',', ''))
-    if numbers:
-        st.session_state.chart_data["values"][0] = int(numbers[0])
-
-# 3. THIS IS THE MISSING PIECE (The Plan B)
-except Exception as e:
-    st.error(f"Oracle Connection Interrupted: {e}")
-
-
-    # 1. First, create the uploader and name the variable correctly
-uploaded_img = st.file_uploader("📤 UPLOAD ANALYTICS SCREENSHOT", type=['png', 'jpg', 'jpeg'])
     
 
 # --- 1. CONFIG ---
@@ -551,6 +477,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
