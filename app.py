@@ -711,89 +711,54 @@ elif page == "💎 Script Architect":
         with c2:
             st.info("Awaiting Tactical Input. Architectural blueprints will manifest here.")
 
-# --- MODULE 7: CLIENT PITCHER (OPTIMIZED) ---
-# --- MODULE 7: CLIENT PITCHER (FULL INTEGRATED VERSION) ---
+# --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH ENGINE</h1>", unsafe_allow_html=True)
     
-    # 🧬 1. NEURAL BRIDGE: Check for data beamed from Lead Source
+    # 🧬 NEURAL BRIDGE: Extract data from session state
     active_target = st.session_state.get('active_pitch_target', {})
     
-    # Logic to handle auto-fill
     default_name = active_target.get('name', "")
     default_niche = active_target.get('niche', "Personal Brand")
     gap_detected = active_target.get('gap', "")
     
-    # Customizing the starting point based on the 'Gap' detected
-    if gap_detected:
-        default_offer = f"I noticed your content is performing well, but there is a clear gap in {gap_detected}. I've architected a solution to bridge this."
-    else:
-        default_offer = ""
+    # Auto-craft the initial offer based on the "Gap"
+    default_offer = f"I noticed a gap in your {gap_detected}. I've architected a solution to bridge this." if gap_detected else ""
 
-    # --- UI LAYOUT ---
     c1, c2 = st.columns([1, 1.5], gap="large")
     
     with c1:
         st.subheader("🎯 TARGET ACQUISITION")
-        client_name = st.text_input("Lead / Brand Name", value=default_name, placeholder="Who are we targeting?")
-        niche_cat = st.selectbox("Industry/Niche", ["Personal Brand", "SaaS Founders", "Fashion", "E-com", "Real Estate"], index=0)
-        
-        offer_details = st.text_area("The 'Gap' or Value Proposition", value=default_offer, height=150, help="What specific problem are you fixing for them?")
+        client_name = st.text_input("Lead / Brand Name", value=default_name)
+        niche_cat = st.selectbox("Industry", ["Personal Brand", "SaaS Founders", "Fashion", "E-com", "Real Estate"], index=0)
+        offer_details = st.text_area("The 'Gap' / Value Prop", value=default_offer, height=150)
         
         if st.button("🔥 GENERATE ELITE TRANSMISSION", use_container_width=True):
-            if not groq_c:
-                st.error("🚨 GROQ ENGINE OFFLINE: Check API Keys.")
-            elif not client_name or not offer_details:
-                st.warning("Director, target name and offer details are required for a lock-on.")
-            else:
+            if groq_c and client_name and offer_details:
                 with st.spinner("🌑 CALCULATING PSYCHOLOGICAL HOOKS..."):
-                    try:
-                        # Elite Sales Prompt
-                        prompt = f"""
-                        System: You are a high-ticket sales closer for VOID OS.
-                        Target: {client_name} in the {niche_cat} niche.
-                        The Problem: {offer_details}.
-                        Task: Write a cold outreach DM that is minimalist, high-authority, and focuses purely on the ROI. 
-                        Do not use emojis or 'hope you are well' fluff. Start with the observation of the gap.
-                        """
-                        
-                        res = groq_c.chat.completions.create(
-                            model="llama-3.3-70b-versatile", 
-                            messages=[{"role": "user", "content": prompt}]
-                        )
-                        st.session_state.current_pitch = res.choices[0].message.content
-                        
-                        # Save to history for the Vault
-                        st.session_state.pitch_history.append({
-                            "client": client_name,
-                            "pitch": st.session_state.current_pitch,
-                            "timestamp": time.strftime("%H:%M")
-                        })
-                    except Exception as e:
-                        st.error(f"Transmission Failed: {e}")
+                    prompt = f"System: High-ticket closer. Target: {client_name} ({niche_cat}). Problem: {offer_details}. Write a minimalist ROI-focused cold DM. No emojis. No fluff."
+                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                    st.session_state.current_pitch = res.choices[0].message.content
+                    st.session_state.pitch_history.append({"client": client_name, "pitch": st.session_state.current_pitch, "timestamp": time.strftime("%H:%M")})
+            else:
+                st.error("System Error: Missing Inputs or API Offline.")
 
-    # 📡 2. THE DISPLAY & ACTION HUB
     with c2:
         if 'current_pitch' in st.session_state:
             st.subheader("📡 ENCRYPTED TRANSMISSION")
-            # Using a code block makes it one-click copyable in some browsers
             st.code(st.session_state.current_pitch, language="markdown")
             
-            st.divider()
-            
-            # Action Buttons
             col_a, col_b = st.columns(2)
             with col_a:
-                if st.button("📋 PITCH SENT"):
-                    st.toast(f"Transmission logged for {client_name}")
+                if st.button("📋 PITCH SENT"): st.toast(f"Transmission logged.")
             with col_b:
-                # This resets the bridge so the next pitch starts fresh
                 if st.button("🔄 CLEAR TARGET"):
                     st.session_state.pop('active_pitch_target', None)
                     st.session_state.pop('current_pitch', None)
                     st.rerun()
         else:
-            st.info("Awaiting Target Data. Use the 'Lead Source' module to beam a target here or enter details manually.")
+            st.info("Awaiting Target Data. Use 'Lead Source' to beam a target or enter details.")
+
 
 # --- MODULE 8: CREATOR LAB & LEAD SOURCE ---
 elif page == "🧪 Creator Lab":
@@ -1009,5 +974,6 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
+
 
 
