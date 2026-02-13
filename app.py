@@ -20,6 +20,21 @@ else:
     # If it's STILL missing, we create a visible warning for the Director
     st.sidebar.error("⚠️ DATA LINK BROKEN: Secrets not syncing.")
 
+# --- 🛰️ SECURE AI UPLINK ---
+# This ensures the key is loaded ONCE at startup
+if "GROQ_API_KEY" in st.secrets:
+    try:
+        # Check if key is actually a string and not empty
+        key = st.secrets["GROQ_API_KEY"].strip()
+        groq_c = Groq(api_key=key)
+    except Exception as e:
+        st.sidebar.error(f"📡 UPLINK CRITICAL FAILURE: {e}")
+        groq_c = None
+else:
+    st.sidebar.warning("⚠️ PROXY OFFLINE: GROQ_API_KEY missing in Secrets.")
+    groq_c = None
+
+
 # --- INITIALIZE ALL KEYS ---
 if 'current_subs' not in st.session_state:
     st.session_state.current_subs = 0  # Or your starting number
@@ -576,6 +591,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
