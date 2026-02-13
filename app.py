@@ -283,7 +283,7 @@ with st.sidebar:
     if st.button("LOGOUT"): st.session_state.logged_in = False; st.rerun()
 
 # --- MODULE 1: DASHBOARD ---
-elif nav == "🏠 Dashboard":
+if nav == "🏠 Dashboard":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ COMMAND CENTER</h1>", unsafe_allow_html=True)
     
     # KPI Row
@@ -659,6 +659,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
