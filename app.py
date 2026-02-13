@@ -13,6 +13,11 @@ import os
 import re 
 import io
 
+
+# --- INITIALIZE STATE (Place this near the top of your script) ---
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "🏠 Dashboard"
+
 # --- 🛰️ SECURE AI UPLINK ---
 # 1. INITIALIZE GLOBAL CLIENTS (ONCE)
 if "GEMINI_API_KEY" in st.secrets:
@@ -339,53 +344,33 @@ if not st.session_state.logged_in:
 
 # --- SIDEBAR NAVIGATION ---
 with st.sidebar:
-    # 1. User Profile Header
     st.markdown(f"<h3 style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</h3>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #444; font-size: 10px;'>ENCRYPTED CONNECTION : ACTIVE</p>", unsafe_allow_html=True)
     
-    # 2. Main Command Center Navigation
     if st.session_state.user_role == "admin":
         options = ["🏠 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
     else:
         options = ["📡 My Growth Hub", "💎 Assigned Scripts", "🌐 Global Pulse"]
     
-    # We store the radio selection in a variable
-    nav = st.radio("COMMAND CENTER", options, key="void_nav_main")
+    # --- IMPORTANT CHANGE ---
+    # We remove the 'key' argument from st.radio and update st.session_state manually
+    choice = st.radio("COMMAND CENTER", options, index=options.index(st.session_state.current_page) if st.session_state.current_page in options else 0)
+    
+    # Sync the selection to our state
+    if choice != st.session_state.current_page and st.session_state.current_page != "FEEDBACK":
+        st.session_state.current_page = choice
 
-    # 3. Dynamic Spacer (Pushes the following items to the bottom)
-    # Increase or decrease the range depending on how many options you have
-    for _ in range(10): 
-        st.sidebar.write("")
-
+    for _ in range(10): st.sidebar.write("")
     st.divider()
 
-    # 4. The New Feedback Feature
-    # Clicking this will override the 'nav' variable logic
+    # Feedback Button sets a custom state
     if st.button("📩 NEURAL FEEDBACK", use_container_width=True):
-        st.session_state.void_nav_main = "FEEDBACK_PAGE" # Hidden state trigger
+        st.session_state.current_page = "FEEDBACK"
         st.rerun()
 
-    # 5. Logout Button
     if st.button("🔒 LOGOUT", use_container_width=True):
         st.session_state.logged_in = False
         st.rerun()
-
-# --- PAGE ROUTING LOGIC ---
-# This part goes in your main app body (outside the sidebar block)
-
-if st.session_state.get('void_nav_main') == "FEEDBACK_PAGE":
-    display_feedback_tab() # Call the feedback function we built
-    # Add a 'Back' button if they want to exit feedback
-    if st.button("← Back to Command Center"):
-        st.session_state.void_nav_main = options[0]
-        st.rerun()
-else:
-    # Your standard navigation logic
-    if nav == "🏠 Dashboard":
-        display_dashboard()
-    elif nav == "🌐 Global Pulse":
-        display_global_pulse()
-    # ... add the rest of your elif statements for other options here
 
 
 # --- MODULE 1: DASHBOARD ---
@@ -929,6 +914,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
