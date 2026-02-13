@@ -275,7 +275,7 @@ with st.sidebar:
     st.markdown(f"<h3 style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</h3>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #444; font-size: 10px;'>ENCRYPTED CONNECTION : ACTIVE</p>", unsafe_allow_html=True)
     if st.session_state.user_role == "admin":
-        options = ["📊 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "🧬 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
+          options = ["🏠 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
     else:
         options = ["📡 My Growth Hub", "💎 Assigned Scripts", "🌐 Global Pulse"]
     nav = st.radio("COMMAND CENTER", options, key="void_nav_main")
@@ -306,7 +306,8 @@ if nav == "🏠 Dashboard":
     with c2:
         st.subheader("🛡️ SYSTEM INTEGRITY")
         st.code(f"AI Core: {active_core if 'active_core' in locals() else 'STANDBY'}\nHandshake: STABLE\nLaunch: T-Minus 48h")
-
+        core_display = active_core if 'active_core' in globals() else "STANDBY"
+        st.code(f"AI Core: {core_display}\nHandshake: STABLE\nLaunch: T-Minus 48h")
 
 # --- MODULE 8: GROWTH HUB (HARDENED VERSION) ---
 elif nav == "📡 My Growth Hub":
@@ -659,6 +660,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
