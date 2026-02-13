@@ -590,74 +590,34 @@ elif nav == "🛰️ Lead Source":
     if not st.session_state.found_leads.empty:
         st.table(st.session_state.found_leads)
 
-# --- MODULE 9: HISTORY ---
+# --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
 elif nav == "📜 History":
-    st.title("📜 ARCHIVES")
-    st.write("Director's Session History")
-    for s in reversed(st.session_state.script_history):
-        with st.expander(f"{s['assigned_to']} | {s['topic']}"):
-            st.write(s['script'])
+    st.markdown("<h1 style='color: #00ff41;'>📜 ARCHIVE VAULT</h1>", unsafe_allow_html=True)
+    
+    if not st.session_state.script_history and not st.session_state.pitch_history:
+        st.info("Vault is empty. Generate scripts in the Architect or Pitcher modules.")
+    else:
+        t1, t2 = st.tabs(["💎 SCRIPT ARCHIVE", "💼 PITCH LOGS"])
+        
+        with t1:
+            for i, s in enumerate(reversed(st.session_state.script_history)):
+                with st.expander(f"📜 {s['platform']} | {s['topic'].upper()}"):
+                    col_a, col_b = st.columns([3, 1])
+                    with col_a:
+                        st.markdown(s['script'])
+                    with col_b:
+                        st.caption(f"Target: {s['assigned_to']}")
+                        if st.button("✅ MARK AS FILMED", key=f"film_{i}"):
+                            st.toast("Updated in Global Vault")
+                        st.download_button("📥 DOWNLOAD TXT", s['script'], file_name=f"script_{i}.txt")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        with t2:
+            for i, p in enumerate(reversed(st.session_state.pitch_history)):
+                with st.container():
+                    st.markdown(f"### 🎯 Target: {p['client']}")
+                    st.info(p['pitch'])
+                    st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
+                    st.divider()
 
 
 
