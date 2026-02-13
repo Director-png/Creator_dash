@@ -290,44 +290,74 @@ elif nav == "📡 My Growth Hub":
         
         if st.button("🛰️ ANALYZE & SYNC"):
             if uploaded_img and client:
-                with st.spinner("🌑 SCANNING..."):
-                    try:
-                        img = Image.open(uploaded_img)
-                        response = client.models.generate_content(
-                            model="gemini-2.0-flash", 
-                            contents=["Extract the total subscriber count as a single number.", img]
-                        )
-                        result = response.text
-                        st.session_state.last_analysis = result
-                        nums = re.findall(r'\d+', result.replace(',', ''))
-                        if nums:
-                            st.session_state.current_subs = int(nums[0])
-                    except Exception as e:
-                        st.error(f"Scan Failed: {e}")
+                with st.spinner("🌑 SCANNING... (Avoiding Rate Limits)"):
+                    # --- RATE LIMIT PROTECTION LOGIC ---
+                    success = False
+                    retries = 3
+                    for i in range(retries):
+                        try:
+                            img = Image.open(uploaded_img)
+                            response = client.models.generate_content(
+                                model="gemini-2.0-flash", 
+                                contents=["Extract total subscriber count as a number only.", img]
+                            )
+                            result = response.text
+                            st.session_state.last_analysis = result
+                            
+                            # Clean the numeric data
+                            nums = re.findall(r'\d+', result.replace(',', ''))
+                            if nums:
+                                st.session_state.current_subs = int(nums[0])
+                            
+                            success = True
+                            break # Exit the loop if successful
+                            
+                        except Exception as e:
+                            if "429" in str(e):
+                                wait_time = (i + 1) * 10  # Wait 10s, then 20s
+                                st.warning(f"⚠️ Rate Limit Hit. Cooling down nodes... Retrying in {wait_time}s")
+                                time.sleep(wait_time)
+                            else:
+                                st.error(f"Scan Failed: {e}")
+                                break
+                    
+                    if not success:
+                        st.error("🌑 VOID OFFLINE: Google Quota Exhausted. Try again in 60 seconds.")
 
+    # --- DISPLAY ANALYTICS ---
     if 'last_analysis' in st.session_state:
         st.info(f"**ORACLE FEEDBACK:** {st.session_state.last_analysis}")
         
         g_col1, g_col2 = st.columns([1, 2])
         with g_col1:
-            st.metric("CURRENT REACH", f"{st.session_state.current_subs}")
+            st.metric("CURRENT REACH", f"{st.session_state.current_subs:,}")
+            # Progress bar towards a 10k goal
             st.progress(min(st.session_state.current_subs / 10000, 1.0))
         
         with g_col2:
-            # THIS IS THE CHART FIX
+            # Visualization of Growth
             chart_df = pd.DataFrame({
                 'Timeline': ['Wk 1', 'Wk 2', 'Wk 3', 'Wk 4', 'LIVE'],
-                'Reach': [int(st.session_state.current_subs*0.8), int(st.session_state.current_subs*0.85), 
-                          int(st.session_state.current_subs*0.9), int(st.session_state.current_subs*0.95), 
-                          st.session_state.current_subs]
+                'Reach': [
+                    int(st.session_state.current_subs*0.8), 
+                    int(st.session_state.current_subs*0.85), 
+                    int(st.session_state.current_subs*0.9), 
+                    int(st.session_state.current_subs*0.95), 
+                    st.session_state.current_subs
+                ]
             })
             st.line_chart(chart_df, x='Timeline', y='Reach')
+
     st.divider()
-    if st.button("🔮 ANALYZE PERSONALIZED ORACLE REPORT"):
-        with st.spinner("🌑 ORACLE IS CONSULTING THE VOID..."):
-            context = f"Creator at {st.session_state.current_subs} followers."
-            report = generate_oracle_report(context, "Cross-Platform", "Elite")
-            st.info(report)
+    if st.button("🔮 GENERATE ORACLE REPORT"):
+        # This uses Groq (Llama), which has a separate quota!
+        if groq_c:
+            with st.spinner("🌑 ORACLE IS CONSULTING THE VOID..."):
+                context = f"Creator at {st.session_state.current_subs} followers."
+                report = generate_oracle_report(context, "Cross-Platform", "Elite")
+                st.info(report)
+        else:
+            st.error("Groq key missing. Cannot generate report.")
 
 
 elif nav == "💎 Assigned Scripts":
@@ -550,6 +580,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
