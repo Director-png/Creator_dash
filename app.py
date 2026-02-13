@@ -544,58 +544,88 @@ elif nav == "💎 Script Architect":
             st.info("Awaiting Tactical Input. Architectural blueprints will manifest here.")
 
 # --- MODULE 7: CLIENT PITCHER (OPTIMIZED) ---
+# --- MODULE 7: CLIENT PITCHER (FULL INTEGRATED VERSION) ---
 elif nav == "💼 Client Pitcher":
-    st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH ENGINE</h1>", unsafe_allow_html=True)
     
+    # 🧬 1. NEURAL BRIDGE: Check for data beamed from Lead Source
+    active_target = st.session_state.get('active_pitch_target', {})
+    
+    # Logic to handle auto-fill
+    default_name = active_target.get('name', "")
+    default_niche = active_target.get('niche', "Personal Brand")
+    gap_detected = active_target.get('gap', "")
+    
+    # Customizing the starting point based on the 'Gap' detected
+    if gap_detected:
+        default_offer = f"I noticed your content is performing well, but there is a clear gap in {gap_detected}. I've architected a solution to bridge this."
+    else:
+        default_offer = ""
+
+    # --- UI LAYOUT ---
     c1, c2 = st.columns([1, 1.5], gap="large")
     
     with c1:
-        client_name = st.text_input("Lead / Brand Name", placeholder="Enter Target Name")
-        niche_cat = st.selectbox("Category", ["Personal Brand", "SaaS Founders", "Fashion", "Local Business", "E-com"])
-        offer_details = st.text_area("Value Proposition", placeholder="What ROI are you bringing to the table?")
+        st.subheader("🎯 TARGET ACQUISITION")
+        client_name = st.text_input("Lead / Brand Name", value=default_name, placeholder="Who are we targeting?")
+        niche_cat = st.selectbox("Industry/Niche", ["Personal Brand", "SaaS Founders", "Fashion", "E-com", "Real Estate"], index=0)
         
-        if st.button("🔥 Generate VOID Pitch", use_container_width=True):
+        offer_details = st.text_area("The 'Gap' or Value Proposition", value=default_offer, height=150, help="What specific problem are you fixing for them?")
+        
+        if st.button("🔥 GENERATE ELITE TRANSMISSION", use_container_width=True):
             if not groq_c:
-                st.error("🚨 SYSTEM OFFLINE: Groq API Key missing.")
+                st.error("🚨 GROQ ENGINE OFFLINE: Check API Keys.")
             elif not client_name or not offer_details:
-                st.warning("Director, identify the target and the offer details first.")
+                st.warning("Director, target name and offer details are required for a lock-on.")
             else:
-                with st.spinner("🌑 ANALYZING LEAD..."):
+                with st.spinner("🌑 CALCULATING PSYCHOLOGICAL HOOKS..."):
                     try:
                         # Elite Sales Prompt
-                        prompt = (
-                            f"Write an elite 'Black-Label' cold outreach message for {client_name} in the {niche_cat} niche. "
-                            f"The offer is: {offer_details}. Style: Minimalist, authoritative, results-driven."
-                        )
+                        prompt = f"""
+                        System: You are a high-ticket sales closer for VOID OS.
+                        Target: {client_name} in the {niche_cat} niche.
+                        The Problem: {offer_details}.
+                        Task: Write a cold outreach DM that is minimalist, high-authority, and focuses purely on the ROI. 
+                        Do not use emojis or 'hope you are well' fluff. Start with the observation of the gap.
+                        """
                         
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "user", "content": prompt}]
                         )
-                        pitch_res = res.choices[0].message.content
+                        st.session_state.current_pitch = res.choices[0].message.content
                         
-                        # Save to history
+                        # Save to history for the Vault
                         st.session_state.pitch_history.append({
                             "client": client_name,
-                            "pitch": pitch_res,
+                            "pitch": st.session_state.current_pitch,
                             "timestamp": time.strftime("%H:%M")
                         })
-                        
-                        with c2:
-                            st.subheader("📡 ELITE TRANSMISSION")
-                            typewriter_effect(pitch_res)
-                            st.divider()
-                            if st.button("📋 MARK AS SENT"):
-                                st.toast(f"Pitch recorded for {client_name}")
-                                
-                    except Exception as e: 
-                        st.error(f"Pitch Transmission Failed: {e}")
+                    except Exception as e:
+                        st.error(f"Transmission Failed: {e}")
 
-    # Column 2 Empty State
-    if 'pitch_res' not in locals() and not st.session_state.pitch_history:
-        with c2:
-            st.info("Identify a high-value lead to generate an elite transmission.")
-
+    # 📡 2. THE DISPLAY & ACTION HUB
+    with c2:
+        if 'current_pitch' in st.session_state:
+            st.subheader("📡 ENCRYPTED TRANSMISSION")
+            # Using a code block makes it one-click copyable in some browsers
+            st.code(st.session_state.current_pitch, language="markdown")
+            
+            st.divider()
+            
+            # Action Buttons
+            col_a, col_b = st.columns(2)
+            with col_a:
+                if st.button("📋 PITCH SENT"):
+                    st.toast(f"Transmission logged for {client_name}")
+            with col_b:
+                # This resets the bridge so the next pitch starts fresh
+                if st.button("🔄 CLEAR TARGET"):
+                    st.session_state.pop('active_pitch_target', None)
+                    st.session_state.pop('current_pitch', None)
+                    st.rerun()
+        else:
+            st.info("Awaiting Target Data. Use the 'Lead Source' module to beam a target here or enter details manually.")
 
 # --- MODULE 8: CREATOR LAB & LEAD SOURCE ---
 elif nav == "🧪 Creator Lab":
@@ -745,6 +775,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
