@@ -837,7 +837,9 @@ elif page == "🛰️ Lead Source":
         
         if st.button("📡 INITIALIZE DEEP SCAN", use_container_width=True):
             with st.spinner("🌑 PENETRATING SOCIAL LAYERS..."):
-                if "RAPIDAPI_KEY" in st.secrets and st.secrets["RAPIDAPI_KEY"] != "your_key_here":
+                try:
+                    # START OF LOGIC
+                    if "RAPIDAPI_KEY" in st.secrets and st.secrets["RAPIDAPI_KEY"] != "your_key_here":
                         # BROAD SEARCH LOGIC
                         url = "https://instagram-scraper-api2.p.rapidapi.com/v1/search_users"
                         headers = {
@@ -850,8 +852,7 @@ elif page == "🛰️ Lead Source":
                         response = requests.get(url, headers=headers, params={"search_query": clean_query})
                         raw_data = response.json()
                         
-                        # GETTING THE CORRECT LIST: Some APIs return 'data' as a list, others as a dict
-                        # We use .get() to avoid crashes
+                        # GETTING THE CORRECT LIST
                         users_list = raw_data.get('data', {}).get('users', [])
                         
                         if users_list:
@@ -866,7 +867,9 @@ elif page == "🛰️ Lead Source":
                                     "Vigor": random.randint(70, 99),
                                     "Value": "High" if user.get('is_verified') else "Medium"
                                 })
-        
+                        else:
+                            # If API is empty, trigger the simulation via an exception
+                            raise ValueError("No users found")
                     
                     else:
                         # SIMULATION MODE (Your Existing Mock Data)
@@ -884,7 +887,12 @@ elif page == "🛰️ Lead Source":
                 except Exception as e:
                     st.error(f"Uplink Error: {e}. Reverting to simulation...")
                     # Fallback so UI doesn't break
-                    data = [{"Handle": "@Fallback_Lead", "Platform": "IG", "Followers": "N/A", "Gap": "Connection Glitch", "Vigor": 50, "Value": "Medium"}]
+                    data = [
+                        {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Vigor": 85, "Value": "High"},
+                        {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Vigor": 94, "Value": "Critical"},
+                        {"Handle": "@PropTech_India", "Platform": "LI", "Followers": "12K", "Gap": "Poor Visual DNA", "Vigor": 62, "Value": "Medium"},
+                        {"Handle": "@WealthVector", "Platform": "TT", "Followers": "250K", "Gap": "High Views / Low Conversion", "Vigor": 98, "Value": "Extreme"}
+                    ]
                     st.session_state.found_leads = pd.DataFrame(data)
 
     with col_stats:
@@ -1011,6 +1019,7 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
+
 
 
 
