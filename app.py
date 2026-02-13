@@ -361,7 +361,7 @@ if page == "FEEDBACK":
         st.rerun()
 
 # --- MODULE 1: DASHBOARD ---
-elif nav == "🏠 Dashboard":
+elif page == "🏠 Dashboard":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ COMMAND CENTER</h1>", unsafe_allow_html=True)
     
     # KPI Row
@@ -388,7 +388,7 @@ elif nav == "🏠 Dashboard":
         st.code(f"AI Core: {core_display}\nHandshake: STABLE\nLaunch: T-Minus 48h")
 
 # --- MODULE 8: GROWTH HUB (HARDENED VERSION) ---
-elif nav == "📡 My Growth Hub":
+elif page == "📡 My Growth Hub":
     st.markdown("<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
     
     # 🧬 INTERNAL UTILITY: Image Compressor to save Tokens/Quota
@@ -481,7 +481,7 @@ elif nav == "📡 My Growth Hub":
                 st.info(res.choices[0].message.content)
                 
 # --- MODULE 10: CLIENT ASSIGNED SCRIPTS ---
-elif nav == "💎 Assigned Scripts":
+elif page == "💎 Assigned Scripts":
     st.markdown(f"<h1 style='color: #00ff41;'>💎 {st.session_state.user_name.upper()}'S VAULT</h1>", unsafe_allow_html=True)
     
     try:
@@ -526,7 +526,7 @@ elif nav == "💎 Assigned Scripts":
 
 
 # --- MODULE 4: GLOBAL PULSE ---
-elif nav == "🌐 Global Pulse":
+elif page == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     pulse_df = load_market_pulse_data(MARKET_PULSE_URL)
     if not pulse_df.empty:
@@ -579,7 +579,7 @@ elif nav == "🌐 Global Pulse":
 
 
 # --- MODULE 5: TREND DUEL ---
-elif nav == "⚔️ Trend Duel":
+elif page == "⚔️ Trend Duel":
     st.title("⚔️ TREND DUEL")
     pulse_df = load_market_pulse_data()
     if not pulse_df.empty:
@@ -596,7 +596,7 @@ elif nav == "⚔️ Trend Duel":
             st.plotly_chart(fig, use_container_width=True)
 
 # --- MODULE 6: SCRIPT ARCHITECT (OPTIMIZED) ---
-elif nav == "💎 Script Architect":
+elif page == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
     
     # Load users for assignment
@@ -671,7 +671,7 @@ elif nav == "💎 Script Architect":
 
 # --- MODULE 7: CLIENT PITCHER (OPTIMIZED) ---
 # --- MODULE 7: CLIENT PITCHER (FULL INTEGRATED VERSION) ---
-elif nav == "💼 Client Pitcher":
+elif page == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH ENGINE</h1>", unsafe_allow_html=True)
     
     # 🧬 1. NEURAL BRIDGE: Check for data beamed from Lead Source
@@ -754,7 +754,7 @@ elif nav == "💼 Client Pitcher":
             st.info("Awaiting Target Data. Use the 'Lead Source' module to beam a target here or enter details manually.")
 
 # --- MODULE 8: CREATOR LAB & LEAD SOURCE ---
-elif nav == "🧪 Creator Lab":
+elif page == "🧪 Creator Lab":
     st.markdown("<h1 style='color: #00d4ff;'>🧪 ROI ENGINE v2.0</h1>", unsafe_allow_html=True)
     
     # --- 🛰️ NICHE CPM DATABASE ---
@@ -818,7 +818,7 @@ elif nav == "🧪 Creator Lab":
                 res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": blueprint_prompt}])
                 st.info(res.choices[0].message.content)
 
-elif nav == "🛰️ Lead Source":
+elif page == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
     
     col_input, col_stats = st.columns([1, 1])
@@ -874,7 +874,7 @@ elif nav == "🛰️ Lead Source":
 
 
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
-elif nav == "📜 History":
+elif page == "📜 History":
     st.markdown("<h1 style='color: #00ff41;'>📜 ARCHIVE VAULT</h1>", unsafe_allow_html=True)
     
     if not st.session_state.script_history and not st.session_state.pitch_history:
@@ -901,6 +901,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
