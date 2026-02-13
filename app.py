@@ -219,27 +219,6 @@ def fetch_live_metrics(platform, handle):
             return st.session_state.current_subs
 
 def display_feedback_tab():
-    st.header("📩 Neural Feedback")
-    st.caption("Tell the Director how to calibrate the VOID OS.")
-    
-    with st.form("feedback_form", clear_on_submit=True):
-        user_email = st.text_input("Email (Optional)")
-        feedback_type = st.selectbox("Category", ["Bug Report", "Feature Request", "General Praise", "Market Suggestion"])
-        message = st.text_area("Your Message")
-        
-        submit = st.form_submit_button("Transmit to VOID")
-        
-        if submit:
-            if message:
-                # We will write the logic to send this to Google Sheets next
-                st.success("Message received. The VOID is processing your input.")
-            else:
-                st.warning("Please enter a message before transmitting.")
-
-# Put your Web App URL here
-FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbz-jeNRRC1jNKSbVzb_KRkMSGxq931WBFRWMaYDslH81sb2lB9eCPZCF_eOu0sOWhVS/exec"
-
-def display_feedback_tab():
     st.header("🧠 Neural Feedback Loop")
     st.write("Is the VOID OS performing to your standards? Submit your logs below.")
     
@@ -252,25 +231,19 @@ def display_feedback_tab():
         
         if submitted:
             if message:
-                # The Payload
-                payload = {
-                    "email": email,
-                    "category": category,
-                    "message": message
-                }
-                
+                payload = {"email": email, "category": category, "message": message}
                 try:
-                    # Sending the data to Google Sheets
                     response = requests.post(FEEDBACK_API_URL, json=payload)
                     if response.status_code == 200:
                         st.success("✅ Transmission Successful. The Director has been notified.")
                         st.balloons()
                     else:
-                        st.error("❌ Transmission Interrupted. The VOID is out of reach.")
+                        st.error("❌ Transmission Interrupted. Check API deployment.")
                 except Exception as e:
                     st.error(f"Critical System Error: {e}")
             else:
                 st.warning("Cannot transmit an empty message.")
+
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -347,23 +320,29 @@ with st.sidebar:
     st.markdown(f"<h3 style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</h3>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #444; font-size: 10px;'>ENCRYPTED CONNECTION : ACTIVE</p>", unsafe_allow_html=True)
     
+    # Define available pages based on role
     if st.session_state.user_role == "admin":
         options = ["🏠 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
     else:
         options = ["📡 My Growth Hub", "💎 Assigned Scripts", "🌐 Global Pulse"]
     
-    # --- IMPORTANT CHANGE ---
-    # We remove the 'key' argument from st.radio and update st.session_state manually
-    choice = st.radio("COMMAND CENTER", options, index=options.index(st.session_state.current_page) if st.session_state.current_page in options else 0)
+    # Ensure the radio index stays synced with current_page
+    try:
+        current_index = options.index(st.session_state.current_page)
+    except ValueError:
+        current_index = 0
+
+    # Command Center Radio
+    choice = st.radio("COMMAND CENTER", options, index=current_index)
     
-    # Sync the selection to our state
+    # Update state only if user clicks the radio (and we aren't in Feedback mode)
     if choice != st.session_state.current_page and st.session_state.current_page != "FEEDBACK":
         st.session_state.current_page = choice
 
-    for _ in range(10): st.sidebar.write("")
+    # Spacer to push buttons to bottom
+    for _ in range(12): st.sidebar.write("")
     st.divider()
 
-    # Feedback Button sets a custom state
     if st.button("📩 NEURAL FEEDBACK", use_container_width=True):
         st.session_state.current_page = "FEEDBACK"
         st.rerun()
@@ -372,9 +351,17 @@ with st.sidebar:
         st.session_state.logged_in = False
         st.rerun()
 
+# --- MAIN PAGE ROUTING ---
+page = st.session_state.current_page
+
+if page == "FEEDBACK":
+    display_feedback_tab()
+    if st.button("← Back to Mission Control"):
+        st.session_state.current_page = "🏠 Dashboard" if st.session_state.user_role == "admin" else "📡 My Growth Hub"
+        st.rerun()
 
 # --- MODULE 1: DASHBOARD ---
-if nav == "🏠 Dashboard":
+elif nav == "🏠 Dashboard":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ COMMAND CENTER</h1>", unsafe_allow_html=True)
     
     # KPI Row
@@ -914,6 +901,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
