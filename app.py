@@ -78,6 +78,52 @@ VAULT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQT
 FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbz1mLI3YkbjVsA4a8rMgMe_07w_1sS8H-f2Wvz1FtFCU-ZN4zCH7kDUGaDPDaaMbrvaPw/exec"
 
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
+# --- ADMIN CONFIG ---
+ADMIN_PASSWORD = "This_is_for_you" # Change this!
+
+def admin_dashboard():
+    st.title("🌑 VOID OS // Admin Console")
+    
+    auth = st.text_input("Enter Admin Access Code", type="password")
+    
+    if auth == ADMIN_PASSWORD:
+        st.success("Access Granted, Director.")
+        
+        # 1. Fetch User Data
+        # We use the same CSV link logic you used for the Pulse
+        USER_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?gid=989182688&single=true&output=csv" 
+        df = pd.read_csv(USER_SHEET_URL)
+        
+        st.subheader("User Database")
+        st.dataframe(df)
+        
+        # 2. Add New Paid User
+        with st.expander("➕ Register New Paid User"):
+            with st.form("add_user"):
+                new_name = st.text_input("Name")
+                new_email = st.text_input("Email")
+                new_role = st.selectbox("Role", ["user", "paid", "admin"])
+                submit = st.form_submit_button("Sync to VOID")
+                
+                if submit:
+                    # We reuse your Feedback API to send this data!
+                    payload = {
+                        "email": new_email,
+                        "category": "USER_REG",
+                        "message": f"NAME:{new_name}|ROLE:{new_role}"
+                    }
+                    # Reuse your Google Apps Script URL
+                    response = requests.post(FEEDBACK_API_URL, json=payload)
+                    if response.status_code == 200:
+                        st.success(f"User {new_name} synchronized successfully.")
+    else:
+        st.warning("Restricted Area. Authentication Required.")
+
+# To display it, you can add a sidebar option:
+if st.sidebar.checkbox("Admin Mode"):
+    admin_dashboard()
+
+
 def typewriter_effect(text):
     container = st.empty()
     full_text = ""
@@ -902,6 +948,7 @@ elif page == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
