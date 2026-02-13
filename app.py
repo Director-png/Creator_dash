@@ -332,23 +332,21 @@ elif nav == "📡 My Growth Hub":
         
         if st.button("🛰️ SCAN & TRANSMIT", use_container_width=True):
             if uploaded_img:
-                # 1. Compress first to avoid 429
                 ready_img = compress_for_ai(uploaded_img)
-                
-                # 2. Run Failover Analysis
                 result_text, core_used = run_analysis(ready_img)
                 
                 if result_text:
                     st.session_state.last_analysis = result_text
-                    st.success(f"✅ Success via {core_used}")
-                    
-                    # Clean the number
                     nums = re.findall(r'\d+', result_text.replace(',', ''))
-                    if nums:
-                        st.session_state.current_subs = int(nums[0])
+                    if nums: st.session_state.current_subs = int(nums[0])
                 else:
-                    st.error("🚨 BLACKOUT: All 3 Google accounts have exhausted their daily quota.")
-
+                    st.warning("🚨 AI CORES DOWN: Please enter your subscriber count manually below.")
+                    manual_count = st.number_input("Enter Subscriber Count", min_value=0, value=st.session_state.get('current_subs', 0))
+                    if st.button("✅ CONFIRM MANUAL SYNC"):
+                        st.session_state.current_subs = manual_count
+                        st.session_state.last_analysis = "Manual Entry Verified"
+                        st.rerun()
+                        
     # --- DATA VISUALIZATION ---
     if 'last_analysis' in st.session_state:
         st.divider()
@@ -599,6 +597,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
