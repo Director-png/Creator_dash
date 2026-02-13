@@ -531,6 +531,46 @@ elif page == "💎 Assigned Scripts":
 elif page == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
     pulse_df = load_market_pulse_data(MARKET_PULSE_URL)
+    
+    if not pulse_df.empty:
+        st.markdown("<h3 style='color: #00d4ff;'>🚨 ELITE VIGOR SIGNALS</h3>", unsafe_allow_html=True)
+        
+        # Select a niche for a Deep Dive
+        target_niche = st.selectbox("Select Niche for Keyword Extraction", pulse_df['Niche'].unique())
+        
+        if st.button(f"🔍 EXTRACT VIRAL KEYWORDS FOR {target_niche.upper()}"):
+            with st.spinner("🌑 ORACLE ANALYZING SEARCH VOLUME..."):
+                # Using Groq to simulate real-time keyword scraping
+                prompt = f"""
+                Analyze the '{target_niche}' niche for February 2026. 
+                Provide:
+                1. Top 5 Viral Keywords (high SEO weight).
+                2. Three 'Negative Hooks' (unpopular opinions that go viral).
+                3. The #1 predicted 'Search Term' for next week.
+                Keep it concise and tactical.
+                """
+                if groq_c:
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": prompt}]
+                    )
+                    intel = res.choices[0].message.content
+                    
+                    st.markdown(f"""
+                    <div style="border: 1px solid #00ff41; padding: 20px; border-radius: 10px; background: #080808;">
+                        <h4 style="color: #00ff41;">📡 INTELLIGENCE BRIEF: {target_niche}</h4>
+                        <p style="white-space: pre-wrap; color: #e0e0e0;">{intel}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.error("AI Uplink Offline. Check Groq API Key.")
+
+        st.divider()
+    
+    
+    
+    st.title("🌐 GLOBAL INTELLIGENCE PULSE")
+    pulse_df = load_market_pulse_data(MARKET_PULSE_URL)
     if not pulse_df.empty:
         st.markdown('<div style="border: 1px solid #00d4ff; padding: 20px; border-radius: 10px; margin-bottom: 30px;">', unsafe_allow_html=True)
         st.markdown("<h3 style='color: #00d4ff;'>🚨 ELITE VIGOR SIGNALS</h3>", unsafe_allow_html=True)
@@ -820,59 +860,78 @@ elif page == "🧪 Creator Lab":
                 res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": blueprint_prompt}])
                 st.info(res.choices[0].message.content)
 
+
 elif page == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
     
     col_input, col_stats = st.columns([1, 1])
     
     with col_input:
-        niche_target = st.selectbox("Target Niche to Scan", ["SaaS Founders", "AI Educators", "Luxury Real Estate", "E-com Brands"])
+        niche_target = st.selectbox("Target Niche to Scan", ["SaaS Founders", "AI Educators", "Luxury Real Estate", "E-com Brands", "Fitness Tech"])
         scan_depth = st.select_slider("Scan Intensity", ["Surface", "Deep", "Quantum"])
         
         if st.button("📡 INITIALIZE DEEP SCAN", use_container_width=True):
             with st.spinner("🌑 SCANNING SOCIAL LAYERS..."):
-                time.sleep(2) # Simulate data retrieval
-                # Simulated high-value leads with "Gaps" identified
+                time.sleep(2) 
+                # Scanned data with added "Vigor" (Growth potential)
                 data = [
-                    {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Value": "High"},
-                    {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Value": "Critical"},
-                    {"Handle": "@PropTech_India", "Platform": "LI", "Followers": "12K", "Gap": "Poor Visual DNA", "Value": "Medium"},
-                    {"Handle": "@WealthVector", "Platform": "TT", "Followers": "250K", "Gap": "High Views / Low Conversion", "Value": "Extreme"}
+                    {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Vigor": 85, "Value": "High"},
+                    {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Vigor": 94, "Value": "Critical"},
+                    {"Handle": "@PropTech_India", "Platform": "LI", "Followers": "12K", "Gap": "Poor Visual DNA", "Vigor": 62, "Value": "Medium"},
+                    {"Handle": "@WealthVector", "Platform": "TT", "Followers": "250K", "Gap": "High Views / Low Conversion", "Vigor": 98, "Value": "Extreme"}
                 ]
                 st.session_state.found_leads = pd.DataFrame(data)
                 st.success(f"Scan Complete. {len(data)} High-Value Gaps Detected.")
 
-    # Display Leads
+    with col_stats:
+        if not st.session_state.found_leads.empty:
+            # Show a quick vigor distribution chart
+            fig = px.pie(st.session_state.found_leads, values='Vigor', names='Handle', 
+                         title="Lead Vigor Distribution", hole=.4,
+                         color_discrete_sequence=px.colors.sequential.Greens_r)
+            fig.update_layout(showlegend=False, height=250, margin=dict(t=30, b=0, l=0, r=0))
+            st.plotly_chart(fig, use_container_width=True)
+
+    # --- LEAD MANAGEMENT ---
     if not st.session_state.found_leads.empty:
         st.divider()
         st.subheader("🎯 IDENTIFIED TARGETS")
         
-        # We use a dataframe with a "Select" capability
+        # Interactive Editor
         edited_df = st.data_editor(
             st.session_state.found_leads,
             column_config={
-                "Value": st.column_config.SelectboxColumn(
-                    "Priority",
-                    options=["Medium", "High", "Critical", "Extreme"],
-                )
+                "Vigor": st.column_config.ProgressColumn("Growth Potential", min_value=0, max_value=100, format="%d%%"),
+                "Value": st.column_config.SelectboxColumn("Priority", options=["Medium", "High", "Critical", "Extreme"]),
             },
             disabled=["Handle", "Platform", "Followers", "Gap"],
             hide_index=True,
             use_container_width=True
         )
 
-        # Tactical Action
-        selected_lead = st.selectbox("Select Target for Immediate Pitch", st.session_state.found_leads["Handle"])
-        if st.button(f"🚀 PORT DATA TO PITCHER: {selected_lead}"):
-            # Transfer data to session state for the Pitcher module to pick up
-            lead_info = st.session_state.found_leads[st.session_state.found_leads["Handle"] == selected_lead].iloc[0]
-            st.session_state.active_pitch_target = {
-                "name": selected_lead,
-                "gap": lead_info["Gap"],
-                "niche": niche_target
-            }
-            st.toast(f"Data for {selected_lead} beamed to Client Pitcher.")
+        # Tactical Actions
+        c1, c2 = st.columns(2)
+        
+        with c1:
+            selected_lead = st.selectbox("Select Target for Action", edited_df["Handle"])
+            if st.button(f"🚀 PORT TO PITCHER", use_container_width=True):
+                lead_info = edited_df[edited_df["Handle"] == selected_lead].iloc[0]
+                st.session_state.active_pitch_target = {
+                    "name": selected_lead,
+                    "gap": lead_info["Gap"],
+                    "niche": niche_target
+                }
+                st.toast(f"Data for {selected_lead} beamed to Client Pitcher.")
 
+        with c2:
+            st.write("") # Alignment
+            if st.button("💎 SYNC ALL TO MASTER VAULT", use_container_width=True):
+                # Using your existing Feedback API as a bridge to save data
+                for _, row in edited_df.iterrows():
+                    sync_msg = f"LEAD:{row['Handle']}|GAP:{row['Gap']}|VAL:{row['Value']}"
+                    payload = {"email": "SYSTEM_SCAN", "category": "LEAD_GEN", "message": sync_msg}
+                    requests.post(FEEDBACK_API_URL, json=payload)
+                st.success("Archive Synchronized. All leads pushed to Google Sheets.")
 
 
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
@@ -950,4 +1009,5 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
+
 
