@@ -911,7 +911,7 @@ elif page == "🛡️ Admin Console":
     
     # 1. Password Protection inside the tab
     auth = st.text_input("Enter Level 5 Authorization Code", type="password")
-    if auth == "1234": # Change this to your preferred secret
+    if auth == "IamAdmin": # Change this to your preferred secret
         st.success("Identity Verified. Welcome, Director.")
         
         # 2. User Management
@@ -950,3 +950,4 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
+
