@@ -202,6 +202,24 @@ def fetch_live_metrics(platform, handle):
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
+# --- 🎨 VOID OS STYLING ---
+st.markdown("""
+    <style>
+    .main { background-color: #050505; color: #e0e0e0; }
+    .stButton>button {
+        background: linear-gradient(45deg, #00ff41, #00d4ff);
+        color: black; font-weight: bold; border: none; border-radius: 5px;
+        transition: 0.3s;
+    }
+    .stButton>button:hover {
+        box-shadow: 0px 0px 15px #00ff41;
+        transform: scale(1.02);
+    }
+    .stMetric { background: #111111; padding: 15px; border-radius: 10px; border-left: 5px solid #00ff41; }
+    div[data-testid="stExpander"] { background: #111111; border: 1px solid #333; }
+    </style>
+    """, unsafe_allow_html=True)
+
 
 # --- 2. SPLASH SCREEN ---
 if 'first_load' not in st.session_state:
@@ -265,23 +283,30 @@ with st.sidebar:
     if st.button("LOGOUT"): st.session_state.logged_in = False; st.rerun()
 
 # --- MODULE 1: DASHBOARD ---
-if nav == "📊 Dashboard":
-    st.markdown("<h1 style='color: white;'>🌑 VOID COMMAND CENTER</h1>", unsafe_allow_html=True)
-    m1, m2, m3, m4 = st.columns(4)
-    with m1: st.metric(label="System Status", value="Operational", delta="Stable")
-    with m2: st.metric(label="Scripts Architected", value=str(len(st.session_state.script_history)), delta="+4 today")
-    with m3: st.metric(label="Active Pipelines", value="12", delta="3 Ready")
-    with m4: st.metric(label="Data Sync", value="Real-time", delta="0.4ms")
+elif nav == "🏠 Dashboard":
+    st.markdown("<h1 style='color: #00ff41;'>🛰️ COMMAND CENTER</h1>", unsafe_allow_html=True)
+    
+    # KPI Row
+    kpi1, kpi2, kpi3 = st.columns(3)
+    kpi1.metric("ARCHIVED SCRIPTS", len(st.session_state.get('script_history', [])))
+    kpi2.metric("ELITE PITCHES", len(st.session_state.get('pitch_history', [])))
+    kpi3.metric("CURRENT REACH", f"{st.session_state.get('current_subs', 0):,}")
     
     st.divider()
-    c_left, c_right = st.columns([2, 1])
-    with c_left:
-        st.subheader("📡 Regional Signal Strength")
-        chart_data = pd.DataFrame({"Node": ["US-East", "EU-West", "Asia-South"], "Traffic": [85, 92, 78]})
-        st.bar_chart(chart_data, x="Node", y="Traffic", color="#00d4ff")
-    with c_right:
-        st.subheader("🛡️ Security Audit")
-        st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
+    
+    c1, c2 = st.columns([2, 1])
+    with c1:
+        st.subheader("🌑 MISSION STATUS")
+        if st.session_state.get('script_history'):
+            last_script = st.session_state.script_history[-1]
+            st.info(f"**LATEST ARCHITECTED:** {last_script['topic']} for {last_script['platform']}")
+        else:
+            st.warning("No missions active. Initialize Script Architect.")
+            
+    with c2:
+        st.subheader("🛡️ SYSTEM INTEGRITY")
+        st.code(f"AI Core: {active_core if 'active_core' in locals() else 'STANDBY'}\nHandshake: STABLE\nLaunch: T-Minus 48h")
+
 
 # --- MODULE 8: GROWTH HUB (HARDENED VERSION) ---
 elif nav == "📡 My Growth Hub":
@@ -572,16 +597,32 @@ elif nav == "💼 Client Pitcher":
 
 
 # --- MODULE 8: CREATOR LAB & LEAD SOURCE ---
-elif nav == "🧬 Creator Lab":
-    st.title("🧬 VIGOR AUDIT")
-    c_name = st.text_input("Creator Handle")
-    c_views = st.number_input("Avg Views", value=5000)
-    c_subs = st.number_input("Follower Count", value=10000)
-    if st.button("⚡ Calculate Vigor"):
-        score = calculate_vigor(c_views, c_subs)
-        st.metric("VIGOR SCORE", f"{score}/100")
-        if score > 80: st.success(f"🔥 {c_name} is viral-prone.")
+elif nav == "🧪 Creator Lab":
+    st.markdown("<h1 style='color: #00d4ff;'>🧪 ROI ENGINE</h1>", unsafe_allow_html=True)
+    
+    with st.container():
+        st.subheader("💰 REVENUE PROJECTION")
+        views = st.slider("Projected Views (Weekly)", 1000, 1000000, 50000)
+        cpm = st.number_input("Est. CPM ($)", value=15.0)
+        conversion_rate = st.slider("Product Conversion Rate (%)", 0.1, 5.0, 1.0)
+        product_price = st.number_input("Product/Service Price ($)", value=497)
+        
+        # Logic
+        ad_rev = (views / 1000) * cpm
+        sales_rev = (views * (conversion_rate / 100)) * product_price
+        total_value = ad_rev + sales_rev
+        
+        st.markdown(f"### **ESTIMATED ROI: ${total_value:,.2f}**")
+        st.progress(0.75) # Aesthetic progress bar
+        st.caption("ROI is calculated based on AdRev + Digital Sales Conversion.")
 
+    st.divider()
+    if st.button("🧬 GENERATE PROFIT BLUEPRINT"):
+        # Uses Groq to give a strategy based on these numbers
+        if groq_c:
+            blueprint_prompt = f"Create a strategy to hit ${total_value} revenue for a creator getting {views} views."
+            res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": blueprint_prompt}])
+            st.success(res.choices[0].message.content)
 elif nav == "🛰️ Lead Source":
     st.title("🛰️ LEAD SOURCE")
     niche_search = st.selectbox("Target Niche", ["SaaS", "E-com", "Coaching"])
@@ -618,6 +659,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
