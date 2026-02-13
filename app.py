@@ -402,27 +402,50 @@ elif nav == "📡 My Growth Hub":
                 )
                 st.info(res.choices[0].message.content)
                 
-
+# --- MODULE 10: CLIENT ASSIGNED SCRIPTS ---
 elif nav == "💎 Assigned Scripts":
-    st.title("💎 YOUR SECURE VAULT")
+    st.markdown(f"<h1 style='color: #00ff41;'>💎 {st.session_state.user_name.upper()}'S VAULT</h1>", unsafe_allow_html=True)
+    
     try:
+        # 🛰️ Sync with the Master Vault Sheet
+        # Ensure your VAULT_SHEET_CSV_URL is correct in your secrets/top of code
         scripts_df = pd.read_csv(VAULT_SHEET_CSV_URL)
         scripts_df.columns = [str(c).strip().lower() for c in scripts_df.columns]
-        my_vault = scripts_df[scripts_df.iloc[:, 1].astype(str) == st.session_state.user_name]
-        # ... rest of your vault code ...        
-        if my_vault.empty: 
-            st.warning("No scripts assigned yet. Awaiting Director transmission.")
+        
+        # FILTER: Show only scripts where the 'Director/Client' column matches logged-in user
+        # Assuming Column 1 (index 1) is 'Client Name'
+        my_vault = scripts_df[scripts_df.iloc[:, 1].astype(str).str.lower() == st.session_state.user_name.lower()]
+        
+        if my_vault.empty:
+            st.info("🛰️ VAULT EMPTY: No scripts assigned to your node yet. Contact the Director.")
+            st.image("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueXZueXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKMGpxxcaNnU6w8/giphy.gif", width=300)
         else:
-            for _, row in my_vault.iterrows():
-                with st.expander(f"📜 {row.iloc[3]} | {row.iloc[2]}"):
-                    st.markdown(f"**PLATFORM:** {row.iloc[2]}")
-                    st.divider()
-                    st.write(row.iloc[4])
-                    st.divider()
-                    st.caption(f"🧬 DNA: {row.iloc[5]}")
-                    st.button("MARK AS FILMED", key=f"btn_{row.iloc[0]}")
+            st.subheader(f"Total Deliverables: {len(my_vault)}")
+            
+            for i, row in my_vault.iterrows():
+                with st.expander(f"🎬 {row.iloc[3]} | {row.iloc[2].upper()}"):
+                    col_text, col_status = st.columns([3, 1])
+                    
+                    with col_text:
+                        st.markdown("### The Script")
+                        st.write(row.iloc[4]) # Script Content
+                        st.divider()
+                        st.caption(f"🧬 Visual DNA: {row.iloc[5]}")
+                    
+                    with col_status:
+                        st.markdown("### Status")
+                        st.checkbox("Filmed", key=f"check_film_{i}")
+                        st.checkbox("Edited", key=f"check_edit_{i}")
+                        st.checkbox("Posted", key=f"check_post_{i}")
+                        
+                        if st.button("📥 DOWNLOAD", key=f"dl_{i}"):
+                            st.download_button("Confirm Download", row.iloc[4], file_name="script.txt")
+
     except Exception as e:
-        st.error(f"Vault Offline: {e}")
+        st.error("DATABASE OFFLINE: Connection to Master Vault timed out.")
+        st.code(str(e))
+
+
 
 # --- MODULE 4: GLOBAL PULSE ---
 elif nav == "🌐 Global Pulse":
@@ -451,6 +474,31 @@ elif nav == "🌐 Global Pulse":
                 st.markdown(f"**[{entry.title.upper()}]({entry.link})**")
                 st.write(BeautifulSoup(entry.summary, "html.parser").text[:180] + "...")
             st.divider()
+            # 🧬 Dynamic RSS Feeds
+    feeds = {
+        "AI & Tech": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "Business": "https://www.entrepreneur.com/rss/technology.rss",
+        "Social Media": "https://mashable.com/feeds/rss/category/social-media"
+    }
+    
+    selected_feed = st.tabs(list(feeds.keys()))
+    
+    for i, category in enumerate(feeds.keys()):
+        with selected_feed[i]:
+            feed_data = feedparser.parse(feeds[category])
+            for entry in feed_data.entries[:5]:
+                with st.container():
+                    # Styling each news card
+                    st.markdown(f"""
+                    <div style="border: 1px solid #333; padding: 20px; border-radius: 10px; background: #080808;">
+                        <h4 style="color: #00ff41;">{entry.title}</h4>
+                        <p style="color: #bbb; font-size: 14px;">{BeautifulSoup(entry.summary, 'html.parser').text[:200]}...</p>
+                        <a href="{entry.link}" target="_blank" style="color: #00d4ff; text-decoration: none;">READ SOURCE ⮕</a>
+                    </div>
+                    <br>
+                    """, unsafe_allow_html=True)
+
+
 
 # --- MODULE 5: TREND DUEL ---
 elif nav == "⚔️ Trend Duel":
@@ -775,6 +823,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
