@@ -94,21 +94,25 @@ def load_user_db():
 
 def load_market_pulse_data(url):
     try:
-        # 1. Pull the data
-        df = pd.read_csv(url)
+        # 1. Pull the data and strip any weird empty rows
+        df = pd.read_csv(url).dropna(how='all')
         
-        # 2. Force every column name to be clean and capitalized
-        # This turns 'niche' -> 'Niche', 'score' -> 'Score', etc.
-        df.columns = [str(c).strip().title() for c in df.columns]
+        # 2. THE IRONCLAD RE-LABEL: 
+        # We assume Col 1 = Niche, Col 2 = Score, Col 3 = Growth, Col 4 = Saturation, Col 5 = Reason
+        # This ignores whatever text is actually in the header cells.
+        expected_cols = ['Niche', 'Score', 'Growth', 'Saturation', 'Reason']
         
-        # 3. EXTRA SAFETY: Explicitly rename just in case
-        # This handles cases where the sheet might have 'Keywords' instead of 'Niche'
-        rename_map = {
-            'Keywords': 'Niche',
-            'Keyword': 'Niche',
-            'Trend': 'Niche'
-        }
-        df.rename(columns=rename_map, inplace=True)
+        # Map existing columns to our expected names based on index
+        # This prevents KeyError even if the sheet header is "Keywords" or "Untitled"
+        new_columns = {}
+        for i, col_name in enumerate(df.columns):
+            if i < len(expected_cols):
+                new_columns[col_name] = expected_cols[i]
+        
+        df.rename(columns=new_columns, inplace=True)
+        
+        # 3. Clean the data types (Force Score to be numeric)
+        df['Score'] = pd.to_numeric(df['Score'], errors='coerce').fillna(0).astype(int)
         
         return df
     except Exception as e:
@@ -836,6 +840,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
