@@ -452,7 +452,7 @@ elif nav == "💎 Assigned Scripts":
 # --- MODULE 4: GLOBAL PULSE ---
 elif nav == "🌐 Global Pulse":
     st.title("🌐 GLOBAL INTELLIGENCE PULSE")
-    pulse_df = load_market_pulse_data()
+    pulse_df = load_market_pulse_data(MARKET_PULSE_URL)
     if not pulse_df.empty:
         st.markdown('<div style="border: 1px solid #00d4ff; padding: 20px; border-radius: 10px; margin-bottom: 30px;">', unsafe_allow_html=True)
         st.markdown("<h3 style='color: #00d4ff;'>🚨 ELITE VIGOR SIGNALS</h3>", unsafe_allow_html=True)
@@ -825,6 +825,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
