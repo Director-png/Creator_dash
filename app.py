@@ -141,7 +141,6 @@ def transmit_script(client, platform, topic, script, dna):
 
 def generate_oracle_report(topic, platform, tone):
     try:
-        groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
         prompt = f"""
         System: You are the VOID OS Oracle. Analyze content architecture for {platform}.
         Topic: {topic} | Tone: {tone}
@@ -397,59 +396,133 @@ elif nav == "⚔️ Trend Duel":
             fig = px.bar(comp, x='Niche', y='Score', color='Score', template='plotly_dark')
             st.plotly_chart(fig, use_container_width=True)
 
-# --- MODULE 6: SCRIPT ARCHITECT ---
+# --- MODULE 6: SCRIPT ARCHITECT (OPTIMIZED) ---
 elif nav == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
+    
+    # Load users for assignment
     users_df = load_user_db()
     client_options = ["Public/General"]
     if not users_df.empty:
+        # Assuming Name is in the second column (index 1)
         db_names = users_df.iloc[:, 1].dropna().unique().tolist()
         client_options = ["Public/General"] + db_names
 
     c1, c2 = st.columns([1, 1.5], gap="large")
+    
     with c1:
         target_client = st.selectbox("Assign To Target", options=client_options, key="arch_target_final")
         platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "X-Thread", "YouTube Long-form"])
         topic = st.text_input("Core Topic", placeholder="e.g., The Future of AI in 2026")
         tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"])
+        
         with st.expander("👤 COMPETITOR SHADOW"):
             c_hook = st.text_area("Their Narrative (What are they saying?)")
         
         if st.button("🚀 ARCHITECT & TRANSMIT", use_container_width=True):
-            if not topic:
+            if not groq_c:
+                st.error("🚨 SYSTEM OFFLINE: Groq API Key is invalid or missing in Secrets.")
+            elif not topic:
                 st.error("Director, the Topic field cannot be empty.")
             else:
                 st.session_state.last_topic = topic
                 with st.spinner("🌑 ARCHITECTING SCRIPT..."):
                     try:
-                        prompt = f"System: VOID OS Content Architect. Platform: {platform}. Topic: {topic}. Tone: {tone_choice}. Angle: {c_hook if c_hook else 'None'}."
-                        res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                        # Constructing the Tactical Prompt
+                        prompt = (
+                            f"System: VOID OS Content Architect. Create a high-retention script for {platform}. "
+                            f"Topic: {topic}. Tone: {tone_choice}. "
+                            f"Competitor Angle to counter: {c_hook if c_hook else 'Standard Industry Narrative'}."
+                        )
+                        
+                        # API Call using Global Client
+                        res = groq_c.chat.completions.create(
+                            model="llama-3.3-70b-versatile", 
+                            messages=[{"role": "user", "content": prompt}]
+                        )
                         txt = res.choices[0].message.content
                         dna_profile = generate_visual_dna(platform, tone_choice)
+                        
+                        # --- CRITICAL FIX: SAVE TO SESSION HISTORY ---
+                        st.session_state.script_history.append({
+                            "assigned_to": target_client, 
+                            "topic": topic, 
+                            "script": txt,
+                            "platform": platform
+                        })
+                        
+                        # Database Sync
                         status = transmit_script(target_client, platform, topic, txt, dna_profile)
+                        
                         with c2:
                             st.subheader("💎 GENERATED ARCHIVE")
                             st.markdown(txt)
                             st.divider()
                             st.caption(f"🧬 DNA: {dna_profile}")
-                            if status: st.success("⚔️ BROADCAST COMPLETE: Script synced.")
-                    except Exception as e: st.error(f"Intelligence Failure: {e}")
+                            if status: 
+                                st.success("⚔️ BROADCAST COMPLETE: Script synced to Vault.")
+                                
+                    except Exception as e: 
+                        st.error(f"Intelligence Failure: {e}")
 
-# --- MODULE 7: CLIENT PITCHER ---
+    # Column 2 Empty State
+    if 'txt' not in locals() and not st.session_state.script_history:
+        with c2:
+            st.info("Awaiting Tactical Input. Architectural blueprints will manifest here.")
+
+# --- MODULE 7: CLIENT PITCHER (OPTIMIZED) ---
 elif nav == "💼 Client Pitcher":
     st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL</h1>", unsafe_allow_html=True)
+    
     c1, c2 = st.columns([1, 1.5], gap="large")
+    
     with c1:
-        client_name = st.text_input("Lead / Brand Name")
-        niche_cat = st.selectbox("Category", ["Personal Brand", "SaaS Founders", "Fashion", "Local Business"])
-        offer_details = st.text_area("Value Proposition")
-        if st.button("🔥 Generate VOID Pitch"):
-            if client_name and offer_details:
+        client_name = st.text_input("Lead / Brand Name", placeholder="Enter Target Name")
+        niche_cat = st.selectbox("Category", ["Personal Brand", "SaaS Founders", "Fashion", "Local Business", "E-com"])
+        offer_details = st.text_area("Value Proposition", placeholder="What ROI are you bringing to the table?")
+        
+        if st.button("🔥 Generate VOID Pitch", use_container_width=True):
+            if not groq_c:
+                st.error("🚨 SYSTEM OFFLINE: Groq API Key missing.")
+            elif not client_name or not offer_details:
+                st.warning("Director, identify the target and the offer details first.")
+            else:
                 with st.spinner("🌑 ANALYZING LEAD..."):
-                    prompt = f"Write an elite black-label pitch for {client_name} in {niche_cat}. Offer: {offer_details}."
-                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
-                    pitch_res = res.choices[0].message.content
-                    with c2: typewriter_effect(pitch_res)
+                    try:
+                        # Elite Sales Prompt
+                        prompt = (
+                            f"Write an elite 'Black-Label' cold outreach message for {client_name} in the {niche_cat} niche. "
+                            f"The offer is: {offer_details}. Style: Minimalist, authoritative, results-driven."
+                        )
+                        
+                        res = groq_c.chat.completions.create(
+                            model="llama-3.3-70b-versatile", 
+                            messages=[{"role": "user", "content": prompt}]
+                        )
+                        pitch_res = res.choices[0].message.content
+                        
+                        # Save to history
+                        st.session_state.pitch_history.append({
+                            "client": client_name,
+                            "pitch": pitch_res,
+                            "timestamp": time.strftime("%H:%M")
+                        })
+                        
+                        with c2:
+                            st.subheader("📡 ELITE TRANSMISSION")
+                            typewriter_effect(pitch_res)
+                            st.divider()
+                            if st.button("📋 MARK AS SENT"):
+                                st.toast(f"Pitch recorded for {client_name}")
+                                
+                    except Exception as e: 
+                        st.error(f"Pitch Transmission Failed: {e}")
+
+    # Column 2 Empty State
+    if 'pitch_res' not in locals() and not st.session_state.pitch_history:
+        with c2:
+            st.info("Identify a high-value lead to generate an elite transmission.")
+
 
 # --- MODULE 8: CREATOR LAB & LEAD SOURCE ---
 elif nav == "🧬 Creator Lab":
@@ -477,6 +550,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
