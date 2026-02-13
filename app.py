@@ -324,7 +324,7 @@ with st.sidebar:
     
     # Define available pages based on role
     if st.session_state.user_role == "admin":
-        options = ["🏠 Dashboard", "🌐 Global Pulse", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
+        options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
     else:
         options = ["📡 My Growth Hub", "💎 Assigned Scripts", "🌐 Global Pulse"]
     
@@ -905,73 +905,48 @@ elif page == "📜 History":
                     st.divider()
 
 
-# --- ADMIN CONFIG ---
-ADMIN_PASSWORD = "This_is_for_you" # Change this!
-
-def admin_dashboard():
-    st.title("🌑 VOID OS // Admin Console")
+# --- MODULE 11: ADMIN CONSOLE (OPTION C) ---
+elif page == "🛡️ Admin Console":
+    st.markdown("<h1 style='color: #00ff41;'>🛡️ SYSTEM ADMINISTRATION</h1>", unsafe_allow_html=True)
     
-    auth = st.text_input("Enter Admin Access Code", type="password")
-    
-    if auth == ADMIN_PASSWORD:
-        st.success("Access Granted, Director.")
+    # 1. Password Protection inside the tab
+    auth = st.text_input("Enter Level 5 Authorization Code", type="password")
+    if auth == "1234": # Change this to your preferred secret
+        st.success("Identity Verified. Welcome, Director.")
         
-        # 1. Fetch User Data
-        # We use the same CSV link logic you used for the Pulse
-        USER_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?gid=989182688&single=true&output=csv" 
-        df = pd.read_csv(USER_SHEET_URL)
-        
-        st.subheader("User Database")
-        st.dataframe(df)
-        
-        # 2. Add New Paid User
-        with st.expander("➕ Register New Paid User"):
-            with st.form("add_user"):
-                new_name = st.text_input("Name")
-                new_email = st.text_input("Email")
-                new_role = st.selectbox("Role", ["user", "paid", "admin"])
-                submit = st.form_submit_button("Sync to VOID")
+        # 2. User Management
+        st.subheader("👥 User Management")
+        users_df = load_user_db()
+        if not users_df.empty:
+            st.dataframe(users_df, use_container_width=True)
+            
+            # Quick Action: Promote to Paid
+            st.divider()
+            st.subheader("⚡ Quick Sync: Register Paid User")
+            with st.form("admin_user_reg"):
+                col1, col2 = st.columns(2)
+                new_n = col1.text_input("Full Name")
+                new_e = col2.text_input("Email Address")
+                new_role = st.selectbox("Assign Status", ["paid", "user", "admin"])
                 
-                if submit:
-                    # We reuse your Feedback API to send this data!
+                if st.form_submit_button("FORCE SYNC TO VOID"):
+                    # We send this to your Feedback API
                     payload = {
-                        "email": new_email,
-                        "category": "USER_REG",
-                        "message": f"NAME:{new_name}|ROLE:{new_role}"
+                        "email": new_e, 
+                        "category": "USER_REG", 
+                        "message": f"NAME:{new_n}|ROLE:{new_role}"
                     }
-                    # Reuse your Google Apps Script URL
-                    response = requests.post(FEEDBACK_API_URL, json=payload)
-                    if response.status_code == 200:
-                        st.success(f"User {new_name} synchronized successfully.")
-    else:
-        st.warning("Restricted Area. Authentication Required.")
-
-# To display it, you can add a sidebar option:
-if st.sidebar.checkbox("Admin Mode"):
-    admin_dashboard()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                    res = requests.post(FEEDBACK_API_URL, json=payload)
+                    if res.status_code == 200:
+                        st.success(f"Transmission Sent: {new_n} is being integrated.")
+                    else:
+                        st.error("Sync Failed. Check Google Apps Script Deployment.")
+        
+        # 3. System Metrics
+        st.divider()
+        st.subheader("🛰️ Node Traffic")
+        st.info(f"Active Users in Database: {len(users_df)}")
+        
+    elif auth != "":
+        st.error("Invalid Credentials. Intrusion attempt logged.")
+        
