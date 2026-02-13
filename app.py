@@ -92,32 +92,29 @@ def load_user_db():
         st.sidebar.error(f"Sync Failure: {e}")
         return pd.DataFrame()
 
-def load_market_pulse_data(url):
+def load_market_pulse_data(url=None): # <--- Added '=None' to make it optional
+    # Use the global URL if none is provided in the parentheses
+    if url is None:
+        url = MARKET_PULSE_URL 
+        
     try:
-        # 1. Pull the data and strip any weird empty rows
+        # Pull data and drop completely empty rows
         df = pd.read_csv(url).dropna(how='all')
         
-        # 2. THE IRONCLAD RE-LABEL: 
-        # We assume Col 1 = Niche, Col 2 = Score, Col 3 = Growth, Col 4 = Saturation, Col 5 = Reason
-        # This ignores whatever text is actually in the header cells.
+        # IRONCLAD RE-LABEL: Force column names by position
         expected_cols = ['Niche', 'Score', 'Growth', 'Saturation', 'Reason']
-        
-        # Map existing columns to our expected names based on index
-        # This prevents KeyError even if the sheet header is "Keywords" or "Untitled"
-        new_columns = {}
-        for i, col_name in enumerate(df.columns):
-            if i < len(expected_cols):
-                new_columns[col_name] = expected_cols[i]
-        
+        new_columns = {df.columns[i]: expected_cols[i] for i in range(min(len(df.columns), len(expected_cols)))}
         df.rename(columns=new_columns, inplace=True)
         
-        # 3. Clean the data types (Force Score to be numeric)
-        df['Score'] = pd.to_numeric(df['Score'], errors='coerce').fillna(0).astype(int)
-        
+        # Data Type Safety
+        if 'Score' in df.columns:
+            df['Score'] = pd.to_numeric(df['Score'], errors='coerce').fillna(0).astype(int)
+            
         return df
     except Exception as e:
-        st.error(f"Sync Error: {e}")
+        st.error(f"Sync Error at Line 523: {e}")
         return pd.DataFrame()
+
 
 def generate_visual_dna(platform, tone):
     styles = {
@@ -840,6 +837,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
