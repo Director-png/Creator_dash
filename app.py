@@ -11,6 +11,7 @@ from google import genai  # Modern way to import
 from PIL import Image
 import os
 import re 
+import io
 
 # --- 🛰️ SECURE AI UPLINK ---
 # 1. INITIALIZE GLOBAL CLIENTS (ONCE)
@@ -598,6 +599,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
