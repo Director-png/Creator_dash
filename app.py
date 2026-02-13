@@ -94,11 +94,22 @@ def load_user_db():
 
 def load_market_pulse_data(url):
     try:
+        # 1. Pull the data
         df = pd.read_csv(url)
-        # --- THE FIX: NORMALIZE COLUMNS ---
-        # This converts all column names to Title Case (Reason, Score, etc.)
-        # so alert['Reason'] will always find its target.
-        df.columns = [str(c).strip().title() for c in df.columns] 
+        
+        # 2. Force every column name to be clean and capitalized
+        # This turns 'niche' -> 'Niche', 'score' -> 'Score', etc.
+        df.columns = [str(c).strip().title() for c in df.columns]
+        
+        # 3. EXTRA SAFETY: Explicitly rename just in case
+        # This handles cases where the sheet might have 'Keywords' instead of 'Niche'
+        rename_map = {
+            'Keywords': 'Niche',
+            'Keyword': 'Niche',
+            'Trend': 'Niche'
+        }
+        df.rename(columns=rename_map, inplace=True)
+        
         return df
     except Exception as e:
         st.error(f"Sync Error: {e}")
@@ -825,6 +836,7 @@ elif nav == "📜 History":
                     st.info(p['pitch'])
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
+
 
 
 
