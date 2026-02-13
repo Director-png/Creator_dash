@@ -9,29 +9,23 @@ import time
 from streamlit_lottie import st_lottie
 from google import genai  # Modern way to import
 from PIL import Image
-import streamlit as st
 import os
 import re 
-# --- PARTNER'S BYPASS: FORCE SECRET RECOGNITION ---
-# If Streamlit is being stubborn, we manually inject the key into the environment
-if "GEMINI_API_KEY" in st.secrets:
-    os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
-else:
-    # If it's STILL missing, we create a visible warning for the Director
-    st.sidebar.error("⚠️ DATA LINK BROKEN: Secrets not syncing.")
 
 # --- 🛰️ SECURE AI UPLINK ---
-# This ensures the key is loaded ONCE at startup
+# 1. INITIALIZE GLOBAL CLIENTS (ONCE)
+if "GEMINI_API_KEY" in st.secrets:
+    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+else:
+    client = None
+
 if "GROQ_API_KEY" in st.secrets:
     try:
-        # Check if key is actually a string and not empty
-        key = st.secrets["GROQ_API_KEY"].strip()
-        groq_c = Groq(api_key=key)
-    except Exception as e:
-        st.sidebar.error(f"📡 UPLINK CRITICAL FAILURE: {e}")
+        # strip() handles accidental spaces in the secrets tab
+        groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"].strip())
+    except:
         groq_c = None
 else:
-    st.sidebar.warning("⚠️ PROXY OFFLINE: GROQ_API_KEY missing in Secrets.")
     groq_c = None
 
 
@@ -206,20 +200,6 @@ def fetch_live_metrics(platform, handle):
             return st.session_state.current_subs
 
 # --- UTILITY: AI STUDIO VISION ENGINE ---
-def analyze_analytics_screenshot(uploaded_file):
-    if client is None:
-        return "🚨 ERROR: System Offline. Check API Key."
-    try:
-        img = Image.open(uploaded_file)
-        # Using the most stable 2026 model
-        response = client.models.generate_content(
-            model="gemini-2.0-flash", 
-            contents=["Extract the subscriber count as a number.", img]
-        )
-        return response.text
-    except Exception as e:
-        return f"Uplink Error: {e}"
-
 # 1. At the TOP of your script (Global Space)
 # --- GLOBAL SETUP ---
 # Line 242
@@ -289,21 +269,6 @@ try:
 except Exception as e:
     st.error(f"Oracle Connection Interrupted: {e}")
 
-# 4. Now the chart is OUTSIDE the try/except block, so it's safe
-st.subheader("📈 Progress Visualization")
-chart_df = pd.DataFrame({
-    "Category": st.session_state.chart_data["labels"],
-    "Count": st.session_state.chart_data["values"]
-})
-
-# --- THE CHART FIX ---
-    # Everything below is indented exactly 4 spaces from the 'elif'
-chart_df = pd.DataFrame({
-        "Status": st.session_state.chart_data["labels"],
-        "Subscribers": st.session_state.chart_data["values"]
-    })
-
-st.bar_chart(data=chart_df, x="Status", y="Subscribers")
 
     # 1. First, create the uploader and name the variable correctly
 uploaded_img = st.file_uploader("📤 UPLOAD ANALYTICS SCREENSHOT", type=['png', 'jpg', 'jpeg'])
@@ -393,48 +358,45 @@ if nav == "📊 Dashboard":
         st.code("Neural Handshake: VERIFIED\nIP Scramble: ACTIVE\nUser DB: ENCRYPTED", language="bash")
 
 elif nav == "📡 My Growth Hub":
-    st.markdown(f"<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
     
     with st.expander("📷 UPLOAD ANALYTICS SCREENSHOT", expanded=True):
-        st.write("Drop a screenshot of your YT/IG/X dashboard to sync real data.")
         uploaded_img = st.file_uploader("Upload Node Data", type=['png', 'jpg', 'jpeg'], key="growth_uploader")
         
         if st.button("🛰️ ANALYZE & SYNC"):
-            if uploaded_img is not None:
-                with st.spinner("🌑 SCANNING NEURAL DATA..."):
-                    result = analyze_analytics_screenshot(uploaded_img)
-                    st.session_state.last_analysis = result
-                    nums = re.findall(r'\d+', result.replace(',', ''))
-                    if nums:
-                        st.session_state.current_subs = int(nums[0])
-                        st.success(f"Intelligence Extracted: {nums[0]} Subscribers.")
-            else:
-                st.warning("Director, provide a data visual for scanning.")
+            if uploaded_img and client:
+                with st.spinner("🌑 SCANNING..."):
+                    try:
+                        img = Image.open(uploaded_img)
+                        response = client.models.generate_content(
+                            model="gemini-2.0-flash", 
+                            contents=["Extract the total subscriber count as a single number.", img]
+                        )
+                        result = response.text
+                        st.session_state.last_analysis = result
+                        nums = re.findall(r'\d+', result.replace(',', ''))
+                        if nums:
+                            st.session_state.current_subs = int(nums[0])
+                    except Exception as e:
+                        st.error(f"Scan Failed: {e}")
 
     if 'last_analysis' in st.session_state:
         st.info(f"**ORACLE FEEDBACK:** {st.session_state.last_analysis}")
         
         g_col1, g_col2 = st.columns([1, 2])
         with g_col1:
-            st.markdown("#### 🎯 TARGETS")
-            goal = st.number_input("End Goal", value=10000)
-            curr = st.session_state.current_subs
-            prog = curr / goal if goal > 0 else 0
-            st.metric("CURRENT REACH", f"{curr}", delta=f"{curr - 1500} Total Growth")
-            st.progress(min(prog, 1.0))
+            st.metric("CURRENT REACH", f"{st.session_state.current_subs}")
+            st.progress(min(st.session_state.current_subs / 10000, 1.0))
         
         with g_col2:
-            st.markdown("#### 📈 GROWTH TRACE")
-            # --- STRICT ALIGNMENT FOR THE CHART ---
+            # THIS IS THE CHART FIX
             chart_df = pd.DataFrame({
-                'Timeline': ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'LIVE'],
-                'Reach': [int(curr*0.8), int(curr*0.85), int(curr*0.9), int(curr*0.95), curr]
+                'Timeline': ['Wk 1', 'Wk 2', 'Wk 3', 'Wk 4', 'LIVE'],
+                'Reach': [int(st.session_state.current_subs*0.8), int(st.session_state.current_subs*0.85), 
+                          int(st.session_state.current_subs*0.9), int(st.session_state.current_subs*0.95), 
+                          st.session_state.current_subs]
             })
-            fig = px.line(chart_df, x='Timeline', y='Reach', markers=True)
-            fig.update_traces(line_color='#00ff41', line_width=4, marker=dict(size=12, color='#00d4ff', symbol='diamond'))
-            fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=250, font=dict(color="#00ff41", family="monospace"))
-            st.plotly_chart(fig, use_container_width=True)
-
+            st.line_chart(chart_df, x='Timeline', y='Reach')
     st.divider()
     if st.button("🔮 ANALYZE PERSONALIZED ORACLE REPORT"):
         with st.spinner("🌑 ORACLE IS CONSULTING THE VOID..."):
@@ -534,7 +496,6 @@ elif nav == "💎 Script Architect":
                 st.session_state.last_topic = topic
                 with st.spinner("🌑 ARCHITECTING SCRIPT..."):
                     try:
-                        groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
                         prompt = f"System: VOID OS Content Architect. Platform: {platform}. Topic: {topic}. Tone: {tone_choice}. Angle: {c_hook if c_hook else 'None'}."
                         res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                         txt = res.choices[0].message.content
@@ -559,7 +520,6 @@ elif nav == "💼 Client Pitcher":
         if st.button("🔥 Generate VOID Pitch"):
             if client_name and offer_details:
                 with st.spinner("🌑 ANALYZING LEAD..."):
-                    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
                     prompt = f"Write an elite black-label pitch for {client_name} in {niche_cat}. Offer: {offer_details}."
                     res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                     pitch_res = res.choices[0].message.content
@@ -591,6 +551,7 @@ elif nav == "📜 History":
     for s in reversed(st.session_state.script_history):
         with st.expander(f"{s['assigned_to']} | {s['topic']}"):
             st.write(s['script'])
+
 
 
 
