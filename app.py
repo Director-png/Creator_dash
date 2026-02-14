@@ -1026,7 +1026,31 @@ elif page == "💎 Upgrade to Pro":
         st.warning("📡 Awaiting Legal Agreement to reveal Payment Nodes.")
         st.write("Please check the box above to initialize the transaction.")
 
+# --- GOOGLE SHEETS UPLINK ---
+FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
 
+with st.form("manual_verify"):
+    st.write("### 🛰️ Admin Sync: Verify Payment")
+    u_email = st.text_input("Your Registered Email")
+    u_txn = st.text_input("Transaction ID / Reference Number")
+    
+    if st.form_submit_button("REQUEST ACTIVATION"):
+        if u_email and u_txn:
+            payload = {
+                "email": u_email,
+                "category": "PAYMENT_VERIFY",
+                "message": f"TXN: {u_txn}"
+            }
+            try:
+                res = requests.post(FEEDBACK_API_URL, json=payload)
+                if res.status_code == 200:
+                    st.success("✅ Transmission Sent. Verification in progress.")
+                else:
+                    st.error("📡 Uplink Failed. Check API Node.")
+            except Exception as e:
+                st.error("Critical System Error.")
+        else:
+            st.warning("All fields required for verification.")
 
 
 
@@ -1065,6 +1089,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
