@@ -1064,6 +1064,7 @@ elif page == "💎 Upgrade to Pro":
             - **Activation:** UPI requires manual verification (1-2 hours).
             - **Usage:** Respect platform scraping limits.
         """)    
+    
     # Force a clean key for the checkbox
     agreed = st.checkbox("I accept the Terms and Conditions", key="force_agree_check")
     
@@ -1075,16 +1076,44 @@ elif page == "💎 Upgrade to Pro":
         st.markdown("### 🇮🇳 DOMESTIC (UPI)")
         st.write("Special Launch Price: **₹499**")
         
-        # Replace 'yourname@vpa' with your actual UPI ID (e.g., void@okicici)
-        vpa_id = "yourname@vpa" 
-        upi_url = f"upi://pay?pa={"anuj05758@okicici"}&pn=VOID_OS&am=499&cu=INR"
+        # Corrected variable placement
+        vpa_id = "anuj05758@okicici" 
+        upi_url = f"upi://pay?pa={vpa_id}&pn=VOID_OS&am=499&cu=INR"
         qr_api = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={upi_url}"
         
-        # Displaying the QR without complex columns to avoid layout crashes
+        # Displaying the QR
         st.image(qr_api, width=250)
         st.caption("Scan with GPay, PhonePe, or Paytm")
         
-        st.success("🛰️ AFTER PAYMENT: Send your TXN ID and Email to the Admin Console.")
+        st.success("🛰️ AFTER PAYMENT: Use the Sync Form below to notify Admin.")
+
+        st.divider()
+        
+        # --- GOOGLE SHEETS UPLINK (Nested inside 'agreed') ---
+        FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
+
+        with st.form("manual_verify"):
+            st.write("### 🛰️ Admin Sync: Verify Payment")
+            u_email = st.text_input("Your Registered Email")
+            u_txn = st.text_input("Transaction ID / Reference Number")
+            
+            if st.form_submit_button("REQUEST ACTIVATION"):
+                if u_email and u_txn:
+                    payload = {
+                        "email": u_email,
+                        "category": "PAYMENT_VERIFY",
+                        "message": f"TXN: {u_txn}"
+                    }
+                    try:
+                        res = requests.post(FEEDBACK_API_URL, json=payload)
+                        if res.status_code == 200:
+                            st.success("✅ Transmission Sent. Verification in progress.")
+                        else:
+                            st.error("📡 Uplink Failed. Check API Node.")
+                    except Exception as e:
+                        st.error("Critical System Error.")
+                else:
+                    st.warning("All fields required for verification.")
 
         st.divider()
         
@@ -1098,32 +1127,6 @@ elif page == "💎 Upgrade to Pro":
         # This shows if the box is NOT checked
         st.warning("📡 Awaiting Legal Agreement to reveal Payment Nodes.")
         st.write("Please check the box above to initialize the transaction.")
-
-# --- GOOGLE SHEETS UPLINK ---
-FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
-
-with st.form("manual_verify"):
-    st.write("### 🛰️ Admin Sync: Verify Payment")
-    u_email = st.text_input("Your Registered Email")
-    u_txn = st.text_input("Transaction ID / Reference Number")
-    
-    if st.form_submit_button("REQUEST ACTIVATION"):
-        if u_email and u_txn:
-            payload = {
-                "email": u_email,
-                "category": "PAYMENT_VERIFY",
-                "message": f"TXN: {u_txn}"
-            }
-            try:
-                res = requests.post(FEEDBACK_API_URL, json=payload)
-                if res.status_code == 200:
-                    st.success("✅ Transmission Sent. Verification in progress.")
-                else:
-                    st.error("📡 Uplink Failed. Check API Node.")
-            except Exception as e:
-                st.error("Critical System Error.")
-        else:
-            st.warning("All fields required for verification.")
 
 
 
@@ -1162,6 +1165,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
