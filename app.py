@@ -306,14 +306,13 @@ if not st.session_state.logged_in:
     t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
     
     with t1:
-        email_in = st.text_input("Email", key="login_email").lower().strip()
-        pw_in = st.text_input("Password", type="password", key="login_pw")
+        email_in = st.text_input("Email", key="gate_email").lower().strip()
+        pw_in = st.text_input("Password", type="password", key="gate_pw")
         
-        if st.button("Access System", use_container_width=True):
-            # Fetching fresh data to ensure we see the 'paid' status and current password
+        # ADDED key="login_btn" TO PREVENT DUPLICATE ID
+        if st.button("Access System", use_container_width=True, key="login_btn"):
             users = load_user_db()
             
-            # --- ADMIN BYPASS ---
             if email_in == "admin" and pw_in == "1234":
                 st.session_state.logged_in = True
                 st.session_state.user_name = "Master Director"
@@ -322,9 +321,7 @@ if not st.session_state.logged_in:
                 st.session_state.user_email = "admin@system.com"
                 st.rerun()
             
-            # --- USER VALIDATION ---
             elif not users.empty:
-                # Match Email (Index 2) and Password (Index 4)
                 match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & (users.iloc[:, 4].astype(str) == pw_in)]
                 
                 if not match.empty:
@@ -343,39 +340,24 @@ if not st.session_state.logged_in:
                     st.error("Access Denied: Credentials Invalid.")
 
         st.write("")
-        # --- EMERGENCY OVERRIDE (FORGOTTEN PASSWORD) ---
+        # --- EMERGENCY OVERRIDE ---
         with st.expander("Forgot Passkey?"):
             st.markdown("### 🛰️ Identity Recovery")
-            reset_email = st.text_input("Registered Email", key="reset_mail").lower().strip()
-            new_passkey = st.text_input("New Secure Passkey", type="password", key="reset_pw")
+            reset_email = st.text_input("Registered Email", key="recovery_email").lower().strip()
+            new_passkey = st.text_input("New Secure Passkey", type="password", key="recovery_pw")
             
-            if st.button("INITIATE PASSWORD OVERRIDE", use_container_width=True):
+            # ADDED key="reset_btn" TO PREVENT DUPLICATE ID
+            if st.button("INITIATE PASSWORD OVERRIDE", use_container_width=True, key="reset_btn"):
                 if reset_email and new_passkey:
-                    # Sync with Google Script
-                    payload = {
-                        "email": reset_email,
-                        "category": "PASSWORD_RESET",
-                        "message": new_passkey
-                    }
+                    payload = {"email": reset_email, "category": "PASSWORD_RESET", "message": new_passkey}
                     try:
-                        # Ensure NEW_URL is your latest Apps Script deployment
                         response = requests.post(NEW_URL, json=payload, timeout=10)
                         if "SUCCESS" in response.text:
-                            st.success("✅ OMNI-SYNC COMPLETE: Passkey updated. You may now login.")
+                            st.success("✅ OMNI-SYNC COMPLETE: Passkey updated.")
                         else:
                             st.error(f"📡 RESET DENIED: {response.text}")
                     except Exception as e:
                         st.error(f"🚨 UPLINK FAILURE: {e}")
-                else:
-                    st.warning("Director, both email and new passkey are required for override.")
-                    
-    with t2:
-        with st.form("reg"):
-            n = st.text_input("Name"); e = st.text_input("Email"); ni = st.text_input("Niche"); p = st.text_input("Password", type="password")
-            if st.form_submit_button("Submit Registration"):
-                requests.post(FORM_POST_URL, data={"entry.483203499": n, "entry.1873870532": e, "entry.1906780868": ni, "entry.1396549807": p})
-                st.success("Transmission Received. Awaiting Node Approval.")
-    st.stop()
 
 # --- SIDEBAR NAVIGATION (UNIFIED & ALIGNED) ---
 with st.sidebar:
@@ -1312,6 +1294,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
