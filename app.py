@@ -977,10 +977,10 @@ elif page == "🛡️ Admin Console":
             st.error("Invalid Credentials. Intrusion attempt logged.")
 
         # Inside tab3 (Daily Lead Drop) of your Admin Console:
-        with tab3:
-            st.subheader("📡 Broadcast New Leads")
-            lead_file = st.file_uploader("Upload Daily Leads (CSV)", type="csv")
-            niche_label = st.text_input("Niche Category", placeholder="e.g., Real Estate India")
+            with tab3:
+                 st.subheader("📡 Broadcast New Leads")
+                 lead_file = st.file_uploader("Upload Daily Leads (CSV)", type="csv")
+                 niche_label = st.text_input("Niche Category", placeholder="e.g., Real Estate India")
             
             if st.button("🚀 PUSH TO PAID USERS"):
                 if lead_file is not None:
@@ -1104,6 +1104,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
