@@ -76,7 +76,7 @@ SCRIPT_VAULT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup1
 VAULT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfeDAY3gnWYlpH90EaJirxUc8d4obYUgiX72WJIah7Cya1VNQ/formResponse"
 VAULT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQTrDvNWe810s55puzBodFKvfUbfMV_l-QoQIfbdPxeQknClGGCQT33UQ471NyGTw4aHLrDTw/pub?output=csv"
 FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbz1mLI3YkbjVsA4a8rMgMe_07w_1sS8H-f2Wvz1FtFCU-ZN4zCH7kDUGaDPDaaMbrvaPw/exec"
-
+NEW_URL = "https://script.google.com/macros/s/AKfycbycLt6DBY237H3ATx1kkQZUxRofR6t1W16kW2s7LNgGAwEFf2BSehNKG4Scl3BTh3EQ/exec"
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
 
 def typewriter_effect(text):
@@ -1402,6 +1402,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
