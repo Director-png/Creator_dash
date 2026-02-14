@@ -991,8 +991,6 @@ with tab3:
         else:
             st.error("No data package detected. Upload a CSV first.")
 
-
-
 # --- MODULE 10: UPGRADE TO PRO (FORCE-RENDER) ---
 elif page == "💎 Upgrade to Pro":
     st.markdown("<h1 style='color: #00ff41;'>💎 VOID PRO: UPGRADE UPLINK</h1>", unsafe_allow_html=True)
@@ -1106,6 +1104,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
