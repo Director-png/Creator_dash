@@ -966,88 +966,85 @@ elif page == "📜 History":
                     st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
                     st.divider()
 
-
 # --- MODULE 11: ADMIN CONSOLE (OPTION C) ---
 elif page == "🛡️ Admin Console":
     st.markdown("<h1 style='color: #00ff41;'>🛡️ SYSTEM ADMINISTRATION</h1>", unsafe_allow_html=True)
     
-    # 1. Password Protection inside the tab
+    # 1. Password Protection
     auth = st.text_input("Enter Level 5 Authorization Code", type="password")
-    if auth == "IamAdmin": # Change this to your preferred secret
+    
+    if auth == "IamAdmin": 
         st.session_state['admin_verified'] = True
         st.success("Identity Verified. Welcome, Director.")
         
-        # 2. User Management
-        st.subheader("👥 User Management")
-        users_df = load_user_db()
-        if not users_df.empty:
-            st.dataframe(users_df, use_container_width=True)
-            
-with st.form("manual_verify_v2"):
-    st.write("### 🛰️ Admin Sync: Verify Payment")
-    u_email = st.text_input("Your Registered Email")
-    u_txn = st.text_input("Transaction ID / Reference Number")
-    
-    # ⚠️ PASTE YOUR NEW URL HERE
-    USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?gid=989182688&single=true&output=csv"    
-    if st.form_submit_button("REQUEST ACTIVATION"):
-        if u_email and u_txn:
-            # We add a 'status' field to make your life easier in the sheet
-            payload = {
-                "email": u_email,
-                "message": u_txn,
-                "category": "PAYMENT_PENDING"
-            }
-            try:
-                # 📡 THE HANDSHAKE
-                response = requests.post(FEEDBACK_API_URL, json=payload, timeout=10)
-                
-                if response.status_code == 200:
-                    st.success(f"✅ TRANSMISSION SUCCESS: Data logged to Central Command.")
-                    st.balloons() # Visual confirmation
-                else:
-                    st.error(f"📡 UPLINK ERROR: Server responded with code {response.status_code}")
-                    st.info("Check if your Google Script is deployed as 'Anyone'.")
-            
-            except Exception as e:
-                st.error(f"🚨 CRITICAL SYSTEM FAILURE: {str(e)}")
-        else:
-            st.warning("Director, both fields are required for synchronization.")        
-        # 3. System Metrics
-        st.divider()
-        st.subheader("🛰️ Node Traffic")
-        st.info(f"Active Users in Database: {len(users_df)}")
-        
-# ... (Inside your Module 11 Admin Logic)
-    elif auth != "":
-            st.error("Invalid Credentials. Intrusion attempt logged.")
+        # INITIALIZE TABS - This was missing in your snippet!
+        tab1, tab2, tab3 = st.tabs(["👥 Users", "💰 Payments", "📡 Lead Drop"])
 
-# --- TAB 2: PAYMENTS ---
+        # --- TAB 1: USER MANAGEMENT ---
+        with tab1:
+            st.subheader("👥 User Management")
+            users_df = load_user_db()
+            if not users_df.empty:
+                st.dataframe(users_df, use_container_width=True)
+            
+            st.divider()
+            st.subheader("🛰️ Node Traffic")
+            st.info(f"Active Users in Database: {len(users_df)}")
+
+        # --- TAB 2: PAYMENTS (Manual Override) ---
         with tab2: 
-            st.subheader("💰 Manual Revenue override")
-            target_mail = st.text_input("User Email to Activate")
+            st.subheader("💰 Manual Revenue Override")
+            target_mail = st.text_input("User Email to Activate", key="admin_target_mail")
             
             if st.button("ACTIVATE PRO NODES"):
-                # 1. Update the Local Session for immediate effect
+                # Update the Local Session for immediate effect
                 st.session_state['user_status'] = 'paid'
-                # 2. Update the CSV/Database logic would go here
                 st.success(f"System Overridden. {target_mail} is now PRO.")
+            
+            st.divider()
+            
+            # THE MANUAL VERIFY FORM - Placed logically inside Payments Tab
+            with st.form("manual_verify_v2"):
+                st.write("### 🛰️ Admin Sync: Verify Payment")
+                u_email = st.text_input("Your Registered Email")
+                u_txn = st.text_input("Transaction ID / Reference Number")
+                
+                # Use your Script URL, not the Sheet URL for the API
+                FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
+                
+                if st.form_submit_button("REQUEST ACTIVATION"):
+                    if u_email and u_txn:
+                        payload = {"email": u_email, "message": u_txn, "category": "PAYMENT_PENDING"}
+                        try:
+                            response = requests.post(FEEDBACK_API_URL, json=payload, timeout=10)
+                            if response.status_code == 200:
+                                st.success(f"✅ TRANSMISSION SUCCESS: Data logged.")
+                                st.balloons()
+                            else:
+                                st.error(f"📡 UPLINK ERROR: {response.status_code}")
+                        except Exception as e:
+                            st.error(f"🚨 CRITICAL SYSTEM FAILURE: {str(e)}")
+                    else:
+                        st.warning("Director, both fields are required.")
 
-        # --- TAB 3: LEAD DROP (Aligned with Tab 2) ---
+        # --- TAB 3: LEAD DROP ---
         with tab3:
             st.subheader("📡 Broadcast New Leads")
             lead_file = st.file_uploader("Upload Daily Leads (CSV)", type="csv")
             niche_label = st.text_input("Niche Category", placeholder="e.g., Real Estate India")
             
-            # This button must be inside tab3
             if st.button("🚀 PUSH TO PAID USERS"):
                 if lead_file is not None:
                     import pandas as pd
                     df = pd.read_csv(lead_file)
                     st.session_state['global_leads'] = df
-                    st.success(f"Transmission Successful. {len(df)} leads pushed to {niche_label}.")
+                    st.success(f"Transmission Successful. {len(df)} leads pushed.")
                 else:
-                    st.error("No data package detected. Upload a CSV first.")
+                    st.error("No data package detected.")
+
+    elif auth != "":
+        st.error("Invalid Credentials. Intrusion attempt logged.")
+
 
 # --- MODULE 10: UPGRADE TO PRO (FORCE-RENDER) ---
 elif page == "💎 Upgrade to Pro":
@@ -1164,6 +1161,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
