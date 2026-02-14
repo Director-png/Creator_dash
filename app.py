@@ -842,37 +842,50 @@ elif page == "🛰️ Lead Source":
             else:
                 with st.spinner(f"🌑 PENETRATING {niche_target.upper()} NODES..."):
                     try:
-                        if "RAPIDAPI_KEY" in st.secrets and st.secrets["RAPIDAPI_KEY"] != "your_key_here":
-                            url = "https://instagram-scraper-api2.p.rapidapi.com/v1/search_users"
-                            headers = {
-                                "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
-                                "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
-                            }
-                            
-                            # Clean the query for the API
-                            query = niche_target.strip().lower()
-                            response = requests.get(url, headers=headers, params={"search_query": query})
-                            raw_data = response.json()
-                            
-                            # Pulling the user list
-                            users_list = raw_data.get('data', {}).get('users', [])
-                            
-                            if users_list:
-                                data = []
-                                limit = 5 if scan_depth == "Surface" else 15
-                                for user in users_list[:limit]:
-                                    data.append({
-                                        "Handle": f"@{user['username']}",
-                                        "Platform": "IG",
-                                        "Followers": "LIVE",
-                                        "Gap": f"Strategic Gap in {niche_target} Content",
-                                        "Vigor": random.randint(70, 99),
-                                        "Value": "High" if user.get('is_verified') else "Medium"
-                                    })
-                            else:
-                                # This forces the simulation if the API genuinely finds nothing
-                                raise ValueError("Zero results from API search")
+                    if "RAPIDAPI_KEY" in st.secrets and st.secrets["RAPIDAPI_KEY"] != "your_key_here":
+                        url = "https://instagram-scraper-api2.p.rapidapi.com/v1/search_users"
+                        headers = {
+                            "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
+                            "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
+                        }
                         
+                        # Use a common keyword to force a result
+                        query = niche_target.strip().lower()
+                        response = requests.get(url, headers=headers, params={"search_query": query})
+                        raw_data = response.json()
+                        
+                        # THE DIAGNOSTIC PULSE
+                        users_list = raw_data.get('data', {}).get('users', [])
+                        
+                        if not users_list:
+                            # Reveal the JSON so we can fix the subscription/key error
+                            st.error("📡 API DIAGNOSTICS REVEALED:")
+                            st.json(raw_data) 
+                            raise ValueError("API returned no users for this keyword.")
+                        
+                        data = []
+                        limit = 5 if scan_depth == "Surface" else 10
+                        for user in users_list[:limit]:
+                            data.append({
+                                "Handle": f"@{user['username']}",
+                                "Platform": "IG",
+                                "Followers": "LIVE",
+                                "Gap": f"Detected Strategic Gap in {niche_target} niche",
+                                "Vigor": random.randint(70, 99),
+                                "Value": "High" if user.get('is_verified') else "Medium"
+                            })
+                    else:
+                        raise ConnectionError("API Key is missing from secrets.toml.")
+
+                except Exception as e:
+                    st.warning(f"Note: {e}. Loading Simulation Mode...")
+                    # FALLBACK DATA
+                    data = [
+                        {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Vigor": 85, "Value": "High"},
+                        {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Vigor": 94, "Value": "Critical"}
+                    ]
+                    st.session_state.found_leads = pd.DataFrame(data)
+                
                         else:
                             raise ConnectionError("API Key Missing")
 
@@ -998,6 +1011,7 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
+
 
 
 
