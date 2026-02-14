@@ -362,12 +362,14 @@ if page == "FEEDBACK":
         st.session_state.current_page = "🏠 Dashboard" if st.session_state.user_role == "admin" else "📡 My Growth Hub"
         st.rerun()
 
-# --- MODULE 1: DASHBOARD ---
-# --- MODULE 1: DASHBOARD ---
+# --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
 elif page == "🏠 Dashboard":
+    # 🚨 COMPLIANCE HEADER (Bot-Friendly)
+    st.markdown("<p style='font-size: 10px; color: #444;'>VOID OS | B2B Outreach SaaS | support@yourdomain.com</p>", unsafe_allow_html=True)
+    
     st.markdown("<h1 style='color: #00ff41;'>🛰️ COMMAND CENTER</h1>", unsafe_allow_html=True)
     
-    # KPI Row
+    # 1. KPI Row (Keep your original logic)
     kpi1, kpi2, kpi3 = st.columns(3)
     kpi1.metric("ARCHIVED SCRIPTS", len(st.session_state.get('script_history', [])))
     kpi2.metric("ELITE PITCHES", len(st.session_state.get('pitch_history', [])))
@@ -375,6 +377,18 @@ elif page == "🏠 Dashboard":
     
     st.divider()
     
+    # 2. BUSINESS TRANSPARENCY (The Razorpay Trap)
+    with st.container():
+        st.write("### 📜 Business Service Description")
+        st.write("""
+            VOID OS is a specialized **Software as a Service (SaaS)** platform providing AI-driven 
+            marketing outreach automation and lead intelligence for digital agencies.
+        """)
+        st.caption("Registered Category: IT Services / Software Development")
+    
+    st.divider()
+    
+    # 3. Mission Status & System Integrity
     c1, c2 = st.columns([2, 1])
     with c1:
         st.subheader("🌑 MISSION STATUS")
@@ -387,25 +401,7 @@ elif page == "🏠 Dashboard":
     with c2:
         st.subheader("🛡️ SYSTEM INTEGRITY")
         core_display = active_core if 'active_core' in globals() else "STANDBY"
-        st.code(f"AI Core: {core_display}\nHandshake: STABLE\nLaunch: READY")
-
-    # --- 🚨 RAZORPAY COMPLIANCE ANCHOR (Hidden in Plain Sight) ---
-    st.divider()
-    auditor_col1, auditor_col2 = st.columns(2)
-    
-    with auditor_col1:
-        st.write("### 📜 Software Service Details")
-        st.caption("VOID OS is a B2B SaaS platform providing AI-driven lead generation and outreach automation.")
-        st.write("📍 **Pricing:** Subscription plans starting from ₹499.")
-        
-    with auditor_col2:
-        st.write("### 📞 Contact & Support")
-        # Replace this with your actual contact email
-        st.write("📧 **Support:** support@your-email.com") 
-        st.write("🌐 **URL:** void-os.streamlit.app")
-
-    st.caption("Legal nodes verified: Terms of Service, Privacy Policy, and Refund Policy are active.")
-
+        st.code(f"AI Core: {core_display}\nHandshake: STABLE\nLaunch: T-Minus 48h")
 
 # --- MODULE 8: GROWTH HUB (HARDENED VERSION) ---
 elif page == "📡 My Growth Hub":
@@ -1069,6 +1065,7 @@ with f_col3:
     st.caption("📍 Dehradun, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
