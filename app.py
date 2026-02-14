@@ -344,7 +344,6 @@ if not st.session_state.logged_in:
                 requests.post(FORM_POST_URL, data={"entry.483203499": n, "entry.1873870532": e, "entry.1906780868": ni, "entry.1396549807": p})
                 st.success("Transmission Received. Awaiting Node Approval.")
     st.stop()
-if st.session_state.user_status == "paid":
 
 # --- SIDEBAR NAVIGATION ---
 with st.sidebar:
@@ -1212,6 +1211,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
