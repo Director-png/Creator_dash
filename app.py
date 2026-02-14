@@ -793,13 +793,16 @@ elif page == "⚔️ Trend Duel":
             fig = px.bar(comp, x='Niche', y='Score', color='Score', template='plotly_dark')
             st.plotly_chart(fig, use_container_width=True)
 
-
 # --- MODULE 6: SCRIPT ARCHITECT (REPAIRED & INTEGRATED) ---
 elif page == "💎 Script Architect":
-    # 🕵️ Detect Persona (Fixed: Checks both Admin flag and Paid status)
-    # We use .strip().lower() to avoid mismatches like "Paid" vs "paid"
-    is_admin = st.session_state.get('user_role') == 'admin' or st.session_state.get('admin_verified', False)
-    user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
+    # 🕵️ EMERGENCY DEBUG MONITOR
+    # This will show you EXACTLY why it is blank.
+    user_status_raw = st.session_state.get('user_status', 'NOT_FOUND')
+    user_role_raw = st.session_state.get('user_role', 'NOT_FOUND')
+    
+    # Show this only to you (Admin) so you can see the error live
+    if st.session_state.get('admin_verified'):
+        st.write(f"DEBUG DATA: Status=['{user_status_raw}'], Role=['{user_role_raw}']")
 
     # 🛑 THE GATEKEEPER: If not Admin and not Paid, block access
     if not is_admin and user_status != 'paid':
@@ -1415,6 +1418,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
