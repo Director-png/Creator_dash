@@ -780,21 +780,26 @@ elif page == "⚔️ Trend Duel":
 elif page == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
     
-    # 🕵️ Detect Persona
-    is_admin = st.session_state.get('admin_verified', False)
+    # Initialize session keys if they don't exist
+    if 'last_script' not in st.session_state: st.session_state.last_script = ""
+    if 'last_topic' not in st.session_state: st.session_state.last_topic = ""
+    if 'last_dna' not in st.session_state: st.session_state.last_dna = ""
+
+    # 🕵️ Detect Persona correctly
+    is_admin = st.session_state.get('user_role') == 'admin'
     
     # Load users ONLY if Admin
     client_options = ["Public/General"]
     if is_admin:
         users_df = load_user_db()
         if not users_df.empty:
-            db_names = users_df.iloc[:, 1].dropna().unique().tolist()
+            # Safer way to get names from your specific column structure
+            db_names = users_df['name'].dropna().unique().tolist()
             client_options = ["Public/General"] + db_names
 
     c1, c2 = st.columns([1, 1.5], gap="large")
     
     with c1:
-        # Only Admin sees the target selection; PRO users are 'Personal' by default
         if is_admin:
             target_client = st.selectbox("Assign To Target", options=client_options, key="arch_target_final")
         else:
@@ -808,7 +813,6 @@ elif page == "💎 Script Architect":
         with st.expander("👤 COMPETITOR SHADOW"):
             c_hook = st.text_area("Their Narrative (What are they saying?)")
         
-        # Change button label based on role
         btn_label = "🚀 ARCHITECT & TRANSMIT" if is_admin else "🚀 ARCHITECT SCRIPT"
         
         if st.button(btn_label, use_container_width=True):
@@ -829,55 +833,40 @@ elif page == "💎 Script Architect":
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "user", "content": prompt}]
                         )
-                        txt = res.choices[0].message.content
-                        dna_profile = generate_visual_dna(platform, tone_choice)
                         
-                        # Save to local session for immediate display
-                        st.session_state.script_history.append({
-                            "assigned_to": target_client, 
-                            "topic": topic, 
-                            "script": txt,
-                            "platform": platform
-                        })
+                        # SAVE TO SESSION STATE IMMEDIATELY
+                        st.session_state.last_script = res.choices[0].message.content
+                        st.session_state.last_topic = topic
+                        st.session_state.last_dna = generate_visual_dna(platform, tone_choice)
                         
-                        # --- CRITICAL: ONLY TRANSMIT TO DATABASE IF ADMIN ---
+                        # --- ADMIN SYNC ---
                         if is_admin:
-                            status = transmit_script(target_client, platform, topic, txt, dna_profile)
-                            if status: 
-                                st.success("⚔️ BROADCAST COMPLETE: Script synced to Vault.")
+                            transmit_script(target_client, platform, topic, st.session_state.last_script, st.session_state.last_dna)
+                            st.success("⚔️ BROADCAST COMPLETE: Script synced to Vault.")
                         else:
-                            st.success("⚔️ ARCHITECTURE COMPLETE: Script ready for deployment.")
-
-                        with c2:
-                            st.subheader("💎 GENERATED ARCHIVE")
-                            st.markdown(txt)
-                            st.divider()
-                            st.caption(f"🧬 DNA: {dna_profile}")
+                            st.success("⚔️ ARCHITECTURE COMPLETE: Ready for deployment.")
                             
                     except Exception as e: 
                         st.error(f"Intelligence Failure: {e}")
 
-    # Column 2 Empty State
-    if 'txt' not in locals() and not st.session_state.get('script_history'):
-        with c2:
+    # --- THE PERSISTENT VIEW (This stays visible even after clicking Archive) ---
+    with c2:
+        if st.session_state.last_script:
+            st.subheader("💎 GENERATED ARCHIVE")
+            st.markdown(st.session_state.last_script)
+            st.divider()
+            st.caption(f"🧬 DNA: {st.session_state.last_dna}")
+            
+            # --- THE ARCHIVE FEATURE ---
+            # Now we use the Session State variable so it NEVER throws NameError
+            if st.button("💾 Archive to History Vault", use_container_width=True):
+                save_script_to_vault(
+                    f"{platform}: {st.session_state.last_topic}", 
+                    st.session_state.last_script
+                )
+        else:
             st.info("Awaiting Tactical Input. Architectural blueprints will manifest here.")
 
-def save_script_to_vault(title, content):
-    payload = {
-        "email": st.session_state.user_email,
-        "category": "SAVE_SCRIPT",
-        "title": title,
-        "content": content
-    }
-    try:
-        requests.post(NEW_URL, json=payload)
-        st.success("📜 Script archived in your Private Vault.")
-    except:
-        st.error("Uplink failed. Script not saved.")
-
-# Inside your Script Architect UI, after the script is generated:
-if st.button("💾 Archive to History Vault"):
-    save_script_to_vault(f"Script_{time.strftime('%Y%m%d')}", generated_script_text)
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -1374,6 +1363,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
