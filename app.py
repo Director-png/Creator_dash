@@ -962,52 +962,55 @@ elif page == "🛡️ Admin Console":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
 
-# --- MODULE 10: UPGRADE TO PRO (STABILIZED) ---
+# --- MODULE 10: UPGRADE TO PRO (FORCE-RENDER) ---
 elif page == "💎 Upgrade to PRO":
     st.markdown("<h1 style='color: #00ff41;'>💎 VOID PRO: UPGRADE UPLINK</h1>", unsafe_allow_html=True)
     
-    st.info("Unlock the full architecture: Unlimited Lead Scans, Neural Pitching, and Global Data Drops.")
+    st.info("Unlock Unlimited Lead Scans & Neural Pitching.")
 
-    # --- TERMS & CONDITIONS (THE LEGAL GATE) ---
-    with st.expander("⚖️ View Terms of Service & Refund Policy"):
+    # 1. THE LEGAL GATE
+    st.subheader("⚖️ Legal Compliance")
+    with st.expander("Read Terms & Refund Policy"):
         st.write("""
-            **1. Service Delivery:** VOID OS provides AI-generated leads. 
-            **2. Refund Policy:** Due to the digital nature of neural credits, all sales are final. 
-            **3. Verification:** Manual UPI transfers require a screenshot for activation (1-2 hours).
+            - **No Refunds:** Digital credits are consumed instantly.
+            - **Activation:** UPI requires manual verification (1-2 hours).
+            - **Usage:** Respect platform scraping limits.
         """)
     
-    # Use a unique key to prevent session ghosting
-    agree = st.checkbox("I agree to the Terms & Conditions", key="legal_agreement_v1")
+    # Force a clean key for the checkbox
+    agreed = st.checkbox("I accept the Terms and Conditions", key="force_agree_check")
     
     st.divider()
 
-    if agree:
-        # Domestic UPI Section
-        st.subheader("🇮🇳 Domestic (UPI)")
-        st.write("Special Launch Price: **₹499** (50% OFF)")
+    # 2. THE RENDER LOGIC
+    if agreed:
+        # DOMESTIC SECTION
+        st.markdown("### 🇮🇳 DOMESTIC (UPI)")
+        st.write("Special Launch Price: **₹499**")
         
-        vpa = "yourname@vpa" # Replace with your ID
-        upi_link = f"upi://pay?pa={vpa}&pn=VOID_OS&am=499&cu=INR"
-        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={upi_link}"
+        # Replace 'yourname@vpa' with your actual UPI ID (e.g., void@okicici)
+        vpa_id = "yourname@vpa" 
+        upi_url = f"upi://pay?pa={vpa_id}&pn=VOID_OS&am=499&cu=INR"
+        qr_api = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={upi_url}"
         
-        col_qr, col_text = st.columns([1, 1.5])
-        with col_qr:
-            st.image(qr_url, caption="Scan with any UPI App")
-        with col_text:
-            st.write("**How to activate:**")
-            st.write("1. Scan the QR and pay ₹499.")
-            st.write("2. Note the Transaction ID.")
-            st.write("3. Upload the screenshot in the 'Admin Sync' below.")
+        # Displaying the QR without complex columns to avoid layout crashes
+        st.image(qr_api, width=250)
+        st.caption("Scan with GPay, PhonePe, or Paytm")
+        
+        st.success("🛰️ AFTER PAYMENT: Send your TXN ID and Email to the Admin Console.")
 
         st.divider()
         
-        # International Section
-        st.subheader("🌎 International (Card/PayPal)")
+        # INTERNATIONAL SECTION
+        st.markdown("### 🌎 INTERNATIONAL (CARD)")
         st.write("Launch Price: **$19**")
-        st.button("🚀 RAZORPAY GATEWAY (Initializing...)", disabled=True, help="Verification in progress")
+        st.button("🚀 RAZORPAY GATEWAY (VERIFYING...)", disabled=True)
+        st.caption("International payments will unlock once Razorpay Website verification is complete.")
+        
     else:
-        st.warning("⚠️ Please accept the Terms & Conditions above to view payment nodes.")
-
+        # This shows if the box is NOT checked
+        st.warning("📡 Awaiting Legal Agreement to reveal Payment Nodes.")
+        st.write("Please check the box above to initialize the transaction.")
 
 
 
@@ -1025,6 +1028,7 @@ footer_html = """
 </div>
 """
 st.markdown(footer_html, unsafe_allow_html=True)
+
 
 
 
