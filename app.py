@@ -983,7 +983,7 @@ elif page == "🛡️ Admin Console":
         if not users_df.empty:
             st.dataframe(users_df, use_container_width=True)
             
-           with st.form("manual_verify_v2"):
+with st.form("manual_verify_v2"):
     st.write("### 🛰️ Admin Sync: Verify Payment")
     u_email = st.text_input("Your Registered Email")
     u_txn = st.text_input("Transaction ID / Reference Number")
@@ -1165,6 +1165,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
