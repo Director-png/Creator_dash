@@ -825,21 +825,21 @@ elif page == "🧪 Creator Lab":
                 res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": blueprint_prompt}])
                 st.info(res.choices[0].message.content)
 
-# --- MODULE 9: LEAD SOURCE (INSTAGRAM191 MASTER KEY) ---
+# --- MODULE 9: LEAD SOURCE (UNIVERSAL SOCIAL UPLINK) ---
 elif page == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
     
-    niche_target = st.text_input("Target Keyword", placeholder="e.g. SaaS Founder, Fitness Coach")
+    niche_target = st.text_input("Target Keyword", placeholder="e.g. SaaS Founder, Real Estate India")
     
-    if st.button("📡 INITIALIZE DEEP SCAN"):
+    if st.button("📡 INITIALIZE DEEP SCAN", use_container_width=True):
         if "RAPIDAPI_KEY" not in st.secrets:
             st.error("Uplink Failure: API Key missing in Secrets.")
         else:
-            with st.spinner("🌑 PENETRATING INSTAGRAM191 ARCHITECTURE..."):
+            with st.spinner("🌑 PENETRATING SOCIAL NODES..."):
+                # 🛑 FOR INSTAGRAM191 (GLAVIER), USE THIS HOST:
                 target_host = "instagram191.p.rapidapi.com" 
-                # 🛑 THE FIX: Instagram191 path is usually /v1/user/search/ or /v1/search/
-                # We will try the 'user/search' path first
-                url = f"https://{target_host}/v1/user/search/"
+                # Endpoint: Web Search is the gold standard for Glavier
+                url = f"https://{target_host}/v1/web/search/"
                 
                 headers = {
                     "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
@@ -847,39 +847,55 @@ elif page == "🛰️ Lead Source":
                 }
                 
                 try:
-                    # Parameter for Instagram191 is 'query'
-                    response = requests.get(url, headers=headers, params={"query": niche_target.strip()})
+                    # Adaptive parameter check: Instagram191 uses 'query'
+                    response = requests.get(url, headers=headers, params={"query": niche_target})
                     raw_data = response.json()
                     
-                    # 🔍 DEBUG: If it fails, try the alternative search path
-                    if "message" in raw_data and "does not exist" in raw_data["message"]:
-                        alt_url = f"https://{target_host}/v1/search/"
-                        response = requests.get(alt_url, headers=headers, params={"query": niche_target.strip()})
-                        raw_data = response.json()
-
-                    # Instagram191 structure check
-                    users = raw_data.get('data', [])
+                    # 🔍 DATA ADAPTATION LAYER
+                    # Tries to find the user list in 'users', 'data', or 'items'
+                    users = raw_data.get('users', raw_data.get('data', raw_data.get('items', [])))
                     
                     if users:
                         data = []
                         for u in users[:10]:
+                            # Adaptive extraction for nested 'user' objects (Standard for Glavier)
+                            u_info = u.get('user', u) 
                             data.append({
-                                "Handle": f"@{u.get('username')}",
+                                "Handle": f"@{u_info.get('username', 'Unknown')}",
                                 "Platform": "IG",
-                                "Followers": u.get('follower_count', 'LIVE'),
-                                "Gap": f"Detected Strategic Gap in {niche_target}",
+                                "Followers": u_info.get('follower_count', 'LIVE'),
+                                "Gap": f"Strategic Gap in {niche_target} Content",
                                 "Vigor": random.randint(80, 99),
-                                "Value": "High" if u.get('is_verified') else "Medium"
+                                "Value": "High" if u_info.get('is_verified') else "Medium"
                             })
                         st.session_state.found_leads = pd.DataFrame(data)
-                        st.success(f"UPLINK SUCCESSFUL: Found {len(data)} Targets.")
+                        st.success(f"Uplink Established: {len(data)} Targets Identified.")
                     else:
-                        st.error("📡 GATEWAY LOGS:")
-                        st.json(raw_data) # This will reveal the exact working path
-                        st.warning("No data found. Reverting to Simulation...")
+                        st.error("Uplink Error: Zero results from API search. Reverting to simulation...")
+                        # Simulation Fallback
+                        sim_data = [
+                            {"Handle": "@Growth_Architect", "Platform": "IG", "Followers": "85K", "Gap": "Low Hook Retention", "Vigor": 88, "Value": "High"},
+                            {"Handle": "@SaaS_Elite", "Platform": "IG", "Followers": "12K", "Gap": "No Direct-to-DM Funnel", "Vigor": 95, "Value": "Critical"}
+                        ]
+                        st.session_state.found_leads = pd.DataFrame(sim_data)
+                        st.info("💡 Tip: Double check your search term or API subscription status on RapidAPI.")
 
                 except Exception as e:
                     st.error(f"Hardware Error: {e}")
+
+    # --- RENDER TABLE & PORT TO PITCHER ---
+    if not st.session_state.found_leads.empty:
+        st.divider()
+        edited_df = st.data_editor(
+            st.session_state.found_leads,
+            hide_index=True, use_container_width=True
+        )
+        
+        if st.button("🚀 PORT SELECTED TO PITCHER"):
+            # Ports the first handle to the Pitcher for analysis
+            target = edited_df.iloc[0]
+            st.session_state.active_pitch_target = {"name": target["Handle"], "gap": target["Gap"], "niche": niche_target}
+            st.toast(f"Neural Bridge Active: {target['Handle']}")
 
 
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
@@ -993,6 +1009,7 @@ elif page == "💎 Upgrade to Pro":
     st.divider()
     st.subheader("🚀 BETA FOUNDER STATUS")
     st.write("Current User Status: **FREE TIER**")
+
 
 
 
