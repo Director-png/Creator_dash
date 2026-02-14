@@ -300,64 +300,51 @@ st.markdown("""<style>
     .stMetric { border: 1px solid #111; padding: 15px; border-radius: 10px; background: #080808; }
     </style>""", unsafe_allow_html=True)
 
-# --- GATEKEEPER (INTEGRATED VERSION) ---
-if not st.session_state.logged_in:
+# --- THE ULTIMATE GATEKEEPER ---
+if not st.session_state.get('logged_in', False):
     st.markdown("<h1 style='text-align: center; color: #00ff41;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
     t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
     
     with t1:
-        email_in = st.text_input("Email", key="gate_email").lower().strip()
-        pw_in = st.text_input("Password", type="password", key="gate_pw")
+        email_in = st.text_input("Email", key="main_login_email").lower().strip()
+        pw_in = st.text_input("Password", type="password", key="main_login_pw")
         
-        # ADDED key="login_btn" TO PREVENT DUPLICATE ID
-        if st.button("Access System", use_container_width=True, key="login_btn"):
+        if st.button("Access System", use_container_width=True, key="gate_access_btn"):
             users = load_user_db()
             
+            # 1. Admin Logic
             if email_in == "admin" and pw_in == "1234":
                 st.session_state.logged_in = True
                 st.session_state.user_name = "Master Director"
                 st.session_state.user_role = "admin"
                 st.session_state.user_status = "paid"
-                st.session_state.user_email = "admin@system.com"
                 st.rerun()
             
+            # 2. User Logic
             elif not users.empty:
                 match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & (users.iloc[:, 4].astype(str) == pw_in)]
-                
                 if not match.empty:
-                    try:
-                        raw_status = str(match.iloc[0, 5]).strip().lower()
-                    except:
-                        raw_status = "free"
-                    
                     st.session_state.logged_in = True
                     st.session_state.user_name = match.iloc[0, 1]
-                    st.session_state.user_email = email_in
-                    st.session_state.user_role = "user"
-                    st.session_state.user_status = raw_status 
+                    st.session_state.user_status = str(match.iloc[0, 5]).strip().lower()
                     st.rerun()
-                else: 
-                    st.error("Access Denied: Credentials Invalid.")
+                else:
+                    st.error("Access Denied.")
 
-        st.write("")
-        # --- EMERGENCY OVERRIDE ---
         with st.expander("Forgot Passkey?"):
-            st.markdown("### 🛰️ Identity Recovery")
-            reset_email = st.text_input("Registered Email", key="recovery_email").lower().strip()
-            new_passkey = st.text_input("New Secure Passkey", type="password", key="recovery_pw")
-            
-            # ADDED key="reset_btn" TO PREVENT DUPLICATE ID
-            if st.button("INITIATE PASSWORD OVERRIDE", use_container_width=True, key="reset_btn"):
-                if reset_email and new_passkey:
-                    payload = {"email": reset_email, "category": "PASSWORD_RESET", "message": new_passkey}
-                    try:
-                        response = requests.post(NEW_URL, json=payload, timeout=10)
-                        if "SUCCESS" in response.text:
-                            st.success("✅ OMNI-SYNC COMPLETE: Passkey updated.")
-                        else:
-                            st.error(f"📡 RESET DENIED: {response.text}")
-                    except Exception as e:
-                        st.error(f"🚨 UPLINK FAILURE: {e}")
+            # ... (Your reset logic here, ensure it has UNIQUE keys like key="reset_email_field") ...
+            pass
+
+    with t2:
+        # ... (Your registration logic) ...
+        pass
+
+    # 🛑 CRITICAL: This prevents the rest of the app (sidebar/tabs) from loading
+    st.stop() 
+
+# --- MAIN APP (ONLY REACHED IF LOGGED IN) ---
+# Ensure all following code (Sidebar, Modules) starts here at 0 indentation
+
 
 # --- SIDEBAR NAVIGATION (UNIFIED & ALIGNED) ---
 with st.sidebar:
@@ -1294,6 +1281,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
