@@ -826,7 +826,7 @@ elif page == "🧪 Creator Lab":
                 st.info(res.choices[0].message.content)
 
 # --- MODULE 9: LEAD SOURCE (INTEGRATED & RECTIFIED) ---
-# --- MODULE 9: LEAD SOURCE (RECTIFIED INDENTATION) ---
+# --- MODULE 9: LEAD SOURCE (FIXED INDENTATION) ---
 elif page == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
     
@@ -919,6 +919,7 @@ elif page == "🛰️ Lead Source":
             if st.button("💎 SYNC ALL TO MASTER VAULT"):
                 st.success("Archive Synchronized.")
 
+
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
 elif page == "📜 History":
     st.markdown("<h1 style='color: #00ff41;'>📜 ARCHIVE VAULT</h1>", unsafe_allow_html=True)
@@ -994,6 +995,7 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
+
 
 
 
