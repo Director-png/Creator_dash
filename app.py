@@ -428,7 +428,7 @@ if not st.session_state.logged_in:
             Security = st.text_input("Security Question: What was your first school? (Required for recovery)")
             
             if st.form_submit_button("Submit Registration"):
-                if n and e and p and sa:
+                if Name and Email and Niche and Create_password and Security:
                     # Note: Ensure your Google Form has a field for the security answer!
                     # You will need to add the correct 'entry.ID' for the security answer below
                     reg_data = {
@@ -1417,6 +1417,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
