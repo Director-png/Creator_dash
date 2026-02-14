@@ -300,6 +300,16 @@ import requests
 import pandas as pd
 import time
 
+
+
+# --- EMERGENCY DIAGNOSTIC ---
+if st.sidebar.checkbox("🔍 Debug Node Mapping"):
+    users_test = load_user_db()
+    if not users_test.empty:
+        st.write("Current Columns:", users_test.columns.tolist())
+        st.write("Top Row Sample:", users_test.iloc[0].values.tolist())
+    else:
+        st.error("Sheet is empty or URL is invalid.")
 # --- CONFIGURATION (Ensure these are defined) ---
 # NEW_URL = "https://script.google.com/macros/s/AKfycbwptoGlGh8xNwVVwf7porQnc-NrW67hrVRpugQpsXxw76X4zsO4qhdk9LH5otqcl4LH/exec"
 # FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
@@ -1336,6 +1346,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
