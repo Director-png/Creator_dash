@@ -826,14 +826,14 @@ elif page == "🧪 Creator Lab":
                 st.info(res.choices[0].message.content)
 
 # --- MODULE 9: LEAD SOURCE (INTEGRATED & RECTIFIED) ---
+# --- MODULE 9: LEAD SOURCE (RECTIFIED INDENTATION) ---
 elif page == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
     
     col_input, col_stats = st.columns([1, 1])
     
     with col_input:
-        # CHANGED TO TEXT INPUT FOR BETTER API MATCHING
-        niche_target = st.text_input("Target Keyword (e.g., SaaS, Founder, CEO)", placeholder="Try broad terms...")
+        niche_target = st.text_input("Target Keyword", placeholder="e.g. SaaS, Founder, Fitness")
         scan_depth = st.select_slider("Scan Intensity", ["Surface", "Deep", "Quantum"])
         
         if st.button("📡 INITIALIZE DEEP SCAN", use_container_width=True):
@@ -841,22 +841,19 @@ elif page == "🛰️ Lead Source":
                 st.warning("Director, enter a target keyword first.")
             else:
                 with st.spinner("🌑 FORCING UPLINK..."):
-                    # 1. AUTH CHECK
                     api_key = st.secrets.get("RAPIDAPI_KEY")
                     
                     if api_key and api_key != "your_key_here":
-                        url = "https://instagram-scraper-api2.p.rapidapi.com/v1/search_users"
-                        headers = {
-                            "X-RapidAPI-Key": api_key,
-                            "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
-                        }
-                        
                         try:
-                            # 2. THE CALL
+                            url = "https://instagram-scraper-api2.p.rapidapi.com/v1/search_users"
+                            headers = {
+                                "X-RapidAPI-Key": api_key,
+                                "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
+                            }
                             response = requests.get(url, headers=headers, params={"search_query": niche_target.strip()})
                             raw_data = response.json()
                             
-                            # 3. THE RAW OUTPUT (We need to see this!)
+                            # THE RAW FEED (Our diagnostic eyes)
                             st.write("📡 RAW SYSTEM FEED:", raw_data)
                             
                             users_list = raw_data.get('data', {}).get('users', [])
@@ -875,39 +872,17 @@ elif page == "🛰️ Lead Source":
                                 st.session_state.found_leads = pd.DataFrame(data)
                                 st.success("Uplink Established.")
                             else:
-                                st.error("Search returned 0 results. Check keyword or subscription.")
-                                # Fallback to simulation so you're not stuck
-                                data = [{"Handle": "@Simulation_Lead", "Platform": "IG", "Followers": "100K", "Gap": "Manual Override", "Vigor": 90, "Value": "Critical"}]
-                                st.session_state.found_leads = pd.DataFrame(data)
+                                raise ValueError("Empty User List")
 
                         except Exception as e:
-                            st.error(f"Hardware Error: {e}")
+                            st.error(f"Uplink Error: {e}. Loading Simulation...")
+                            data = [
+                                {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Vigor": 85, "Value": "High"},
+                                {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Vigor": 94, "Value": "Critical"}
+                            ]
+                            st.session_state.found_leads = pd.DataFrame(data)
                     else:
-                        st.error("SYSTEM CRITICAL: No API Key found in st.secrets.")
-                        
-                except Exception as e:
-                    st.warning(f"Note: {e}. Loading Simulation Mode...")
-                    # FALLBACK DATA
-                    data = [
-                        {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Vigor": 85, "Value": "High"},
-                        {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Vigor": 94, "Value": "Critical"}
-                    ]
-                    st.session_state.found_leads = pd.DataFrame(data)
-                
-                        else:
-                            raise ConnectionError("API Key Missing")
-
-                    except Exception as e:
-                        st.error(f"Uplink Error: {e}. Reverting to simulation...")
-                        # STATIC MOCK DATA FOR TESTING
-                        data = [
-                            {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Vigor": 85, "Value": "High"},
-                            {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Vigor": 94, "Value": "Critical"},
-                            {"Handle": "@WealthVector", "Platform": "TT", "Followers": "250K", "Gap": "High Views / Low Conversion", "Vigor": 98, "Value": "Extreme"}
-                        ]
-                    
-                    st.session_state.found_leads = pd.DataFrame(data)
-                    st.success(f"Scan Complete. {len(st.session_state.found_leads)} Targets Identified.")
+                        st.error("SYSTEM CRITICAL: API Key Missing in Secrets.")
 
     with col_stats:
         if not st.session_state.found_leads.empty:
@@ -934,15 +909,15 @@ elif page == "🛰️ Lead Source":
         c1, c2 = st.columns(2)
         with c1:
             selected_lead = st.selectbox("Select Target", edited_df["Handle"])
-            if st.button(f"🚀 PORT TO PITCHER", use_container_width=True):
+            if st.button("🚀 PORT TO PITCHER"):
                 lead_info = edited_df[edited_df["Handle"] == selected_lead].iloc[0]
                 st.session_state.active_pitch_target = {"name": selected_lead, "gap": lead_info["Gap"], "niche": niche_target}
                 st.toast(f"Neural Link: {selected_lead}")
 
         with c2:
             st.write("") 
-            if st.button("💎 SYNC ALL TO MASTER VAULT", use_container_width=True):
-                st.success("Archive Synchronized to Google Sheets.")
+            if st.button("💎 SYNC ALL TO MASTER VAULT"):
+                st.success("Archive Synchronized.")
 
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
 elif page == "📜 History":
@@ -1019,6 +994,7 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
+
 
 
 
