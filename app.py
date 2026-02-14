@@ -845,40 +845,43 @@ elif page == "🛰️ Lead Source":
                     "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
                     "X-RapidAPI-Host": target_host
                 }
-                
+
                 try:
-                    # Adaptive parameter check: some use 'query', some use 'q'
-                    response = requests.get(url, headers=headers, params={"query": niche_target})
+                    # FORCING THE CALL
+                    response = requests.get(url, headers=headers, params={"query": niche_target.strip()})
                     raw_data = response.json()
                     
-                    # 🔍 DATA ADAPTATION LAYER
-                    # This looks for the list of users regardless of the API's internal naming
+                    # 🔍 THE BLACK BOX REVEALED
                     users = raw_data.get('users', raw_data.get('data', raw_data.get('items', [])))
                     
-                    if users:
-                        data = []
-                        for u in users[:10]:
-                            # Adaptive extraction for nested 'user' objects
-                            u_info = u.get('user', u) 
-                            data.append({
-                                "Handle": f"@{u_info.get('username', 'Unknown')}",
-                                "Platform": "IG",
-                                "Followers": u_info.get('follower_count', 'LIVE'),
-                                "Gap": f"Strategic Gap in {niche_target} Content",
-                                "Vigor": random.randint(80, 99),
-                                "Value": "High" if u_info.get('is_verified') else "Medium"
-                            })
-                        st.session_state.found_leads = pd.DataFrame(data)
-                        st.success(f"Uplink Established: {len(data)} Targets Identified.")
-                    else:
-                        st.error("Uplink Error: Zero results from API search. Reverting to simulation...")
-                        # Simulation Fallback
-                        sim_data = [
-                            {"Handle": "@Growth_Architect", "Platform": "IG", "Followers": "85K", "Gap": "Low Hook Retention", "Vigor": 88, "Value": "High"},
-                            {"Handle": "@SaaS_Elite", "Platform": "IG", "Followers": "12K", "Gap": "No Direct-to-DM Funnel", "Vigor": 95, "Value": "Critical"}
-                        ]
-                        st.session_state.found_leads = pd.DataFrame(sim_data)
+                    if not users:
+                        st.error("📡 DIAGNOSTIC DATA DETECTED:")
+                        st.json(raw_data) # This will show us EXACTLY why it's zero
+                        raise ValueError("API returned no users for this query.")
+                    
+                    data = []
+                    for u in users[:10]:
+                        u_info = u.get('user', u) 
+                        data.append({
+                            "Handle": f"@{u_info.get('username', 'Unknown')}",
+                            "Platform": "IG",
+                            "Followers": u_info.get('follower_count', 'LIVE'),
+                            "Gap": f"Strategic Gap in {niche_target} Content",
+                            "Vigor": random.randint(80, 99),
+                            "Value": "High" if u_info.get('is_verified') else "Medium"
+                        })
+                    st.session_state.found_leads = pd.DataFrame(data)
+                    st.success(f"Uplink Established: {len(data)} Targets Identified.")
 
+                except Exception as e:
+                    st.warning(f"Note: {e}. Reverting to Simulation...")
+                    # Simulation Fallback (Keep this as your safety net)
+                    sim_data = [
+                        {"Handle": "@AI_Global", "Platform": "IG", "Followers": "45K", "Gap": "Low Hook Retention", "Vigor": 88, "Value": "High"},
+                        {"Handle": "@Wealth_Flow", "Platform": "IG", "Followers": "12K", "Gap": "No Direct-to-DM Funnel", "Vigor": 95, "Value": "Critical"}
+                    ]
+                    st.session_state.found_leads = pd.DataFrame(sim_data)
+                
                 except Exception as e:
                     st.error(f"Hardware Error: {e}")
 
@@ -1008,6 +1011,7 @@ elif page == "💎 Upgrade to Pro":
     st.divider()
     st.subheader("🚀 BETA FOUNDER STATUS")
     st.write("Current User Status: **FREE TIER**")
+
 
 
 
