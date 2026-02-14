@@ -825,99 +825,76 @@ elif page == "🧪 Creator Lab":
                 res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": blueprint_prompt}])
                 st.info(res.choices[0].message.content)
 
-# --- MODULE 9: LEAD SOURCE (INTEGRATED & RECTIFIED) ---
-# --- MODULE 9: LEAD SOURCE (FIXED INDENTATION) ---
+# --- MODULE 9: LEAD SOURCE (UNIVERSAL SOCIAL UPLINK) ---
 elif page == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
     
-    col_input, col_stats = st.columns([1, 1])
+    niche_target = st.text_input("Target Keyword", placeholder="e.g. SaaS Founder, Real Estate India")
     
-    with col_input:
-        niche_target = st.text_input("Target Keyword", placeholder="e.g. SaaS, Founder, Fitness")
-        scan_depth = st.select_slider("Scan Intensity", ["Surface", "Deep", "Quantum"])
-        
-        if st.button("📡 INITIALIZE DEEP SCAN", use_container_width=True):
-            if not niche_target:
-                st.warning("Director, enter a target keyword first.")
-            else:
-                with st.spinner("🌑 FORCING UPLINK..."):
-                    api_key = st.secrets.get("RAPIDAPI_KEY")
+    if st.button("📡 INITIALIZE DEEP SCAN", use_container_width=True):
+        if "RAPIDAPI_KEY" not in st.secrets:
+            st.error("Uplink Failure: API Key missing in Secrets.")
+        else:
+            with st.spinner("🌑 PENETRATING SOCIAL NODES..."):
+                # Use the Host for the specific API you subscribed to
+                # If using Public Data Scraper, change to: "instagram-data1.p.rapidapi.com"
+                target_host = "instagram-api-rocksolid.p.rapidapi.com" 
+                url = f"https://{target_host}/v1/search_users"
+                
+                headers = {
+                    "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
+                    "X-RapidAPI-Host": target_host
+                }
+                
+                try:
+                    # Adaptive parameter check: some use 'query', some use 'q'
+                    response = requests.get(url, headers=headers, params={"query": niche_target})
+                    raw_data = response.json()
                     
-                    if api_key and api_key != "your_key_here":
-                        try:
-                            url = "https://instagram-scraper-api2.p.rapidapi.com/v1/search_users"
-                            headers = {
-                                "X-RapidAPI-Key": api_key,
-                                "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
-                            }
-                            response = requests.get(url, headers=headers, params={"search_query": niche_target.strip()})
-                            raw_data = response.json()
-                            
-                            # THE RAW FEED (Our diagnostic eyes)
-                            st.write("📡 RAW SYSTEM FEED:", raw_data)
-                            
-                            users_list = raw_data.get('data', {}).get('users', [])
-                            
-                            if users_list:
-                                data = []
-                                for user in users_list[:10]:
-                                    data.append({
-                                        "Handle": f"@{user['username']}",
-                                        "Platform": "IG",
-                                        "Followers": "LIVE",
-                                        "Gap": f"Strategic Content Gap in {niche_target}",
-                                        "Vigor": random.randint(75, 98),
-                                        "Value": "High"
-                                    })
-                                st.session_state.found_leads = pd.DataFrame(data)
-                                st.success("Uplink Established.")
-                            else:
-                                raise ValueError("Empty User List")
-
-                        except Exception as e:
-                            st.error(f"Uplink Error: {e}. Loading Simulation...")
-                            data = [
-                                {"Handle": "@TechFlow_AI", "Platform": "IG", "Followers": "120K", "Gap": "Low Hook Retention", "Vigor": 85, "Value": "High"},
-                                {"Handle": "@SaaS_Mastery", "Platform": "YT", "Followers": "45K", "Gap": "No Monetization Funnel", "Vigor": 94, "Value": "Critical"}
-                            ]
-                            st.session_state.found_leads = pd.DataFrame(data)
+                    # 🔍 DATA ADAPTATION LAYER
+                    # This looks for the list of users regardless of the API's internal naming
+                    users = raw_data.get('users', raw_data.get('data', raw_data.get('items', [])))
+                    
+                    if users:
+                        data = []
+                        for u in users[:10]:
+                            # Adaptive extraction for nested 'user' objects
+                            u_info = u.get('user', u) 
+                            data.append({
+                                "Handle": f"@{u_info.get('username', 'Unknown')}",
+                                "Platform": "IG",
+                                "Followers": u_info.get('follower_count', 'LIVE'),
+                                "Gap": f"Strategic Gap in {niche_target} Content",
+                                "Vigor": random.randint(80, 99),
+                                "Value": "High" if u_info.get('is_verified') else "Medium"
+                            })
+                        st.session_state.found_leads = pd.DataFrame(data)
+                        st.success(f"Uplink Established: {len(data)} Targets Identified.")
                     else:
-                        st.error("SYSTEM CRITICAL: API Key Missing in Secrets.")
+                        st.error("Uplink Error: Zero results from API search. Reverting to simulation...")
+                        # Simulation Fallback
+                        sim_data = [
+                            {"Handle": "@Growth_Architect", "Platform": "IG", "Followers": "85K", "Gap": "Low Hook Retention", "Vigor": 88, "Value": "High"},
+                            {"Handle": "@SaaS_Elite", "Platform": "IG", "Followers": "12K", "Gap": "No Direct-to-DM Funnel", "Vigor": 95, "Value": "Critical"}
+                        ]
+                        st.session_state.found_leads = pd.DataFrame(sim_data)
 
-    with col_stats:
-        if not st.session_state.found_leads.empty:
-            fig = px.pie(st.session_state.found_leads, values='Vigor', names='Handle', 
-                         title="Lead Vigor Distribution", hole=.4,
-                         color_discrete_sequence=px.colors.sequential.Greens_r)
-            fig.update_layout(showlegend=False, height=250, margin=dict(t=30, b=0, l=0, r=0),
-                              paper_bgcolor='rgba(0,0,0,0)', font_color="white")
-            st.plotly_chart(fig, use_container_width=True)
+                except Exception as e:
+                    st.error(f"Hardware Error: {e}")
 
-    # --- LEAD MANAGEMENT ---
+    # --- RENDER TABLE & PORT TO PITCHER ---
     if not st.session_state.found_leads.empty:
         st.divider()
         edited_df = st.data_editor(
             st.session_state.found_leads,
-            column_config={
-                "Vigor": st.column_config.ProgressColumn("Growth Potential", min_value=0, max_value=100, format="%d%%"),
-                "Value": st.column_config.SelectboxColumn("Priority", options=["Medium", "High", "Critical", "Extreme"]),
-            },
-            disabled=["Handle", "Platform", "Followers", "Gap"],
             hide_index=True, use_container_width=True
         )
-
-        c1, c2 = st.columns(2)
-        with c1:
-            selected_lead = st.selectbox("Select Target", edited_df["Handle"])
-            if st.button("🚀 PORT TO PITCHER"):
-                lead_info = edited_df[edited_df["Handle"] == selected_lead].iloc[0]
-                st.session_state.active_pitch_target = {"name": selected_lead, "gap": lead_info["Gap"], "niche": niche_target}
-                st.toast(f"Neural Link: {selected_lead}")
-
-        with c2:
-            st.write("") 
-            if st.button("💎 SYNC ALL TO MASTER VAULT"):
-                st.success("Archive Synchronized.")
+        
+        if st.button("🚀 PORT SELECTED TO PITCHER"):
+            # Ports the first handle to the Pitcher for analysis
+            target = edited_df.iloc[0]
+            st.session_state.active_pitch_target = {"name": target["Handle"], "gap": target["Gap"], "niche": niche_target}
+            st.toast(f"Neural Bridge Active: {target['Handle']}")
 
 
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
@@ -1031,6 +1008,7 @@ elif page == "💎 Upgrade to Pro":
     st.divider()
     st.subheader("🚀 BETA FOUNDER STATUS")
     st.write("Current User Status: **FREE TIER**")
+
 
 
 
