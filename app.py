@@ -963,7 +963,7 @@ elif page == "🛡️ Admin Console":
         
 
 # --- MODULE 10: UPGRADE TO PRO (FORCE-RENDER) ---
-elif page == "💎 Upgrade to PRO":
+elif page == "💎 Upgrade to Pro":
     st.markdown("<h1 style='color: #00ff41;'>💎 VOID PRO: UPGRADE UPLINK</h1>", unsafe_allow_html=True)
     
     st.info("Unlock Unlimited Lead Scans & Neural Pitching.")
@@ -1028,6 +1028,7 @@ footer_html = """
 </div>
 """
 st.markdown(footer_html, unsafe_allow_html=True)
+
 
 
 
