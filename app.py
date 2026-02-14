@@ -100,6 +100,18 @@ def load_user_db():
         st.error(f"Database Uplink Error: {e}")
         return pd.DataFrame()
 
+def load_history_db():
+    try:
+        # Use your history tab CSV export link
+        # Format: https://docs.google.com/spreadsheets/d/ID/export?format=csv&gid=TAB_ID
+        history_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQTrDvNWe810s55puzBodFKvfUbfMV_l-QoQIfbdPxeQknClGGCQT33UQ471NyGTw4aHLrDTw/pub?gid=678649061&single=true&output=csv" 
+        df = pd.read_csv(f"{history_url}&cache={time.time()}")
+        df.columns = [str(c).strip().lower() for c in df.columns]
+        return df
+    except Exception as e:
+        st.error(f"Vault Connection Error: {e}")
+        return pd.DataFrame()
+
 
 def load_market_pulse_data(url=None): # <--- Added '=None' to make it optional
     # Use the global URL if none is provided in the parentheses
@@ -1362,6 +1374,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
