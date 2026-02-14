@@ -294,21 +294,49 @@ st.markdown("""<style>
     </style>""", unsafe_allow_html=True)
 
 # --- GATEKEEPER ---
+# --- GATEKEEPER (INTEGRATED VERSION) ---
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align: center; color: #00ff41;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
     t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
+    
     with t1:
         email_in = st.text_input("Email").lower().strip()
         pw_in = st.text_input("Password", type="password")
+        
         if st.button("Access System", use_container_width=True):
             users = load_user_db()
+            
+            # --- ADMIN BYPASS ---
             if email_in == "admin" and pw_in == "1234":
-                st.session_state.logged_in = True; st.session_state.user_name = "Master Director"; st.session_state.user_role = "admin"; st.rerun()
+                st.session_state.logged_in = True
+                st.session_state.user_name = "Master Director"
+                st.session_state.user_role = "admin"
+                st.session_state.user_status = "paid" # Admin is always PRO
+                st.rerun()
+            
+            # --- USER VALIDATION ---
             elif not users.empty:
+                # We match Email (Index 2) and Password (Index 4)
                 match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & (users.iloc[:, 4].astype(str) == pw_in)]
+                
                 if not match.empty:
-                    st.session_state.logged_in = True; st.session_state.user_name = match.iloc[0, 1]; st.session_state.user_role = "user"; st.rerun()
-                else: st.error("Access Denied: Credentials Invalid.")
+                    # 🚀 NEW LOGIC START: STATUS SYNC
+                    # Assuming Column 6 (Index 5) is where your 'paid'/'free' status is stored
+                    try:
+                        raw_status = str(match.iloc[0, 5]).strip().lower()
+                    except:
+                        raw_status = "free" # Fallback if column is empty
+                    
+                    st.session_state.logged_in = True
+                    st.session_state.user_name = match.iloc[0, 1] # Index 1 for Name
+                    st.session_state.user_role = "user"
+                    st.session_state.user_status = raw_status # 'paid' or 'free'
+                    # 🚀 NEW LOGIC END
+                    
+                    st.rerun()
+                else: 
+                    st.error("Access Denied: Credentials Invalid.")
+                    
     with t2:
         with st.form("reg"):
             n = st.text_input("Name"); e = st.text_input("Email"); ni = st.text_input("Niche"); p = st.text_input("Password", type="password")
@@ -316,6 +344,7 @@ if not st.session_state.logged_in:
                 requests.post(FORM_POST_URL, data={"entry.483203499": n, "entry.1873870532": e, "entry.1906780868": ni, "entry.1396549807": p})
                 st.success("Transmission Received. Awaiting Node Approval.")
     st.stop()
+if st.session_state.user_status == "paid":
 
 # --- SIDEBAR NAVIGATION ---
 with st.sidebar:
@@ -1183,6 +1212,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
