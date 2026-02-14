@@ -465,7 +465,7 @@ with st.sidebar:
 
     # 2. Define Options based on Role AND Status
     if st.session_state.user_role == "admin":
-        options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "📜 History", "⚙️ Settings"]
+        options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "💼 Client Pitcher", "📜 History", "⚙️ Settings"]
     elif user_status == 'paid':
         options = ["📡 My Growth Hub", "🌐 Global Pulse", "🏗️ Script Architect", "🧪 Creator Lab", "📜 History", "⚙️ Settings"]
     else:
@@ -800,45 +800,107 @@ elif page == "⚔️ Trend Duel":
         if not comp.empty: 
             fig = px.bar(comp, x='Niche', y='Score', color='Score', template='plotly_dark')
             st.plotly_chart(fig, use_container_width=True)
-# --- MODULE 6: SCRIPT ARCHITECT (TOTAL RESET VERSION) ---
-elif page == "💎 Script Architect":
+
+# --- MODULE 6: SCRIPT ARCHITECT (MASTER BUILD) ---
+elif page == "🏗️ Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
 
-    # 1. FORCE INITIALIZE MEMORY (No conditions)
+    # 1. 🛡️ ROBUST PERSONA DETECTION
+    # We pull data and sanitize it immediately to prevent matching errors
+    raw_status = str(st.session_state.get('user_status', 'free')).strip().lower()
+    raw_role = str(st.session_state.get('user_role', 'user')).strip().lower()
+    is_admin_verified = st.session_state.get('admin_verified', False)
+
+    # Fuzzy logic check: True if "paid" or "pro" is anywhere in the status string
+    is_paid_user = any(x in raw_status for x in ['paid', 'pro', 'elite'])
+    is_system_admin = (raw_role == 'admin' or is_admin_verified)
+
+    # 2. 🛑 THE MASTER GATEKEEPER
+    if not is_system_admin and not is_paid_user:
+        st.error(f"🚨 ACCESS DENIED: System detects Node Status as [{raw_status.upper()}]")
+        st.info("If you have an active subscription, please try logging out and back in to refresh your uplink.")
+        st.stop()
+
+    # 3. 🧠 INITIALIZE PERSISTENT STORAGE
+    # This prevents the page from wiping clean when buttons are clicked
     if 'current_architect_txt' not in st.session_state: st.session_state.current_architect_txt = ""
     if 'current_architect_topic' not in st.session_state: st.session_state.current_architect_topic = ""
-    
-    # 2. THE UI (No Gatekeepers for this test)
+    if 'current_architect_dna' not in st.session_state: st.session_state.current_architect_dna = ""
+
+    # 4. 🏢 ADMIN DATA LOAD
+    client_options = ["Public/General"]
+    if is_system_admin:
+        try:
+            users_df = load_user_db()
+            if not users_df.empty:
+                # Using dynamic column access to be safe
+                db_names = users_df.iloc[:, 1].dropna().unique().tolist()
+                client_options = ["Public/General"] + db_names
+        except Exception as e:
+            st.sidebar.error(f"DB Sync Error: {e}")
+
+    # 5. 🏗️ ARCHITECTURAL INTERFACE
     c1, c2 = st.columns([1, 1.5], gap="large")
     
     with c1:
-        st.subheader("🛠️ Configuration")
+        if is_system_admin:
+            target_client = st.selectbox("Assign To Target", options=client_options, key="arch_target_final")
+        else:
+            target_client = "Personal Use"
+            st.success("💎 PRO ARCHIVE MODE ACTIVE")
+
         platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "X-Thread", "YouTube Long-form"])
-        topic = st.text_input("Core Topic", value=st.session_state.current_architect_topic)
+        # Persist the topic input in session state
+        topic = st.text_input("Core Topic", value=st.session_state.current_architect_topic, placeholder="e.g., The Future of AI in 2026")
         tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"])
         
-        if st.button("🚀 ARCHITECT SCRIPT", use_container_width=True):
+        with st.expander("👤 COMPETITOR SHADOW"):
+            c_hook = st.text_area("Their Narrative (What are they saying?)")
+        
+        btn_label = "🚀 ARCHITECT & TRANSMIT" if is_system_admin else "🚀 ARCHITECT SCRIPT"
+        
+        if st.button(btn_label, use_container_width=True):
             if not topic:
-                st.error("Missing Topic")
+                st.error("Director, the Topic field is mandatory for generation.")
+            elif not groq_c:
+                st.error("🚨 SYSTEM OFFLINE: Groq API Key missing.")
             else:
-                with st.spinner("🌑 WORKING..."):
+                with st.spinner("🌑 ARCHITECTING..."):
                     try:
-                        prompt = f"Create a {platform} script about {topic} in a {tone_choice} tone."
+                        prompt = (
+                            f"System: VOID OS Content Architect. Create a high-retention script for {platform}. "
+                            f"Topic: {topic}. Tone: {tone_choice}. "
+                            f"Competitor Angle to counter: {c_hook if c_hook else 'Standard Industry Narrative'}."
+                        )
+                        
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "user", "content": prompt}]
                         )
+                        
+                        # --- CAPTURE TO MEMORY ---
                         st.session_state.current_architect_txt = res.choices[0].message.content
                         st.session_state.current_architect_topic = topic
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"API Error: {e}")
+                        st.session_state.current_architect_dna = generate_visual_dna(platform, tone_choice)
+                        
+                        # Admin-only Transmission
+                        if is_system_admin:
+                            status = transmit_script(target_client, platform, topic, st.session_state.current_architect_txt, st.session_state.current_architect_dna)
+                            if status: st.success("⚔️ BROADCAST COMPLETE: Script synced to Vault.")
+                        
+                        st.rerun() # Refresh to populate C2
+                            
+                    except Exception as e: 
+                        st.error(f"Intelligence Failure: {e}")
 
     with c2:
         if st.session_state.current_architect_txt:
             st.subheader("💎 GENERATED ARCHIVE")
             st.markdown(st.session_state.current_architect_txt)
+            st.divider()
+            st.caption(f"🧬 DNA: {st.session_state.current_architect_dna}")
             
+            # --- INTEGRATED ARCHIVE TO HISTORY ---
             if st.button("💾 Archive to History Vault", use_container_width=True):
                 payload = {
                     "email": st.session_state.get('user_email', 'unknown'),
@@ -846,10 +908,18 @@ elif page == "💎 Script Architect":
                     "title": f"{platform}: {st.session_state.current_architect_topic}",
                     "content": st.session_state.current_architect_txt
                 }
-                requests.post(NEW_URL, json=payload)
-                st.success("Archived!")
+                try:
+                    # NEW_URL must be the current Web App URL from your Google Apps Script
+                    r = requests.post(NEW_URL, json=payload, timeout=10)
+                    if "SUCCESS" in r.text: 
+                        st.success("📜 Script archived in your Private Vault.")
+                    else: 
+                        st.error("Vault rejected the transmission.")
+                except Exception as e:
+                    st.error(f"Uplink failed: {e}")
         else:
-            st.info("Blueprints will manifest here.")
+            st.info("Awaiting Tactical Input. Architectural blueprints will manifest here.")
+
 
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
@@ -1347,6 +1417,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
