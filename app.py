@@ -300,19 +300,32 @@ st.markdown("""<style>
     .stMetric { border: 1px solid #111; padding: 15px; border-radius: 10px; background: #080808; }
     </style>""", unsafe_allow_html=True)
 
-# --- THE ULTIMATE GATEKEEPER ---
-if not st.session_state.get('logged_in', False):
+import streamlit as st
+import requests
+import pandas as pd
+import time
+
+# --- CONFIGURATION (Ensure these are defined) ---
+# NEW_URL = "https://script.google.com/macros/s/AKfycbwptoGlGh8xNwVVwf7porQnc-NrW67hrVRpugQpsXxw76X4zsO4qhdk9LH5otqcl4LH/exec"
+# FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
+
+# --- GATEKEEPER START ---
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align: center; color: #00ff41;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
+    
     t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
     
     with t1:
-        email_in = st.text_input("Email", key="main_login_email").lower().strip()
-        pw_in = st.text_input("Password", type="password", key="main_login_pw")
+        email_in = st.text_input("Email", key="gate_login_email").lower().strip()
+        pw_in = st.text_input("Password", type="password", key="gate_login_pw")
         
-        if st.button("Access System", use_container_width=True, key="gate_access_btn"):
+        if st.button("Access System", use_container_width=True, key="gate_login_btn"):
             users = load_user_db()
             
-            # 1. Admin Logic
+            # 1. Admin Bypass
             if email_in == "admin" and pw_in == "1234":
                 st.session_state.logged_in = True
                 st.session_state.user_name = "Master Director"
@@ -320,31 +333,78 @@ if not st.session_state.get('logged_in', False):
                 st.session_state.user_status = "paid"
                 st.rerun()
             
-            # 2. User Logic
+            # 2. Standard User Validation
             elif not users.empty:
-                match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & (users.iloc[:, 4].astype(str) == pw_in)]
+                # Match Email (Col 3 / Index 2) and Password (Col 5 / Index 4)
+                match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & 
+                              (users.iloc[:, 4].astype(str) == pw_in)]
+                
                 if not match.empty:
                     st.session_state.logged_in = True
                     st.session_state.user_name = match.iloc[0, 1]
+                    st.session_state.user_email = email_in
+                    # Status is Column 6 (Index 5)
                     st.session_state.user_status = str(match.iloc[0, 5]).strip().lower()
                     st.rerun()
                 else:
-                    st.error("Access Denied.")
+                    st.error("Access Denied: Credentials Invalid.")
 
-        with st.expander("Forgot Passkey?"):
-            # ... (Your reset logic here, ensure it has UNIQUE keys like key="reset_email_field") ...
-            pass
+        st.write("---")
+        # --- SECURE PASSWORD RESET ---
+        with st.expander("Forgot Passkey? (Security Recovery)"):
+            r_email = st.text_input("Registered Email", key="reset_email").lower().strip()
+            # Security Question serves as the second factor of authentication
+            s_ans = st.text_input("Security Answer: What was your first school?", key="reset_security").lower().strip()
+            new_p = st.text_input("New Secure Passkey", type="password", key="reset_new_pw")
+            
+            if st.button("INITIATE OVERRIDE", use_container_width=True, key="reset_exec_btn"):
+                if r_email and s_ans and new_p:
+                    # Payload sends both the answer and the new password
+                    payload = {
+                        "email": r_email,
+                        "category": "SECURE_RESET", 
+                        "answer": s_ans,
+                        "message": new_p
+                    }
+                    try:
+                        response = requests.post(NEW_URL, json=payload, timeout=10)
+                        if "SUCCESS" in response.text:
+                            st.success("✅ IDENTITY VERIFIED: Passkey updated. You may login.")
+                        else:
+                            st.error(f"📡 ACCESS DENIED: {response.text}")
+                    except Exception as e:
+                        st.error(f"🚨 UPLINK CRASHED: {e}")
 
     with t2:
-        # ... (Your registration logic) ...
-        pass
+        with st.form("secure_reg", clear_on_submit=True):
+            st.write("### Create New Node")
+            n = st.text_input("Full Name")
+            e = st.text_input("Email Address")
+            ni = st.text_input("Target Niche")
+            p = st.text_input("Set Passkey", type="password")
+            # This answer must be stored in your sheet to allow resets later
+            sa = st.text_input("Security Question: What was your first school? (Required for recovery)")
+            
+            if st.form_submit_button("Submit Registration"):
+                if n and e and p and sa:
+                    # Note: Ensure your Google Form has a field for the security answer!
+                    # You will need to add the correct 'entry.ID' for the security answer below
+                    reg_data = {
+                        "entry.1191019325": n, 
+                        "entry.1480968897": e, 
+                        "entry.1906780868": ni, 
+                        "entry.860899570": p,
+                        "entry.107117169": sa # <--- UPDATE THIS ID
+                    }
+                    requests.post(FORM_POST_URL, data=reg_data)
+                    st.success("Registration Sent. Awaiting Node Activation.")
+                else:
+                    st.warning("All fields, including Security Answer, are required.")
 
-    # 🛑 CRITICAL: This prevents the rest of the app (sidebar/tabs) from loading
-    st.stop() 
+    # 🛑 THE SECURITY WALL: Prevents internal app from loading if not logged in
+    st.stop()
 
-# --- MAIN APP (ONLY REACHED IF LOGGED IN) ---
-# Ensure all following code (Sidebar, Modules) starts here at 0 indentation
-
+# --- MAIN APP UI BEGINS HERE (Only accessible if logged_in is True) ---
 
 # --- SIDEBAR NAVIGATION (UNIFIED & ALIGNED) ---
 with st.sidebar:
@@ -1281,6 +1341,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
