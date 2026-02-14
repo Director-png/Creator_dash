@@ -972,7 +972,7 @@ elif page == "🛡️ Admin Console":
         st.subheader("🛰️ Node Traffic")
         st.info(f"Active Users in Database: {len(users_df)}")
         
-    elif auth != "":
+elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
 
 # Inside tab3 (Daily Lead Drop) of your Admin Console:
@@ -1106,6 +1106,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
