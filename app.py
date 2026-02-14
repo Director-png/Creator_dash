@@ -992,16 +992,38 @@ elif page == "🛡️ Admin Console":
             st.info(f"Active Users in Database: {len(users_df)}")
 
         # --- TAB 2: PAYMENTS (Manual Override) ---
+        # --- TAB 2: PAYMENTS (Manual Override) ---
         with tab2: 
             st.subheader("💰 Manual Revenue Override")
             target_mail = st.text_input("User Email to Activate", key="admin_target_mail")
             
             if st.button("ACTIVATE PRO NODES"):
-                # Update the Local Session for immediate effect
-                st.session_state['user_status'] = 'paid'
-                st.success(f"System Overridden. {target_mail} is now PRO.")
-            
-            st.divider()
+                if target_mail:
+                    # 1. Update LOCAL memory for you immediately
+                    st.session_state['user_status'] = 'paid'
+                    
+                    # 2. Update REMOTE Google Sheet
+                    # We send a specific category "ROLE_UPGRADE" so the script knows what to do
+                    payload = {
+                        "email": target_mail,
+                        "category": "ROLE_UPGRADE",
+                        "message": "PAID"
+                    }
+                    
+                    try:
+                        # Using your existing Apps Script URL
+                        FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
+                        response = requests.post(FEEDBACK_API_URL, json=payload, timeout=10)
+                        
+                        if response.status_code == 200:
+                            st.success(f"⚔️ OMNI-SYNC COMPLETE: {target_mail} is now a PRO node.")
+                            st.balloons()
+                        else:
+                            st.error(f"📡 UPLINK FAILED: Status {response.status_code}")
+                    except Exception as e:
+                        st.error(f"🚨 CONNECTION ERROR: {str(e)}")
+                else:
+                    st.warning("Director, enter a target email first.")
             
             # THE MANUAL VERIFY FORM - Placed logically inside Payments Tab
             with st.form("manual_verify_v2"):
@@ -1161,6 +1183,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
