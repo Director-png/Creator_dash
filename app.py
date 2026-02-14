@@ -420,23 +420,23 @@ if not st.session_state.logged_in:
     with t2:
         with st.form("secure_reg", clear_on_submit=True):
             st.write("### Create New Node")
-            n = st.text_input("Full Name")
-            e = st.text_input("Email Address")
-            ni = st.text_input("Target Niche")
-            p = st.text_input("Set Passkey", type="password")
+            Name = st.text_input("Full Name")
+            Email = st.text_input("Email Address")
+            Niche = st.text_input("Target Niche")
+            Create password= st.text_input("Set Passkey", type="password")
             # This answer must be stored in your sheet to allow resets later
-            sa = st.text_input("Security Question: What was your first school? (Required for recovery)")
+            Security = st.text_input("Security Question: What was your first school? (Required for recovery)")
             
             if st.form_submit_button("Submit Registration"):
                 if n and e and p and sa:
                     # Note: Ensure your Google Form has a field for the security answer!
                     # You will need to add the correct 'entry.ID' for the security answer below
                     reg_data = {
-                        "entry.1191019325": n, 
-                        "entry.1480968897": e, 
-                        "entry.1906780868": ni, 
-                        "entry.860899570": p,
-                        "entry.107117169": sa # <--- UPDATE THIS ID
+                        "entry.1191019325": Name, 
+                        "entry.1480968897": Email, 
+                        "entry.860899570": Niche, 
+                        "entry.465373209": Create password,
+                        "entry.107117169": Security # <--- UPDATE THIS ID
                     }
                     requests.post(FORM_POST_URL, data=reg_data)
                     st.success("Registration Sent. Awaiting Node Activation.")
@@ -1417,6 +1417,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
