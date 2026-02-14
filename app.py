@@ -324,9 +324,9 @@ with st.sidebar:
     
     # Define available pages based on role
     if st.session_state.user_role == "admin":
-        options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "📜 History"]
+        options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "💎 Upgrade to Pro", "📜 History"]
     else:
-        options = ["📡 My Growth Hub", "💎 Assigned Scripts", "🌐 Global Pulse"]
+        options = ["📡 My Growth Hub", "💎 Assigned Scripts", "🌐 Global Pulse", "💎 Upgrade to Pro"]
     
     # Ensure the radio index stays synced with current_page
     try:
@@ -996,6 +996,41 @@ elif page == "🛡️ Admin Console":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
 
+# --- MODULE 10: PAYMENT WALL (UPI) ---
+elif page == "💎 Upgrade to Pro":
+    st.markdown("<h1 style='color: #00ff41;'>💎 UNLOCK QUANTUM ACCESS</h1>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        st.markdown("""
+        ### Pro Features:
+        * 🛰️ **Quantum Scan Depth** (100+ leads/scan)
+        * 🧠 **Llama-3.3-70B** High-Priority Processing
+        * 💎 **Master Vault** Auto-Sync (Google Sheets)
+        * 🚀 **Custom Branding** for Pitcher DMs
+        """)
+        
+        plan = st.radio("Select Plan", ["Monthly Access - ₹999", "Lifetime Access - ₹4,999"])
+        
+    with col2:
+        st.info("⚡ PAY VIA UPI")
+        # Replace 'yourname@upi' with your actual VPA
+        upi_vpa = "yourname@okicici" 
+        amount = "999" if "Monthly" in plan else "4999"
+        
+        # Simple UPI QR Link Generator
+        upi_link = f"upi://pay?pa={upi_vpa}&pn=VOID_OS&am={amount}&cu=INR"
+        
+        # We use a QR API to display the payment code
+        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={upi_link}"
+        st.image(qr_url, caption="Scan with GPay, PhonePe, or Paytm")
+        
+        st.warning("⚠️ After payment, upload the screenshot in the 'History' tab for manual verification (Beta Protocol).")
+
+    st.divider()
+    st.subheader("🚀 BETA FOUNDER STATUS")
+    st.write("Current User Status: **FREE TIER**")
 
 
 
