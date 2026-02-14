@@ -88,6 +88,23 @@ def typewriter_effect(text):
         time.sleep(0.005) 
     container.markdown(full_text)
 
+def save_script_to_vault(title, content):
+    # This function now has a safety check
+    if not content:
+        return
+    payload = {
+        "email": st.session_state.get('user_email', 'unknown'),
+        "category": "SAVE_SCRIPT",
+        "title": title,
+        "content": content
+    }
+    try:
+        requests.post(NEW_URL, json=payload, timeout=5)
+        st.success("📜 Script archived in your Private Vault.")
+    except:
+        st.error("Uplink failed.")
+
+
 @st.cache_data(ttl=0)
 def load_user_db():
     try:
@@ -780,21 +797,21 @@ elif page == "⚔️ Trend Duel":
 elif page == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
     
-    # Initialize session keys if they don't exist
-    if 'last_script' not in st.session_state: st.session_state.last_script = ""
-    if 'last_topic' not in st.session_state: st.session_state.last_topic = ""
-    if 'last_dna' not in st.session_state: st.session_state.last_dna = ""
-
-    # 🕵️ Detect Persona correctly
-    is_admin = st.session_state.get('user_role') == 'admin'
+    # 🕵️ Detect Persona (Fixed to allow Paid Users)
+    is_admin = st.session_state.get('user_role') == 'admin' or st.session_state.get('admin_verified', False)
+    
+    # Initialize Persistent Storage for this session
+    if 'current_architect_txt' not in st.session_state: st.session_state.current_architect_txt = ""
+    if 'current_architect_dna' not in st.session_state: st.session_state.current_architect_dna = ""
+    if 'current_architect_topic' not in st.session_state: st.session_state.current_architect_topic = ""
     
     # Load users ONLY if Admin
     client_options = ["Public/General"]
     if is_admin:
         users_df = load_user_db()
         if not users_df.empty:
-            # Safer way to get names from your specific column structure
-            db_names = users_df['name'].dropna().unique().tolist()
+            # Safer name extraction
+            db_names = users_df.iloc[:, 1].dropna().unique().tolist()
             client_options = ["Public/General"] + db_names
 
     c1, c2 = st.columns([1, 1.5], gap="large")
@@ -834,38 +851,60 @@ elif page == "💎 Script Architect":
                             messages=[{"role": "user", "content": prompt}]
                         )
                         
-                        # SAVE TO SESSION STATE IMMEDIATELY
-                        st.session_state.last_script = res.choices[0].message.content
-                        st.session_state.last_topic = topic
-                        st.session_state.last_dna = generate_visual_dna(platform, tone_choice)
+                        # --- CAPTURE TO PERSISTENT STATE ---
+                        st.session_state.current_architect_txt = res.choices[0].message.content
+                        st.session_state.current_architect_topic = topic
+                        st.session_state.current_architect_dna = generate_visual_dna(platform, tone_choice)
                         
-                        # --- ADMIN SYNC ---
+                        # Save to history list logic (for your local tracking)
+                        st.session_state.script_history.append({
+                            "assigned_to": target_client, 
+                            "topic": topic, 
+                            "script": st.session_state.current_architect_txt,
+                            "platform": platform
+                        })
+                        
                         if is_admin:
-                            transmit_script(target_client, platform, topic, st.session_state.last_script, st.session_state.last_dna)
-                            st.success("⚔️ BROADCAST COMPLETE: Script synced to Vault.")
+                            # Use existing transmit logic
+                            status = transmit_script(target_client, platform, topic, st.session_state.current_architect_txt, st.session_state.current_architect_dna)
+                            if status: st.success("⚔️ BROADCAST COMPLETE: Script synced to Vault.")
                         else:
                             st.success("⚔️ ARCHITECTURE COMPLETE: Ready for deployment.")
+                        
+                        st.rerun() # Refresh to update C2 immediately
                             
                     except Exception as e: 
                         st.error(f"Intelligence Failure: {e}")
 
-    # --- THE PERSISTENT VIEW (This stays visible even after clicking Archive) ---
     with c2:
-        if st.session_state.last_script:
+        if st.session_state.current_architect_txt:
             st.subheader("💎 GENERATED ARCHIVE")
-            st.markdown(st.session_state.last_script)
+            st.markdown(st.session_state.current_architect_txt)
             st.divider()
-            st.caption(f"🧬 DNA: {st.session_state.last_dna}")
+            st.caption(f"🧬 DNA: {st.session_state.current_architect_dna}")
             
-            # --- THE ARCHIVE FEATURE ---
-            # Now we use the Session State variable so it NEVER throws NameError
-            if st.button("💾 Archive to History Vault", use_container_width=True):
-                save_script_to_vault(
-                    f"{platform}: {st.session_state.last_topic}", 
-                    st.session_state.last_script
-                )
+            # --- INTEGRATED HISTORY FEATURE (SAFE) ---
+            st.write("")
+            if st.button("💾 Archive to History Vault", use_container_width=True, key="vault_btn"):
+                # Nested function to handle the API call
+                def trigger_save():
+                    payload = {
+                        "email": st.session_state.get('user_email', 'unknown'),
+                        "category": "SAVE_SCRIPT",
+                        "title": f"{platform}: {st.session_state.current_architect_topic}",
+                        "content": st.session_state.current_architect_txt
+                    }
+                    try:
+                        r = requests.post(NEW_URL, json=payload, timeout=10)
+                        if "SUCCESS" in r.text: st.success("📜 Script archived in your Private Vault.")
+                        else: st.error("Vault rejected the transmission.")
+                    except:
+                        st.error("Uplink failed. Check connection.")
+                
+                trigger_save()
         else:
             st.info("Awaiting Tactical Input. Architectural blueprints will manifest here.")
+
 
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
@@ -1363,6 +1402,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
