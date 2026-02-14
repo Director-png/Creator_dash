@@ -1037,13 +1037,14 @@ with tab3:
     lead_file = st.file_uploader("Upload Daily Leads (CSV)", type="csv")
     niche_label = st.text_input("Niche Category", placeholder="e.g., Real Estate India")
             
-            if st.button("🚀 PUSH TO PAID USERS"):
-                if lead_file is not None:
-                    # Save the file to the app's state or a shared database
-                    import pandas as pd
-                    df = pd.read_csv(lead_file)
-                    st.session_state['global_leads'] = df
-                    st.success(f"Transmission Successful. {len(df)} leads pushed to {niche_label}.")
+            
+    if st.button("🚀 PUSH TO PAID USERS"):
+    if lead_file is not None:
+        # Save the file to the app's state or a shared database
+        import pandas as pd
+        df = pd.read_csv(lead_file)
+        st.session_state['global_leads'] = df
+        st.success(f"Transmission Successful. {len(df)} leads pushed to {niche_label}.")
                 else:
                     st.error("No data package detected. Upload a CSV first.")
 
@@ -1164,6 +1165,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
