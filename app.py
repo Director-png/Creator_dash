@@ -838,45 +838,53 @@ elif page == "🛰️ Lead Source":
         
         if st.button("📡 INITIALIZE DEEP SCAN", use_container_width=True):
             if not niche_target:
-                st.warning("Director, please enter a search keyword.")
+                st.warning("Director, enter a target keyword first.")
             else:
-                with st.spinner(f"🌑 PENETRATING {niche_target.upper()} NODES..."):
-                    try:
-                    if "RAPIDAPI_KEY" in st.secrets and st.secrets["RAPIDAPI_KEY"] != "your_key_here":
+                with st.spinner("🌑 FORCING UPLINK..."):
+                    # 1. AUTH CHECK
+                    api_key = st.secrets.get("RAPIDAPI_KEY")
+                    
+                    if api_key and api_key != "your_key_here":
                         url = "https://instagram-scraper-api2.p.rapidapi.com/v1/search_users"
                         headers = {
-                            "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
+                            "X-RapidAPI-Key": api_key,
                             "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com"
                         }
                         
-                        # Use a common keyword to force a result
-                        query = niche_target.strip().lower()
-                        response = requests.get(url, headers=headers, params={"search_query": query})
-                        raw_data = response.json()
-                        
-                        # THE DIAGNOSTIC PULSE
-                        users_list = raw_data.get('data', {}).get('users', [])
-                        
-                        if not users_list:
-                            # Reveal the JSON so we can fix the subscription/key error
-                            st.error("📡 API DIAGNOSTICS REVEALED:")
-                            st.json(raw_data) 
-                            raise ValueError("API returned no users for this keyword.")
-                        
-                        data = []
-                        limit = 5 if scan_depth == "Surface" else 10
-                        for user in users_list[:limit]:
-                            data.append({
-                                "Handle": f"@{user['username']}",
-                                "Platform": "IG",
-                                "Followers": "LIVE",
-                                "Gap": f"Detected Strategic Gap in {niche_target} niche",
-                                "Vigor": random.randint(70, 99),
-                                "Value": "High" if user.get('is_verified') else "Medium"
-                            })
-                    else:
-                        raise ConnectionError("API Key is missing from secrets.toml.")
+                        try:
+                            # 2. THE CALL
+                            response = requests.get(url, headers=headers, params={"search_query": niche_target.strip()})
+                            raw_data = response.json()
+                            
+                            # 3. THE RAW OUTPUT (We need to see this!)
+                            st.write("📡 RAW SYSTEM FEED:", raw_data)
+                            
+                            users_list = raw_data.get('data', {}).get('users', [])
+                            
+                            if users_list:
+                                data = []
+                                for user in users_list[:10]:
+                                    data.append({
+                                        "Handle": f"@{user['username']}",
+                                        "Platform": "IG",
+                                        "Followers": "LIVE",
+                                        "Gap": f"Strategic Content Gap in {niche_target}",
+                                        "Vigor": random.randint(75, 98),
+                                        "Value": "High"
+                                    })
+                                st.session_state.found_leads = pd.DataFrame(data)
+                                st.success("Uplink Established.")
+                            else:
+                                st.error("Search returned 0 results. Check keyword or subscription.")
+                                # Fallback to simulation so you're not stuck
+                                data = [{"Handle": "@Simulation_Lead", "Platform": "IG", "Followers": "100K", "Gap": "Manual Override", "Vigor": 90, "Value": "Critical"}]
+                                st.session_state.found_leads = pd.DataFrame(data)
 
+                        except Exception as e:
+                            st.error(f"Hardware Error: {e}")
+                    else:
+                        st.error("SYSTEM CRITICAL: No API Key found in st.secrets.")
+                        
                 except Exception as e:
                     st.warning(f"Note: {e}. Loading Simulation Mode...")
                     # FALLBACK DATA
@@ -1011,6 +1019,7 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
+
 
 
 
