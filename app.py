@@ -423,7 +423,7 @@ if not st.session_state.logged_in:
             Name = st.text_input("Full Name")
             Email = st.text_input("Email Address")
             Niche = st.text_input("Target Niche")
-            Create password= st.text_input("Set Passkey", type="password")
+            Create_password= st.text_input("Set Passkey", type="password")
             # This answer must be stored in your sheet to allow resets later
             Security = st.text_input("Security Question: What was your first school? (Required for recovery)")
             
@@ -435,7 +435,7 @@ if not st.session_state.logged_in:
                         "entry.1191019325": Name, 
                         "entry.1480968897": Email, 
                         "entry.860899570": Niche, 
-                        "entry.465373209": Create password,
+                        "entry.465373209": Create_password,
                         "entry.107117169": Security # <--- UPDATE THIS ID
                     }
                     requests.post(FORM_POST_URL, data=reg_data)
@@ -1417,6 +1417,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
