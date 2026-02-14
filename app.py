@@ -1004,7 +1004,7 @@ elif page == "💎 Upgrade to Pro":
         
         # Replace 'yourname@vpa' with your actual UPI ID (e.g., void@okicici)
         vpa_id = "yourname@vpa" 
-        upi_url = f"upi://pay?pa={vpa_id}&pn=VOID_OS&am=499&cu=INR"
+        upi_url = f"upi://pay?pa={anuj05758@okicici}&pn=VOID_OS&am=499&cu=INR"
         qr_api = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={upi_url}"
         
         # Displaying the QR without complex columns to avoid layout crashes
@@ -1089,6 +1089,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
