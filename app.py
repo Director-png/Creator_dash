@@ -1005,7 +1005,7 @@ elif page == "🛡️ Admin Console":
         st.session_state['admin_verified'] = True
         st.success("Identity Verified. Welcome, Director.")
         
-        # INITIALIZE TABS - This was missing in your snippet!
+        # 2. INITIALIZE TABS
         tab1, tab2, tab3 = st.tabs(["👥 Users", "💰 Payments", "📡 Lead Drop"])
 
         # --- TAB 1: USER MANAGEMENT ---
@@ -1020,58 +1020,56 @@ elif page == "🛡️ Admin Console":
             st.info(f"Active Users in Database: {len(users_df)}")
 
         # --- TAB 2: PAYMENTS (Manual Override) ---
-        # --- TAB 2: PAYMENTS (Manual Override) ---
         with tab2: 
             st.subheader("💰 Manual Revenue Override")
             target_mail = st.text_input("User Email to Activate", key="admin_target_mail")
             
             if st.button("ACTIVATE PRO NODES"):
                 if target_mail:
-                    # 1. Update LOCAL memory for you immediately
-                    st.session_state['user_status'] = 'paid'
-                    
-                    # 2. Update REMOTE Google Sheet
-                    # We send a specific category "ROLE_UPGRADE" so the script knows what to do
+                    # 1. Prepare Payload for Role Upgrade
                     payload = {
-                        "email": target_mail,
+                        "email": target_mail.lower().strip(),
                         "category": "ROLE_UPGRADE",
-                        "message": "PAID"
+                        "message": "PRO_ACTIVATION"
                     }
                     
+                    # 2. Execute Uplink to Google Apps Script
                     try:
-                        # Using your existing Apps Script URL
-                        FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
-                        response = requests.post(FEEDBACK_API_URL, json=payload, timeout=10)
+                        # Using your upgraded Apps Script URL
+                        NEW_URL = "https://script.google.com/macros/s/AKfycbwptoGlGh8xNwVVwf7porQnc-NrW67hrVRpugQpsXxw76X4zsO4qhdk9LH5otqcl4LH/exec" 
+                        response = requests.post(NEW_URL, json=payload, timeout=10)
                         
-                        if response.status_code == 200:
-                            st.success(f"⚔️ OMNI-SYNC COMPLETE: {target_mail} is now a PRO node.")
+                        if response.status_code == 200 and "SUCCESS" in response.text:
+                            st.success(f"⚔️ OMNI-SYNC COMPLETE: {target_mail} updated in Google Sheets.")
                             st.balloons()
                         else:
-                            st.error(f"📡 UPLINK FAILED: Status {response.status_code}")
+                            st.error(f"📡 SCRIPT RESPONSE: {response.text}")
                     except Exception as e:
-                        st.error(f"🚨 CONNECTION ERROR: {str(e)}")
+                        st.error(f"🚨 UPLINK CRASHED: {e}")
                 else:
                     st.warning("Director, enter a target email first.")
+
+            st.divider()
             
-            # THE MANUAL VERIFY FORM - Placed logically inside Payments Tab
+            # --- THE MANUAL VERIFY FORM ---
             with st.form("manual_verify_v2"):
                 st.write("### 🛰️ Admin Sync: Verify Payment")
                 u_email = st.text_input("Your Registered Email")
                 u_txn = st.text_input("Transaction ID / Reference Number")
                 
-                # Use your Script URL, not the Sheet URL for the API
+                # Feedback API URL
                 FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
                 
                 if st.form_submit_button("REQUEST ACTIVATION"):
                     if u_email and u_txn:
-                        payload = {"email": u_email, "message": u_txn, "category": "PAYMENT_PENDING"}
+                        f_payload = {"email": u_email, "message": u_txn, "category": "PAYMENT_PENDING"}
                         try:
-                            response = requests.post(FEEDBACK_API_URL, json=payload, timeout=10)
-                            if response.status_code == 200:
-                                st.success(f"✅ TRANSMISSION SUCCESS: Data logged.")
+                            f_res = requests.post(FEEDBACK_API_URL, json=f_payload, timeout=10)
+                            if f_res.status_code == 200:
+                                st.success("✅ TRANSMISSION SUCCESS: Data logged.")
                                 st.balloons()
                             else:
-                                st.error(f"📡 UPLINK ERROR: {response.status_code}")
+                                st.error(f"📡 UPLINK ERROR: {f_res.status_code}")
                         except Exception as e:
                             st.error(f"🚨 CRITICAL SYSTEM FAILURE: {str(e)}")
                     else:
@@ -1211,6 +1209,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
