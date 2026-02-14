@@ -1022,8 +1022,7 @@ with st.form("manual_verify_v2"):
     elif auth != "":
             st.error("Invalid Credentials. Intrusion attempt logged.")
 
-
-    with tab2: # Payments Tab
+with tab2: # Payments Tab
     st.subheader("💰 Manual Revenue override")
     target_mail = st.text_input("User Email to Activate")
     if st.button("ACTIVATE PRO NODES"):
@@ -1165,6 +1164,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
