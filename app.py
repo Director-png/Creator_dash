@@ -825,79 +825,58 @@ elif page == "🧪 Creator Lab":
                 res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": blueprint_prompt}])
                 st.info(res.choices[0].message.content)
 
-# --- MODULE 9: LEAD SOURCE (UNIVERSAL SOCIAL UPLINK) ---
+# --- MODULE 9: LEAD SOURCE (INSTAGRAM191 UPLINK) ---
 elif page == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
     
-    niche_target = st.text_input("Target Keyword", placeholder="e.g. SaaS Founder, Real Estate India")
+    niche_target = st.text_input("Target Keyword", placeholder="e.g. Fitness Coach, SaaS")
     
-    if st.button("📡 INITIALIZE DEEP SCAN", use_container_width=True):
+    if st.button("📡 INITIALIZE DEEP SCAN"):
         if "RAPIDAPI_KEY" not in st.secrets:
             st.error("Uplink Failure: API Key missing in Secrets.")
         else:
-            with st.spinner("🌑 PENETRATING SOCIAL NODES..."):
-                # Use the Host for the specific API you subscribed to
-                # If using Public Data Scraper, change to: "instagram-data1.p.rapidapi.com"
-                target_host = "instagram-api-rocksolid.p.rapidapi.com" 
-                url = f"https://{target_host}/v1/search_users"
+            with st.spinner("🌑 PENETRATING INSTAGRAM191 NODES..."):
+                # 🛑 THE EXACT HOST FROM YOUR SNIPPET
+                target_host = "instagram191.p.rapidapi.com" 
+                # Endpoint for searching users (standard for this provider)
+                url = f"https://{target_host}/v1/search/users"
                 
                 headers = {
                     "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
                     "X-RapidAPI-Host": target_host
                 }
-
+                
                 try:
-                    # FORCING THE CALL
-                    response = requests.get(url, headers=headers, params={"query": niche_target.strip()})
+                    # Parameter for this specific API is usually 'search_query'
+                    response = requests.get(url, headers=headers, params={"search_query": niche_target.strip()})
                     raw_data = response.json()
                     
-                    # 🔍 THE BLACK BOX REVEALED
-                    users = raw_data.get('users', raw_data.get('data', raw_data.get('items', [])))
+                    # Log the structure if it fails
+                    if "message" in raw_data:
+                        st.error(f"🛰️ SYSTEM MESSAGE: {raw_data['message']}")
                     
-                    if not users:
-                        st.error("📡 DIAGNOSTIC DATA DETECTED:")
-                        st.json(raw_data) # This will show us EXACTLY why it's zero
-                        raise ValueError("API returned no users for this query.")
+                    # Instagram191 usually returns a list under 'data'
+                    users = raw_data.get('data', [])
                     
-                    data = []
-                    for u in users[:10]:
-                        u_info = u.get('user', u) 
-                        data.append({
-                            "Handle": f"@{u_info.get('username', 'Unknown')}",
-                            "Platform": "IG",
-                            "Followers": u_info.get('follower_count', 'LIVE'),
-                            "Gap": f"Strategic Gap in {niche_target} Content",
-                            "Vigor": random.randint(80, 99),
-                            "Value": "High" if u_info.get('is_verified') else "Medium"
-                        })
-                    st.session_state.found_leads = pd.DataFrame(data)
-                    st.success(f"Uplink Established: {len(data)} Targets Identified.")
+                    if users:
+                        data = []
+                        for u in users[:10]:
+                            data.append({
+                                "Handle": f"@{u.get('username')}",
+                                "Platform": "IG",
+                                "Followers": u.get('follower_count', 'LIVE'),
+                                "Gap": f"Strategic Gap in {niche_target}",
+                                "Vigor": random.randint(80, 99),
+                                "Value": "High" if u.get('is_verified') else "Medium"
+                            })
+                        st.session_state.found_leads = pd.DataFrame(data)
+                        st.success(f"UPLINK ESTABLISHED: {len(data)} Targets Found.")
+                    else:
+                        st.warning("No users found. Showing raw response for diagnostic:")
+                        st.json(raw_data) # This will tell us if the endpoint path changed
 
-                except Exception as e:
-                    st.warning(f"Note: {e}. Reverting to Simulation...")
-                    # Simulation Fallback (Keep this as your safety net)
-                    sim_data = [
-                        {"Handle": "@AI_Global", "Platform": "IG", "Followers": "45K", "Gap": "Low Hook Retention", "Vigor": 88, "Value": "High"},
-                        {"Handle": "@Wealth_Flow", "Platform": "IG", "Followers": "12K", "Gap": "No Direct-to-DM Funnel", "Vigor": 95, "Value": "Critical"}
-                    ]
-                    st.session_state.found_leads = pd.DataFrame(sim_data)
-                
                 except Exception as e:
                     st.error(f"Hardware Error: {e}")
-
-    # --- RENDER TABLE & PORT TO PITCHER ---
-    if not st.session_state.found_leads.empty:
-        st.divider()
-        edited_df = st.data_editor(
-            st.session_state.found_leads,
-            hide_index=True, use_container_width=True
-        )
-        
-        if st.button("🚀 PORT SELECTED TO PITCHER"):
-            # Ports the first handle to the Pitcher for analysis
-            target = edited_df.iloc[0]
-            st.session_state.active_pitch_target = {"name": target["Handle"], "gap": target["Gap"], "niche": niche_target}
-            st.toast(f"Neural Bridge Active: {target['Handle']}")
 
 
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
@@ -1011,6 +990,7 @@ elif page == "💎 Upgrade to Pro":
     st.divider()
     st.subheader("🚀 BETA FOUNDER STATUS")
     st.write("Current User Status: **FREE TIER**")
+
 
 
 
