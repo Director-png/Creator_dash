@@ -962,52 +962,70 @@ elif page == "🛡️ Admin Console":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
 
-# --- MODULE 10: UPGRADE TO PRO (WITH LEGAL GATE) ---
+# --- MODULE 10: UPGRADE TO PRO (STABILIZED) ---
 elif page == "💎 Upgrade to PRO":
     st.markdown("<h1 style='color: #00ff41;'>💎 VOID PRO: UPGRADE UPLINK</h1>", unsafe_allow_html=True)
     
-    # --- TERMS & CONDITIONS SECTION ---
+    st.info("Unlock the full architecture: Unlimited Lead Scans, Neural Pitching, and Global Data Drops.")
+
+    # --- TERMS & CONDITIONS (THE LEGAL GATE) ---
     with st.expander("⚖️ View Terms of Service & Refund Policy"):
         st.write("""
-            **1. Service Delivery:** VOID OS provides AI-generated leads and pitch templates. 
-            Accuracy is dependent on third-party API nodes.
-            **2. Refund Policy:** Due to the digital nature of the 'Neural Credits', all sales are final. 
-            No refunds are issued once leads are accessed.
-            **3. Usage:** Automated scraping for resale is strictly prohibited.
-            **4. Privacy:** Your data is encrypted and never shared with third-party marketers.
+            **1. Service Delivery:** VOID OS provides AI-generated leads. 
+            **2. Refund Policy:** Due to the digital nature of neural credits, all sales are final. 
+            **3. Verification:** Manual UPI transfers require a screenshot for activation (1-2 hours).
         """)
     
-    # The Legal Gate
-    agree = st.checkbox("I have read and agree to the Terms & Conditions and Refund Policy.")
+    # Use a unique key to prevent session ghosting
+    agree = st.checkbox("I agree to the Terms & Conditions", key="legal_agreement_v1")
     
     st.divider()
 
-    if not agree:
-        st.warning("⚠️ You must accept the Terms & Conditions to initialize the Payment Node.")
-    else:
-        # --- PAYMENT CHANNELS (UNLOCKED) ---
-        col1, col2 = st.columns(2)
+    if agree:
+        # Domestic UPI Section
+        st.subheader("🇮🇳 Domestic (UPI)")
+        st.write("Special Launch Price: **₹499** (50% OFF)")
         
-        with col1:
-            st.write("### 🇮🇳 Domestic (UPI)")
-            st.write("Price: **₹499**")
-            vpa = "yourname@vpa" 
-            upi_link = f"upi://pay?pa={vpa}&pn=VOID_OS&am=499&cu=INR"
-            qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={upi_link}"
-            st.image(qr_url, caption="Scan to Pay")
-            
-        with col2:
-            st.write("### 🌎 International")
-            st.write("Price: **$19**")
-            # This is your placeholder until Razorpay is active
-            st.button("🚀 OPEN RAZORPAY GATEWAY (Coming Soon)", disabled=True)
-            st.caption("International cards will be supported once Razorpay verification completes.")
+        vpa = "yourname@vpa" # Replace with your ID
+        upi_link = f"upi://pay?pa={vpa}&pn=VOID_OS&am=499&cu=INR"
+        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={upi_link}"
+        
+        col_qr, col_text = st.columns([1, 1.5])
+        with col_qr:
+            st.image(qr_url, caption="Scan with any UPI App")
+        with col_text:
+            st.write("**How to activate:**")
+            st.write("1. Scan the QR and pay ₹499.")
+            st.write("2. Note the Transaction ID.")
+            st.write("3. Upload the screenshot in the 'Admin Sync' below.")
 
-    # --- PROMO CODE SYSTEM ---
-    st.divider()
-    promo = st.text_input("Enter Early-Bird Promo Code", help="Ask the Admin for a launch discount.")
-    if promo.upper() == "VOID50":
-        st.success("Identity Recognized: 50% Early Bird Discount applied to manual UPI transfers.")
+        st.divider()
+        
+        # International Section
+        st.subheader("🌎 International (Card/PayPal)")
+        st.write("Launch Price: **$19**")
+        st.button("🚀 RAZORPAY GATEWAY (Initializing...)", disabled=True, help="Verification in progress")
+    else:
+        st.warning("⚠️ Please accept the Terms & Conditions above to view payment nodes.")
+
+
+
+
+
+
+
+
+# --- GLOBAL FOOTER (RAZORPAY COMPLIANCE) ---
+st.markdown("---")
+footer_html = """
+<div style="text-align: center; color: #666; font-size: 12px; padding: 20px;">
+    <p>© 2026 VOID OS | <a href="mailto:support@voidos.com" style="color: #00ff41;">Contact Support</a></p>
+    <p>Built for Digital Architects & Outreach Specialists</p>
+    <p style="font-size: 10px;">Privacy Policy | Terms of Service | Refund Policy</p>
+</div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)
+
 
 
 
