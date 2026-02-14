@@ -99,6 +99,12 @@ def load_user_db():
     except Exception as e:
         st.sidebar.error(f"Sync Failure: {e}")
         return pd.DataFrame()
+if st.button("Access System", use_container_width=True):
+            users = load_user_db()
+            
+            # --- TEMPORARY DEBUGGER (Delete after fix) ---
+            st.write("DEBUG: Column Names:", users.columns.tolist())
+            st.write("DEBUG: First Row Data:", users.iloc[0].tolist())
 
 def load_market_pulse_data(url=None): # <--- Added '=None' to make it optional
     # Use the global URL if none is provided in the parentheses
@@ -1215,6 +1221,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
