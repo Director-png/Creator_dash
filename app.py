@@ -849,7 +849,23 @@ elif page == "💎 Script Architect":
     if 'txt' not in locals() and not st.session_state.get('script_history'):
         with c2:
             st.info("Awaiting Tactical Input. Architectural blueprints will manifest here.")
-            
+
+def save_script_to_vault(title, content):
+    payload = {
+        "email": st.session_state.user_email,
+        "category": "SAVE_SCRIPT",
+        "title": title,
+        "content": content
+    }
+    try:
+        requests.post(NEW_URL, json=payload)
+        st.success("📜 Script archived in your Private Vault.")
+    except:
+        st.error("Uplink failed. Script not saved.")
+
+# Inside your Script Architect UI, after the script is generated:
+if st.button("💾 Archive to History Vault"):
+    save_script_to_vault(f"Script_{time.strftime('%Y%m%d')}", generated_script_text)
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -1346,6 +1362,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
