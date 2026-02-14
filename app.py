@@ -280,6 +280,14 @@ def display_feedback_tab():
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
+# --- GLOBAL PERSONA DETECTION (Do this before any pages load) ---
+user_role_raw = st.session_state.get('user_role', 'free')
+user_status_raw = st.session_state.get('user_status', 'free')
+
+# Define these once so they are NEVER "Undefined"
+is_admin = str(user_role_raw).lower() == 'admin' or st.session_state.get('admin_verified', False)
+is_paid = "paid" in str(user_status_raw).lower() or "pro" in str(user_status_raw).lower()
+
 # --- 🎨 VOID OS STYLING ---
 st.markdown("""
     <style>
@@ -793,46 +801,32 @@ elif page == "⚔️ Trend Duel":
             fig = px.bar(comp, x='Niche', y='Score', color='Score', template='plotly_dark')
             st.plotly_chart(fig, use_container_width=True)
 
-# --- MODULE 6: SCRIPT ARCHITECT (REPAIRED & INTEGRATED) ---
+# --- MODULE 6: SCRIPT ARCHITECT ---
 elif page == "💎 Script Architect":
-    # 🕵️ EMERGENCY DEBUG MONITOR
-    # This will show you EXACTLY why it is blank.
-    user_status_raw = st.session_state.get('user_status', 'NOT_FOUND')
-    user_role_raw = st.session_state.get('user_role', 'NOT_FOUND')
-    
-    # Show this only to you (Admin) so you can see the error live
-    if st.session_state.get('admin_verified'):
-        st.write(f"DEBUG DATA: Status=['{user_status_raw}'], Role=['{user_role_raw}']")
+    st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
 
-    # 🛑 THE GATEKEEPER: If not Admin and not Paid, block access
-    if not is_admin and user_status != 'paid':
-        st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
+    # 🛑 GATEKEEPER: Using the global variables defined above
+    if not is_admin and not is_paid:
         st.warning("🚨 NODE INACTIVE: This module requires a PRO Node activation.")
-        st.info("Please contact the Director to upgrade your access tier.")
         st.stop()
 
-    # ✅ AUTHORIZED ACCESS: Logic continues below
-    st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
-    
-    # Initialize Persistent Storage (Crucial to prevent NameError)
+    # Initialize Session Memory for Script
     if 'current_architect_txt' not in st.session_state: st.session_state.current_architect_txt = ""
     if 'current_architect_dna' not in st.session_state: st.session_state.current_architect_dna = ""
     if 'current_architect_topic' not in st.session_state: st.session_state.current_architect_topic = ""
-    if 'script_history' not in st.session_state: st.session_state.script_history = []
-    
+
     # Load users ONLY if Admin
     client_options = ["Public/General"]
     if is_admin:
         users_df = load_user_db()
         if not users_df.empty:
-            # Assumes names are in the second column (Index 1)
+            # Safer name extraction using header
             db_names = users_df.iloc[:, 1].dropna().unique().tolist()
             client_options = ["Public/General"] + db_names
 
     c1, c2 = st.columns([1, 1.5], gap="large")
     
     with c1:
-        # Role-based target selection
         if is_admin:
             target_client = st.selectbox("Assign To Target", options=client_options, key="arch_target_final")
         else:
@@ -846,7 +840,6 @@ elif page == "💎 Script Architect":
         with st.expander("👤 COMPETITOR SHADOW"):
             c_hook = st.text_area("Their Narrative (What are they saying?)")
         
-        # Role-based button label
         btn_label = "🚀 ARCHITECT & TRANSMIT" if is_admin else "🚀 ARCHITECT SCRIPT"
         
         if st.button(btn_label, use_container_width=True):
@@ -868,42 +861,30 @@ elif page == "💎 Script Architect":
                             messages=[{"role": "user", "content": prompt}]
                         )
                         
-                        # --- CAPTURE TO SESSION STATE (Fixed Persistence) ---
+                        # --- CAPTURE DATA ---
                         st.session_state.current_architect_txt = res.choices[0].message.content
                         st.session_state.current_architect_topic = topic
                         st.session_state.current_architect_dna = generate_visual_dna(platform, tone_choice)
                         
-                        # Add to local session history
-                        st.session_state.script_history.append({
-                            "assigned_to": target_client, 
-                            "topic": topic, 
-                            "script": st.session_state.current_architect_txt,
-                            "platform": platform
-                        })
-                        
                         if is_admin:
-                            # Original transmit logic for admin
                             status = transmit_script(target_client, platform, topic, st.session_state.current_architect_txt, st.session_state.current_architect_dna)
-                            if status: st.success("⚔️ BROADCAST COMPLETE: Script synced to Vault.")
+                            if status: st.success("⚔️ BROADCAST COMPLETE: Script synced.")
                         else:
-                            st.success("⚔️ ARCHITECTURE COMPLETE: Ready for deployment.")
+                            st.success("⚔️ ARCHITECTURE COMPLETE.")
                         
-                        st.rerun() # Refresh to show script in c2 immediately
+                        st.rerun()
                             
                     except Exception as e: 
                         st.error(f"Intelligence Failure: {e}")
 
     with c2:
-        # Display the script if it exists in the session memory
         if st.session_state.current_architect_txt:
             st.subheader("💎 GENERATED ARCHIVE")
             st.markdown(st.session_state.current_architect_txt)
             st.divider()
-            st.caption(f"🧬 DNA: {st.session_state.current_architect_dna}")
             
-            # --- INTEGRATED ARCHIVE FEATURE ---
-            # Uses session state to prevent NameError on rerun
-            if st.button("💾 Archive to History Vault", use_container_width=True, key="vault_btn_arch"):
+            # ARCHIVE BUTTON
+            if st.button("💾 Archive to History Vault", use_container_width=True):
                 payload = {
                     "email": st.session_state.get('user_email', 'unknown'),
                     "category": "SAVE_SCRIPT",
@@ -911,16 +892,13 @@ elif page == "💎 Script Architect":
                     "content": st.session_state.current_architect_txt
                 }
                 try:
-                    # NEW_URL must be defined globally at the top of your script
                     r = requests.post(NEW_URL, json=payload, timeout=10)
-                    if "SUCCESS" in r.text:
-                        st.success("📜 Script archived in your Private Vault.")
-                    else:
-                        st.error("Vault rejected the transmission.")
-                except Exception as e:
-                    st.error(f"Uplink failed: {e}")
+                    if "SUCCESS" in r.text: st.success("📜 Script archived.")
+                    else: st.error("Vault rejected transmission.")
+                except:
+                    st.error("Uplink failed.")
         else:
-            st.info("Awaiting Tactical Input. Architectural blueprints will manifest here.")
+            st.info("Awaiting Tactical Input.")
 
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
@@ -1418,6 +1396,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
