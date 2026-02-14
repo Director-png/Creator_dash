@@ -300,18 +300,17 @@ st.markdown("""<style>
     .stMetric { border: 1px solid #111; padding: 15px; border-radius: 10px; background: #080808; }
     </style>""", unsafe_allow_html=True)
 
-# --- GATEKEEPER ---
 # --- GATEKEEPER (INTEGRATED VERSION) ---
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align: center; color: #00ff41;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
     t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
     
     with t1:
-        email_in = st.text_input("Email").lower().strip()
-        pw_in = st.text_input("Password", type="password")
+        email_in = st.text_input("Email", key="login_email").lower().strip()
+        pw_in = st.text_input("Password", type="password", key="login_pw")
         
         if st.button("Access System", use_container_width=True):
-            # Fetching fresh data to ensure we see the 'paid' status
+            # Fetching fresh data to ensure we see the 'paid' status and current password
             users = load_user_db()
             
             # --- ADMIN BYPASS ---
@@ -319,30 +318,56 @@ if not st.session_state.logged_in:
                 st.session_state.logged_in = True
                 st.session_state.user_name = "Master Director"
                 st.session_state.user_role = "admin"
-                st.session_state.user_status = "paid" # Admin is always PRO
+                st.session_state.user_status = "paid"
+                st.session_state.user_email = "admin@system.com"
                 st.rerun()
             
             # --- USER VALIDATION ---
             elif not users.empty:
-                # We match Email (Index 2) and Password (Index 4)
+                # Match Email (Index 2) and Password (Index 4)
                 match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & (users.iloc[:, 4].astype(str) == pw_in)]
                 
                 if not match.empty:
-                    # 🚀 STATUS SYNC LOGIC
-                    # Looking at Column 6 (Index 5) for the status 'paid'
                     try:
                         raw_status = str(match.iloc[0, 5]).strip().lower()
                     except:
-                        raw_status = "free" # Fallback if column index is missing
+                        raw_status = "free"
                     
                     st.session_state.logged_in = True
-                    st.session_state.user_name = match.iloc[0, 1] # Index 1 for Name
+                    st.session_state.user_name = match.iloc[0, 1]
+                    st.session_state.user_email = email_in
                     st.session_state.user_role = "user"
-                    st.session_state.user_status = raw_status # Sets 'paid' or 'free'
-                    
+                    st.session_state.user_status = raw_status 
                     st.rerun()
                 else: 
                     st.error("Access Denied: Credentials Invalid.")
+
+        st.write("")
+        # --- EMERGENCY OVERRIDE (FORGOTTEN PASSWORD) ---
+        with st.expander("Forgot Passkey?"):
+            st.markdown("### 🛰️ Identity Recovery")
+            reset_email = st.text_input("Registered Email", key="reset_mail").lower().strip()
+            new_passkey = st.text_input("New Secure Passkey", type="password", key="reset_pw")
+            
+            if st.button("INITIATE PASSWORD OVERRIDE", use_container_width=True):
+                if reset_email and new_passkey:
+                    # Sync with Google Script
+                    payload = {
+                        "email": reset_email,
+                        "category": "PASSWORD_RESET",
+                        "message": new_passkey
+                    }
+                    try:
+                        # Ensure NEW_URL is your latest Apps Script deployment
+                        response = requests.post(NEW_URL, json=payload, timeout=10)
+                        if "SUCCESS" in response.text:
+                            st.success("✅ OMNI-SYNC COMPLETE: Passkey updated. You may now login.")
+                        else:
+                            st.error(f"📡 RESET DENIED: {response.text}")
+                    except Exception as e:
+                        st.error(f"🚨 UPLINK FAILURE: {e}")
+                else:
+                    st.warning("Director, both email and new passkey are required for override.")
                     
     with t2:
         with st.form("reg"):
@@ -352,33 +377,48 @@ if not st.session_state.logged_in:
                 st.success("Transmission Received. Awaiting Node Approval.")
     st.stop()
 
-# --- SIDEBAR NAVIGATION ---
+# --- SIDEBAR NAVIGATION (UNIFIED & ALIGNED) ---
 with st.sidebar:
+    # 1. Identity Header
     st.markdown(f"<h3 style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</h3>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #444; font-size: 10px;'>ENCRYPTED CONNECTION : ACTIVE</p>", unsafe_allow_html=True)
     
-    # Define available pages based on role
-    if st.session_state.user_role == "admin":
-        options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "💎 Upgrade to Pro", "📜 History"]
+    # Dynamic Status Badge
+    user_status = st.session_state.get('user_status', 'free').strip().lower()
+    if user_status == 'paid' or st.session_state.user_role == "admin":
+        st.success("💎 PRO NODE ACTIVE")
     else:
-        options = ["📡 My Growth Hub", "💎 Assigned Scripts", "🌐 Global Pulse", "💎 Upgrade to Pro"]
+        st.warning("📡 BASIC NODE")
     
-    # Ensure the radio index stays synced with current_page
+    st.markdown("<p style='text-align: center; color: #444; font-size: 10px;'>ENCRYPTED CONNECTION : ACTIVE</p>", unsafe_allow_html=True)
+    st.divider()
+
+    # 2. Define Options based on Role AND Status
+    if st.session_state.user_role == "admin":
+        options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "💎 Script Architect", "💼 Client Pitcher", "📜 History", "⚙️ Settings"]
+    elif user_status == 'paid':
+        options = ["📡 My Growth Hub", "🌐 Global Pulse", "🏗️ Script Architect", "🧪 Creator Lab", "📜 History", "⚙️ Settings"]
+    else:
+        options = ["📡 My Growth Hub", "🌐 Global Pulse", "📜 Assigned Scripts", "⚖️ Legal Archive", "💎 Upgrade to Pro", "⚙️ Settings"]
+
+    # 3. Handle Page Indexing
     try:
         current_index = options.index(st.session_state.current_page)
-    except ValueError:
+    except (ValueError, KeyError):
         current_index = 0
 
-    # Command Center Radio
+    # 4. The Unified Radio Menu
+    # Note: We use the variable 'choice' to update current_page
     choice = st.radio("COMMAND CENTER", options, index=current_index)
     
-    # Update state only if user clicks the radio (and we aren't in Feedback mode)
     if choice != st.session_state.current_page and st.session_state.current_page != "FEEDBACK":
         st.session_state.current_page = choice
 
-    # Spacer to push buttons to bottom
-    for _ in range(12): st.sidebar.write("")
+    # 5. Global Action Buttons
     st.divider()
+    
+    if st.button("🔄 SYNC NODE STATUS", use_container_width=True):
+        st.cache_data.clear() # Clears the load_user_db cache
+        st.rerun()
 
     if st.button("📩 NEURAL FEEDBACK", use_container_width=True):
         st.session_state.current_page = "FEEDBACK"
@@ -388,26 +428,9 @@ with st.sidebar:
         st.session_state.logged_in = False
         st.rerun()
 
-with st.sidebar:
-    if st.session_state.get('logged_in'):
-        if st.button("🔄 SYNC NODE STATUS"):
-            st.cache_data.clear() # Clears the load_user_db cache
-            st.rerun()
-# --- STEP 1: DEFINE THE DYNAMIC MENU ---
-# --- SIDEBAR LOGIC GATE ---
-# Get status from session (this should be set during login)
-user_status = st.session_state.get('user_status', 'free')
-
-if user_status == 'paid':
-    # THE PRO EXPERIENCE
-    menu = ["📡 My Growth Hub", "🌐 Global Pulse", "🏗️ Script Architect", "🧪 Creator Lab", "📜 History", "⚙️ Settings"]
-    # We REMOVE "Assigned Scripts" from here
-else:
-    # THE FREE EXPERIENCE
-    menu = ["📡 My Growth Hub", "🌐 Global Pulse", "📜 Assigned Scripts", "⚖️ Legal Archive", "💎 Upgrade to Pro"]
-
-page = st.sidebar.radio("Navigation", menu)
-
+# --- PAGE ROUTING ---
+# This variable 'page' is what your module if/elif blocks should use
+page = st.session_state.current_page
 
 # --- MAIN PAGE ROUTING ---
 page = st.session_state.current_page
@@ -1185,6 +1208,74 @@ elif page == "💎 Upgrade to Pro":
         st.write("Please check the box above to initialize the transaction.")
 
 
+# --- MODULE 12: SETTINGS ---
+elif page == "⚙️ Settings":
+    st.markdown("<h1 style='color: #00ff41;'>⚙️ SYSTEM SETTINGS</h1>", unsafe_allow_html=True)
+    st.markdown("---")
+
+    # 1. PROFILE INTELLIGENCE
+    with st.container(border=True):
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            st.image("https://api.dicebear.com/7.x/bottts/svg?seed=" + st.session_state.user_name, width=100)
+        with col2:
+            st.subheader(f"Director: {st.session_state.user_name}")
+            st.caption(f"Registered Email: {st.session_state.get('user_email', 'N/A')}")
+            
+            # Dynamic Badge
+            status = st.session_state.get('user_status', 'free')
+            if status == "paid":
+                st.markdown("<span style='background-color: #00ff41; color: black; padding: 2px 8px; border-radius: 5px; font-weight: bold;'>PRO NODE</span>", unsafe_allow_html=True)
+            else:
+                st.markdown("<span style='background-color: #444; color: white; padding: 2px 8px; border-radius: 5px; font-weight: bold;'>BASIC NODE</span>", unsafe_allow_html=True)
+
+    st.write("")
+
+    # 2. SUBSCRIPTION & BILLING
+    with st.expander("💳 Subscription Management", expanded=True):
+        if status == "paid":
+            st.success("Your Pro subscription is active until the next billing cycle.")
+            st.info("To cancel or change billing details, contact Central Command.")
+        else:
+            st.warning("You are currently on the Limited 'Free' Tier.")
+            if st.button("🚀 UPGRADE TO PRO NOW"):
+                st.session_state.current_page = "💎 Upgrade to Pro"
+                st.rerun()
+
+    # 3. SECURITY NODES
+    with st.expander("🔒 Security & Access"):
+        st.write("### Change Password")
+        old_p = st.text_input("Current Password", type="password")
+        new_p = st.text_input("New Password", type="password")
+        conf_p = st.text_input("Confirm New Password", type="password")
+        
+        if st.button("UPDATE CREDENTIALS"):
+            if new_p == conf_p and len(new_p) > 4:
+                # This would ideally call a 'ROLE_UPGRADE' style function 
+                # but with a 'PASSWORD_UPDATE' category for your Google Script
+                st.info("Transmission sent. Security protocols updating...")
+            else:
+                st.error("Passwords do not match or are too weak.")
+
+    # 4. INTERFACE PREFERENCES
+    with st.expander("🎨 Interface Preferences"):
+        st.toggle("Enable Neural UI Animations", value=True)
+        st.toggle("Show Real-time ROI in Sidebar", value=True)
+        st.select_slider("System Font Scaling", options=["Stealth", "Standard", "Explosive"], value="Standard")
+
+    # 5. SYSTEM ACTIONS (The "Nuclear" Option)
+    st.write("")
+    st.divider()
+    col_a, col_b = st.columns(2)
+    with col_a:
+        if st.button("🔄 CLEAR SYSTEM CACHE", use_container_width=True):
+            st.cache_data.clear()
+            st.success("Local Memory Wiped.")
+    with col_b:
+        if st.button("🔓 TERMINATE SESSION", use_container_width=True):
+            st.session_state.logged_in = False
+            st.rerun()
+
 
 
 
@@ -1221,6 +1312,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
