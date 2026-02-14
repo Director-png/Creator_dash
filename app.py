@@ -1061,10 +1061,11 @@ with f_col2:
 with f_col3:
     st.markdown("**Contact Uplink**")
     # ⚠️ IMPORTANT: Razorpay needs a real email here
-    st.caption("📧 support@yourdomain.com") 
-    st.caption("📍 Dehradun, Uttarakhand, India")
+    st.caption("📧 director07022026@gmail.com") 
+    st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
