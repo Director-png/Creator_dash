@@ -962,41 +962,52 @@ elif page == "🛡️ Admin Console":
         st.error("Invalid Credentials. Intrusion attempt logged.")
         
 
-# --- MODULE 10: PAYMENT WALL (UPI) ---
-elif page == "💎 Upgrade to Pro":
-    st.markdown("<h1 style='color: #00ff41;'>💎 UNLOCK QUANTUM ACCESS</h1>", unsafe_allow_html=True)
+# --- MODULE 10: UPGRADE TO PRO (WITH LEGAL GATE) ---
+elif page == "💎 Upgrade to PRO":
+    st.markdown("<h1 style='color: #00ff41;'>💎 VOID PRO: UPGRADE UPLINK</h1>", unsafe_allow_html=True)
     
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        st.markdown("""
-        ### Pro Features:
-        * 🛰️ **Quantum Scan Depth** (100+ leads/scan)
-        * 🧠 **Llama-3.3-70B** High-Priority Processing
-        * 💎 **Master Vault** Auto-Sync (Google Sheets)
-        * 🚀 **Custom Branding** for Pitcher DMs
+    # --- TERMS & CONDITIONS SECTION ---
+    with st.expander("⚖️ View Terms of Service & Refund Policy"):
+        st.write("""
+            **1. Service Delivery:** VOID OS provides AI-generated leads and pitch templates. 
+            Accuracy is dependent on third-party API nodes.
+            **2. Refund Policy:** Due to the digital nature of the 'Neural Credits', all sales are final. 
+            No refunds are issued once leads are accessed.
+            **3. Usage:** Automated scraping for resale is strictly prohibited.
+            **4. Privacy:** Your data is encrypted and never shared with third-party marketers.
         """)
-        
-        plan = st.radio("Select Plan", ["Monthly Access - ₹999", "Lifetime Access - ₹4,999"])
-        
-    with col2:
-        st.info("⚡ PAY VIA UPI")
-        # Replace 'yourname@upi' with your actual VPA
-        upi_vpa = "yourname@okicici" 
-        amount = "999" if "Monthly" in plan else "4999"
-        
-        # Simple UPI QR Link Generator
-        upi_link = f"upi://pay?pa={upi_vpa}&pn=VOID_OS&am={amount}&cu=INR"
-        
-        # We use a QR API to display the payment code
-        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={upi_link}"
-        st.image(qr_url, caption="Scan with GPay, PhonePe, or Paytm")
-        
-        st.warning("⚠️ After payment, upload the screenshot in the 'History' tab for manual verification (Beta Protocol).")
-
+    
+    # The Legal Gate
+    agree = st.checkbox("I have read and agree to the Terms & Conditions and Refund Policy.")
+    
     st.divider()
-    st.subheader("🚀 BETA FOUNDER STATUS")
-    st.write("Current User Status: **FREE TIER**")
+
+    if not agree:
+        st.warning("⚠️ You must accept the Terms & Conditions to initialize the Payment Node.")
+    else:
+        # --- PAYMENT CHANNELS (UNLOCKED) ---
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.write("### 🇮🇳 Domestic (UPI)")
+            st.write("Price: **₹499**")
+            vpa = "yourname@vpa" 
+            upi_link = f"upi://pay?pa={vpa}&pn=VOID_OS&am=499&cu=INR"
+            qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={upi_link}"
+            st.image(qr_url, caption="Scan to Pay")
+            
+        with col2:
+            st.write("### 🌎 International")
+            st.write("Price: **$19**")
+            # This is your placeholder until Razorpay is active
+            st.button("🚀 OPEN RAZORPAY GATEWAY (Coming Soon)", disabled=True)
+            st.caption("International cards will be supported once Razorpay verification completes.")
+
+    # --- PROMO CODE SYSTEM ---
+    st.divider()
+    promo = st.text_input("Enter Early-Bird Promo Code", help="Ask the Admin for a launch discount.")
+    if promo.upper() == "VOID50":
+        st.success("Identity Recognized: 50% Early Bird Discount applied to manual UPI transfers.")
 
 
 
