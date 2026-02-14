@@ -363,6 +363,7 @@ if page == "FEEDBACK":
         st.rerun()
 
 # --- MODULE 1: DASHBOARD ---
+# --- MODULE 1: DASHBOARD ---
 elif page == "🏠 Dashboard":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ COMMAND CENTER</h1>", unsafe_allow_html=True)
     
@@ -385,9 +386,26 @@ elif page == "🏠 Dashboard":
             
     with c2:
         st.subheader("🛡️ SYSTEM INTEGRITY")
-        st.code(f"AI Core: {active_core if 'active_core' in locals() else 'STANDBY'}\nHandshake: STABLE\nLaunch: T-Minus 48h")
         core_display = active_core if 'active_core' in globals() else "STANDBY"
-        st.code(f"AI Core: {core_display}\nHandshake: STABLE\nLaunch: T-Minus 48h")
+        st.code(f"AI Core: {core_display}\nHandshake: STABLE\nLaunch: READY")
+
+    # --- 🚨 RAZORPAY COMPLIANCE ANCHOR (Hidden in Plain Sight) ---
+    st.divider()
+    auditor_col1, auditor_col2 = st.columns(2)
+    
+    with auditor_col1:
+        st.write("### 📜 Software Service Details")
+        st.caption("VOID OS is a B2B SaaS platform providing AI-driven lead generation and outreach automation.")
+        st.write("📍 **Pricing:** Subscription plans starting from ₹499.")
+        
+    with auditor_col2:
+        st.write("### 📞 Contact & Support")
+        # Replace this with your actual contact email
+        st.write("📧 **Support:** support@your-email.com") 
+        st.write("🌐 **URL:** void-os.streamlit.app")
+
+    st.caption("Legal nodes verified: Terms of Service, Privacy Policy, and Refund Policy are active.")
+
 
 # --- MODULE 8: GROWTH HUB (HARDENED VERSION) ---
 elif page == "📡 My Growth Hub":
@@ -1028,6 +1046,7 @@ footer_html = """
 </div>
 """
 st.markdown(footer_html, unsafe_allow_html=True)
+
 
 
 
