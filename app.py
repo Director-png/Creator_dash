@@ -1046,6 +1046,29 @@ footer_html = """
 </div>
 """
 st.markdown(footer_html, unsafe_allow_html=True)
+# --- COMPLIANCE FOOTER (FOR RAZORPAY APPROVAL) ---
+st.divider()
+f_col1, f_col2, f_col3 = st.columns(3)
+
+with f_col1:
+    st.markdown("**VOID OS Operations**")
+    st.caption("AI-Powered SaaS Solutions")
+    st.caption("B2B Outreach Intelligence")
+
+with f_col2:
+    st.markdown("**Legal Nodes**")
+    # These should link to your 'Legal Archive' page or be clear text
+    st.caption("Privacy Policy")
+    st.caption("Terms & Conditions")
+    st.caption("Refund Policy")
+
+with f_col3:
+    st.markdown("**Contact Uplink**")
+    # ⚠️ IMPORTANT: Razorpay needs a real email here
+    st.caption("📧 support@yourdomain.com") 
+    st.caption("📍 Dehradun, Uttarakhand, India")
+
+st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
 
 
 
