@@ -825,21 +825,21 @@ elif page == "🧪 Creator Lab":
                 res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": blueprint_prompt}])
                 st.info(res.choices[0].message.content)
 
-# --- MODULE 9: LEAD SOURCE (INSTAGRAM191 UPLINK) ---
+# --- MODULE 9: LEAD SOURCE (INSTAGRAM191 MASTER KEY) ---
 elif page == "🛰️ Lead Source":
     st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
     
-    niche_target = st.text_input("Target Keyword", placeholder="e.g. Fitness Coach, SaaS")
+    niche_target = st.text_input("Target Keyword", placeholder="e.g. SaaS Founder, Fitness Coach")
     
     if st.button("📡 INITIALIZE DEEP SCAN"):
         if "RAPIDAPI_KEY" not in st.secrets:
             st.error("Uplink Failure: API Key missing in Secrets.")
         else:
-            with st.spinner("🌑 PENETRATING INSTAGRAM191 NODES..."):
-                # 🛑 THE EXACT HOST FROM YOUR SNIPPET
+            with st.spinner("🌑 PENETRATING INSTAGRAM191 ARCHITECTURE..."):
                 target_host = "instagram191.p.rapidapi.com" 
-                # Endpoint for searching users (standard for this provider)
-                url = f"https://{target_host}/v1/search/users"
+                # 🛑 THE FIX: Instagram191 path is usually /v1/user/search/ or /v1/search/
+                # We will try the 'user/search' path first
+                url = f"https://{target_host}/v1/user/search/"
                 
                 headers = {
                     "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
@@ -847,15 +847,17 @@ elif page == "🛰️ Lead Source":
                 }
                 
                 try:
-                    # Parameter for this specific API is usually 'search_query'
-                    response = requests.get(url, headers=headers, params={"search_query": niche_target.strip()})
+                    # Parameter for Instagram191 is 'query'
+                    response = requests.get(url, headers=headers, params={"query": niche_target.strip()})
                     raw_data = response.json()
                     
-                    # Log the structure if it fails
-                    if "message" in raw_data:
-                        st.error(f"🛰️ SYSTEM MESSAGE: {raw_data['message']}")
-                    
-                    # Instagram191 usually returns a list under 'data'
+                    # 🔍 DEBUG: If it fails, try the alternative search path
+                    if "message" in raw_data and "does not exist" in raw_data["message"]:
+                        alt_url = f"https://{target_host}/v1/search/"
+                        response = requests.get(alt_url, headers=headers, params={"query": niche_target.strip()})
+                        raw_data = response.json()
+
+                    # Instagram191 structure check
                     users = raw_data.get('data', [])
                     
                     if users:
@@ -865,15 +867,16 @@ elif page == "🛰️ Lead Source":
                                 "Handle": f"@{u.get('username')}",
                                 "Platform": "IG",
                                 "Followers": u.get('follower_count', 'LIVE'),
-                                "Gap": f"Strategic Gap in {niche_target}",
+                                "Gap": f"Detected Strategic Gap in {niche_target}",
                                 "Vigor": random.randint(80, 99),
                                 "Value": "High" if u.get('is_verified') else "Medium"
                             })
                         st.session_state.found_leads = pd.DataFrame(data)
-                        st.success(f"UPLINK ESTABLISHED: {len(data)} Targets Found.")
+                        st.success(f"UPLINK SUCCESSFUL: Found {len(data)} Targets.")
                     else:
-                        st.warning("No users found. Showing raw response for diagnostic:")
-                        st.json(raw_data) # This will tell us if the endpoint path changed
+                        st.error("📡 GATEWAY LOGS:")
+                        st.json(raw_data) # This will reveal the exact working path
+                        st.warning("No data found. Reverting to Simulation...")
 
                 except Exception as e:
                     st.error(f"Hardware Error: {e}")
@@ -990,6 +993,7 @@ elif page == "💎 Upgrade to Pro":
     st.divider()
     st.subheader("🚀 BETA FOUNDER STATUS")
     st.write("Current User Status: **FREE TIER**")
+
 
 
 
