@@ -825,58 +825,65 @@ elif page == "🧪 Creator Lab":
                 res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": blueprint_prompt}])
                 st.info(res.choices[0].message.content)
 
-# --- MODULE 9: LEAD SOURCE (INSTAGRAM191 SEARCH FIX) ---
+# --- MODULE 9: LEAD SOURCE (RESILIENT AUTO-SWITCH) ---
 elif page == "🛰️ Lead Source":
-    st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: TOP SCAN</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
     
-    niche_target = st.text_input("Target Keyword", placeholder="e.g. Marketing, Real Estate")
+    niche_target = st.text_input("Target Keyword", placeholder="e.g. Real Estate, Fitness Coach")
     
     if st.button("📡 INITIALIZE DEEP SCAN"):
         if "RAPIDAPI_KEY" not in st.secrets:
             st.error("Uplink Failure: API Key missing in Secrets.")
         else:
-            with st.spinner("🌑 SCANNING GLAVIER TOP NODES..."):
+            with st.spinner("🌑 CYCLING THROUGH API NODES..."):
                 target_host = "instagram191.p.rapidapi.com" 
-                # 🛑 THE VERIFIED ENDPOINT for Search on Instagram191
-                url = f"https://{target_host}/v1/search/top/"
-                
                 headers = {
                     "X-RapidAPI-Key": st.secrets["RAPIDAPI_KEY"],
                     "X-RapidAPI-Host": target_host
                 }
                 
-                try:
-                    # Instagram191 Top Search uses 'search_query'
-                    response = requests.get(url, headers=headers, params={"search_query": niche_target.strip()})
-                    raw_data = response.json()
-                    
-                    # Glavier 'Top Search' structure: raw_data -> 'users' (a list of objects)
-                    # Each object has a 'user' key inside it
-                    users_payload = raw_data.get('users', [])
-                    
-                    if users_payload:
-                        data = []
-                        for item in users_payload[:10]:
-                            u = item.get('user', {})
-                            data.append({
-                                "Handle": f"@{u.get('username', 'Unknown')}",
-                                "Platform": "IG",
-                                "Followers": u.get('follower_count', 'LIVE'),
-                                "Gap": f"Strategic Content Gap in {niche_target}",
-                                "Vigor": random.randint(80, 99),
-                                "Value": "High" if u.get('is_verified') else "Medium"
-                            })
-                        st.session_state.found_leads = pd.DataFrame(data)
-                        st.success(f"UPLINK SUCCESSFUL: Found {len(data)} Targets.")
-                    else:
-                        st.error("📡 ZERO RESULTS: Trying alternative search logic...")
-                        # Fallback to simulation if the API is having a sync delay
-                        sim_data = [{"Handle": "@Lead_Gen_Master", "Platform": "IG", "Followers": "50K", "Gap": "No Funnel", "Vigor": 90, "Value": "High"}]
-                        st.session_state.found_leads = pd.DataFrame(sim_data)
-                        st.json(raw_data) # Debug the response
-
-                except Exception as e:
-                    st.error(f"Hardware Error: {e}")
+                # 🛑 THE PATH-FINDER LOOP
+                # We try the three most likely paths for Glavier
+                endpoints = ["/v1/user/search", "/v1/web/search", "/v1/search"]
+                success = False
+                
+                for path in endpoints:
+                    try:
+                        url = f"https://{target_host}{path}"
+                        # Glavier likes 'query' or 'q'
+                        params = {"query": niche_target.strip(), "q": niche_target.strip()}
+                        response = requests.get(url, headers=headers, params=params)
+                        raw_data = response.json()
+                        
+                        # Data check
+                        users = raw_data.get('data', raw_data.get('users', raw_data.get('items', [])))
+                        
+                        if users:
+                            data = []
+                            for u in users[:10]:
+                                u_info = u.get('user', u)
+                                data.append({
+                                    "Handle": f"@{u_info.get('username')}",
+                                    "Platform": "IG",
+                                    "Followers": u_info.get('follower_count', 'LIVE'),
+                                    "Gap": f"Strategic Gap in {niche_target}",
+                                    "Vigor": random.randint(80, 99),
+                                    "Value": "High"
+                                })
+                            st.session_state.found_leads = pd.DataFrame(data)
+                            st.success(f"UPLINK SUCCESSFUL via {path}")
+                            success = True
+                            break # Stop searching once we find a working path
+                    except:
+                        continue
+                
+                if not success:
+                    st.error("📡 ALL ENDPOINTS EXHAUSTED.")
+                    st.json(raw_data) # Show the final error message
+                    st.warning("Reverting to Simulation Mode for UI Testing.")
+                    # Simulation Fallback (Keep your UI working no matter what)
+                    sim_data = [{"Handle": "@Lead_Gen_Master", "Platform": "IG", "Followers": "50K", "Gap": "No Funnel", "Vigor": 90, "Value": "High"}]
+                    st.session_state.found_leads = pd.DataFrame(sim_data)
 
 
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
@@ -990,6 +997,7 @@ elif page == "💎 Upgrade to Pro":
     st.divider()
     st.subheader("🚀 BETA FOUNDER STATUS")
     st.write("Current User Status: **FREE TIER**")
+
 
 
 
