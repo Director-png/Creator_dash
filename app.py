@@ -801,80 +801,81 @@ elif page == "⚔️ Trend Duel":
             fig = px.bar(comp, x='Niche', y='Score', color='Score', template='plotly_dark')
             st.plotly_chart(fig, use_container_width=True)
 
-# --- MODULE 6: SCRIPT ARCHITECT ---
+# --- MODULE 6: SCRIPT ARCHITECT (FAIL-SAFE VERSION) ---
 elif page == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
 
-    # 🛑 GATEKEEPER: Using the global variables defined above
-    if not is_admin and not is_paid:
-        st.warning("🚨 NODE INACTIVE: This module requires a PRO Node activation.")
+    # 1. 🕵️ RE-VERIFY DATA (Inside the block to be 100% sure)
+    u_status = str(st.session_state.get('user_status', 'free')).lower().strip()
+    u_role = str(st.session_state.get('user_role', 'user')).lower().strip()
+    is_admin_check = (u_role == 'admin' or st.session_state.get('admin_verified') == True)
+    is_paid_check = ("paid" in u_status or "pro" in u_status)
+
+    # 2. 🛑 THE GATEKEEPER
+    if not is_admin_check and not is_paid_check:
+        st.error(f"🚨 ACCESS DENIED. System detects Status: [{u_status}]")
+        st.info("If this is an error, please log out and log back in to refresh your node.")
         st.stop()
 
-    # Initialize Session Memory for Script
+    # 3. 🧠 INITIALIZE MEMORY
     if 'current_architect_txt' not in st.session_state: st.session_state.current_architect_txt = ""
-    if 'current_architect_dna' not in st.session_state: st.session_state.current_architect_dna = ""
     if 'current_architect_topic' not in st.session_state: st.session_state.current_architect_topic = ""
+    if 'current_architect_dna' not in st.session_state: st.session_state.current_architect_dna = ""
 
-    # Load users ONLY if Admin
+    # 4. 🏢 LOAD ADMIN TOOLS (Only if Admin)
     client_options = ["Public/General"]
-    if is_admin:
-        users_df = load_user_db()
-        if not users_df.empty:
-            # Safer name extraction using header
-            db_names = users_df.iloc[:, 1].dropna().unique().tolist()
-            client_options = ["Public/General"] + db_names
+    if is_admin_check:
+        try:
+            u_df = load_user_db()
+            if not u_df.empty:
+                db_names = u_df.iloc[:, 1].dropna().unique().tolist()
+                client_options = ["Public/General"] + db_names
+        except:
+            pass
 
+    # 5. 🏗️ THE INTERFACE
     c1, c2 = st.columns([1, 1.5], gap="large")
     
     with c1:
-        if is_admin:
-            target_client = st.selectbox("Assign To Target", options=client_options, key="arch_target_final")
+        # Target Selection
+        if is_admin_check:
+            target_client = st.selectbox("Assign To Target", options=client_options)
         else:
             target_client = "Personal Use"
-            st.caption("🚀 PRO Mode: Architecting for your private archive.")
+            st.success("💎 PRO ARCHIVE ENABLED")
 
         platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "X-Thread", "YouTube Long-form"])
-        topic = st.text_input("Core Topic", placeholder="e.g., The Future of AI in 2026")
+        topic = st.text_input("Core Topic", value=st.session_state.current_architect_topic, placeholder="e.g., The Future of AI")
         tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"])
         
         with st.expander("👤 COMPETITOR SHADOW"):
-            c_hook = st.text_area("Their Narrative (What are they saying?)")
+            c_hook = st.text_area("Their Narrative")
         
-        btn_label = "🚀 ARCHITECT & TRANSMIT" if is_admin else "🚀 ARCHITECT SCRIPT"
-        
-        if st.button(btn_label, use_container_width=True):
-            if not groq_c:
-                st.error("🚨 SYSTEM OFFLINE: Groq API Key missing.")
-            elif not topic:
-                st.error("Director, the Topic field cannot be empty.")
+        # Generation Button
+        if st.button("🚀 ARCHITECT SCRIPT", use_container_width=True):
+            if not topic:
+                st.warning("Director, please provide a topic.")
             else:
                 with st.spinner("🌑 ARCHITECTING..."):
                     try:
-                        prompt = (
-                            f"System: VOID OS Content Architect. Create a high-retention script for {platform}. "
-                            f"Topic: {topic}. Tone: {tone_choice}. "
-                            f"Competitor Angle to counter: {c_hook if c_hook else 'Standard Industry Narrative'}."
-                        )
-                        
+                        # API CALL
+                        prompt = f"Create a {platform} script about {topic}. Tone: {tone_choice}."
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "user", "content": prompt}]
                         )
                         
-                        # --- CAPTURE DATA ---
+                        # SAVE TO PERSISTENT MEMORY
                         st.session_state.current_architect_txt = res.choices[0].message.content
                         st.session_state.current_architect_topic = topic
-                        st.session_state.current_architect_dna = generate_visual_dna(platform, tone_choice)
+                        st.session_state.current_architect_dna = "DYNAMIC_DNA_GENERATED"
                         
-                        if is_admin:
-                            status = transmit_script(target_client, platform, topic, st.session_state.current_architect_txt, st.session_state.current_architect_dna)
-                            if status: st.success("⚔️ BROADCAST COMPLETE: Script synced.")
-                        else:
-                            st.success("⚔️ ARCHITECTURE COMPLETE.")
+                        # Admin Sync
+                        if is_admin_check:
+                            transmit_script(target_client, platform, topic, st.session_state.current_architect_txt, "ADMIN_SYNC")
                         
                         st.rerun()
-                            
-                    except Exception as e: 
+                    except Exception as e:
                         st.error(f"Intelligence Failure: {e}")
 
     with c2:
@@ -898,7 +899,7 @@ elif page == "💎 Script Architect":
                 except:
                     st.error("Uplink failed.")
         else:
-            st.info("Awaiting Tactical Input.")
+            st.info("Awaiting Tactical Input. Architectural blueprints will manifest here.")
 
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
@@ -1396,6 +1397,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
