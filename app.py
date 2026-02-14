@@ -353,6 +353,29 @@ with st.sidebar:
         st.session_state.logged_in = False
         st.rerun()
 
+# --- STEP 1: DEFINE THE DYNAMIC MENU ---
+# In your sidebar logic, check if the user is PRO
+is_pro = st.session_state.get('user_status') == 'paid'
+
+if is_pro:
+    menu_options = [
+        "🏠 Dashboard", 
+        "🛰️ Lead Source",        # Now shows the PRO database
+        "🏗️ Script Architect",   # NEW: AI Script generator
+        "🧪 Creator Lab",        # NEW: Content testing/editing
+        "🛡️ Admin Console"       # (Hidden unless it's you)
+    ]
+else:
+    menu_options = [
+        "🏠 Dashboard", 
+        "💎 Upgrade to Pro", 
+        "⚖️ Legal Archive"
+    ]
+
+page = st.sidebar.radio("Navigation", menu_options)
+
+
+
 # --- MAIN PAGE ROUTING ---
 page = st.session_state.current_page
 
@@ -651,22 +674,31 @@ elif page == "⚔️ Trend Duel":
             fig = px.bar(comp, x='Niche', y='Score', color='Score', template='plotly_dark')
             st.plotly_chart(fig, use_container_width=True)
 
-# --- MODULE 6: SCRIPT ARCHITECT (OPTIMIZED) ---
+# --- MODULE 6: SCRIPT ARCHITECT (DUAL-ROLE) ---
 elif page == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
     
-    # Load users for assignment
-    users_df = load_user_db()
+    # 🕵️ Detect Persona
+    is_admin = st.session_state.get('admin_verified', False)
+    
+    # Load users ONLY if Admin
     client_options = ["Public/General"]
-    if not users_df.empty:
-        # Assuming Name is in the second column (index 1)
-        db_names = users_df.iloc[:, 1].dropna().unique().tolist()
-        client_options = ["Public/General"] + db_names
+    if is_admin:
+        users_df = load_user_db()
+        if not users_df.empty:
+            db_names = users_df.iloc[:, 1].dropna().unique().tolist()
+            client_options = ["Public/General"] + db_names
 
     c1, c2 = st.columns([1, 1.5], gap="large")
     
     with c1:
-        target_client = st.selectbox("Assign To Target", options=client_options, key="arch_target_final")
+        # Only Admin sees the target selection; PRO users are 'Personal' by default
+        if is_admin:
+            target_client = st.selectbox("Assign To Target", options=client_options, key="arch_target_final")
+        else:
+            target_client = "Personal Use"
+            st.caption("🚀 PRO Mode: Architecting for your private archive.")
+
         platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "X-Thread", "YouTube Long-form"])
         topic = st.text_input("Core Topic", placeholder="e.g., The Future of AI in 2026")
         tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"])
@@ -674,23 +706,23 @@ elif page == "💎 Script Architect":
         with st.expander("👤 COMPETITOR SHADOW"):
             c_hook = st.text_area("Their Narrative (What are they saying?)")
         
-        if st.button("🚀 ARCHITECT & TRANSMIT", use_container_width=True):
+        # Change button label based on role
+        btn_label = "🚀 ARCHITECT & TRANSMIT" if is_admin else "🚀 ARCHITECT SCRIPT"
+        
+        if st.button(btn_label, use_container_width=True):
             if not groq_c:
-                st.error("🚨 SYSTEM OFFLINE: Groq API Key is invalid or missing in Secrets.")
+                st.error("🚨 SYSTEM OFFLINE: Groq API Key missing.")
             elif not topic:
                 st.error("Director, the Topic field cannot be empty.")
             else:
-                st.session_state.last_topic = topic
-                with st.spinner("🌑 ARCHITECTING SCRIPT..."):
+                with st.spinner("🌑 ARCHITECTING..."):
                     try:
-                        # Constructing the Tactical Prompt
                         prompt = (
                             f"System: VOID OS Content Architect. Create a high-retention script for {platform}. "
                             f"Topic: {topic}. Tone: {tone_choice}. "
                             f"Competitor Angle to counter: {c_hook if c_hook else 'Standard Industry Narrative'}."
                         )
                         
-                        # API Call using Global Client
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "user", "content": prompt}]
@@ -698,7 +730,7 @@ elif page == "💎 Script Architect":
                         txt = res.choices[0].message.content
                         dna_profile = generate_visual_dna(platform, tone_choice)
                         
-                        # --- CRITICAL FIX: SAVE TO SESSION HISTORY ---
+                        # Save to local session for immediate display
                         st.session_state.script_history.append({
                             "assigned_to": target_client, 
                             "topic": topic, 
@@ -706,24 +738,28 @@ elif page == "💎 Script Architect":
                             "platform": platform
                         })
                         
-                        # Database Sync
-                        status = transmit_script(target_client, platform, topic, txt, dna_profile)
-                        
+                        # --- CRITICAL: ONLY TRANSMIT TO DATABASE IF ADMIN ---
+                        if is_admin:
+                            status = transmit_script(target_client, platform, topic, txt, dna_profile)
+                            if status: 
+                                st.success("⚔️ BROADCAST COMPLETE: Script synced to Vault.")
+                        else:
+                            st.success("⚔️ ARCHITECTURE COMPLETE: Script ready for deployment.")
+
                         with c2:
                             st.subheader("💎 GENERATED ARCHIVE")
                             st.markdown(txt)
                             st.divider()
                             st.caption(f"🧬 DNA: {dna_profile}")
-                            if status: 
-                                st.success("⚔️ BROADCAST COMPLETE: Script synced to Vault.")
-                                
+                            
                     except Exception as e: 
                         st.error(f"Intelligence Failure: {e}")
 
     # Column 2 Empty State
-    if 'txt' not in locals() and not st.session_state.script_history:
+    if 'txt' not in locals() and not st.session_state.get('script_history'):
         with c2:
             st.info("Awaiting Tactical Input. Architectural blueprints will manifest here.")
+            
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -1104,6 +1140,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
