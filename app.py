@@ -800,91 +800,45 @@ elif page == "⚔️ Trend Duel":
         if not comp.empty: 
             fig = px.bar(comp, x='Niche', y='Score', color='Score', template='plotly_dark')
             st.plotly_chart(fig, use_container_width=True)
-
-# --- MODULE 6: SCRIPT ARCHITECT (FAIL-SAFE VERSION) ---
+# --- MODULE 6: SCRIPT ARCHITECT (TOTAL RESET VERSION) ---
 elif page == "💎 Script Architect":
     st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
 
-    # 1. 🕵️ RE-VERIFY DATA (Inside the block to be 100% sure)
-    u_status = str(st.session_state.get('user_status', 'free')).lower().strip()
-    u_role = str(st.session_state.get('user_role', 'user')).lower().strip()
-    is_admin_check = (u_role == 'admin' or st.session_state.get('admin_verified') == True)
-    is_paid_check = ("paid" in u_status or "pro" in u_status)
-
-    # 2. 🛑 THE GATEKEEPER
-    if not is_admin_check and not is_paid_check:
-        st.error(f"🚨 ACCESS DENIED. System detects Status: [{u_status}]")
-        st.info("If this is an error, please log out and log back in to refresh your node.")
-        st.stop()
-
-    # 3. 🧠 INITIALIZE MEMORY
+    # 1. FORCE INITIALIZE MEMORY (No conditions)
     if 'current_architect_txt' not in st.session_state: st.session_state.current_architect_txt = ""
     if 'current_architect_topic' not in st.session_state: st.session_state.current_architect_topic = ""
-    if 'current_architect_dna' not in st.session_state: st.session_state.current_architect_dna = ""
-
-    # 4. 🏢 LOAD ADMIN TOOLS (Only if Admin)
-    client_options = ["Public/General"]
-    if is_admin_check:
-        try:
-            u_df = load_user_db()
-            if not u_df.empty:
-                db_names = u_df.iloc[:, 1].dropna().unique().tolist()
-                client_options = ["Public/General"] + db_names
-        except:
-            pass
-
-    # 5. 🏗️ THE INTERFACE
+    
+    # 2. THE UI (No Gatekeepers for this test)
     c1, c2 = st.columns([1, 1.5], gap="large")
     
     with c1:
-        # Target Selection
-        if is_admin_check:
-            target_client = st.selectbox("Assign To Target", options=client_options)
-        else:
-            target_client = "Personal Use"
-            st.success("💎 PRO ARCHIVE ENABLED")
-
+        st.subheader("🛠️ Configuration")
         platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "X-Thread", "YouTube Long-form"])
-        topic = st.text_input("Core Topic", value=st.session_state.current_architect_topic, placeholder="e.g., The Future of AI")
+        topic = st.text_input("Core Topic", value=st.session_state.current_architect_topic)
         tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"])
         
-        with st.expander("👤 COMPETITOR SHADOW"):
-            c_hook = st.text_area("Their Narrative")
-        
-        # Generation Button
         if st.button("🚀 ARCHITECT SCRIPT", use_container_width=True):
             if not topic:
-                st.warning("Director, please provide a topic.")
+                st.error("Missing Topic")
             else:
-                with st.spinner("🌑 ARCHITECTING..."):
+                with st.spinner("🌑 WORKING..."):
                     try:
-                        # API CALL
-                        prompt = f"Create a {platform} script about {topic}. Tone: {tone_choice}."
+                        prompt = f"Create a {platform} script about {topic} in a {tone_choice} tone."
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "user", "content": prompt}]
                         )
-                        
-                        # SAVE TO PERSISTENT MEMORY
                         st.session_state.current_architect_txt = res.choices[0].message.content
                         st.session_state.current_architect_topic = topic
-                        st.session_state.current_architect_dna = "DYNAMIC_DNA_GENERATED"
-                        
-                        # Admin Sync
-                        if is_admin_check:
-                            transmit_script(target_client, platform, topic, st.session_state.current_architect_txt, "ADMIN_SYNC")
-                        
                         st.rerun()
                     except Exception as e:
-                        st.error(f"Intelligence Failure: {e}")
+                        st.error(f"API Error: {e}")
 
     with c2:
         if st.session_state.current_architect_txt:
             st.subheader("💎 GENERATED ARCHIVE")
             st.markdown(st.session_state.current_architect_txt)
-            st.divider()
             
-            # ARCHIVE BUTTON
             if st.button("💾 Archive to History Vault", use_container_width=True):
                 payload = {
                     "email": st.session_state.get('user_email', 'unknown'),
@@ -892,14 +846,10 @@ elif page == "💎 Script Architect":
                     "title": f"{platform}: {st.session_state.current_architect_topic}",
                     "content": st.session_state.current_architect_txt
                 }
-                try:
-                    r = requests.post(NEW_URL, json=payload, timeout=10)
-                    if "SUCCESS" in r.text: st.success("📜 Script archived.")
-                    else: st.error("Vault rejected transmission.")
-                except:
-                    st.error("Uplink failed.")
+                requests.post(NEW_URL, json=payload)
+                st.success("Archived!")
         else:
-            st.info("Awaiting Tactical Input. Architectural blueprints will manifest here.")
+            st.info("Blueprints will manifest here.")
 
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
@@ -1397,6 +1347,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
