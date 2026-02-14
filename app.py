@@ -1022,33 +1022,32 @@ with st.form("manual_verify_v2"):
     elif auth != "":
             st.error("Invalid Credentials. Intrusion attempt logged.")
 
-with tab2: # Payments Tab
-    st.subheader("💰 Manual Revenue override")
-    target_mail = st.text_input("User Email to Activate")
-    if st.button("ACTIVATE PRO NODES"):
-        # 1. Update the Local Session for immediate effect
-        st.session_state['user_status'] = 'paid'
-        # 2. Update the CSV/Database
-        # (Add your logic here to save "Paid" status to your CSV)
-        st.success(f"System Overridden. {target_mail} is now PRO.")
-        # Inside tab3 (Daily Lead Drop) of your Admin Console:
-with tab3:
-    st.subheader("📡 Broadcast New Leads")
-    lead_file = st.file_uploader("Upload Daily Leads (CSV)", type="csv")
-    niche_label = st.text_input("Niche Category", placeholder="e.g., Real Estate India")
+# --- TAB 2: PAYMENTS ---
+        with tab2: 
+            st.subheader("💰 Manual Revenue override")
+            target_mail = st.text_input("User Email to Activate")
             
+            if st.button("ACTIVATE PRO NODES"):
+                # 1. Update the Local Session for immediate effect
+                st.session_state['user_status'] = 'paid'
+                # 2. Update the CSV/Database logic would go here
+                st.success(f"System Overridden. {target_mail} is now PRO.")
+
+        # --- TAB 3: LEAD DROP (Aligned with Tab 2) ---
+        with tab3:
+            st.subheader("📡 Broadcast New Leads")
+            lead_file = st.file_uploader("Upload Daily Leads (CSV)", type="csv")
+            niche_label = st.text_input("Niche Category", placeholder="e.g., Real Estate India")
             
-    if st.button("🚀 PUSH TO PAID USERS"):
-    if lead_file is not None:
-        # Save the file to the app's state or a shared database
-        import pandas as pd
-        df = pd.read_csv(lead_file)
-        st.session_state['global_leads'] = df
-        st.success(f"Transmission Successful. {len(df)} leads pushed to {niche_label}.")
+            # This button must be inside tab3
+            if st.button("🚀 PUSH TO PAID USERS"):
+                if lead_file is not None:
+                    import pandas as pd
+                    df = pd.read_csv(lead_file)
+                    st.session_state['global_leads'] = df
+                    st.success(f"Transmission Successful. {len(df)} leads pushed to {niche_label}.")
                 else:
                     st.error("No data package detected. Upload a CSV first.")
-
-
 
 # --- MODULE 10: UPGRADE TO PRO (FORCE-RENDER) ---
 elif page == "💎 Upgrade to Pro":
@@ -1165,6 +1164,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
