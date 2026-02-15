@@ -1416,7 +1416,8 @@ elif page == "⚖️ Legal Archive":
                     if response.status_code == 200:
                         st.success(f"**Recommendation Locked, {st.session_state.get('user_name', 'Director')}!**")
                         st.balloons()
-                        st.markdown("> Your input has been transmitted directly to the Master Vault.")
+                        st.markdown("> Your input has been transmitted directly to the Master Vault.
+                        > We are building this app for YOU, and we’ll surely work on making this a reality in the next update!")
                     else:
                         st.error("Uplink Error: Sheet rejected the data. Check Form IDs.")
                 
@@ -1425,19 +1426,7 @@ elif page == "⚖️ Legal Archive":
             else:
                 st.warning("Director, please add a small suggestion first!")
                     
-                    # --- SUCCESS INTERFACE ---
-                    st.success(f"**Recommendation Locked, {st.session_state.get('user_name', 'Director')}!**")
-                    st.balloons()
-                    st.markdown(f"""
-                    > "System Note: Your input on **{vote_choice}** has been transmitted to the Master Vault. 
-                    > We are building this app for YOU, and we’ll surely work on making this a reality in the next update!"
-                    """)
-                    
-                except Exception as e:
-                    st.error(f"Uplink Interrupted: {e}")
-            else:
-                st.warning("Director, please add a small suggestion so we know exactly how to help you!")
-
+                   
     # --- SECTION 3: BASIC CHECKLIST (The 'Now' value) ---
     st.divider()
     with st.expander("✅ VIEW BASIC SAFETY CHECKLIST"):
@@ -1634,6 +1623,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
