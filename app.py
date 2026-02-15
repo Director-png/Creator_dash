@@ -1416,8 +1416,9 @@ elif page == "⚖️ Legal Archive":
                     if response.status_code == 200:
                         st.success(f"**Recommendation Locked, {st.session_state.get('user_name', 'Director')}!**")
                         st.balloons()
-                        st.markdown(f"> Your input has been transmitted directly to the Master Vault.
-                        > We are building this app for YOU, and we’ll surely work on making this a reality in the next update!")
+                        st.markdown(f"""
+                        > Your input has been transmitted directly to the Master Vault.
+                        > We are building this app for YOU, and we’ll surely work on making this a reality in the next update!""")
                     else:
                         st.error("Uplink Error: Sheet rejected the data. Check Form IDs.")
                 
@@ -1623,6 +1624,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
