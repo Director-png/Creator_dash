@@ -1349,91 +1349,100 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
 
-
 # --- MODULE: LEGAL ARCHIVE ---
 elif page == "⚖️ Legal Archive":
+    # 1. CHECK SECURITY CLEARANCE
+    # We check the 'tier' from your session state. Default is 'Basic'
+    user_tier = st.session_state.get('user_tier', 'Basic') 
+    is_pro = (user_tier == 'Pro')
+
     st.markdown("<h1 style='color: #00ff41;'>⚖️ LEGAL DEFENSE VAULT</h1>", unsafe_allow_html=True)
     
-    # --- 🛡️ GLOBAL STATUS BAR ---
-    is_pro = st.session_state.get('is_pro', False) # Logic for later
-    status_color = "#00ff41" if is_pro else "#ff4b4b"
-    status_text = "PRO ACCESS ACTIVE" if is_pro else "BASIC ACCESS (RESTRICTED)"
+    # --- STATUS HEADER ---
+    if is_pro:
+        st.success("💎 PRO ACCESS ACTIVE: All Legal Blueprints Unlocked.")
+    else:
+        st.warning("⚠️ BASIC ACCESS: Some advanced defense tools are locked.")
+
+    # --- SECTION 1: THE CREATOR CHECKLIST (Everyone can use this) ---
+    st.markdown("### 🛡️ Your Safety Checklist")
+    st.write("Before you sign any brand deal, make sure you've checked these 3 boxes:")
     
-    st.markdown(f"""
-        <div style="border: 1px solid {status_color}; padding: 10px; border-radius: 5px; text-align: center;">
-            <span style="color: {status_color}; font-weight: bold;">{status_text}</span>
-        </div>
-    """, unsafe_allow_html=True)
-
-    st.write("")
-
-    # --- 🟢 BASIC ACCESS SECTOR (Manual Tools) ---
     with st.container(border=True):
-        st.subheader("✅ MANUAL COMPLIANCE CHECKLIST")
-        st.caption("Standard operating procedure for every brand deal.")
-        
-        col_c1, col_c2 = st.columns(2)
-        with col_c1:
-            st.checkbox("Usage Rights (Perpetuity vs Limited)")
-            st.checkbox("Exclusivity Clauses")
-            st.checkbox("Payment Milestones (Upfront/Net-30)")
-        with col_c2:
-            st.checkbox("Deliverable Deadlines")
-            st.checkbox("Revision Caps (Max 2)")
-            st.checkbox("Whitelisting Permissions")
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.checkbox("Do I own my content?")
+        with c2:
+            st.checkbox("Is the pay date clear?")
+        with c3:
+            st.checkbox("Are revisions limited?")
 
     st.divider()
 
-    # --- 💎 PRO ACCESS SECTOR (The "Temptation" Zone) ---
-    st.markdown("### 💎 PRO-TIER DEFENSE MODULES")
+    # --- SECTION 2: THE DOWNLOAD CENTER ---
+    st.markdown("### 📂 Contract Templates")
     
     col1, col2 = st.columns(2)
 
+    # --- BOX 1: BRAND AGREEMENT ---
     with col1:
-        # 📂 MODULE: AUTO-GENERATOR
         with st.container(border=True):
-            st.markdown("#### 📝 Neural Contract Forge")
-            st.caption("Generate custom NDAs & Brand Contracts in seconds.")
+            st.markdown("#### 🤝 Brand Collaboration Contract")
+            st.write("A professional agreement to ensure you get paid on time.")
             if is_pro:
-                st.button("GENERATE NEW CONTRACT", key="gen_con")
+                st.download_button(
+                    label="📥 DOWNLOAD NOW",
+                    data="[Standard Brand Contract Text...]",
+                    file_name="brand_deal_pro.txt",
+                    use_container_width=True,
+                    key="dl_brand_pro"
+                )
             else:
-                st.button("🔒 UNLOCK FORGE", key="lock_gen", disabled=True)
-                st.info("Available in Pro Tier")
+                st.button("🔒 LOCKED (PRO ONLY)", disabled=True, use_container_width=True, key="lock_brand")
+                st.caption("Upgrade to download professional templates.")
 
-        # 📂 MODULE: AUDITOR
-        with st.container(border=True):
-            st.markdown("#### 👁️ Neural Auditor (AI)")
-            st.caption("Upload any PDF/Doc to scan for 'Predatory Clauses'.")
-            if is_pro:
-                st.file_uploader("Upload Contract for Audit", type=['pdf'])
-            else:
-                st.button("🔒 UNLOCK AI AUDIT", key="lock_audit", disabled=True)
-                st.warning("Protect your IP with AI scanning.")
-
+    # --- BOX 2: NDA (SECRET PROTECTION) ---
     with col2:
-        # 📂 MODULE: TEMPLATE VAULT
         with st.container(border=True):
-            st.markdown("#### 📂 Master Template Vault")
-            st.caption("Instant download of 50+ Creator-Legal documents.")
+            st.markdown("#### 🤫 Secret-Keeping Agreement (NDA)")
+            st.write("Protect your ideas when talking to editors or partners.")
             if is_pro:
-                st.selectbox("Select Template", ["Universal NDA", "Brand Collab v2", "Editor Agreement"])
-                st.button("DOWNLOAD SELECTION")
+                st.download_button(
+                    label="📥 DOWNLOAD NOW",
+                    data="[Standard NDA Text...]",
+                    file_name="nda_pro.txt",
+                    use_container_width=True,
+                    key="dl_nda_pro"
+                )
             else:
-                st.markdown("---")
-                st.markdown("⭐ **INCLUDES:**")
-                st.write("* YouTube Content License")
-                st.write("* Agency Rep Agreement")
-                st.write("* Music Sync Rights")
-                st.button("🔒 VIEW 50+ TEMPLATES", key="lock_vault", disabled=True)
+                st.button("🔒 LOCKED (PRO ONLY)", disabled=True, use_container_width=True, key="lock_nda")
+                st.caption("Protect your ideas with Pro access.")
 
-    # --- 💳 THE CONVERSION TRIGGER ---
+    st.divider()
+
+    # --- SECTION 3: THE AI CONTRACT DOCTOR (The Big Pro Feature) ---
+    st.markdown("### 🤖 Neural Contract Auditor")
+    
+    with st.container(border=True):
+        if is_pro:
+            st.markdown("#### 👁️ AI Scanning Active")
+            st.write("Upload your PDF contract below. Our AI will look for hidden 'Red Flags' that might hurt you.")
+            uploaded_pdf = st.file_uploader("Drop your contract here", type=['pdf', 'txt'])
+            if uploaded_pdf:
+                st.info("AI is analyzing the document for predatory clauses...")
+        else:
+            st.markdown("#### 👁️ AI Contract Scanner")
+            st.write("Imagine having a lawyer in your pocket. This AI scans your contracts for dangerous hidden terms.")
+            st.button("🔒 UNLOCK AI SCANNING", disabled=True, use_container_width=True)
+            st.caption("Only available for Pro Members.")
+
+    # --- SECTION 4: HOW TO UPGRADE ---
     if not is_pro:
         st.divider()
-        with st.container(border=True):
-            st.markdown("<h3 style='text-align: center; color: #00d4ff;'>🛡️ NEVER SIGN A BAD DEAL AGAIN</h3>", unsafe_allow_html=True)
-            st.write("One bad contract can cost you your entire channel. Upgrade to the Pro Tier for full legal automation.")
-            if st.button("🚀 UPGRADE TO PRO ACCESS NOW", use_container_width=True):
-                st.toast("Redirecting to Razorpay Secure Server...", icon="💳")
+        st.markdown("<h3 style='text-align: center;'>🚀 Ready to go Professional?</h3>", unsafe_allow_html=True)
+        if st.button("CLICK HERE TO UPGRADE TO PRO", use_container_width=True):
+            st.balloons()
+            st.info("Redirecting to the Payment Gateway...")
 
 
 
@@ -1624,6 +1633,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
