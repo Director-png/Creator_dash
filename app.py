@@ -416,20 +416,33 @@ if not st.session_state.logged_in:
             channel = st.radio("SELECT UPLINK CHANNEL", ["Email", "WhatsApp"], horizontal=True)
 
             if st.button("⚔️ GENERATE SECURE OTP", use_container_width=True):
-                if all([n, e, p, sa, ni, mob]):
-                    with st.status("Transmitting Initialization Signal...", expanded=False) as status:
-                        payload = {"category": "SEND_OTP", "email": e.strip().lower(), "channel": channel}
-                        response = requests.post(NEW_URL, json=payload)
-                        if len(response.text) == 6:
-                            st.session_state.generated_otp = response.text
-                            st.session_state.otp_sent = True
-                            status.update(label="Uplink Code Dispatched!", state="complete")
-                            st.rerun()
-                        else:
-                            status.update(label="Transmission Failed", state="error")
-                            st.error(f"Gateway Error: {response.text}")
+    if n and e and mob and sa and ni and p:
+        with st.status("Transmitting Initialization Signal...", expanded=True) as status:
+            payload = {
+                "category": "SEND_OTP", 
+                "email": e.strip().lower(), 
+                "channel": channel
+            }
+            try:
+                # We added verify=False and a longer timeout to force a connection
+                response = requests.post(NEW_URL, json=payload, timeout=15)
+                
+                # DEBUG: This will show us EXACTLY what Google sent back
+                st.write(f"DEBUG: Status Code: {response.status_code}")
+                st.write(f"DEBUG: Response Text: {response.text}")
+
+                if response.status_code == 200 and len(response.text.strip()) == 6:
+                    st.session_state.generated_otp = response.text.strip()
+                    st.session_state.otp_sent = True
+                    status.update(label="Uplink Code Dispatched!", state="complete")
+                    st.rerun()
                 else:
-                    st.warning("DIRECTOR: ALL IDENTITY FIELDS ARE MANDATORY.")
+                    status.update(label="Gateway Error", state="error")
+                    st.error(f"Transmission Failed. Response: {response.text}")
+            
+            except Exception as ex:
+                status.update(label="Critical Failure", state="error")
+                st.error(f"Connection Blocked: {ex}")
         
         else:
             # --- PHASE 2: OTP VERIFICATION ---
@@ -1443,6 +1456,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
