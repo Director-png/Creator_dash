@@ -417,45 +417,52 @@ if not st.session_state.logged_in:
                     except Exception as e:
                         st.error(f"🚨 UPLINK CRASHED: {e}")
 
-    with t2:
-        with st.expander("🛡️ INITIALIZE NEW IDENTITY"):
-    # Define variables with unique keys to avoid collisions
-    n = st.text_input("Full Name", key="reg_name")
-    e = st.text_input("Email Address", key="reg_email")
-    p = st.text_input("Set Passkey", type="password", key="reg_pass")
-    sa = st.text_input("Security Answer (e.g., Mother's Maiden Name)", key="reg_sa")
-    ni = st.text_input("Niche (Tech, Lifestyle, etc.)", key="reg_niche")
+   with t2:
+    with st.expander("🛡️ INITIALIZE NEW IDENTITY"):
+        # All inputs are now perfectly aligned under the expander
+        n = st.text_input("Full Name", key="reg_name")
+        e = st.text_input("Email Address", key="reg_email")
+        p = st.text_input("Set Passkey", type="password", key="reg_pass")
+        sa = st.text_input("Security Answer (e.g., Mother's Maiden Name)", key="reg_sa")
+        ni = st.text_input("Niche (Tech, Lifestyle, etc.)", key="reg_niche")
 
-    if st.button("⚔️ ESTABLISH UPLINK", use_container_width=True):
-        # The 'if n and e and p and sa' check now has variables to look at
-        if n and e and p and sa and ni:
-            payload = {
-                "category": "REGISTRATION",
-                "name": n.strip(),
-                "email": e.strip().lower(),
-                "password": p.strip(),
-                "answer": sa.strip().lower(),
-                "niche": ni.strip(),
-                "role": "user",
-                "status": "free"
-            }
-            
-            with st.spinner("Transmitting to VOID Vault..."):
-                try:
-                    r = requests.post(NEW_URL, json=payload, timeout=10)
-                    if "SUCCESS" in r.text:
-                        st.success("✅ IDENTITY SECURED.")
-                        st.balloons()
-                    else:
-                        st.error(f"Uplink Refused: {r.text}")
-                except Exception as ex:
-                    st.error(f"Network Failure: {ex}")
-        else:
-            st.warning("Director, all tactical identification fields must be filled.")
+        if st.button("⚔️ ESTABLISH UPLINK", use_container_width=True):
+            # Checking all fields before transmission
+            if n and e and p and sa and ni:
+                payload = {
+                    "category": "REGISTRATION",
+                    "name": n.strip(),
+                    "email": e.strip().lower(),
+                    "password": p.strip(),
+                    "answer": sa.strip().lower(),
+                    "niche": ni.strip(),
+                    "role": "user",
+                    "status": "free"
+                }
+                
+                with st.spinner("Transmitting to VOID Vault..."):
+                    try:
+                        r = requests.post(NEW_URL, json=payload, timeout=10)
+                        if "SUCCESS" in r.text:
+                            st.success("✅ IDENTITY SECURED.")
+                            st.balloons()
+                        else:
+                            st.error(f"Uplink Refused: {r.text}")
+                    except Exception as ex:
+                        st.error(f"Network Failure: {ex}")
+            else:
+                st.warning("Director, all tactical identification fields must be filled.")
+        
 
-       
+
+
+
+
+
 
         
+
+
     # 🛑 THE SECURITY WALL: Prevents internal app from loading if not logged in
     st.stop()
 
@@ -1430,6 +1437,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
