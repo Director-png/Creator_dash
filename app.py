@@ -1350,16 +1350,25 @@ elif page == "🛡️ Admin Console":
         st.error("Invalid Credentials. Intrusion attempt logged.")
 
 # --- MODULE: LEGAL ARCHIVE ---
+ # --- TEMPORARY DEBUGGER (Remove after fix) ---
+st.write(f"DEBUG: Name={st.session_state.get('user_name')} | Role={st.session_state.get('role')} | Tier={st.session_state.get('user_tier')}")
 elif page == "⚖️ Legal Archive":
-    # 1. UNIVERSAL ACCESS CHECK
-    # We check if the user is 'Pro' OR 'Admin'. Both get full access.
-    user_tier = st.session_state.get('user_tier', 'Basic') 
-    user_role = st.session_state.get('role', 'User') # Checking if you are Admin
+    # 1. THE "GOD-MODE" CHECK
+    # We pull values and convert them to uppercase to avoid "admin" vs "Admin" issues
+    u_name = str(st.session_state.get('user_name', '')).upper()
+    u_role = str(st.session_state.get('role', '')).upper()
+    u_tier = str(st.session_state.get('user_tier', '')).upper()
     
-    # Authorized if you are Pro OR Admin
-    is_authorized = (user_tier == 'Pro' or user_role == 'Admin' or st.session_state.get('user_name') == 'Admin')
+    # Authorized if name contains ADMIN/DIRECTOR or tier is PRO
+    is_authorized = ("ADMIN" in u_name or "DIRECTOR" in u_name or "ADMIN" in u_role or "PRO" in u_tier)
 
+    # --- UI REMAINS THE SAME ---
     st.markdown("<h1 style='color: #00ff41;'>⚖️ LEGAL DEFENSE VAULT</h1>", unsafe_allow_html=True)
+    
+    if is_authorized:
+        st.success(f"💎 AUTHORIZED ACCESS: Welcome, {u_name}. All Systems Green.")
+    else:
+        st.warning("⚠️ BASIC ACCESS: Secure modules are currently encrypted.")
     
     # --- STATUS HEADER ---
     if is_authorized:
@@ -1635,6 +1644,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
