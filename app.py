@@ -631,29 +631,36 @@ elif page == "🏠 Dashboard":
         st.code(f"AI Core: {core_display}\nHandshake: STABLE\nLaunch: T-Minus 48h")
 
 elif page == "📡 My Growth Hub":
-    st.markdown("<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #00d4ff;'>📡 SOCIAL INTEL MATRIX</h1>", unsafe_allow_html=True)
     
+    # --- 🛡️ QUOTA SYSTEM (3 PER DAY) ---
+    MAX_DAILY_SCANS = 3
+    if 'daily_scans' not in st.session_state:
+        st.session_state.daily_scans = 0
+
+    # Progress bar for visual quota
+    quota_col1, quota_col2 = st.columns([3, 1])
+    with quota_col1:
+        prog_val = st.session_state.daily_scans / MAX_DAILY_SCANS
+        st.progress(prog_val)
+    with quota_col2:
+        st.write(f"⚡ {st.session_state.daily_scans}/{MAX_DAILY_SCANS} USED")
+
     # Dynamic Niche Branding
     user_niche = st.session_state.get('user_niche', 'Creator')
-    st.info(f"Current Matrix: **{user_niche}** | Core analysis optimized for your niche.")
+    st.caption(f"CURRENT SECTOR: **{user_niche.upper()}** | Analyzing via Triple-Core Failover.")
 
-    # 🧬 INTERNAL UTILITY: Image Compressor
-    def compress_for_ai(uploaded_file):
-        img = Image.open(uploaded_file)
-        if img.mode in ("RGBA", "P"): img = img.convert("RGB")
-        img.thumbnail((800, 800)) 
-        buffer = io.BytesIO()
-        img.save(buffer, format="JPEG", quality=85)
-        return Image.open(buffer)
-
-    # 🛡️ INTERNAL UTILITY: Triple-Core Failover
-    def run_analysis(image_input):
+    # --- 📡 TRIPLE-CORE NEURAL ENGINE (Handle Analysis) ---
+    def run_handle_analysis(handles_dict):
         keys = [
             st.secrets.get("GEMINI_API_KEY"),
             st.secrets.get("GEMINI_API_KEY_BACKUP"),
             st.secrets.get("GEMINI_API_KEY_3")
         ]
         
+        # Build Intel String
+        intel_data = ", ".join([f"{k}: {v}" for k, v in handles_dict.items() if v])
+
         for i, k in enumerate(keys):
             if not k: continue
             try:
@@ -661,73 +668,77 @@ elif page == "📡 My Growth Hub":
                 temp_client = genai.Client(api_key=k.strip())
                 core_name = ["Alpha", "Beta", "Gamma"][i]
                 
-                with st.spinner(f"🌑 ANALYZING VIA CORE {core_name}..."):
+                with st.spinner(f"🌑 CONSULTING CORE {core_name}..."):
+                    prompt = f"""
+                    SYSTEM: Act as an Elite Growth Strategist.
+                    DATA: {intel_data}
+                    NICHE: {user_niche}
+                    TASK: Analyze these handles. Predict content style and give 3 surgical growth tactics.
+                    STYLE: Professional, concise, technical.
+                    """
                     response = temp_client.models.generate_content(
-                        model="gemini-2.0-flash", 
-                        contents=["Extract total subscriber/follower count as a number only.", image_input]
+                        model="gemini-1.5-flash", 
+                        contents=[prompt]
                     )
                     return response.text, core_name
             except Exception as e:
                 if "429" in str(e):
-                    st.warning(f"⚠️ Core {['Alpha', 'Beta', 'Gamma'][i]} Exhausted. Switching...")
+                    st.warning(f"⚠️ Core {['Alpha', 'Beta', 'Gamma'][i]} Busy. Rerouting...")
                     continue
                 else:
-                    st.error(f"Core Error: {e}")
+                    st.error(f"Uplink Error: {e}")
         return None, None
 
-    # --- UI LAYOUT ---
-    with st.expander("📷 UPLOAD ANALYTICS SCREENSHOT", expanded=True):
-        uploaded_img = st.file_uploader("Upload Node Data", type=['png', 'jpg', 'jpeg'])
-        
-        if st.button("🛰️ SCAN & TRANSMIT", use_container_width=True):
-            if uploaded_img:
-                ready_img = compress_for_ai(uploaded_img)
-                result_text, core_used = run_analysis(ready_img)
-                
-                if result_text:
-                    st.session_state.last_analysis = result_text
-                    nums = re.findall(r'\d+', result_text.replace(',', ''))
-                    if nums: st.session_state.current_subs = int(nums[0])
-                else:
-                    st.warning("🚨 AI CORES DOWN: Please enter count manually.")
-                    
-    # --- MANUAL OVERRIDE (If AI Fails) ---
-    if 'last_analysis' not in st.session_state and uploaded_img:
-        manual_count = st.number_input("Enter Subscriber Count", min_value=0, value=st.session_state.get('current_subs', 0))
-        if st.button("✅ CONFIRM MANUAL SYNC"):
-            st.session_state.current_subs = manual_count
-            st.session_state.last_analysis = "Manual Entry Verified"
-            st.rerun()
+    # --- UI LAYOUT: INTEL INPUT ---
+    with st.container(border=True):
+        st.markdown("### 🔗 NODE INPUT")
+        c1, c2 = st.columns(2)
+        with c1:
+            yt = st.text_input("YouTube", placeholder="@username")
+            ig = st.text_input("Instagram", placeholder="username")
+        with c2:
+            tw = st.text_input("X (Twitter)", placeholder="@username")
+            li = st.text_input("LinkedIn", placeholder="in/username")
 
-    # --- DATA VISUALIZATION ---
-    if 'last_analysis' in st.session_state:
-        st.divider()
-        col_left, col_right = st.columns([1, 2])
-        
-        with col_left:
-            st.metric("CURRENT REACH", f"{st.session_state.current_subs:,}")
-            st.caption(f"Raw Feed: {st.session_state.last_analysis}")
+    # --- EXECUTION GATE ---
+    if st.session_state.daily_scans < MAX_DAILY_SCANS:
+        if st.button("🛰️ SCAN & ANALYZE HANDLES", use_container_width=True):
+            handles = {"YouTube": yt, "Instagram": ig, "X": tw, "LinkedIn": li}
             
-        with col_right:
-            s = st.session_state.current_subs
-            chart_data = pd.DataFrame({
-                'Phase': ['Base', 'Target', 'Launch'],
-                'Reach': [int(s*0.9), s, int(s*1.2)]
-            })
-            st.area_chart(chart_data, x='Phase', y='Reach', color="#00d4ff")
+            if any(handles.values()):
+                res_text, core_used = run_handle_analysis(handles)
+                if res_text:
+                    st.session_state.last_intel = res_text
+                    st.session_state.daily_scans += 1
+                    st.success(f"Intel secured via Core {core_used}")
+                    st.rerun()
+            else:
+                st.warning("Director: No nodes provided for analysis.")
+    else:
+        st.button("🚫 QUOTA EXHAUSTED", disabled=True, use_container_width=True)
+        st.info("Neural cooldown in effect. Next cycle opens in 24 hours.")
 
-        if st.button("🔮 GENERATE STRATEGY REPORT"):
-            if groq_c:
-                with st.spinner("🌑 ORACLE CONSULTING..."):
-                    # PERSONALIZED PROMPT:
-                    prompt = f"As an elite consultant for a {user_niche} creator with {st.session_state.current_subs} subs. Provide 3 elite growth tactics."
-                    res = groq_c.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": prompt}]
-                    )
-                    st.markdown(f"### 🛡️ {user_niche.upper()} STRATEGY")
-                    st.info(res.choices[0].message.content)
+    # --- INTEL DISPLAY ---
+    if 'last_intel' in st.session_state:
+        st.divider()
+        st.markdown("### 📊 STRATEGIC FORECAST")
+        
+        # Display the AI Response in a clean card
+        with st.container(border=True):
+            st.markdown(st.session_state.last_intel)
+        
+        # Visualization: Growth Trajectory
+        st.markdown("#### ⚡ PROJECTED VELOCITY")
+        # Creating a dummy growth chart based on "Neural Confidence"
+        chart_data = pd.DataFrame({
+            'Week': ['W1', 'W2', 'W3', 'W4'],
+            'Growth': [10, 25, 45, 80]
+        })
+        st.line_chart(chart_data, x='Week', y='Growth', color="#00d4ff")
 
+        if st.button("🗑️ CLEAR SESSION DATA"):
+            del st.session_state.last_intel
+            st.rerun()
 
 
 # --- MODULE 10: CLIENT ASSIGNED SCRIPTS ---
@@ -1505,6 +1516,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
