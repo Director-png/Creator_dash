@@ -650,44 +650,40 @@ elif page == "📡 My Growth Hub":
     user_niche = st.session_state.get('user_niche', 'Creator')
     st.caption(f"CURRENT SECTOR: **{user_niche.upper()}** | Analyzing via Triple-Core Failover.")
 
-    # --- 📡 TRIPLE-CORE NEURAL ENGINE (Handle Analysis) ---
-    def run_handle_analysis(handles_dict):
-        keys = [
-            st.secrets.get("GEMINI_API_KEY"),
-            st.secrets.get("GEMINI_API_KEY_BACKUP"),
-            st.secrets.get("GEMINI_API_KEY_3")
-        ]
-        
-        # Build Intel String
-        intel_data = ", ".join([f"{k}: {v}" for k, v in handles_dict.items() if v])
+     import time  # Add this at the very top of your script
 
-        for i, k in enumerate(keys):
-            if not k: continue
-            try:
-                from google import genai
-                temp_client = genai.Client(api_key=k.strip())
-                core_name = ["Alpha", "Beta", "Gamma"][i]
-                
-                with st.spinner(f"🌑 CONSULTING CORE {core_name}..."):
-                    prompt = f"""
-                    SYSTEM: Act as an Elite Growth Strategist.
-                    DATA: {intel_data}
-                    NICHE: {user_niche}
-                    TASK: Analyze these handles. Predict content style and give 3 surgical growth tactics.
-                    STYLE: Professional, concise, technical.
-                    """
-                    response = temp_client.models.generate_content(
+def run_handle_analysis(handles_dict):
+    keys = [
+        st.secrets.get("GEMINI_API_KEY"),
+        st.secrets.get("GEMINI_API_KEY_BACKUP"),
+        st.secrets.get("GEMINI_API_KEY_3")
+    ]
+    
+    intel_data = ", ".join([f"{k}: {v}" for k, v in handles_dict.items() if v])
+
+    for i, k in enumerate(keys):
+        if not k: continue
+        try:
+            from google import genai
+            # USE 2.0 FLASH - It is the 2026 standard for high-stability
+            temp_client = genai.Client(api_key=k.strip())
+            core_name = ["Alpha", "Beta", "Gamma"][i]
+            
+            with st.spinner(f"🌑 CORE {core_name} INITIATING UPLINK..."):
+                prompt = f"Strategize growth for these handles: {intel_data}. Niche: {st.session_state.get('user_niche', 'Creator')}. Style: Surgical/Cyberpunk."
+                response = temp_client.models.generate_content(
                     model="gemini-2.0-flash", 
                     contents=[prompt]
-                    )
-                    return response.text, core_name
-            except Exception as e:
-                if "429" in str(e):
-                    st.warning(f"⚠️ Core {['Alpha', 'Beta', 'Gamma'][i]} Busy. Rerouting...")
-                    continue
-                else:
-                    st.error(f"Uplink Error: {e}")
-        return None, None
+                )
+                return response.text, core_name
+        except Exception as e:
+            if "429" in str(e):
+                st.warning(f"⚠️ Core {['Alpha', 'Beta', 'Gamma'][i]} Busy. Stabilizing for 5s...")
+                time.sleep(5)  # The "Cooling" period
+                continue
+            else:
+                st.error(f"Uplink Error: {e}")
+    return None, None
 
     # --- UI LAYOUT: INTEL INPUT ---
     with st.container(border=True):
@@ -1516,6 +1512,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
