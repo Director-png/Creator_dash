@@ -630,109 +630,41 @@ elif page == "🏠 Dashboard":
         core_display = active_core if 'active_core' in globals() else "STANDBY"
         st.code(f"AI Core: {core_display}\nHandshake: STABLE\nLaunch: T-Minus 48h")
 
-elif page == "📡 My Growth Hub":
-    st.markdown("<h1 style='color: #00d4ff;'>📡 SOCIAL INTEL MATRIX</h1>", unsafe_allow_html=True)
-    
-    # --- 🛡️ QUOTA SYSTEM (3 PER DAY) ---
-    MAX_DAILY_SCANS = 3
-    if 'daily_scans' not in st.session_state:
-        st.session_state.daily_scans = 0
-
-    # Progress bar for visual quota
-    quota_col1, quota_col2 = st.columns([3, 1])
-    with quota_col1:
-        prog_val = st.session_state.daily_scans / MAX_DAILY_SCANS
-        st.progress(prog_val)
-    with quota_col2:
-        st.write(f"⚡ {st.session_state.daily_scans}/{MAX_DAILY_SCANS} USED")
-
-    # Dynamic Niche Branding
-    user_niche = st.session_state.get('user_niche', 'Creator')
-    st.caption(f"CURRENT SECTOR: **{user_niche.upper()}** | Analyzing via Triple-Core Failover.")
-    
-    # 🧬 INTERNAL FUNCTION (Nested within the page for logic alignment)
-    def run_handle_analysis(handles_dict):
-        import time # Ensure timing for cooldowns
-        keys = [
-            st.secrets.get("GEMINI_API_KEY"),
-            st.secrets.get("GEMINI_API_KEY_BACKUP"),
-            st.secrets.get("GEMINI_API_KEY_3")
-        ]
+# --- GROWTH TRACKER (Basic) ---
+with st.container(border=True):
+    st.subheader("📈 GROWTH DATA INPUT")
+    col1, col2 = st.columns(2)
+    with col1:
+        start_count = st.number_input("Starting Followers", min_value=0, value=1000)
+        days_passed = st.slider("Days since tracking started", 1, 30, 7)
+    with col2:
+        current_count = st.number_input("Current Followers", min_value=0, value=1200)
         
-        intel_data = ", ".join([f"{k}: {v}" for k, v in handles_dict.items() if v])
-
-        for i, k in enumerate(keys):
-            if not k: continue
-            try:
-                from google import genai
-                # 2026 STANDARD: Gemini 2.0 Flash
-                temp_client = genai.Client(api_key=k.strip())
-                core_name = ["Alpha", "Beta", "Gamma"][i]
-                
-                with st.spinner(f"🌑 CORE {core_name} INITIATING UPLINK..."):
-                    prompt = f"Strategize growth for these handles: {intel_data}. Niche: {user_niche}. Style: Surgical/Cyberpunk."
-                    response = temp_client.models.generate_content(
-                        model="gemini-2.0-flash", 
-                        contents=[prompt]
-                    )
-                    return response.text, core_name
-            except Exception as e:
-                if "429" in str(e):
-                    st.warning(f"⚠️ Core {['Alpha', 'Beta', 'Gamma'][i]} Busy. Stabilizing for 5s...")
-                    time.sleep(5)  # The cooldown period
-                    continue
-                else:
-                    st.error(f"Uplink Error: {e}")
-        return None, None
-
-    # --- UI LAYOUT: INTEL INPUT ---
-    with st.container(border=True):
-        st.markdown("### 🔗 NODE INPUT")
-        c1, c2 = st.columns(2)
-        with c1:
-            yt = st.text_input("YouTube", placeholder="@username")
-            ig = st.text_input("Instagram", placeholder="username")
-        with c2:
-            tw = st.text_input("X (Twitter)", placeholder="@username")
-            li = st.text_input("LinkedIn", placeholder="in/username")
-
-    # --- EXECUTION GATE ---
-    if st.session_state.daily_scans < MAX_DAILY_SCANS:
-        if st.button("🛰️ SCAN & ANALYZE HANDLES", use_container_width=True):
-            handles = {"YouTube": yt, "Instagram": ig, "X": tw, "LinkedIn": li}
-            
-            if any(handles.values()):
-                res_text, core_used = run_handle_analysis(handles)
-                if res_text:
-                    st.session_state.last_intel = res_text
-                    st.session_state.daily_scans += 1
-                    st.success(f"Intel secured via Core {core_used}")
-                    st.rerun()
-            else:
-                st.warning("Director: No nodes provided for analysis.")
-    else:
-        st.button("🚫 QUOTA EXHAUSTED", disabled=True, use_container_width=True)
-        st.info("Neural cooldown in effect. Next cycle opens in 24 hours.")
-
-    # --- INTEL DISPLAY ---
-    if 'last_intel' in st.session_state:
-        st.divider()
-        st.markdown("### 📊 STRATEGIC FORECAST")
+    # Calculate Growth Rate (Standard Formula)
+    if current_count > start_count:
+        growth_rate = ((current_count - start_count) / start_count) / days_passed
+        projection_30d = current_count * (1 + (growth_rate * 30))
         
-        with st.container(border=True):
-            st.markdown(st.session_state.last_intel)
-        
-        st.markdown("#### ⚡ PROJECTED VELOCITY")
-        chart_data = pd.DataFrame({
-            'Week': ['W1', 'W2', 'W3', 'W4'],
-            'Growth': [10, 25, 45, 80]
-        })
-        st.line_chart(chart_data, x='Week', y='Growth', color="#00d4ff")
+        st.metric("DAILY VELOCITY", f"+{round(growth_rate*100, 2)}%")
+        st.success(f"🔮 30-Day Forecast: **{int(projection_30d):,} Followers**")
 
-        if st.button("🗑️ CLEAR SESSION DATA"):
-            del st.session_state.last_intel
-            st.rerun()
+# --- TASK MANAGER ---
+st.divider()
+st.subheader("🗓️ CONTENT CALENDAR & TASK FORGE")
 
+if 'tasks' not in st.session_state:
+    st.session_state.tasks = pd.DataFrame(columns=["Task", "Platform", "Status", "Deadline"])
+
+with st.expander("➕ ADD NEW CONTENT TASK"):
+    t_name = st.text_input("Task Description (e.g., 'Record AI Video')")
+    t_plat = st.selectbox("Node", ["YouTube", "Instagram", "X", "LinkedIn"])
+    t_date = st.date_input("Deadline")
+    if st.button("SYNC TO FORGE"):
+        new_row = pd.DataFrame([[t_name, t_plat, "⏳ Pending", t_date]], columns=st.session_state.tasks.columns)
+        st.session_state.tasks = pd.concat([st.session_state.tasks, new_row], ignore_index=True)
+
+# Display as an interactive Notion-like table
+st.data_editor(st.session_state.tasks, use_container_width=True, num_rows="dynamic")
 
 # --- MODULE 10: CLIENT ASSIGNED SCRIPTS ---
 elif page == "💎 Assigned Scripts":
@@ -1509,6 +1441,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
