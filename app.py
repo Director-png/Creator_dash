@@ -1395,26 +1395,35 @@ elif page == "⚖️ Legal Archive":
             "In your own words, what else would make this app better for you?",
             placeholder="e.g., I want a way to track if a brand has paid me yet..."
         )
-        # 3. The Submit & Affirmation Logic
         if st.button("📤 SEND RECOMMENDATION", use_container_width=True):
             if user_suggestion:
-                try:
-                    # --- 📡 THE DATA UPLINK ---
-                    # We create a small dataframe to append to your master sheet
-                    feedback_data = {
-                        "Date": [pd.Timestamp.now().strftime("%Y-%m-%d %H:%M")],
-                        "User": [st.session_state.get('user_name', 'Unknown')],
-                        "Priority": [vote_choice],
-                        "Feedback": [user_suggestion]
-                    }
-                    df_feedback = pd.DataFrame(feedback_data)
+                import requests # Ensure this is at the top of your script
+                
+                # --- 📡 THE GOOGLE FORM BRIDGE ---
+                # Replace the URL with your "formResponse" URL and match the entry IDs
+                form_url = "https://docs.google.com/forms/d/e/1FAIpQLSfeDAY3gnWYlpH90EaJirxUc8d4obYUgiX72WJIah7Cya1VNQ/formResponse"
+                
+                payload = {
+                    "entry.2084741280": st.session_state.get('user_name', 'Unknown'), # User Name ID
+                    "entry.554052255": vote_choice,                                 # Priority ID
+                    "entry.2031301382": user_suggestion                              # Feedback ID
+                }
 
-                    # METHOD: Append to your Google Sheet via a Web App URL or Form
-                    # Replace 'YOUR_FEEDBACK_SHEET_URL' with your specific link
-                    # For now, we will log it to your session for safety:
-                    if 'feedback_log' not in st.session_state:
-                        st.session_state.feedback_log = []
-                    st.session_state.feedback_log.append(feedback_data)
+                try:
+                    # We send the data "behind the scenes"
+                    response = requests.post(form_url, data=payload)
+                    
+                    if response.status_code == 200:
+                        st.success(f"**Recommendation Locked, {st.session_state.get('user_name', 'Director')}!**")
+                        st.balloons()
+                        st.markdown("> Your input has been transmitted directly to the Master Vault.")
+                    else:
+                        st.error("Uplink Error: Sheet rejected the data. Check Form IDs.")
+                
+                except Exception as e:
+                    st.error(f"Critical Failure: {e}")
+            else:
+                st.warning("Director, please add a small suggestion first!")
                     
                     # --- SUCCESS INTERFACE ---
                     st.success(f"**Recommendation Locked, {st.session_state.get('user_name', 'Director')}!**")
@@ -1625,6 +1634,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
