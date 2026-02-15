@@ -418,8 +418,7 @@ if not st.session_state.logged_in:
                         st.error(f"🚨 UPLINK CRASHED: {e}")
 
     with t2:
-        # --- CLEAN REGISTRATION LOGIC ---
-with st.expander("🛡️ INITIALIZE NEW IDENTITY"):
+        with st.expander("🛡️ INITIALIZE NEW IDENTITY"):
     # Define variables with unique keys to avoid collisions
     n = st.text_input("Full Name", key="reg_name")
     e = st.text_input("Email Address", key="reg_email")
@@ -453,6 +452,8 @@ with st.expander("🛡️ INITIALIZE NEW IDENTITY"):
                     st.error(f"Network Failure: {ex}")
         else:
             st.warning("Director, all tactical identification fields must be filled.")
+
+       
 
         
     # 🛑 THE SECURITY WALL: Prevents internal app from loading if not logged in
@@ -1429,6 +1430,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
