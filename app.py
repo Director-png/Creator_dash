@@ -742,17 +742,24 @@ elif page == "📡 My Growth Hub":
 
 # --- MODULE 10: CLIENT ASSIGNED SCRIPTS ---
 elif page == "💎 Assigned Scripts":
-    st.markdown(f"<h1 style='color: #00ff41;'>💎 {st.session_state.user_name.upper()}'S VAULT</h1>", unsafe_allow_html=True)
+    # Using session_state safely with a fallback to 'Director'
+    current_user = st.session_state.get('user_name', 'Director').upper()
+    st.markdown(f"<h1 style='color: #00ff41;'>💎 {current_user}'S VAULT</h1>", unsafe_allow_html=True)
+    
+    # 🛰️ Define URL (Ensure this is in your secrets or defined here)
+    # VAULT_SHEET_CSV_URL = st.secrets["https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQTrDvNWe810s55puzBodFKvfUbfMV_l-QoQIfbdPxeQknClGGCQT33UQ471NyGTw4aHLrDTw/pub?output=csv"] 
     
     try:
-        # 🛰️ Sync with the Master Vault Sheet
-        # Ensure your VAULT_SHEET_CSV_URL is correct in your secrets/top of code
+        # Load the database
         scripts_df = pd.read_csv(VAULT_SHEET_CSV_URL)
-        scripts_df.columns = [str(c).strip().lower() for c in scripts_df.columns]
         
-        # FILTER: Show only scripts where the 'Director/Client' column matches logged-in user
-        # Assuming Column 1 (index 1) is 'Client Name'
-        my_vault = scripts_df[scripts_df.iloc[:, 1].astype(str).str.lower() == st.session_state.user_name.lower()]
+        # Clean column whitespace for safety
+        scripts_df.columns = [str(c).strip() for c in scripts_df.columns]
+        
+        # FILTER: Using .iloc[1] for Client Name as per your logic
+        # We use .fillna('') to prevent crashes on empty rows
+        user_name_lower = st.session_state.get('user_name', '').lower()
+        my_vault = scripts_df[scripts_df.iloc[:, 1].astype(str).str.lower() == user_name_lower].fillna("N/A")
         
         if my_vault.empty:
             st.info("🛰️ VAULT EMPTY: No scripts assigned to your node yet. Contact the Director.")
@@ -761,28 +768,43 @@ elif page == "💎 Assigned Scripts":
             st.subheader(f"Total Deliverables: {len(my_vault)}")
             
             for i, row in my_vault.iterrows():
-                with st.expander(f"🎬 {row.iloc[3]} | {row.iloc[2].upper()}"):
+                # Logic Preservation: row.iloc[3]=Title, row.iloc[2]=Platform
+                title = row.iloc[3] if len(row) > 3 else "Untitled Script"
+                platform = str(row.iloc[2]).upper() if len(row) > 2 else "GENERAL"
+                content = row.iloc[4] if len(row) > 4 else "No content available."
+                visual_dna = row.iloc[5] if len(row) > 5 else "No DNA data provided."
+
+                with st.expander(f"🎬 {title} | {platform}"):
                     col_text, col_status = st.columns([3, 1])
                     
                     with col_text:
                         st.markdown("### The Script")
-                        st.write(row.iloc[4]) # Script Content
+                        st.write(content) 
                         st.divider()
-                        st.caption(f"🧬 Visual DNA: {row.iloc[5]}")
+                        st.caption(f"🧬 Visual DNA: {visual_dna}")
                     
                     with col_status:
                         st.markdown("### Status")
+                        # Keys must be unique, adding index 'i' is perfect
                         st.checkbox("Filmed", key=f"check_film_{i}")
                         st.checkbox("Edited", key=f"check_edit_{i}")
                         st.checkbox("Posted", key=f"check_post_{i}")
                         
-                        if st.button("📥 DOWNLOAD", key=f"dl_{i}"):
-                            st.download_button("Confirm Download", row.iloc[4], file_name="script.txt")
+                        st.divider()
+                        # RECTIFIED DOWNLOAD: Download buttons should stand alone
+                        st.download_button(
+                            label="📥 DOWNLOAD", 
+                            data=str(content), 
+                            file_name=f"script_{i}.txt",
+                            key=f"dl_btn_{i}",
+                            use_container_width=True
+                        )
 
     except Exception as e:
-        st.error("DATABASE OFFLINE: Connection to Master Vault timed out.")
-        st.code(str(e))
-
+        st.error("DATABASE OFFLINE: Connection to Master Vault timed out or URL invalid.")
+        # Only show the raw error if you are in 'Dev' mode, otherwise it looks messy
+        with st.expander("📡 Diagnostic Error Log"):
+            st.code(str(e))
 
 
 # --- MODULE 4: GLOBAL PULSE ---
@@ -1515,6 +1537,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
