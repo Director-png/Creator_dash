@@ -677,8 +677,8 @@ elif page == "📡 My Growth Hub":
                     STYLE: Professional, concise, technical.
                     """
                     response = temp_client.models.generate_content(
-                        model="gemini-1.5-flash", 
-                        contents=[prompt]
+                    model="gemini-2.0-flash", 
+                    contents=[prompt]
                     )
                     return response.text, core_name
             except Exception as e:
@@ -1516,6 +1516,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
