@@ -1436,10 +1436,9 @@ elif page == "⚖️ Legal Archive":
         st.write("- Do you keep the rights to your raw footage?")
         st.write("- Is there a limit on how many 'Revisions' the brand can ask for?")
 
-
 # --- MODULE 10: 💎 VOID PRO LICENSE UPLINK ---
 elif page == "💎 Upgrade to Pro":
-    st.markdown("<h1 style='color: #00ff41;'>💎 VOID OS // LICENSE UPLINK</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='color: #00ff41;'>💎 VOID OS // LICENSE UPLINK</h1>", unsafe_allow_html=True)
         
         # 1. VALUE PROPOSITION
         with st.container(border=True):
@@ -1614,6 +1613,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
