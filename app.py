@@ -649,9 +649,7 @@ elif page == "📡 My Growth Hub":
     # Dynamic Niche Branding
     user_niche = st.session_state.get('user_niche', 'Creator')
     st.caption(f"CURRENT SECTOR: **{user_niche.upper()}** | Analyzing via Triple-Core Failover.")
-
-     import time  # Add this at the very top of your script
-
+    
 def run_handle_analysis(handles_dict):
     keys = [
         st.secrets.get("GEMINI_API_KEY"),
@@ -1512,6 +1510,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
