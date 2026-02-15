@@ -542,9 +542,9 @@ with st.sidebar:
 
     # 2. Define Options based on Role AND Status
     if st.session_state.user_role == "admin":
-        options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "💼 Client Pitcher", "📜 History", "⚙️ Settings"]
+        options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
     elif user_status == 'paid':
-        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "📜 History", "⚙️ Settings"]
+        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
     else:
         options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "💎 Assigned Scripts", "⚖️ Legal Archive", "💎 Upgrade to Pro", "⚙️ Settings"]
 
@@ -1350,6 +1350,93 @@ elif page == "🛡️ Admin Console":
         st.error("Invalid Credentials. Intrusion attempt logged.")
 
 
+# --- MODULE: LEGAL ARCHIVE ---
+elif page == "⚖️ Legal Archive":
+    st.markdown("<h1 style='color: #00ff41;'>⚖️ LEGAL DEFENSE VAULT</h1>", unsafe_allow_html=True)
+    
+    # --- 🛡️ GLOBAL STATUS BAR ---
+    is_pro = st.session_state.get('is_pro', False) # Logic for later
+    status_color = "#00ff41" if is_pro else "#ff4b4b"
+    status_text = "PRO ACCESS ACTIVE" if is_pro else "BASIC ACCESS (RESTRICTED)"
+    
+    st.markdown(f"""
+        <div style="border: 1px solid {status_color}; padding: 10px; border-radius: 5px; text-align: center;">
+            <span style="color: {status_color}; font-weight: bold;">{status_text}</span>
+        </div>
+    """, unsafe_allow_html=True)
+
+    st.write("")
+
+    # --- 🟢 BASIC ACCESS SECTOR (Manual Tools) ---
+    with st.container(border=True):
+        st.subheader("✅ MANUAL COMPLIANCE CHECKLIST")
+        st.caption("Standard operating procedure for every brand deal.")
+        
+        col_c1, col_c2 = st.columns(2)
+        with col_c1:
+            st.checkbox("Usage Rights (Perpetuity vs Limited)")
+            st.checkbox("Exclusivity Clauses")
+            st.checkbox("Payment Milestones (Upfront/Net-30)")
+        with col_c2:
+            st.checkbox("Deliverable Deadlines")
+            st.checkbox("Revision Caps (Max 2)")
+            st.checkbox("Whitelisting Permissions")
+
+    st.divider()
+
+    # --- 💎 PRO ACCESS SECTOR (The "Temptation" Zone) ---
+    st.markdown("### 💎 PRO-TIER DEFENSE MODULES")
+    
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # 📂 MODULE: AUTO-GENERATOR
+        with st.container(border=True):
+            st.markdown("#### 📝 Neural Contract Forge")
+            st.caption("Generate custom NDAs & Brand Contracts in seconds.")
+            if is_pro:
+                st.button("GENERATE NEW CONTRACT", key="gen_con")
+            else:
+                st.button("🔒 UNLOCK FORGE", key="lock_gen", disabled=True)
+                st.info("Available in Pro Tier")
+
+        # 📂 MODULE: AUDITOR
+        with st.container(border=True):
+            st.markdown("#### 👁️ Neural Auditor (AI)")
+            st.caption("Upload any PDF/Doc to scan for 'Predatory Clauses'.")
+            if is_pro:
+                st.file_uploader("Upload Contract for Audit", type=['pdf'])
+            else:
+                st.button("🔒 UNLOCK AI AUDIT", key="lock_audit", disabled=True)
+                st.warning("Protect your IP with AI scanning.")
+
+    with col2:
+        # 📂 MODULE: TEMPLATE VAULT
+        with st.container(border=True):
+            st.markdown("#### 📂 Master Template Vault")
+            st.caption("Instant download of 50+ Creator-Legal documents.")
+            if is_pro:
+                st.selectbox("Select Template", ["Universal NDA", "Brand Collab v2", "Editor Agreement"])
+                st.button("DOWNLOAD SELECTION")
+            else:
+                st.markdown("---")
+                st.markdown("⭐ **INCLUDES:**")
+                st.write("* YouTube Content License")
+                st.write("* Agency Rep Agreement")
+                st.write("* Music Sync Rights")
+                st.button("🔒 VIEW 50+ TEMPLATES", key="lock_vault", disabled=True)
+
+    # --- 💳 THE CONVERSION TRIGGER ---
+    if not is_pro:
+        st.divider()
+        with st.container(border=True):
+            st.markdown("<h3 style='text-align: center; color: #00d4ff;'>🛡️ NEVER SIGN A BAD DEAL AGAIN</h3>", unsafe_allow_html=True)
+            st.write("One bad contract can cost you your entire channel. Upgrade to the Pro Tier for full legal automation.")
+            if st.button("🚀 UPGRADE TO PRO ACCESS NOW", use_container_width=True):
+                st.toast("Redirecting to Razorpay Secure Server...", icon="💳")
+
+
+
 # --- MODULE 10: UPGRADE TO PRO (FORCE-RENDER) ---
 elif page == "💎 Upgrade to Pro":
     st.markdown("<h1 style='color: #00ff41;'>💎 VOID PRO: UPGRADE UPLINK</h1>", unsafe_allow_html=True)
@@ -1537,6 +1624,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
