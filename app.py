@@ -427,10 +427,7 @@ if not st.session_state.logged_in:
                             # We added verify=False and a longer timeout to force a connection
                             response = requests.post(NEW_URL, json=payload, timeout=15)
                             
-                            # DEBUG: This will show us EXACTLY what Google sent back
-                            st.write(f"DEBUG: Status Code: {response.status_code}")
-                            st.write(f"DEBUG: Response Text: {response.text}")
-
+                            
                             if response.status_code == 200 and len(response.text.strip()) == 6:
                                 st.session_state.generated_otp = response.text.strip()
                                 st.session_state.otp_sent = True
@@ -1458,6 +1455,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
