@@ -1351,16 +1351,19 @@ elif page == "🛡️ Admin Console":
 
 # --- MODULE: LEGAL ARCHIVE ---
 elif page == "⚖️ Legal Archive":
-    # 1. CHECK SECURITY CLEARANCE
-    # We check the 'tier' from your session state. Default is 'Basic'
+    # 1. UNIVERSAL ACCESS CHECK
+    # We check if the user is 'Pro' OR 'Admin'. Both get full access.
     user_tier = st.session_state.get('user_tier', 'Basic') 
-    is_pro = (user_tier == 'Pro')
+    user_role = st.session_state.get('role', 'User') # Checking if you are Admin
+    
+    # Authorized if you are Pro OR Admin
+    is_authorized = (user_tier == 'Pro' or user_role == 'Admin' or st.session_state.get('user_name') == 'Admin')
 
     st.markdown("<h1 style='color: #00ff41;'>⚖️ LEGAL DEFENSE VAULT</h1>", unsafe_allow_html=True)
     
     # --- STATUS HEADER ---
-    if is_pro:
-        st.success("💎 PRO ACCESS ACTIVE: All Legal Blueprints Unlocked.")
+    if is_authorized:
+        st.success("💎 AUTHORIZED ACCESS: All Legal Blueprints Unlocked.")
     else:
         st.warning("⚠️ BASIC ACCESS: Some advanced defense tools are locked.")
 
@@ -1389,13 +1392,13 @@ elif page == "⚖️ Legal Archive":
         with st.container(border=True):
             st.markdown("#### 🤝 Brand Collaboration Contract")
             st.write("A professional agreement to ensure you get paid on time.")
-            if is_pro:
+            if is_authorized:
                 st.download_button(
                     label="📥 DOWNLOAD NOW",
                     data="[Standard Brand Contract Text...]",
-                    file_name="brand_deal_pro.txt",
+                    file_name="brand_deal_authorized.txt",
                     use_container_width=True,
-                    key="dl_brand_pro"
+                    key="dl_brand_auth"
                 )
             else:
                 st.button("🔒 LOCKED (PRO ONLY)", disabled=True, use_container_width=True, key="lock_brand")
@@ -1406,13 +1409,13 @@ elif page == "⚖️ Legal Archive":
         with st.container(border=True):
             st.markdown("#### 🤫 Secret-Keeping Agreement (NDA)")
             st.write("Protect your ideas when talking to editors or partners.")
-            if is_pro:
+            if is_authorized:
                 st.download_button(
                     label="📥 DOWNLOAD NOW",
                     data="[Standard NDA Text...]",
-                    file_name="nda_pro.txt",
+                    file_name="nda_authorized.txt",
                     use_container_width=True,
-                    key="dl_nda_pro"
+                    key="dl_nda_auth"
                 )
             else:
                 st.button("🔒 LOCKED (PRO ONLY)", disabled=True, use_container_width=True, key="lock_nda")
@@ -1420,13 +1423,13 @@ elif page == "⚖️ Legal Archive":
 
     st.divider()
 
-    # --- SECTION 3: THE AI CONTRACT DOCTOR (The Big Pro Feature) ---
+    # --- SECTION 3: THE AI CONTRACT DOCTOR ---
     st.markdown("### 🤖 Neural Contract Auditor")
     
     with st.container(border=True):
-        if is_pro:
+        if is_authorized:
             st.markdown("#### 👁️ AI Scanning Active")
-            st.write("Upload your PDF contract below. Our AI will look for hidden 'Red Flags' that might hurt you.")
+            st.write("Upload your PDF contract below. Our AI will look for hidden 'Red Flags'.")
             uploaded_pdf = st.file_uploader("Drop your contract here", type=['pdf', 'txt'])
             if uploaded_pdf:
                 st.info("AI is analyzing the document for predatory clauses...")
@@ -1437,13 +1440,12 @@ elif page == "⚖️ Legal Archive":
             st.caption("Only available for Pro Members.")
 
     # --- SECTION 4: HOW TO UPGRADE ---
-    if not is_pro:
+    if not is_authorized:
         st.divider()
         st.markdown("<h3 style='text-align: center;'>🚀 Ready to go Professional?</h3>", unsafe_allow_html=True)
         if st.button("CLICK HERE TO UPGRADE TO PRO", use_container_width=True):
             st.balloons()
             st.info("Redirecting to the Payment Gateway...")
-
 
 
 # --- MODULE 10: UPGRADE TO PRO (FORCE-RENDER) ---
@@ -1633,6 +1635,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
