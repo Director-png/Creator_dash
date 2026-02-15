@@ -1349,9 +1349,9 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
 
-# --- MODULE: LEGAL ARCHIVE (Tactical Retreat Mode) ---
+# --- MODULE: LEGAL ARCHIVE (Feedback & Vote Edition) ---
 elif page == "⚖️ Legal Archive":
-    # Universal Access Check
+    # Universal Access Check (God-Mode)
     u_name = str(st.session_state.get('user_name', '')).upper()
     u_role = str(st.session_state.get('role', '')).upper()
     is_authorized = ("ADMIN" in u_name or "DIRECTOR" in u_name or "ADMIN" in u_role)
@@ -1359,48 +1359,63 @@ elif page == "⚖️ Legal Archive":
     st.markdown("<h1 style='color: #00ff41;'>⚖️ LEGAL DEFENSE VAULT</h1>", unsafe_allow_html=True)
     
     # --- 🛰️ SYSTEM UPDATE NOTICE ---
-    st.warning("📡 **SYSTEM UPDATE IN PROGRESS:** We are currently upgrading our Legal Forge to allow for full contract customization and high-speed Neural Auditing. These features will go live in the **V2.0 Core Update**.")
+    st.warning("📡 **SYSTEM OPTIMIZATION IN PROGRESS:** We are fine-tuning our AI Law-Cores to make sure your contracts are 100% bulletproof. These advanced tools will unlock in the next update.")
 
-    # --- SECTION 1: MANUAL CHECKLIST (Always available) ---
-    st.markdown("### 🛡️ Pre-Sign Safety Protocol")
-    with st.container(border=True):
-        st.write("Basic checks remain active for all users:")
-        c1, c2 = st.columns(2)
-        with c1:
-            st.checkbox("Usage Rights Verification")
-            st.checkbox("Payment Milestone Check")
-        with c2:
-            st.checkbox("Revision Limitation")
-            st.checkbox("Exclusivity Lockdown")
-
-    st.divider()
-
-    # --- SECTION 2: THE "COMING SOON" GRID ---
-    st.markdown("### 💎 PRO-TIER EVOLUTION (Phase 2)")
-    
+    # --- SECTION 1: THE COMING SOON PREVIEW ---
     col1, col2 = st.columns(2)
-
-    # BOX 1: CUSTOMIZABLE CONTRACTS
     with col1:
         with st.container(border=True):
-            st.markdown("#### 📝 Smart Contract Forge")
-            st.caption("Create personalized contracts tailored to your specific brand deals.")
-            st.button("⚡ OPTIMIZING LOGIC...", disabled=True, use_container_width=True)
-            st.info("Estimated Launch: Next Patch.")
-
-    # BOX 2: AI SCANNER
+            st.markdown("#### 📝 Custom Contract Creator")
+            st.caption("Tell the AI what you need, and it writes the deal for you.")
+            st.button("⚙️ CALIBRATING...", disabled=True, use_container_width=True)
+            
     with col2:
         with st.container(border=True):
-            st.markdown("#### 👁️ Neural Auditor 2.0")
-            st.caption("Deep-scan technology to find predatory clauses in seconds.")
-            st.button("⚙️ CALIBRATING CORES...", disabled=True, use_container_width=True)
-            st.info("Status: Training AI Models.")
+            st.markdown("#### 👁️ AI Contract Scanner")
+            st.caption("Upload a brand's contract to find hidden traps instantly.")
+            st.button("⚙️ TRAINING AI...", disabled=True, use_container_width=True)
 
-    # --- 🌑 DIRECTOR'S ADDITION: THE "VOTE" ---
     st.divider()
-    st.markdown("#### 🗳️ Feature Priority Vote")
-    st.write("Which legal tool do you need most in the next update?")
-    st.radio("Select Priority:", ["International Payment Security", "Copyright Infringement Protection", "Agency Manager Contracts"], label_visibility="collapsed")
+
+    # --- SECTION 2: THE COMMUNITY FORGE (Vote & Feedback) ---
+    st.markdown("### 🧬 Help Us Build Your Defense")
+    st.write("Which legal protection do you need most right now? Your choice will decide what we build first.")
+
+    with st.container(border=True):
+        # 1. The Vote
+        vote_choice = st.radio(
+            "Select your top priority:",
+            ["Brand Deal Safety (Contracts)", "Copyright Protection (Music/Videos)", "Agency & Manager Agreements"],
+            index=0
+        )
+        
+        # 2. The Open Feedback
+        st.write("")
+        user_suggestion = st.text_area(
+            "In your own words, what else would make this app better for you?",
+            placeholder="e.g., I want a way to track if a brand has paid me yet..."
+        )
+        
+        # 3. The Submit & Affirmation
+        if st.button("📤 SEND RECOMMENDATION", use_container_width=True):
+            if user_suggestion:
+                # Here we show the warm, non-technical affirmation
+                st.success(f"**Thank you for the recommendation, {st.session_state.get('user_name', 'Creator')}!**")
+                st.balloons()
+                st.markdown(f"""
+                > "We’ve received your input on **{vote_choice}**. Our team is already looking into your ideas about *'{user_suggestion[:30]}...'*. 
+                > We are building this app for YOU, and we’ll surely work on making this a reality in the next update!"
+                """)
+            else:
+                st.warning("Director, please add a small suggestion so we know exactly how to help you!")
+
+    # --- SECTION 3: BASIC CHECKLIST (The 'Now' value) ---
+    st.divider()
+    with st.expander("✅ VIEW BASIC SAFETY CHECKLIST"):
+        st.write("While the AI is training, always check these manually:")
+        st.write("- Is the payment date clearly mentioned?")
+        st.write("- Do you keep the rights to your raw footage?")
+        st.write("- Is there a limit on how many 'Revisions' the brand can ask for?")
 
 
 # --- MODULE 10: UPGRADE TO PRO (FORCE-RENDER) ---
@@ -1590,6 +1605,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
