@@ -1351,9 +1351,6 @@ elif page == "🛡️ Admin Console":
 
 # --- MODULE: LEGAL ARCHIVE ---
 elif page == "⚖️ Legal Archive":
-# --- TEMPORARY DEBUGGER (Remove after fix) ---
-     st.write(f"DEBUG: Name={st.session_state.get('user_name')} | Role={st.session_state.get('role')} | Tier={st.session_state.get('user_tier')}")
-
     # 1. THE "GOD-MODE" CHECK
     # We pull values and convert them to uppercase to avoid "admin" vs "Admin" issues
     u_name = str(st.session_state.get('user_name', '')).upper()
@@ -1645,6 +1642,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
