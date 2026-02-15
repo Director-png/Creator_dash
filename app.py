@@ -591,26 +591,28 @@ elif page == "🏠 Dashboard":
         core_display = active_core if 'active_core' in globals() else "STANDBY"
         st.code(f"AI Core: {core_display}\nHandshake: STABLE\nLaunch: T-Minus 48h")
 
-# --- MODULE 8: GROWTH HUB (HARDENED VERSION) ---
 elif page == "📡 My Growth Hub":
     st.markdown("<h1 style='color: #00d4ff;'>📡 GROWTH INTELLIGENCE</h1>", unsafe_allow_html=True)
     
-    # 🧬 INTERNAL UTILITY: Image Compressor to save Tokens/Quota
+    # Dynamic Niche Branding
+    user_niche = st.session_state.get('user_niche', 'Creator')
+    st.info(f"Current Matrix: **{user_niche}** | Core analysis optimized for your niche.")
+
+    # 🧬 INTERNAL UTILITY: Image Compressor
     def compress_for_ai(uploaded_file):
         img = Image.open(uploaded_file)
         if img.mode in ("RGBA", "P"): img = img.convert("RGB")
-        img.thumbnail((800, 800)) # Scale down to save 70% of token weight
+        img.thumbnail((800, 800)) 
         buffer = io.BytesIO()
         img.save(buffer, format="JPEG", quality=85)
         return Image.open(buffer)
 
     # 🛡️ INTERNAL UTILITY: Triple-Core Failover
     def run_analysis(image_input):
-        # List all possible keys from your Secrets
         keys = [
             st.secrets.get("GEMINI_API_KEY"),
             st.secrets.get("GEMINI_API_KEY_BACKUP"),
-            st.secrets.get("GEMINI_API_KEY_3") # Engine Gamma
+            st.secrets.get("GEMINI_API_KEY_3")
         ]
         
         for i, k in enumerate(keys):
@@ -648,13 +650,16 @@ elif page == "📡 My Growth Hub":
                     nums = re.findall(r'\d+', result_text.replace(',', ''))
                     if nums: st.session_state.current_subs = int(nums[0])
                 else:
-                    st.warning("🚨 AI CORES DOWN: Please enter your subscriber count manually below.")
-                    manual_count = st.number_input("Enter Subscriber Count", min_value=0, value=st.session_state.get('current_subs', 0))
-                    if st.button("✅ CONFIRM MANUAL SYNC"):
-                        st.session_state.current_subs = manual_count
-                        st.session_state.last_analysis = "Manual Entry Verified"
-                        st.rerun()
-                        
+                    st.warning("🚨 AI CORES DOWN: Please enter count manually.")
+                    
+    # --- MANUAL OVERRIDE (If AI Fails) ---
+    if 'last_analysis' not in st.session_state and uploaded_img:
+        manual_count = st.number_input("Enter Subscriber Count", min_value=0, value=st.session_state.get('current_subs', 0))
+        if st.button("✅ CONFIRM MANUAL SYNC"):
+            st.session_state.current_subs = manual_count
+            st.session_state.last_analysis = "Manual Entry Verified"
+            st.rerun()
+
     # --- DATA VISUALIZATION ---
     if 'last_analysis' in st.session_state:
         st.divider()
@@ -665,7 +670,6 @@ elif page == "📡 My Growth Hub":
             st.caption(f"Raw Feed: {st.session_state.last_analysis}")
             
         with col_right:
-            # Growth Simulation based on real data
             s = st.session_state.current_subs
             chart_data = pd.DataFrame({
                 'Phase': ['Base', 'Target', 'Launch'],
@@ -673,17 +677,20 @@ elif page == "📡 My Growth Hub":
             })
             st.area_chart(chart_data, x='Phase', y='Reach', color="#00d4ff")
 
-    if st.button("🔮 GENERATE STRATEGY REPORT"):
-        # This part uses GROQ (which is still online!)
-        if groq_c:
-            with st.spinner("🌑 ORACLE CONSULTING..."):
-                prompt = f"Creator has {st.session_state.current_subs} subs. Give 3 elite growth tactics."
-                res = groq_c.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
-                    messages=[{"role": "user", "content": prompt}]
-                )
-                st.info(res.choices[0].message.content)
-                
+        if st.button("🔮 GENERATE STRATEGY REPORT"):
+            if groq_c:
+                with st.spinner("🌑 ORACLE CONSULTING..."):
+                    # PERSONALIZED PROMPT:
+                    prompt = f"As an elite consultant for a {user_niche} creator with {st.session_state.current_subs} subs. Provide 3 elite growth tactics."
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": prompt}]
+                    )
+                    st.markdown(f"### 🛡️ {user_niche.upper()} STRATEGY")
+                    st.info(res.choices[0].message.content)
+
+
+
 # --- MODULE 10: CLIENT ASSIGNED SCRIPTS ---
 elif page == "💎 Assigned Scripts":
     st.markdown(f"<h1 style='color: #00ff41;'>💎 {st.session_state.user_name.upper()}'S VAULT</h1>", unsafe_allow_html=True)
@@ -1351,7 +1358,6 @@ elif page == "💎 Upgrade to Pro":
         st.write("Please check the box above to initialize the transaction.")
 
 
-# --- MODULE 12: SETTINGS ---
 elif page == "⚙️ Settings":
     st.markdown("<h1 style='color: #00ff41;'>⚙️ SYSTEM SETTINGS</h1>", unsafe_allow_html=True)
     st.markdown("---")
@@ -1363,6 +1369,7 @@ elif page == "⚙️ Settings":
             st.image("https://api.dicebear.com/7.x/bottts/svg?seed=" + st.session_state.user_name, width=100)
         with col2:
             st.subheader(f"Director: {st.session_state.user_name}")
+            st.write(f"**Niche:** {st.session_state.get('user_niche', 'Not Set')}")
             st.caption(f"Registered Email: {st.session_state.get('user_email', 'N/A')}")
             
             # Dynamic Badge
@@ -1372,41 +1379,45 @@ elif page == "⚙️ Settings":
             else:
                 st.markdown("<span style='background-color: #444; color: white; padding: 2px 8px; border-radius: 5px; font-weight: bold;'>BASIC NODE</span>", unsafe_allow_html=True)
 
-    st.write("")
+    # 2. IDENTITY NODES (New Security Data Section)
+    with st.expander("📱 Identity Data (Vault Linked)", expanded=True):
+        c1, c2 = st.columns(2)
+        with c1:
+            st.text_input("Registered Mobile", value=st.session_state.get('user_mob', 'N/A'), disabled=True)
+        with c2:
+            st.text_input("Security Answer / DOB", value=st.session_state.get('user_dob', 'N/A'), disabled=True)
+        st.caption("Contact Central Command to modify these core identity nodes.")
 
-    # 2. SUBSCRIPTION & BILLING
-    with st.expander("💳 Subscription Management", expanded=True):
+    # 3. SUBSCRIPTION & BILLING
+    with st.expander("💳 Subscription Management"):
         if status == "paid":
-            st.success("Your Pro subscription is active until the next billing cycle.")
-            st.info("To cancel or change billing details, contact Central Command.")
+            st.success("Your Pro subscription is active.")
         else:
             st.warning("You are currently on the Limited 'Free' Tier.")
             if st.button("🚀 UPGRADE TO PRO NOW"):
                 st.session_state.current_page = "💎 Upgrade to Pro"
                 st.rerun()
 
-    # 3. SECURITY NODES
+    # 4. SECURITY NODES
     with st.expander("🔒 Security & Access"):
         st.write("### Change Password")
-        old_p = st.text_input("Current Password", type="password")
-        new_p = st.text_input("New Password", type="password")
-        conf_p = st.text_input("Confirm New Password", type="password")
+        old_p = st.text_input("Current Password", type="password", key="set_old_p")
+        new_p = st.text_input("New Password", type="password", key="set_new_p")
+        conf_p = st.text_input("Confirm New Password", type="password", key="set_conf_p")
         
         if st.button("UPDATE CREDENTIALS"):
             if new_p == conf_p and len(new_p) > 4:
-                # This would ideally call a 'ROLE_UPGRADE' style function 
-                # but with a 'PASSWORD_UPDATE' category for your Google Script
                 st.info("Transmission sent. Security protocols updating...")
             else:
                 st.error("Passwords do not match or are too weak.")
 
-    # 4. INTERFACE PREFERENCES
+    # 5. INTERFACE PREFERENCES
     with st.expander("🎨 Interface Preferences"):
         st.toggle("Enable Neural UI Animations", value=True)
         st.toggle("Show Real-time ROI in Sidebar", value=True)
         st.select_slider("System Font Scaling", options=["Stealth", "Standard", "Explosive"], value="Standard")
 
-    # 5. SYSTEM ACTIONS (The "Nuclear" Option)
+    # 6. SYSTEM ACTIONS
     st.write("")
     st.divider()
     col_a, col_b = st.columns(2)
@@ -1455,6 +1466,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
