@@ -76,7 +76,7 @@ SCRIPT_VAULT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup1
 VAULT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfeDAY3gnWYlpH90EaJirxUc8d4obYUgiX72WJIah7Cya1VNQ/formResponse"
 VAULT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQTrDvNWe810s55puzBodFKvfUbfMV_l-QoQIfbdPxeQknClGGCQT33UQ471NyGTw4aHLrDTw/pub?output=csv"
 FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbz1mLI3YkbjVsA4a8rMgMe_07w_1sS8H-f2Wvz1FtFCU-ZN4zCH7kDUGaDPDaaMbrvaPw/exec"
-NEW_URL = "https://script.google.com/macros/s/AKfycbycLt6DBY237H3ATx1kkQZUxRofR6t1W16kW2s7LNgGAwEFf2BSehNKG4Scl3BTh3EQ/exec"
+NEW_URL = "https://script.google.com/macros/s/AKfycbzr-XvIzEgQJ917HztpRYrIFlJtJBij2dna_cYI3bY4rE9nWt3lynylnAwbasnxTsbp/exec"
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
 
 def typewriter_effect(text):
@@ -354,112 +354,118 @@ if st.sidebar.checkbox("🔍 Debug Node Mapping"):
 # --- GATEKEEPER START ---
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
+if 'otp_sent' not in st.session_state:
+    st.session_state.otp_sent = False
+if 'generated_otp' not in st.session_state:
+    st.session_state.generated_otp = None
 
 if not st.session_state.logged_in:
-    st.markdown("<h1 style='text-align: center; color: #00ff41;'>🛡️ DIRECTOR'S INTELLIGENCE PORTAL</h1>", unsafe_allow_html=True)
+    # 1. High-End Branding Header
+    st.markdown("<h1 style='text-align: center; color: #00ff41; letter-spacing: 5px;'>VOID OS</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #888; font-size: 0.8em;'>INTELLIGENCE ACCESS PROTOCOL v3.0</p>", unsafe_allow_html=True)
     
-    t1, t2 = st.tabs(["🔑 Login", "📝 Register"])
+    t1, t2 = st.tabs(["🔒 SECURE ACCESS", "🛡️ IDENTITY INITIALIZATION"])
     
     with t1:
-        email_in = st.text_input("Email", key="gate_login_email").lower().strip()
-        pw_in = st.text_input("Password", type="password", key="gate_login_pw")
+        # --- LOGIN LOGIC (Standard but Polished) ---
+        email_in = st.text_input("DIRECTOR EMAIL", key="gate_login_email").lower().strip()
+        pw_in = st.text_input("PASSKEY", type="password", key="gate_login_pw")
         
-        if st.button("Access System", use_container_width=True, key="gate_login_btn"):
+        if st.button("INITIATE UPLINK", use_container_width=True, key="gate_login_btn"):
             users = load_user_db()
-            
-            # 1. Admin Bypass
             if email_in == "admin" and pw_in == "1234":
-                st.session_state.logged_in = True
-                st.session_state.user_name = "Master Director"
-                st.session_state.user_role = "admin"
-                st.session_state.user_status = "paid"
+                st.session_state.update({"logged_in": True, "user_name": "Master Director", "user_role": "admin", "user_status": "paid"})
                 st.rerun()
-            
-            # 2. Standard User Validation
             elif not users.empty:
-                # Match Email (Col 3 / Index 2) and Password (Col 5 / Index 4)
-                match = users[(users.iloc[:, 2].astype(str).str.lower() == email_in) & 
-                              (users.iloc[:, 4].astype(str) == pw_in)]
-                
+                # Optimized matching using the sheet structure we defined
+                match = users[(users.iloc[:, 0].astype(str).str.lower() == email_in) & (users.iloc[:, 2].astype(str) == pw_in)]
                 if not match.empty:
-                    st.session_state.logged_in = True
-                    st.session_state.user_name = match.iloc[0, 1]
-                    st.session_state.user_email = email_in
-                    # Status is Column 6 (Index 5)
-                    st.session_state.user_status = str(match.iloc[0, 5]).strip().lower()
+                    st.session_state.update({"logged_in": True, "user_name": match.iloc[0, 1], "user_email": email_in, "user_status": str(match.iloc[0, 4]).strip().lower()})
                     st.rerun()
                 else:
-                    st.error("Access Denied: Credentials Invalid.")
+                    st.error("INTEGRITY BREACH: INVALID CREDENTIALS.")
 
-        st.write("---")
-        # --- SECURE PASSWORD RESET ---
-        with st.expander("Forgot Passkey? (Security Recovery)"):
-            r_email = st.text_input("Registered Email", key="reset_email").lower().strip()
-            # Security Question serves as the second factor of authentication
-            s_ans = st.text_input("Security Answer: What was your first school?", key="reset_security").lower().strip()
-            new_p = st.text_input("New Secure Passkey", type="password", key="reset_new_pw")
-            
-            if st.button("INITIATE OVERRIDE", use_container_width=True, key="reset_exec_btn"):
-                if r_email and s_ans and new_p:
-                    # Payload sends both the answer and the new password
-                    payload = {
-                        "email": r_email,
-                        "category": "SECURE_RESET", 
-                        "answer": s_ans,
-                        "message": new_p
-                    }
-                    try:
-                        response = requests.post(NEW_URL, json=payload, timeout=10)
-                        if "SUCCESS" in response.text:
-                            st.success("✅ IDENTITY VERIFIED: Passkey updated. You may login.")
-                        else:
-                            st.error(f"📡 ACCESS DENIED: {response.text}")
-                    except Exception as e:
-                        st.error(f"🚨 UPLINK CRASHED: {e}")
+        # --- SECURE RESET (FALLBACK LOGIC) ---
+        with st.expander("RECOVERY PROTOCOL (Lost Passkey)"):
+            r_email = st.text_input("REGISTERED EMAIL", key="reset_email").lower().strip()
+            s_ans = st.text_input("SECURITY KEY (DOB / PRESET)", key="reset_security").lower().strip()
+            new_p = st.text_input("NEW PASSKEY", type="password", key="reset_new_pw")
+            if st.button("OVERRIDE SECURITY", use_container_width=True):
+                payload = {"email": r_email, "category": "SECURE_RESET", "answer": s_ans, "message": new_p}
+                try:
+                    response = requests.post(NEW_URL, json=payload, timeout=10)
+                    if "SUCCESS" in response.text: st.success("IDENTITY VERIFIED. PASSKEY UPDATED.")
+                    else: st.error(f"UPLINK DENIED: {response.text}")
+                except Exception as e: st.error(f"SYSTEM CRASH: {e}")
 
     with t2:
-      with st.expander("🛡️ INITIALIZE NEW IDENTITY"):
-        # All inputs are now perfectly aligned under the expander
-        n = st.text_input("Full Name", key="reg_name")
-        e = st.text_input("Email Address", key="reg_email")
-        p = st.text_input("Set Passkey", type="password", key="reg_pass")
-        sa = st.text_input("Security Answer (e.g., Mother's Maiden Name)", key="reg_sa")
-        ni = st.text_input("Niche (Tech, Lifestyle, etc.)", key="reg_niche")
+        # --- ELITE 2-STEP REGISTRATION ---
+        if not st.session_state.otp_sent:
+            st.markdown("### PHASE 1: DATA CAPTURE")
+            c1, c2 = st.columns(2)
+            with c1:
+                n = st.text_input("FULL NAME", key="reg_name", placeholder="Director Name")
+                e = st.text_input("EMAIL", key="reg_email", placeholder="vault@void.os")
+                mob = st.text_input("MOBILE", key="reg_mob", placeholder="+91 XXXX-XXXXXX")
+            with c2:
+                p = st.text_input("PASSKEY", type="password", key="reg_pass")
+                sa = st.text_input("SECURITY KEY (DOB/ANSWER)", key="reg_sa", placeholder="DD/MM/YYYY")
+                ni = st.text_input("NICHE", key="reg_niche", placeholder="AI Strategist")
 
-        if st.button("⚔️ ESTABLISH UPLINK", use_container_width=True):
-            # Checking all fields before transmission
-            if n and e and p and sa and ni:
-                payload = {
-                    "category": "REGISTRATION",
-                    "name": n.strip(),
-                    "email": e.strip().lower(),
-                    "password": p.strip(),
-                    "answer": sa.strip().lower(),
-                    "niche": ni.strip(),
-                    "role": "user",
-                    "status": "free"
-                }
-                
-                with st.spinner("Transmitting to VOID Vault..."):
-                    try:
-                        r = requests.post(NEW_URL, json=payload, timeout=10)
-                        if "SUCCESS" in r.text:
-                            st.success("✅ IDENTITY SECURED.")
-                            st.balloons()
+            st.write("---")
+            channel = st.radio("SELECT UPLINK CHANNEL", ["Email", "WhatsApp"], horizontal=True)
+
+            if st.button("⚔️ GENERATE SECURE OTP", use_container_width=True):
+                if all([n, e, p, sa, ni, mob]):
+                    with st.status("Transmitting Initialization Signal...", expanded=False) as status:
+                        payload = {"category": "SEND_OTP", "email": e.strip().lower(), "channel": channel}
+                        response = requests.post(NEW_URL, json=payload)
+                        if len(response.text) == 6:
+                            st.session_state.generated_otp = response.text
+                            st.session_state.otp_sent = True
+                            status.update(label="Uplink Code Dispatched!", state="complete")
+                            st.rerun()
                         else:
-                            st.error(f"Uplink Refused: {r.text}")
-                    except Exception as ex:
-                        st.error(f"Network Failure: {ex}")
-            else:
-                st.warning("Director, all tactical identification fields must be filled.")
+                            status.update(label="Transmission Failed", state="error")
+                            st.error(f"Gateway Error: {response.text}")
+                else:
+                    st.warning("DIRECTOR: ALL IDENTITY FIELDS ARE MANDATORY.")
         
-
-
-
-
-
-
-
+        else:
+            # --- PHASE 2: OTP VERIFICATION ---
+            st.markdown(f"### PHASE 2: VERIFY UPLINK")
+            st.info(f"A 6-digit code has been dispatched to your **{st.session_state.get('channel', 'Email')}**.")
+            
+            _, mid, _ = st.columns([1, 2, 1])
+            with mid:
+                user_otp = st.text_input("ENTER CODE", placeholder="000000", label_visibility="collapsed")
+                
+                if st.button("🔓 FINALIZE INITIALIZATION", use_container_width=True):
+                    if user_otp == st.session_state.generated_otp:
+                        final_payload = {
+                            "category": "REGISTRATION",
+                            "name": st.session_state.reg_name,
+                            "email": st.session_state.reg_email,
+                            "password": st.session_state.reg_pass,
+                            "mobile": st.session_state.reg_mob,
+                            "answer": st.session_state.reg_sa,
+                            "niche": st.session_state.reg_niche,
+                            "role": "user",
+                            "status": "free"
+                        }
+                        r = requests.post(NEW_URL, json=final_payload)
+                        if "SUCCESS" in r.text:
+                            st.success("✅ IDENTITY SECURED. WELCOME TO THE VOID.")
+                            st.balloons()
+                            st.session_state.otp_sent = False # Reset for future
+                        else:
+                            st.error(f"VAULT REJECTION: {r.text}")
+                    else:
+                        st.error("INTEGRITY BREACH: INVALID CODE.")
+            
+            if st.button("Restart Initialization", type="secondary"):
+                st.session_state.otp_sent = False
+                st.rerun()
         
 
 
@@ -1437,6 +1443,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
