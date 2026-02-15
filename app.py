@@ -418,31 +418,43 @@ if not st.session_state.logged_in:
                         st.error(f"🚨 UPLINK CRASHED: {e}")
 
     with t2:
-        with st.form("secure_reg", clear_on_submit=True):
-            st.write("### Create New Node")
-            Name = st.text_input("Full Name")
-            Email = st.text_input("Email Address")
-            Niche = st.text_input("Target Niche")
-            Create_password= st.text_input("Set Passkey", type="password")
-            # This answer must be stored in your sheet to allow resets later
-            Security = st.text_input("Security Question: What was your first school? (Required for recovery)")
-            
-            if st.form_submit_button("Submit Registration"):
-                if Name and Email and Niche and Create_password and Security:
-                    # Note: Ensure your Google Form has a field for the security answer!
-                    # You will need to add the correct 'entry.ID' for the security answer below
-                    reg_data = {
-                        "entry.1191019325": Name, 
-                        "entry.1480968897": Email, 
-                        "entry.860899570": Niche, 
-                        "entry.465373209": Create_password,
-                        "entry.107117169": Security # <--- UPDATE THIS ID
-                    }
-                    requests.post(FORM_POST_URL, data=reg_data)
-                    st.success("Registration Sent. Awaiting Node Activation.")
-                else:
-                    st.warning("All fields, including Security Answer, are required.")
+        # --- CLEAN REGISTRATION LOGIC ---
+with st.expander("🛡️ INITIALIZE NEW IDENTITY"):
+    # Define variables with unique keys to avoid collisions
+    n = st.text_input("Full Name", key="reg_name")
+    e = st.text_input("Email Address", key="reg_email")
+    p = st.text_input("Set Passkey", type="password", key="reg_pass")
+    sa = st.text_input("Security Answer (e.g., Mother's Maiden Name)", key="reg_sa")
+    ni = st.text_input("Niche (Tech, Lifestyle, etc.)", key="reg_niche")
 
+    if st.button("⚔️ ESTABLISH UPLINK", use_container_width=True):
+        # The 'if n and e and p and sa' check now has variables to look at
+        if n and e and p and sa and ni:
+            payload = {
+                "category": "REGISTRATION",
+                "name": n.strip(),
+                "email": e.strip().lower(),
+                "password": p.strip(),
+                "answer": sa.strip().lower(),
+                "niche": ni.strip(),
+                "role": "user",
+                "status": "free"
+            }
+            
+            with st.spinner("Transmitting to VOID Vault..."):
+                try:
+                    r = requests.post(NEW_URL, json=payload, timeout=10)
+                    if "SUCCESS" in r.text:
+                        st.success("✅ IDENTITY SECURED.")
+                        st.balloons()
+                    else:
+                        st.error(f"Uplink Refused: {r.text}")
+                except Exception as ex:
+                    st.error(f"Network Failure: {ex}")
+        else:
+            st.warning("Director, all tactical identification fields must be filled.")
+
+        
     # 🛑 THE SECURITY WALL: Prevents internal app from loading if not logged in
     st.stop()
 
@@ -1417,6 +1429,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
