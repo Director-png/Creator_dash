@@ -1437,113 +1437,73 @@ elif page == "⚖️ Legal Archive":
         st.write("- Is there a limit on how many 'Revisions' the brand can ask for?")
 
 
-import streamlit as st
-import requests
-
-# --- MODULE: UPGRADE TO PRO (ELITE TERMINAL) ---
-def render_upgrade_module():
-    st.markdown("<h1 style='color: #00ff41;'>💎 VOID OS // LICENSE UPLINK</h1>", unsafe_allow_html=True)
-    
-    # 1. THE VALUE PROPOSITION
-    with st.container(border=True):
-        st.markdown("### ⚡ NEURAL FORGE: PRO ACCESS")
-        c1, c2 = st.columns(2)
-        with c1:
-            st.write("🔓 **Unlimited Neural Pitching**")
-            st.write("🔓 **Full Legal Archive Access**")
-        with c2:
-            st.write("🔓 **Deep Lead Scanners**")
-            st.write("🔓 **Priority Support Node**")
+# --- MODULE 10: 💎 VOID PRO LICENSE UPLINK ---
+    elif page == "💎 Upgrade to Pro":
+        st.markdown("<h1 style='color: #00ff41;'>💎 VOID OS // LICENSE UPLINK</h1>", unsafe_allow_html=True)
         
-        st.markdown("""
-        ---
-        **Price:** ~~₹1,499~~ | <span style='color: #00ff41; font-size: 20px;'>**₹499 (Limited Launch Offer)**</span>
-        """, unsafe_allow_html=True)
+        # 1. VALUE PROPOSITION
+        with st.container(border=True):
+            st.markdown("### ⚡ NEURAL FORGE: PRO ACCESS")
+            c1, c2 = st.columns(2)
+            with c1:
+                st.write("🔓 **Unlimited Neural Pitching**")
+                st.write("🔓 **Full Legal Archive Access**")
+            with c2:
+                st.write("🔓 **Deep Lead Scanners**")
+                st.write("🔓 **Priority Support Node**")
+            st.markdown("---")
+            st.markdown("**Price:** ~~₹1,499~~ | <span style='color: #00ff41; font-size: 20px;'>**₹499 (Launch Offer)**</span>", unsafe_allow_html=True)
 
-    # 2. THE LEGAL GATE (Compliance for KYC)
-    st.subheader("⚖️ Protocol Agreement")
-    with st.expander("Review Terms & Refund Policy"):
-        st.write("""
-            - **Non-Refundable:** Digital licenses grant instant asset access.
-            - **Manual Sync:** UPI verification is performed by a human Director (1-2 hours).
-            - **Email Match:** Ensure your registered email matches your payment sync.
-        """)    
-    
-    agreed = st.checkbox("I verify the Terms of VOID OS", key="force_agree_check")
-    st.divider()
-
-    # 3. RENDER LOGIC
-    if agreed:
-        st.markdown("### 🛰️ SELECT PAYMENT GATEWAY")
-        col_gate1, col_gate2 = st.columns(2)
-
-        # GATEWAY A: THE ACTIVE UPI UPLINK
-        with col_gate1:
-            with st.container(border=True):
-                st.markdown("#### 🇮🇳 NEURAL UPI")
-                st.caption("Direct Bank Transfer")
-                
-                vpa_id = "anuj05758@okicici" 
-                # Pre-filled amount (499) and Transaction Note
-                upi_url = f"upi://pay?pa={vpa_id}&pn=VOID_OS&am=499&cu=INR&tn=VOID_OS_PRO_LICENSE"
-                qr_api = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={upi_url}"
-                
-                st.image(qr_api, use_container_width=True)
-                st.link_button("📲 OPEN UPI APP", upi_url, use_container_width=True)
-                st.caption("Works with GPay, PhonePe, Paytm, & BHIM")
-
-        # GATEWAY B: THE LOCKED RAZORPAY BRIDGE
-        with col_gate2:
-            with st.container(border=True):
-                st.markdown("#### 💳 CREDIT/DEBIT CARD")
-                st.caption("Secured by Razorpay")
-                st.button("🔒 ENCRYPTED", disabled=True, use_container_width=True)
-                st.warning("OFFLINE: Available in V2.0 Core Update.")
-                st.caption("Status: Awaiting KYC Calibration.")
-
+        # 2. LEGAL GATE
+        st.subheader("⚖️ Protocol Agreement")
+        with st.expander("Review Terms & Refund Policy"):
+            st.write("- **Non-Refundable:** Digital licenses grant instant asset access.")
+            st.write("- **Manual Sync:** UPI verification takes 1-2 hours.")
+            st.write("- **Email Match:** Ensure registered email matches payment sync.")
+        
+        agreed = st.checkbox("I verify the Terms of VOID OS", key="force_agree_check")
         st.divider()
 
-        # 4. DATA SYNC (The Sheet Integration)
-        st.markdown("### 🧬 MANUAL DATA SYNC")
-        st.write("Submit your transaction details below to bridge your account to PRO.")
-        
-        with st.container(border=True):
-            sync_email = st.text_input("REGISTERED EMAIL", placeholder="e.g., director@voidos.com")
-            utr_num = st.text_input("12-DIGIT UTR / TRANSACTION ID", placeholder="e.g., 402911223344")
-            
-            if st.button("SYNC WITH VOID OS", use_container_width=True):
-                if "@" in sync_email and len(utr_num) >= 10:
-                    # --- 📡 UPLINK TO YOUR GOOGLE SHEET ---
-                    # Replace with your actual Payment Verification Form URL
-                    pay_form_url = "https://docs.google.com/forms/d/e/YOUR_PAYMENT_FORM_ID/formResponse"
-                    
-                    payload = {
-                        "entry.12345": sync_email,     # ID for Email Question
-                        "entry.67890": utr_num,       # ID for UTR Question
-                        "entry.11223": "PRO_499",     # ID for Plan Type
-                        "entry.44556": st.session_state.get('user_name', 'Unknown') # ID for User Name
-                    }
-                    
-                    try:
-                        requests.post(pay_form_url, data=payload)
-                        st.success("🛰️ UPLINK SUCCESSFUL: Admin notified. Your Pro status is being calibrated.")
-                        st.balloons()
-                    except Exception as e:
-                        st.error(f"Uplink Error: {e}")
-                else:
-                    st.error("Protocol Error: Please provide a valid Email and UTR.")
+        if agreed:
+            st.markdown("### 🛰️ SELECT PAYMENT GATEWAY")
+            col_gate1, col_gate2 = st.columns(2)
 
-    # 5. SUPPORT FOOTER
-    st.divider()
-    st.markdown("### 🆘 SUPPORT & INTELLIGENCE")
-    sup_col1, sup_col2 = st.columns(2)
-    with sup_col1:
-        st.link_button("📧 EMAIL SUPPORT", "mailto:anuj05758@gmail.com", use_container_width=True)
-    with sup_col2:
-        if st.button("🚩 REPORT PAYMENT ISSUE", use_container_width=True):
-            st.info("Contact the Director on the email provided for instant resolution.")
+            with col_gate1:
+                with st.container(border=True):
+                    st.markdown("#### 🇮🇳 NEURAL UPI")
+                    vpa_id = "anuj05758@okicici" 
+                    upi_url = f"upi://pay?pa={vpa_id}&pn=VOID_OS&am=499&cu=INR&tn=VOID_OS_PRO"
+                    qr_api = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={upi_url}"
+                    st.image(qr_api, use_container_width=True)
+                    st.link_button("📲 OPEN UPI APP", upi_url, use_container_width=True)
 
+            with col_gate2:
+                with st.container(border=True):
+                    st.markdown("#### 💳 CARD / RAZORPAY")
+                    st.button("🔒 ENCRYPTED", disabled=True, use_container_width=True)
+                    st.warning("OFFLINE: Available in V2.0 Update.")
 
+            st.divider()
+
+            # 3. MANUAL SYNC FORM
+            st.markdown("### 🧬 MANUAL DATA SYNC")
+            with st.container(border=True):
+                sync_email = st.text_input("REGISTERED EMAIL", placeholder="e.g., director@voidos.com")
+                utr_num = st.text_input("12-DIGIT UTR / TRANSACTION ID", placeholder="e.g., 4029XXXXXXXX")
+                
+                if st.button("SYNC WITH VOID OS", use_container_width=True):
+                    if "@" in sync_email and len(utr_num) >= 10:
+                        # 📡 UPLINK LOGIC
+                        pay_form_url = "https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse"
+                        payload = {"entry.123": sync_email, "entry.456": utr_num} # Update with IDs
+                        try:
+                            requests.post(pay_form_url, data=payload)
+                            st.success("🛰️ UPLINK SUCCESSFUL: Verification in progress.")
+                            st.balloons()
+                        except:
+                            st.error("Uplink Failure. Contact Support.")
+                    else:
+                        st.error("Invalid Input Details.")
 
 
 elif page == "⚙️ Settings":
@@ -1654,6 +1614,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
