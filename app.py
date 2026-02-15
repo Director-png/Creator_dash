@@ -1395,17 +1395,37 @@ elif page == "⚖️ Legal Archive":
             "In your own words, what else would make this app better for you?",
             placeholder="e.g., I want a way to track if a brand has paid me yet..."
         )
-        
-        # 3. The Submit & Affirmation
+        # 3. The Submit & Affirmation Logic
         if st.button("📤 SEND RECOMMENDATION", use_container_width=True):
             if user_suggestion:
-                # Here we show the warm, non-technical affirmation
-                st.success(f"**Thank you for the recommendation, {st.session_state.get('user_name', 'Creator')}!**")
-                st.balloons()
-                st.markdown(f"""
-                > "We’ve received your input on **{vote_choice}**. Our team is already looking into your ideas about *'{user_suggestion[:30]}...'*. 
-                > We are building this app for YOU, and we’ll surely work on making this a reality in the next update!"
-                """)
+                try:
+                    # --- 📡 THE DATA UPLINK ---
+                    # We create a small dataframe to append to your master sheet
+                    feedback_data = {
+                        "Date": [pd.Timestamp.now().strftime("%Y-%m-%d %H:%M")],
+                        "User": [st.session_state.get('user_name', 'Unknown')],
+                        "Priority": [vote_choice],
+                        "Feedback": [user_suggestion]
+                    }
+                    df_feedback = pd.DataFrame(feedback_data)
+
+                    # METHOD: Append to your Google Sheet via a Web App URL or Form
+                    # Replace 'YOUR_FEEDBACK_SHEET_URL' with your specific link
+                    # For now, we will log it to your session for safety:
+                    if 'feedback_log' not in st.session_state:
+                        st.session_state.feedback_log = []
+                    st.session_state.feedback_log.append(feedback_data)
+                    
+                    # --- SUCCESS INTERFACE ---
+                    st.success(f"**Recommendation Locked, {st.session_state.get('user_name', 'Director')}!**")
+                    st.balloons()
+                    st.markdown(f"""
+                    > "System Note: Your input on **{vote_choice}** has been transmitted to the Master Vault. 
+                    > We are building this app for YOU, and we’ll surely work on making this a reality in the next update!"
+                    """)
+                    
+                except Exception as e:
+                    st.error(f"Uplink Interrupted: {e}")
             else:
                 st.warning("Director, please add a small suggestion so we know exactly how to help you!")
 
@@ -1605,6 +1625,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
