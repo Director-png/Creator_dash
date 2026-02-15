@@ -650,38 +650,40 @@ elif page == "📡 My Growth Hub":
     user_niche = st.session_state.get('user_niche', 'Creator')
     st.caption(f"CURRENT SECTOR: **{user_niche.upper()}** | Analyzing via Triple-Core Failover.")
     
-def run_handle_analysis(handles_dict):
-    keys = [
-        st.secrets.get("GEMINI_API_KEY"),
-        st.secrets.get("GEMINI_API_KEY_BACKUP"),
-        st.secrets.get("GEMINI_API_KEY_3")
-    ]
-    
-    intel_data = ", ".join([f"{k}: {v}" for k, v in handles_dict.items() if v])
+    # 🧬 INTERNAL FUNCTION (Nested within the page for logic alignment)
+    def run_handle_analysis(handles_dict):
+        import time # Ensure timing for cooldowns
+        keys = [
+            st.secrets.get("GEMINI_API_KEY"),
+            st.secrets.get("GEMINI_API_KEY_BACKUP"),
+            st.secrets.get("GEMINI_API_KEY_3")
+        ]
+        
+        intel_data = ", ".join([f"{k}: {v}" for k, v in handles_dict.items() if v])
 
-    for i, k in enumerate(keys):
-        if not k: continue
-        try:
-            from google import genai
-            # USE 2.0 FLASH - It is the 2026 standard for high-stability
-            temp_client = genai.Client(api_key=k.strip())
-            core_name = ["Alpha", "Beta", "Gamma"][i]
-            
-            with st.spinner(f"🌑 CORE {core_name} INITIATING UPLINK..."):
-                prompt = f"Strategize growth for these handles: {intel_data}. Niche: {st.session_state.get('user_niche', 'Creator')}. Style: Surgical/Cyberpunk."
-                response = temp_client.models.generate_content(
-                    model="gemini-2.0-flash", 
-                    contents=[prompt]
-                )
-                return response.text, core_name
-        except Exception as e:
-            if "429" in str(e):
-                st.warning(f"⚠️ Core {['Alpha', 'Beta', 'Gamma'][i]} Busy. Stabilizing for 5s...")
-                time.sleep(5)  # The "Cooling" period
-                continue
-            else:
-                st.error(f"Uplink Error: {e}")
-    return None, None
+        for i, k in enumerate(keys):
+            if not k: continue
+            try:
+                from google import genai
+                # 2026 STANDARD: Gemini 2.0 Flash
+                temp_client = genai.Client(api_key=k.strip())
+                core_name = ["Alpha", "Beta", "Gamma"][i]
+                
+                with st.spinner(f"🌑 CORE {core_name} INITIATING UPLINK..."):
+                    prompt = f"Strategize growth for these handles: {intel_data}. Niche: {user_niche}. Style: Surgical/Cyberpunk."
+                    response = temp_client.models.generate_content(
+                        model="gemini-2.0-flash", 
+                        contents=[prompt]
+                    )
+                    return response.text, core_name
+            except Exception as e:
+                if "429" in str(e):
+                    st.warning(f"⚠️ Core {['Alpha', 'Beta', 'Gamma'][i]} Busy. Stabilizing for 5s...")
+                    time.sleep(5)  # The cooldown period
+                    continue
+                else:
+                    st.error(f"Uplink Error: {e}")
+        return None, None
 
     # --- UI LAYOUT: INTEL INPUT ---
     with st.container(border=True):
@@ -717,13 +719,10 @@ def run_handle_analysis(handles_dict):
         st.divider()
         st.markdown("### 📊 STRATEGIC FORECAST")
         
-        # Display the AI Response in a clean card
         with st.container(border=True):
             st.markdown(st.session_state.last_intel)
         
-        # Visualization: Growth Trajectory
         st.markdown("#### ⚡ PROJECTED VELOCITY")
-        # Creating a dummy growth chart based on "Neural Confidence"
         chart_data = pd.DataFrame({
             'Week': ['W1', 'W2', 'W3', 'W4'],
             'Growth': [10, 25, 45, 80]
@@ -1510,6 +1509,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
