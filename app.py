@@ -546,7 +546,7 @@ with st.sidebar:
     elif user_status == 'paid':
         options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "📜 History", "⚙️ Settings"]
     else:
-        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "Assigned Scripts", "⚖️ Legal Archive", "💎 Upgrade to Pro", "⚙️ Settings"]
+        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "💎 Assigned Scripts", "⚖️ Legal Archive", "💎 Upgrade to Pro", "⚙️ Settings"]
 
     # 3. Handle Page Indexing
     try:
@@ -1537,6 +1537,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
