@@ -288,24 +288,6 @@ user_status_raw = st.session_state.get('user_status', 'free')
 is_admin = str(user_role_raw).lower() == 'admin' or st.session_state.get('admin_verified', False)
 is_paid = "paid" in str(user_status_raw).lower() or "pro" in str(user_status_raw).lower()
 
-# --- 🎨 VOID OS STYLING ---
-st.markdown("""
-    <style>
-    .main { background-color: #050505; color: #e0e0e0; }
-    .stButton>button {
-        background: linear-gradient(45deg, #00ff41, #00d4ff);
-        color: black; font-weight: bold; border: none; border-radius: 5px;
-        transition: 0.3s;
-    }
-    .stButton>button:hover {
-        box-shadow: 0px 0px 15px #00ff41;
-        transform: scale(1.02);
-    }
-    .stMetric { background: #111111; padding: 15px; border-radius: 10px; border-left: 5px solid #00ff41; }
-    div[data-testid="stExpander"] { background: #111111; border: 1px solid #333; }
-    </style>
-    """, unsafe_allow_html=True)
-
 
 # --- 2. SPLASH SCREEN ---
 if 'first_load' not in st.session_state:
@@ -319,23 +301,80 @@ if 'first_load' not in st.session_state:
     st.session_state.first_load = True
     st.rerun()
 
-# --- 3. GLOBAL STYLES ---
-st.markdown("""<style>
-    [data-testid="stSidebar"] { background-image: linear-gradient(180deg, #000000 0%, #080808 100%); border-right: 1px solid #00d4ff33; }
-    .stButton>button { border: 1px solid #00d4ff; background-color: transparent; color: #00d4ff; letter-spacing: 2px; font-family: monospace; transition: 0.3s; }
-    .stButton>button:hover { background-color: #00d4ff; color: black; box-shadow: 0 0 20px #00d4ff; }
-    .stTextInput>div>div>input { background-color: #050505; color: #00d4ff; border: 1px solid #111; }
-    .stTextArea>div>div>textarea { background-color: #050505; color: #00d4ff; border: 1px solid #111; }
-    .stSelectbox>div>div { background-color: #050505; color: #00d4ff; }
-    .stExpander { background-color: #050505; border: 1px solid #00d4ff22 !important; border-radius: 5px; }
-    h1, h2, h3 { font-family: 'Courier New', Courier, monospace; letter-spacing: -1px; }
-    .stMetric { border: 1px solid #111; padding: 15px; border-radius: 10px; background: #080808; }
-    </style>""", unsafe_allow_html=True)
+# --- 🎨 VOID OS NEURAL VISUAL IDENTITY ---
+st.markdown("""
+    <style>
+    /* Global Background & Text */
+    .main { background-color: #050505; color: #e0e0e0; }
+    
+    /* Sidebar Styling */
+    [data-testid="stSidebar"] { 
+        background-image: linear-gradient(180deg, #000000 0%, #080808 100%); 
+        border-right: 1px solid #00d4ff33; 
+    }
 
-import streamlit as st
-import requests
-import pandas as pd
-import time
+    /* Cyan Neural Glow for Titles */
+    h1, h2, h3 { 
+        font-family: 'Courier New', Courier, monospace; 
+        letter-spacing: 2px; 
+        color: #00d4ff !important;
+        text-shadow: 0 0 10px #00d4ff55;
+    }
+
+    /* Elite Button Design */
+    .stButton>button {
+        background: transparent;
+        color: #00d4ff; 
+        font-weight: bold; 
+        border: 1px solid #00d4ff; 
+        border-radius: 5px;
+        letter-spacing: 2px;
+        font-family: monospace;
+        transition: 0.4s all ease-in-out;
+        width: 100%;
+    }
+    
+    .stButton>button:hover {
+        background: #00d4ff;
+        color: black;
+        box-shadow: 0px 0px 20px #00d4ff;
+        transform: translateY(-2px);
+    }
+
+    /* Input Field Styling */
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea { 
+        background-color: #080808; 
+        color: #00d4ff; 
+        border: 1px solid #00d4ff33 !important; 
+    }
+    
+    .stSelectbox>div>div { 
+        background-color: #080808; 
+        color: #00d4ff; 
+    }
+
+    /* Metrics & Cards */
+    .stMetric { 
+        background: #0a0a0a; 
+        padding: 15px; 
+        border-radius: 10px; 
+        border-left: 5px solid #00d4ff;
+        box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+    }
+
+    /* Expander Styling */
+    div[data-testid="stExpander"] { 
+        background: #0a0a0a; 
+        border: 1px solid #00d4ff22 !important; 
+        border-radius: 8px;
+    }
+
+    /* Custom Scrollbar for the Elite look */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: #00d4ff; border-radius: 10px; }
+    </style>
+    """, unsafe_allow_html=True)
 
 
 
@@ -361,7 +400,7 @@ if 'generated_otp' not in st.session_state:
 
 if not st.session_state.logged_in:
     # 1. High-End Branding Header
-    st.markdown("<h1 style='text-align: center; color: #00ff41; letter-spacing: 5px;'>VOID OS</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #00d4ff; letter-spacing: 5px;'>VOID OS</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #888; font-size: 0.8em;'>INTELLIGENCE ACCESS PROTOCOL v3.0</p>", unsafe_allow_html=True)
     
     t1, t2 = st.tabs(["🔑 LOGIN", "🛡️ IDENTITY INITIALIZATION"])
@@ -1466,6 +1505,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
