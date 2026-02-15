@@ -630,41 +630,115 @@ elif page == "🏠 Dashboard":
         core_display = active_core if 'active_core' in globals() else "STANDBY"
         st.code(f"AI Core: {core_display}\nHandshake: STABLE\nLaunch: T-Minus 48h")
 
-# --- GROWTH TRACKER (Basic) ---
-with st.container(border=True):
-    st.subheader("📈 GROWTH DATA INPUT")
-    col1, col2 = st.columns(2)
-    with col1:
-        start_count = st.number_input("Starting Followers", min_value=0, value=1000)
-        days_passed = st.slider("Days since tracking started", 1, 30, 7)
-    with col2:
-        current_count = st.number_input("Current Followers", min_value=0, value=1200)
+elif page == "📡 My Growth Hub":
+    st.markdown("<h1 style='color: #00d4ff;'>📡 SOCIAL INTEL MATRIX</h1>", unsafe_allow_html=True)
+    
+    # --- 💎 PRO-TIER UPGRADE TEASER ---
+    with st.container(border=True):
+        col_t1, col_t2 = st.columns([3, 1])
+        with col_t1:
+            st.markdown("### 🧬 Neural Scanner (OCR)")
+            st.caption("Auto-sync analytics via screenshot. Currently in Alpha.")
+        with col_t2:
+            if st.button("🚀 UNLOCK PRO", use_container_width=True):
+                st.toast("Redirecting to Razorpay Gateway...", icon="💳")
         
-    # Calculate Growth Rate (Standard Formula)
-    if current_count > start_count:
-        growth_rate = ((current_count - start_count) / start_count) / days_passed
-        projection_30d = current_count * (1 + (growth_rate * 30))
-        
-        st.metric("DAILY VELOCITY", f"+{round(growth_rate*100, 2)}%")
-        st.success(f"🔮 30-Day Forecast: **{int(projection_30d):,} Followers**")
+        # Disabled scanner to prevent 429 errors during testing
+        st.button("📷 UPLOAD SCREENSHOT (PRO ONLY)", disabled=True, use_container_width=True)
 
-# --- TASK MANAGER ---
-st.divider()
-st.subheader("🗓️ CONTENT CALENDAR & TASK FORGE")
+    # --- 📈 GROWTH TRACKER (Manual Intelligence) ---
+    st.divider()
+    with st.container(border=True):
+        st.subheader("📈 GROWTH DATA INPUT")
+        col1, col2 = st.columns(2)
+        with col1:
+            start_count = st.number_input("Starting Followers", min_value=0, value=1000, help="Count when you started tracking")
+            days_passed = st.slider("Days since tracking started", 1, 60, 7)
+        with col2:
+            current_count = st.number_input("Current Followers", min_value=0, value=1200)
+            
+        # --- MATHEMATICAL FORECASTING LOGIC ---
+        if current_count >= start_count and days_passed > 0:
+            growth_diff = current_count - start_count
+            daily_avg = growth_diff / days_passed
+            growth_rate_pct = (growth_diff / start_count) / days_passed if start_count > 0 else 0
+            projection_30d = current_count + (daily_avg * 30)
+            
+            # Metric Row
+            m1, m2, m3 = st.columns(3)
+            m1.metric("DAILY VELOCITY", f"+{int(daily_avg)}/day")
+            m2.metric("GROWTH RATE", f"{round(growth_rate_pct*100, 2)}%")
+            m3.metric("30D FORECAST", f"{int(projection_30d):,}")
+            
+            # Dynamic Feedback
+            if growth_rate_pct > 0.05:
+                st.success(f"🔥 Viral Momentum Detected! Projection: **{int(projection_30d):,}**")
+            elif growth_rate_pct > 0:
+                st.info(f"🔮 Linear Growth Confirmed. Projection: **{int(projection_30d):,}**")
+        else:
+            st.warning("Director: Current count must be higher than starting count for projections.")
 
-if 'tasks' not in st.session_state:
-    st.session_state.tasks = pd.DataFrame(columns=["Task", "Platform", "Status", "Deadline"])
+    # --- 🗓️ TASK FORGE (Notion-Style Manager) ---
+    st.divider()
+    st.subheader("🗓️ CONTENT CALENDAR & TASK FORGE")
 
-with st.expander("➕ ADD NEW CONTENT TASK"):
-    t_name = st.text_input("Task Description (e.g., 'Record AI Video')")
-    t_plat = st.selectbox("Node", ["YouTube", "Instagram", "X", "LinkedIn"])
-    t_date = st.date_input("Deadline")
-    if st.button("SYNC TO FORGE"):
-        new_row = pd.DataFrame([[t_name, t_plat, "⏳ Pending", t_date]], columns=st.session_state.tasks.columns)
-        st.session_state.tasks = pd.concat([st.session_state.tasks, new_row], ignore_index=True)
+    # Initialize task data in session state so it doesn't vanish on refresh
+    if 'tasks' not in st.session_state:
+        st.session_state.tasks = pd.DataFrame(
+            columns=["Task", "Node", "Status", "Deadline"]
+        )
 
-# Display as an interactive Notion-like table
-st.data_editor(st.session_state.tasks, use_container_width=True, num_rows="dynamic")
+    # Input Form
+    with st.expander("➕ FORGE NEW CONTENT TASK", expanded=False):
+        with st.form("task_form", clear_on_submit=True):
+            t_name = st.text_input("Task Description", placeholder="e.g. Record Cinematic B-Roll")
+            t_plat = st.selectbox("Node", ["YouTube", "Instagram", "X", "LinkedIn", "TikTok"])
+            t_date = st.date_input("Deadline")
+            submit_task = st.form_submit_button("SYNC TO FORGE")
+            
+            if submit_task and t_name:
+                new_task = pd.DataFrame([{
+                    "Task": t_name, 
+                    "Node": t_plat, 
+                    "Status": "⏳ Pending", 
+                    "Deadline": t_date.strftime("%Y-%m-%d")
+                }])
+                st.session_state.tasks = pd.concat([st.session_state.tasks, new_task], ignore_index=True)
+                st.success("Task Synchronized.")
+
+    # Interactive Table (The heart of the Notion-style view)
+    if not st.session_state.tasks.empty:
+        # User can edit status or task names directly in the table
+        edited_df = st.data_editor(
+            st.session_state.tasks,
+            use_container_width=True,
+            num_rows="dynamic", # Allows users to delete/add rows manually
+            column_config={
+                "Status": st.column_config.SelectboxColumn(
+                    "Status",
+                    options=["⏳ Pending", "🎬 Filming", "✂️ Editing", "✅ Uploaded"],
+                    required=True,
+                ),
+                "Node": st.column_config.SelectboxColumn(
+                    "Node",
+                    options=["YouTube", "Instagram", "X", "LinkedIn", "TikTok"],
+                    required=True,
+                )
+            }
+        )
+        # Save changes back to session state
+        st.session_state.tasks = edited_df
+    else:
+        st.caption("No tasks currently forged in the matrix.")
+
+    # --- 🌑 DIRECTOR'S ANALYTICS IDEA: PROGRESS BAR ---
+    if not st.session_state.tasks.empty:
+        done = len(st.session_state.tasks[st.session_state.tasks['Status'] == "✅ Uploaded"])
+        total = len(st.session_state.tasks)
+        progress = done / total if total > 0 else 0
+        st.write(f"**Total Campaign Progress: {int(progress*100)}%**")
+        st.progress(progress)
+
 
 # --- MODULE 10: CLIENT ASSIGNED SCRIPTS ---
 elif page == "💎 Assigned Scripts":
@@ -1441,6 +1515,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
