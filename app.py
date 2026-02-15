@@ -417,8 +417,8 @@ if not st.session_state.logged_in:
                     except Exception as e:
                         st.error(f"🚨 UPLINK CRASHED: {e}")
 
-   with t2:
-    with st.expander("🛡️ INITIALIZE NEW IDENTITY"):
+    with t2:
+      with st.expander("🛡️ INITIALIZE NEW IDENTITY"):
         # All inputs are now perfectly aligned under the expander
         n = st.text_input("Full Name", key="reg_name")
         e = st.text_input("Email Address", key="reg_email")
@@ -1437,6 +1437,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
