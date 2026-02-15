@@ -348,7 +348,7 @@ if st.sidebar.checkbox("🔍 Debug Node Mapping"):
     else:
         st.error("Sheet is empty or URL is invalid.")
 # --- CONFIGURATION (Ensure these are defined) ---
-# NEW_URL = "https://script.google.com/macros/s/AKfycbwptoGlGh8xNwVVwf7porQnc-NrW67hrVRpugQpsXxw76X4zsO4qhdk9LH5otqcl4LH/exec"
+# NEW_URL = "https://script.google.com/macros/s/AKfycbw8HjjiXJe53CVd4_qU6c4RIjfkMEBJxXZUBVwJdGJCiytgGBgKjMSfGc2tPeckNRih/exec"
 # FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
 
 # --- GATEKEEPER START ---
@@ -364,7 +364,7 @@ if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align: center; color: #00ff41; letter-spacing: 5px;'>VOID OS</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #888; font-size: 0.8em;'>INTELLIGENCE ACCESS PROTOCOL v3.0</p>", unsafe_allow_html=True)
     
-    t1, t2 = st.tabs(["🔒 SECURE ACCESS", "🛡️ IDENTITY INITIALIZATION"])
+    t1, t2 = st.tabs(["🔑 LOGIN", "🛡️ IDENTITY INITIALIZATION"])
     
     with t1:
         # --- LOGIN LOGIC (Standard but Polished) ---
@@ -416,33 +416,35 @@ if not st.session_state.logged_in:
             channel = st.radio("SELECT UPLINK CHANNEL", ["Email", "WhatsApp"], horizontal=True)
 
             if st.button("⚔️ GENERATE SECURE OTP", use_container_width=True):
-    if n and e and mob and sa and ni and p:
-        with st.status("Transmitting Initialization Signal...", expanded=True) as status:
-            payload = {
-                "category": "SEND_OTP", 
-                "email": e.strip().lower(), 
-                "channel": channel
-            }
-            try:
-                # We added verify=False and a longer timeout to force a connection
-                response = requests.post(NEW_URL, json=payload, timeout=15)
-                
-                # DEBUG: This will show us EXACTLY what Google sent back
-                st.write(f"DEBUG: Status Code: {response.status_code}")
-                st.write(f"DEBUG: Response Text: {response.text}")
+                if n and e and mob and sa and ni and p:
+                    with st.status("Transmitting Initialization Signal...", expanded=True) as status:
+                        payload = {
+                            "category": "SEND_OTP", 
+                            "email": e.strip().lower(), 
+                            "channel": channel
+                        }
+                        try:
+                            # We added verify=False and a longer timeout to force a connection
+                            response = requests.post(NEW_URL, json=payload, timeout=15)
+                            
+                            # DEBUG: This will show us EXACTLY what Google sent back
+                            st.write(f"DEBUG: Status Code: {response.status_code}")
+                            st.write(f"DEBUG: Response Text: {response.text}")
 
-                if response.status_code == 200 and len(response.text.strip()) == 6:
-                    st.session_state.generated_otp = response.text.strip()
-                    st.session_state.otp_sent = True
-                    status.update(label="Uplink Code Dispatched!", state="complete")
-                    st.rerun()
+                            if response.status_code == 200 and len(response.text.strip()) == 6:
+                                st.session_state.generated_otp = response.text.strip()
+                                st.session_state.otp_sent = True
+                                status.update(label="Uplink Code Dispatched!", state="complete")
+                                st.rerun()
+                            else:
+                                status.update(label="Gateway Error", state="error")
+                                st.error(f"Transmission Failed. Response: {response.text}")
+                        
+                        except Exception as ex:
+                            status.update(label="Critical Failure", state="error")
+                            st.error(f"Connection Blocked: {ex}")
                 else:
-                    status.update(label="Gateway Error", state="error")
-                    st.error(f"Transmission Failed. Response: {response.text}")
-            
-            except Exception as ex:
-                status.update(label="Critical Failure", state="error")
-                st.error(f"Connection Blocked: {ex}")
+                    st.warning("DIRECTOR: ALL IDENTITY FIELDS ARE MANDATORY.")
         
         else:
             # --- PHASE 2: OTP VERIFICATION ---
@@ -1456,6 +1458,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
