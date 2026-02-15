@@ -1349,110 +1349,58 @@ elif page == "🛡️ Admin Console":
     elif auth != "":
         st.error("Invalid Credentials. Intrusion attempt logged.")
 
-# --- MODULE: LEGAL ARCHIVE ---
+# --- MODULE: LEGAL ARCHIVE (Tactical Retreat Mode) ---
 elif page == "⚖️ Legal Archive":
-    # 1. THE "GOD-MODE" CHECK
-    # We pull values and convert them to uppercase to avoid "admin" vs "Admin" issues
+    # Universal Access Check
     u_name = str(st.session_state.get('user_name', '')).upper()
     u_role = str(st.session_state.get('role', '')).upper()
-    u_tier = str(st.session_state.get('user_tier', '')).upper()
-    
-    # Authorized if name contains ADMIN/DIRECTOR or tier is PRO
-    is_authorized = ("ADMIN" in u_name or "DIRECTOR" in u_name or "ADMIN" in u_role or "PRO" in u_tier)
+    is_authorized = ("ADMIN" in u_name or "DIRECTOR" in u_name or "ADMIN" in u_role)
 
-    # --- UI REMAINS THE SAME ---
     st.markdown("<h1 style='color: #00ff41;'>⚖️ LEGAL DEFENSE VAULT</h1>", unsafe_allow_html=True)
     
-    if is_authorized:
-        st.success(f"💎 AUTHORIZED ACCESS: Welcome, {u_name}. All Systems Green.")
-    else:
-        st.warning("⚠️ BASIC ACCESS: Secure modules are currently encrypted.")
-    
-    # --- STATUS HEADER ---
-    if is_authorized:
-        st.success("💎 AUTHORIZED ACCESS: All Legal Blueprints Unlocked.")
-    else:
-        st.warning("⚠️ BASIC ACCESS: Some advanced defense tools are locked.")
+    # --- 🛰️ SYSTEM UPDATE NOTICE ---
+    st.warning("📡 **SYSTEM UPDATE IN PROGRESS:** We are currently upgrading our Legal Forge to allow for full contract customization and high-speed Neural Auditing. These features will go live in the **V2.0 Core Update**.")
 
-    # --- SECTION 1: THE CREATOR CHECKLIST (Everyone can use this) ---
-    st.markdown("### 🛡️ Your Safety Checklist")
-    st.write("Before you sign any brand deal, make sure you've checked these 3 boxes:")
-    
+    # --- SECTION 1: MANUAL CHECKLIST (Always available) ---
+    st.markdown("### 🛡️ Pre-Sign Safety Protocol")
     with st.container(border=True):
-        c1, c2, c3 = st.columns(3)
+        st.write("Basic checks remain active for all users:")
+        c1, c2 = st.columns(2)
         with c1:
-            st.checkbox("Do I own my content?")
+            st.checkbox("Usage Rights Verification")
+            st.checkbox("Payment Milestone Check")
         with c2:
-            st.checkbox("Is the pay date clear?")
-        with c3:
-            st.checkbox("Are revisions limited?")
+            st.checkbox("Revision Limitation")
+            st.checkbox("Exclusivity Lockdown")
 
     st.divider()
 
-    # --- SECTION 2: THE DOWNLOAD CENTER ---
-    st.markdown("### 📂 Contract Templates")
+    # --- SECTION 2: THE "COMING SOON" GRID ---
+    st.markdown("### 💎 PRO-TIER EVOLUTION (Phase 2)")
     
     col1, col2 = st.columns(2)
 
-    # --- BOX 1: BRAND AGREEMENT ---
+    # BOX 1: CUSTOMIZABLE CONTRACTS
     with col1:
         with st.container(border=True):
-            st.markdown("#### 🤝 Brand Collaboration Contract")
-            st.write("A professional agreement to ensure you get paid on time.")
-            if is_authorized:
-                st.download_button(
-                    label="📥 DOWNLOAD NOW",
-                    data="[Standard Brand Contract Text...]",
-                    file_name="brand_deal_authorized.txt",
-                    use_container_width=True,
-                    key="dl_brand_auth"
-                )
-            else:
-                st.button("🔒 LOCKED (PRO ONLY)", disabled=True, use_container_width=True, key="lock_brand")
-                st.caption("Upgrade to download professional templates.")
+            st.markdown("#### 📝 Smart Contract Forge")
+            st.caption("Create personalized contracts tailored to your specific brand deals.")
+            st.button("⚡ OPTIMIZING LOGIC...", disabled=True, use_container_width=True)
+            st.info("Estimated Launch: Next Patch.")
 
-    # --- BOX 2: NDA (SECRET PROTECTION) ---
+    # BOX 2: AI SCANNER
     with col2:
         with st.container(border=True):
-            st.markdown("#### 🤫 Secret-Keeping Agreement (NDA)")
-            st.write("Protect your ideas when talking to editors or partners.")
-            if is_authorized:
-                st.download_button(
-                    label="📥 DOWNLOAD NOW",
-                    data="[Standard NDA Text...]",
-                    file_name="nda_authorized.txt",
-                    use_container_width=True,
-                    key="dl_nda_auth"
-                )
-            else:
-                st.button("🔒 LOCKED (PRO ONLY)", disabled=True, use_container_width=True, key="lock_nda")
-                st.caption("Protect your ideas with Pro access.")
+            st.markdown("#### 👁️ Neural Auditor 2.0")
+            st.caption("Deep-scan technology to find predatory clauses in seconds.")
+            st.button("⚙️ CALIBRATING CORES...", disabled=True, use_container_width=True)
+            st.info("Status: Training AI Models.")
 
+    # --- 🌑 DIRECTOR'S ADDITION: THE "VOTE" ---
     st.divider()
-
-    # --- SECTION 3: THE AI CONTRACT DOCTOR ---
-    st.markdown("### 🤖 Neural Contract Auditor")
-    
-    with st.container(border=True):
-        if is_authorized:
-            st.markdown("#### 👁️ AI Scanning Active")
-            st.write("Upload your PDF contract below. Our AI will look for hidden 'Red Flags'.")
-            uploaded_pdf = st.file_uploader("Drop your contract here", type=['pdf', 'txt'])
-            if uploaded_pdf:
-                st.info("AI is analyzing the document for predatory clauses...")
-        else:
-            st.markdown("#### 👁️ AI Contract Scanner")
-            st.write("Imagine having a lawyer in your pocket. This AI scans your contracts for dangerous hidden terms.")
-            st.button("🔒 UNLOCK AI SCANNING", disabled=True, use_container_width=True)
-            st.caption("Only available for Pro Members.")
-
-    # --- SECTION 4: HOW TO UPGRADE ---
-    if not is_authorized:
-        st.divider()
-        st.markdown("<h3 style='text-align: center;'>🚀 Ready to go Professional?</h3>", unsafe_allow_html=True)
-        if st.button("CLICK HERE TO UPGRADE TO PRO", use_container_width=True):
-            st.balloons()
-            st.info("Redirecting to the Payment Gateway...")
+    st.markdown("#### 🗳️ Feature Priority Vote")
+    st.write("Which legal tool do you need most in the next update?")
+    st.radio("Select Priority:", ["International Payment Security", "Copyright Infringement Protection", "Agency Manager Contracts"], label_visibility="collapsed")
 
 
 # --- MODULE 10: UPGRADE TO PRO (FORCE-RENDER) ---
@@ -1642,6 +1590,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
