@@ -1543,49 +1543,7 @@ def render_upgrade_module():
         if st.button("🚩 REPORT PAYMENT ISSUE", use_container_width=True):
             st.info("Contact the Director on the email provided for instant resolution.")
 
-# To run this, just call the function:
-# render_upgrade_module()
 
-        st.divider()
-        
-        # --- GOOGLE SHEETS UPLINK (Nested inside 'agreed') ---
-        FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
-
-        with st.form("manual_verify"):
-            st.write("### 🛰️ Admin Sync: Verify Payment")
-            u_email = st.text_input("Your Registered Email")
-            u_txn = st.text_input("Transaction ID / Reference Number")
-            
-            if st.form_submit_button("REQUEST ACTIVATION"):
-                if u_email and u_txn:
-                    payload = {
-                        "email": u_email,
-                        "category": "PAYMENT_VERIFY",
-                        "message": f"TXN: {u_txn}"
-                    }
-                    try:
-                        res = requests.post(FEEDBACK_API_URL, json=payload)
-                        if res.status_code == 200:
-                            st.success("✅ Transmission Sent. Verification in progress.")
-                        else:
-                            st.error("📡 Uplink Failed. Check API Node.")
-                    except Exception as e:
-                        st.error("Critical System Error.")
-                else:
-                    st.warning("All fields required for verification.")
-
-        st.divider()
-        
-        # INTERNATIONAL SECTION
-        st.markdown("### 🌎 INTERNATIONAL (CARD)")
-        st.write("Launch Price: **$19**")
-        st.button("🚀 RAZORPAY GATEWAY (VERIFYING...)", disabled=True)
-        st.caption("International payments will unlock once Razorpay Website verification is complete.")
-        
-    else:
-        # This shows if the box is NOT checked
-        st.warning("📡 Awaiting Legal Agreement to reveal Payment Nodes.")
-        st.write("Please check the box above to initialize the transaction.")
 
 
 elif page == "⚙️ Settings":
@@ -1696,6 +1654,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
