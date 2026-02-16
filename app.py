@@ -962,6 +962,7 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
+# --- MODULE 7: THE NEURAL FORGE (ELITE COMMAND) ---
 elif page == "🧠 Neural Forge":
         if not is_paid and not is_admin:
             st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
@@ -970,61 +971,87 @@ elif page == "🧠 Neural Forge":
 
         st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
         
-        # 🟢 THE TREND MAPPER (NOW FULLY VISIBLE)
-        with st.sidebar:
-            st.markdown("### 📡 TREND MAPPER")
-            st.caption("Sync with the current zeitgeist")
-            trend_sync = st.radio("Active Trend Mode", ["Viral Audio Hook", "Niche Commentary", "Educational Deep-Dive", "None"])
-            target_aud = st.text_input("Target Audience", "Young Entrepreneurs")
-
+        # 1. THE CENTRAL CONTROL PANEL
         with st.container(border=True):
-            f_col1, f_col2 = st.columns([1, 1.2])
+            col_a, col_b = st.columns([1, 1], gap="medium")
             
-            with f_col1:
-                st.subheader("🧬 Neural Input")
-                topic = st.text_input("Core Concept", key="forge_topic")
-                framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock"])
+            with col_a:
+                st.subheader("🧬 Core Configuration")
+                f_platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form", "X-Thread"], key="forge_plat")
+                f_topic = st.text_input("Core Concept", placeholder="e.g., The psychology of luxury branding", key="forge_top")
                 
-                if st.button("🔥 FORGE ELITE CONTENT", use_container_width=True):
-                    if topic:
-                        with st.spinner("🌑 NEURAL SYNTHESIS..."):
-                            try:
-                                # Using the Versatile model for the main script
-                                forge_prompt = (
-                                    f"VOID OS PRO. Topic: {topic}. Framework: {framework}. "
-                                    f"Trend Sync: {trend_sync}. Audience: {target_aud}. "
-                                    f"Create an elite script with visual cues."
-                                )
-                                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": forge_prompt}])
-                                st.session_state.pro_forge_txt = res.choices[0].message.content
-                                st.rerun()
-                            except Exception as e:
-                                st.error("🚦 RATE LIMIT HIT: The AI is cooling down. Please wait 60 seconds.")
+                # EXPANDED FRAMEWORKS
+                f_framework = st.selectbox("Retention Framework", [
+                    "The Controversy Start (High Vigor)", 
+                    "The Hero's Journey (Storytelling)", 
+                    "Statistical Shock (Educational)",
+                    "The 'Mistake' Hook (Click-through Focus)",
+                    "Day in the Life (Relatability)",
+                    "The Deep-Dive (Authority)"
+                ])
 
-            with f_col2:
-                if st.session_state.get('pro_forge_txt'):
-                    st.subheader("💎 NEURAL OUTPUT")
-                    st.session_state.pro_forge_txt = st.text_area("Neural Editor", value=st.session_state.pro_forge_txt, height=300)
-                    
-                    # --- ANALYSIS TOOLS WITH RATE-LIMIT PROTECTION ---
-                    t1, t2 = st.tabs(["🚀 Hook Analysis", "🧠 Retention Check"])
-                    with t1:
-                        if st.button("RUN HOOK ANALYSIS"):
-                            try:
-                                # Switching to 70b to avoid the 8b rate limit
-                                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Analyze this hook: {st.session_state.pro_forge_txt[:200]}"}])
-                                st.success(res.choices[0].message.content)
-                            except:
-                                st.error("Rate limit reached. Try again in 1 minute.")
-                    with t2:
-                        if st.button("SCAN BOREDOM GAPS"):
-                            try:
-                                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Identify retention drops in: {st.session_state.pro_forge_txt}"}])
-                                st.warning(res.choices[0].message.content)
-                            except:
-                                st.error("Rate limit reached. Try again in 1 minute.")
-                else:
-                    st.info("System ready for neural synthesis.")   
+            with col_b:
+                st.subheader("📡 Trend Mapper (Integrated)")
+                # Making Trend Mapper easy and prominent
+                f_trend = st.segmented_control("Current Trend Sync", 
+                    options=["Viral Audio", "Niche Commentary", "POV/Relatable", "Educational Breakdown"],
+                    default="None"
+                )
+                f_audience = st.text_input("Target Audience Persona", "High-Performance Creators")
+                f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
+
+            # 2. THE ACTIVATION BUTTON
+            if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
+                if f_topic:
+                    with st.spinner("🌑 FORGING ELITE CONTENT..."):
+                        try:
+                            # Using 70b-versatile to avoid 8b rate limits
+                            forge_prompt = (
+                                f"Act as an elite content engineer. Create a script for {f_platform}. "
+                                f"Topic: {f_topic}. Framework: {f_framework}. "
+                                f"Trend Mapping: {f_trend}. Audience: {f_audience}. "
+                                f"Tone Vigor: {f_vigor}. Structure with timestamps, B-roll cues, and psychological triggers."
+                            )
+                            res = groq_c.chat.completions.create(
+                                model="llama-3.3-70b-versatile", 
+                                messages=[{"role": "user", "content": forge_prompt}]
+                            )
+                            st.session_state.pro_forge_txt = res.choices[0].message.content
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Uplink Error: {e}. System cooling down, try in 60s.")
+
+        # 3. OUTPUT & OPTIMIZATION SUITE
+        if st.session_state.get('pro_forge_txt'):
+            st.divider()
+            c_out, c_tools = st.columns([1.5, 1])
+            
+            with c_out:
+                st.subheader("💎 NEURAL OUTPUT")
+                st.session_state.pro_forge_txt = st.text_area("Master Editor", value=st.session_state.pro_forge_txt, height=450)
+            
+            with c_tools:
+                st.subheader("🧪 Intelligence Tools")
+                # Using 70b here as well to prevent the RateLimitError from before
+                if st.button("🚀 ANALYZE HOOK VIRALITY", use_container_width=True):
+                    with st.spinner("Neural Scan..."):
+                        res = groq_c.chat.completions.create(
+                            model="llama-3.3-70b-versatile", 
+                            messages=[{"role": "user", "content": f"Analyze this hook for viral potential and rewrite it 3 times: {st.session_state.pro_forge_txt[:200]}"}]
+                        )
+                        st.info(res.choices[0].message.content)
+
+                if st.button("🧠 SCAN RETENTION GAPS", use_container_width=True):
+                    with st.spinner("Scanning Pacing..."):
+                        res = groq_c.chat.completions.create(
+                            model="llama-3.3-70b-versatile", 
+                            messages=[{"role": "user", "content": f"Identify 'wordy' or boring sections in this script and suggest cuts: {st.session_state.pro_forge_txt}"}]
+                        )
+                        st.warning(res.choices[0].message.content)
+                
+                if st.button("💾 ARCHIVE TO PRO VAULT", use_container_width=True):
+                    st.success("Synchronized with Secure History.")
+
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -1601,6 +1628,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
