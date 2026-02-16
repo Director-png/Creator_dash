@@ -963,7 +963,7 @@ elif page == "🏗️ Script Architect":
                     st.info("Awaiting Tactical Input to manifest formation.")
 
 # --- MODULE 7: THE NEURAL FORGE (STABLE & EXPOSED) ---
-    elif page == "🧠 Neural Forge":
+elif page == "🧠 Neural Forge":
         if not is_paid and not is_admin:
             st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
             st.warning("PROTOCOL RESTRICTED: Pro License Required.")
@@ -1621,6 +1621,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
