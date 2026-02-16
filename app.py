@@ -518,7 +518,35 @@ if not st.session_state.logged_in:
                 st.session_state.otp_sent = False
                 st.rerun()
         
+def verify_and_sync_status(email):
+    """Fetches the latest clearance level from Google Sheets."""
+    try:
+        # We use a GET request or a POST with a 'CHECK' action to your Apps Script
+        check_payload = {"email": email, "action": "CHECK_STATUS"}
+        response = requests.post(NEW_URL, json=check_payload, timeout=15)
+        
+        if response.status_code == 200:
+            # We expect the script to return the status string (e.g., "Pro" or "Basic")
+            new_status = response.text.strip()
+            if new_status in ["Pro", "Basic"]:
+                st.session_state.user_status = new_status
+                return True
+        return False
+    except Exception as e:
+        st.error(f"Gatekeeper Offline: {e}")
+        return False
 
+# --- INSIDE YOUR LOGIN PAGE ---
+if st.button("🔓 ACCESS SYSTEM"):
+    # (Your existing password verification logic goes here)
+    if password_is_correct:
+        with st.spinner("Synchronizing Neural Clearance..."):
+            success = verify_and_sync_status(user_email)
+            if success:
+                st.success(f"Access Granted: {st.session_state.user_status} Level")
+                st.rerun()
+            else:
+                st.error("Clearance Synchronization Failed.")
 
     # 🛑 THE SECURITY WALL: Prevents internal app from loading if not logged in
     st.stop()
@@ -1625,6 +1653,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
