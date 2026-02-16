@@ -593,7 +593,10 @@ with st.sidebar:
                 except Exception as e:
                     st.error(f"UPLINK ERROR: {e}")
         else:
-            st.warning("NO ACTIVE SESSION DETECTED")# Clears the load_user_db cache
+            st.warning("NO ACTIVE SESSION DETECTED")
+            if response.status_code == 200:
+               new_status = response.text.strip()
+               st.write(f"DEBUG: Google returned: '{new_status}'") # <--- TEMP DEBUG LINE
         st.rerun()
 
     if st.button("📩 NEURAL FEEDBACK", use_container_width=True):
@@ -1665,6 +1668,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
