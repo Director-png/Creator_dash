@@ -918,7 +918,7 @@ elif page == "⚔️ Trend Duel":
             st.plotly_chart(fig, use_container_width=True)
 
 elif page == "🏗️ Script Architect":
-    st.markdown("<h1 style='color: #00ff41;'>⚔️ SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='color: #00ff41;'>⚔️ SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
         
         # 1. USAGE LIMITS (Basic Only)
         if not is_paid and not is_admin:
@@ -961,6 +961,7 @@ elif page == "🏗️ Script Architect":
                         st.rerun()
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
+
 
 elif page == "🧠 Neural Forge":
         # 1. THE PRO GATE
@@ -1580,6 +1581,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
