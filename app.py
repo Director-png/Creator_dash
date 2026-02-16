@@ -918,7 +918,7 @@ elif page == "⚔️ Trend Duel":
             st.plotly_chart(fig, use_container_width=True)
 
 elif page == "🏗️ Script Architect":
-        st.markdown("<h1 style='color: #00ff41;'>⚔️ SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #00ff41;'>⚔️ SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
         
         # 1. USAGE LIMITS (Basic Only)
         if not is_paid and not is_admin:
@@ -926,29 +926,41 @@ elif page == "🏗️ Script Architect":
             if st.session_state.daily_script_count >= 3:
                 st.error("🚨 DAILY UPLINK LIMIT REACHED")
                 st.stop()
-            st.caption(f"🛰️ BASIC NODE: {3 - st.session_state.daily_script_count} scripts left today.")
+            st.caption(f"🛰️ BASIC NODE: {3 - st.session_state.daily_script_count} scripts remaining.")
 
-        # 2. GENERATION INTERFACE
+        # 2. THE FORMATION ENGINE
         with st.container(border=True):
-            platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok"])
-            topic = st.text_input("Core Topic")
-            
-            if st.button("🏗️ ARCHITECT SCRIPT", use_container_width=True):
-                if topic:
-                    with st.spinner("🛰️ GENERATING..."):
-                        if not is_paid and not is_admin: st.session_state.daily_script_count += 1
-                        res = groq_c.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": f"Write a viral {platform} script for: {topic}"}])
-                        st.session_state.current_architect_txt = res.choices[0].message.content
+            c1, c2 = st.columns([1, 1.5], gap="large")
+            with c1:
+                st.subheader("Architectural Input")
+                platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
+                topic = st.text_input("Core Topic", placeholder="e.g., The reality of building a SaaS")
+                tone = st.select_slider("Vigor", ["Professional", "Aggressive", "Elite"])
+                
+                if st.button("🏗️ ARCHITECT FULL SCRIPT", use_container_width=True):
+                    if topic:
+                        with st.spinner("🛰️ ARCHITECTING FORMATION..."):
+                            if not is_paid and not is_admin: st.session_state.daily_script_count += 1
+                            # Restoration of the high-quality formation prompt
+                            formation_prompt = (
+                                f"Act as a master content strategist. Create a high-retention {platform} script about {topic}. "
+                                f"Tone: {tone}. Formation: Start with a 'Pattern Interrupt' hook, move into 'The Agitation', "
+                                f"provide 'The Insight', and end with a 'Call to Value'. Use timestamps and clear visual cues."
+                            )
+                            res = groq_c.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": formation_prompt}])
+                            st.session_state.current_architect_txt = res.choices[0].message.content
+                            st.rerun()
+
+            with c2:
+                if st.session_state.get('current_architect_txt'):
+                    st.subheader("💎 SCRIPT BLUEPRINT")
+                    st.session_state.current_architect_txt = st.text_area("Live Editor", value=st.session_state.current_architect_txt, height=400)
+                    st.warning("⚠️ Optimization & Trend Mapping is restricted to PRO Nodes.")
+                    if st.button("🧠 UPGRADE TO NEURAL FORGE"):
+                        st.session_state.page = "🧠 Neural Forge"
                         st.rerun()
-
-        if st.session_state.get('current_architect_txt'):
-            st.text_area("Script Preview", value=st.session_state.current_architect_txt, height=300)
-            # THE UPSELL BUTTON
-            st.warning("⚠️ Optimization Tools (Hook/Retention) are locked.")
-            if st.button("🧠 ANALYZE IN NEURAL FORGE (PRO)"):
-                st.session_state.page = "🧠 Neural Forge"
-                st.rerun()
-
+                else:
+                    st.info("Awaiting Tactical Input to manifest formation.")
 
 elif page == "🧠 Neural Forge":
         # 1. THE PRO GATE
@@ -1568,6 +1580,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
