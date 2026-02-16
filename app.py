@@ -1301,7 +1301,7 @@ elif page == "🛡️ Admin Console":
                     try:
                         # Using your upgraded Apps Script URL
                         NEW_URL = "https://script.google.com/macros/s/AKfycbx3RsguvYV_lgP6CdKaPnB6zSwpSMJ7SlLkpDubpcPvHaVHYWemboXuhgaUb-MH3vRN/exec" 
-                        response = requests.post(NEW_URL, json=payload, timeout=10)
+                        response = requests.post(NEW_URL, json=payload, timeout=30)
                         
                         if response.status_code == 200 and "SUCCESS" in response.text:
                             st.success(f"⚔️ OMNI-SYNC COMPLETE: {target_mail} updated in Google Sheets.")
@@ -1621,6 +1621,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
