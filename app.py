@@ -962,47 +962,61 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-
 elif page == "🧠 Neural Forge":
-        # 1. THE PRO GATE
         if not is_paid and not is_admin:
             st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
             st.warning("PROTOCOL RESTRICTED: Pro License Required.")
             st.image("https://img.icons8.com/neon/100/lock.png")
-            if st.button("🚀 UPGRADE TO PRO"):
+            if st.button("🚀 ACCESS ELITE UPLINK"):
                 st.session_state.page = "💎 Upgrade to Pro"
                 st.rerun()
             st.stop()
 
-        st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // PRO</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
         
-        # 2. ADVANCED GENERATION + AUTO-OPTIMIZATION
         with st.container(border=True):
-            c1, c2 = st.columns([1, 1.5])
-            with c1:
-                st.subheader("Neural Input")
+            f_col1, f_col2 = st.columns([1, 1.2])
+            
+            with f_col1:
+                st.subheader("🧬 Neural Input")
                 topic = st.text_input("Core Concept")
-                framework = st.selectbox("Retention Framework", ["AIDA", "The Controversy Start", "The Hero's Journey"])
-                tone = st.select_slider("Vigor Level", ["High", "Extreme", "Elite"])
+                framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "The Statistical Shock"])
+                vigor = st.select_slider("Vigor Level", ["High", "Extreme", "Elite"])
                 
-                if st.button("🔥 FORGE ELITE SCRIPT"):
-                    with st.spinner("🌑 SYNTHESIZING..."):
-                        # Uses the 70B Model for Elite Quality
-                        res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Create a script for {topic} using {framework} framework in {tone} tone. Add visual pattern interrupt cues."}])
-                        st.session_state.pro_script = res.choices[0].message.content
+                # --- NEW LOGIC: TREND MAPPER ---
+                with st.expander("📡 TREND MAPPER (BETA)"):
+                    trend_type = st.radio("Sync with Current Trend?", ["Viral Audio Hook", "Niche Commentary", "Educational Deep-Dive"])
+                    target_audience = st.text_input("Target Audience", placeholder="e.g., Young Entrepreneurs")
+
+                if st.button("🔥 FORGE ELITE CONTENT"):
+                    with st.spinner("🌑 NEURAL SYNTHESIS (70B)..."):
+                        # Elite Llama-3 70B Generation
+                        forge_prompt = (
+                            f"System: VOID OS NEURAL FORGE. Create an elite script for {topic} using the {framework} framework. "
+                            f"Vigor: {vigor}. Trend Context: {trend_type}. Target Audience: {target_audience}. "
+                            f"Integrate psychological hooks, B-roll cues, and 'Vigor' score optimization."
+                        )
+                        res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": forge_prompt}])
+                        st.session_state.pro_forge_txt = res.choices[0].message.content
                         st.rerun()
 
-            with c2:
-                if st.session_state.get('pro_script'):
-                    st.session_state.pro_script = st.text_area("Master Editor", value=st.session_state.pro_script, height=350)
+            with f_col2:
+                if st.session_state.get('pro_forge_txt'):
+                    st.subheader("💎 NEURAL OUTPUT")
+                    st.session_state.pro_forge_txt = st.text_area("Neural Editor", value=st.session_state.pro_forge_txt, height=300)
                     
-                    # NEW PRO LOGIC: VIGOR SCRAPER
-                    if st.button("🧬 RUN VIGOR ANALYSIS"):
-                        with st.spinner("Analyzing Retention..."):
-                            analysis = groq_c.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": f"Find the 2 weakest sentences in this script and rewrite them to be 50% shorter and more punchy: {st.session_state.pro_script}"}])
-                            st.success(analysis.choices[0].message.content)
+                    # --- SOPHISTICATED TOOLKIT ---
+                    t1, t2 = st.tabs(["🚀 Hook Analysis", "🧠 Retention Check"])
+                    with t1:
+                        if st.button("RUN HOOK ANALYSIS"):
+                            res = groq_c.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": f"Analyze the hook of this script: {st.session_state.pro_forge_txt}"}])
+                            st.success(res.choices[0].message.content)
+                    with t2:
+                        if st.button("SCAN BOREDOM GAPS"):
+                            res = groq_c.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": f"Identify retention drop-off points in: {st.session_state.pro_forge_txt}"}])
+                            st.warning(res.choices[0].message.content)
                 else:
-                    st.info("System ready for neural input.")
+                    st.info("System ready for neural synthesis.")
                 
 
 
@@ -1581,6 +1595,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
