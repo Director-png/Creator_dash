@@ -517,7 +517,7 @@ with st.sidebar:
     st.markdown(f"<h3 style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</h3>", unsafe_allow_html=True)
     
     # Dynamic Status Badge
-    user_status = st.session_state.get('user_status', 'free').strip().lower()
+    user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
     if user_status == 'Pro' or st.session_state.user_role == "admin":
         st.success("💎 PRO NODE ACTIVE")
     else:
@@ -530,9 +530,9 @@ with st.sidebar:
     if st.session_state.user_role == "admin":
         options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "🧠 Neural Forge", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
     elif user_status == 'paid':
-        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧠 Neural Forge", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
     else:
-        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "⚖️ Legal Archive", "💎 Upgrade to Pro", "⚙️ Settings"]
+        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "⚖️ Legal Archive", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
 
     # 3. Handle Page Indexing
     try:
@@ -1668,6 +1668,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
