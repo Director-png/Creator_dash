@@ -542,9 +542,9 @@ with st.sidebar:
 
     # 2. Define Options based on Role AND Status
     if st.session_state.user_role == "admin":
-        options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+        options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "🧠 Neural Forge", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
     elif user_status == 'paid':
-        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧠 Neural Forge", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
     else:
         options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "⚖️ Legal Archive", "💎 Upgrade to Pro", "⚙️ Settings"]
 
@@ -917,102 +917,80 @@ elif page == "⚔️ Trend Duel":
             fig = px.bar(comp, x='Niche', y='Score', color='Score', template='plotly_dark')
             st.plotly_chart(fig, use_container_width=True)
 
-# --- MODULE 6 & 7: THE UNIFIED COMMAND CENTER ---
 elif page == "🏗️ Script Architect":
-        st.markdown("<h1 style='color: #00ff41;'>⚔️ UNIFIED COMMAND CENTER</h1>", unsafe_allow_html=True)
-
-        # 1. IDENTITY & GATEKEEPER
-        raw_status = str(st.session_state.get('user_status', 'free')).strip().lower()
-        is_paid = any(x in raw_status for x in ['paid', 'pro', 'elite'])
-        is_admin = st.session_state.get('admin_verified', False)
-
-        # 2. USAGE LIMITS (Basic Only)
+        st.markdown("<h1 style='color: #00ff41;'>⚔️ SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+        
+        # 1. USAGE LIMITS (Basic Only)
         if not is_paid and not is_admin:
             if 'daily_script_count' not in st.session_state: st.session_state.daily_script_count = 0
             if st.session_state.daily_script_count >= 3:
                 st.error("🚨 DAILY UPLINK LIMIT REACHED")
-                st.info("Upgrade to PRO for unlimited AI-powered architecture.")
-                if st.button("🚀 UNLOCK PRO ACCESS"):
-                    st.session_state.page = "💎 Upgrade to Pro"
-                    st.rerun()
                 st.stop()
-            st.caption(f"🛰️ BASIC NODE: {3 - st.session_state.daily_script_count} manual blueprints left.")
+            st.caption(f"🛰️ BASIC NODE: {3 - st.session_state.daily_script_count} scripts left today.")
 
-        # 3. TOP SECTION: SCRIPT GENERATION
+        # 2. GENERATION INTERFACE
         with st.container(border=True):
-            st.subheader("🛠️ Phase 1: Architectural Blueprint")
-            col_in, col_out = st.columns([1, 1.5], gap="medium")
+            platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok"])
+            topic = st.text_input("Core Topic")
             
-            with col_in:
-                platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
-                topic = st.text_input("Core Topic", placeholder="e.g., The Future of AI")
-                tone = st.select_slider("Vigor", ["Professional", "Aggressive", "Elite"])
-                
-                # --- GENERATION BUTTONS ---
-                if is_paid or is_admin:
-                    if st.button("🧠 FORGE NEURAL SCRIPT (PRO)", use_container_width=True):
-                        if topic:
-                            with st.spinner("🌑 SYNTHESIZING..."):
-                                res = groq_c.chat.completions.create(
-                                    model="llama-3.3-70b-versatile", 
-                                    messages=[{"role": "user", "content": f"Create a viral {platform} script about {topic} in a {tone} tone."}]
-                                )
-                                st.session_state.current_architect_txt = res.choices[0].message.content
-                                st.rerun()
-                else:
-                    if st.button("🏗️ CONSTRUCT MANUAL TEMPLATE", use_container_width=True):
-                        st.session_state.daily_script_count += 1
-                        st.session_state.current_architect_txt = f"### 📐 {platform} TEMPLATE\n**HOOK:** [Write Hook]\n**BODY:** [Enter Value]\n**CTA:** [Target Audience]"
+            if st.button("🏗️ ARCHITECT SCRIPT", use_container_width=True):
+                if topic:
+                    with st.spinner("🛰️ GENERATING..."):
+                        if not is_paid and not is_admin: st.session_state.daily_script_count += 1
+                        res = groq_c.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": f"Write a viral {platform} script for: {topic}"}])
+                        st.session_state.current_architect_txt = res.choices[0].message.content
                         st.rerun()
 
-            with col_out:
-                if st.session_state.get('current_architect_txt'):
-                    st.text_area("Live Script Editor", value=st.session_state.current_architect_txt, height=250, key="live_editor")
-                else:
-                    st.info("Awaiting input to manifest blueprint.")
+        if st.session_state.get('current_architect_txt'):
+            st.text_area("Script Preview", value=st.session_state.current_architect_txt, height=300)
+            # THE UPSELL BUTTON
+            st.warning("⚠️ Optimization Tools (Hook/Retention) are locked.")
+            if st.button("🧠 ANALYZE IN NEURAL FORGE (PRO)"):
+                st.session_state.page = "🧠 Neural Forge"
+                st.rerun()
 
-        st.divider()
 
-        # 4. BOTTOM SECTION: OPTIMIZATION LAB
-        st.subheader("🧪 Phase 2: Intelligence Optimization")
-        
-        # PRO GATE FOR LAB FEATURES
+elif page == "🧠 Neural Forge":
+        # 1. THE PRO GATE
         if not is_paid and not is_admin:
-            with st.container(border=True):
-                st.markdown("#### 🔒 LAB FEATURES LOCKED")
-                st.write("Upgrade to PRO to access the **Hook Analyzer** and **Retention Engine**.")
-                if st.button("🚀 UPGRADE NOW", key="lab_upgrade"):
-                    st.session_state.page = "💎 Upgrade to Pro"
-                    st.rerun()
-        else:
-            opt_col1, opt_col2 = st.columns(2)
-            
-            with opt_col1:
-                with st.container(border=True):
-                    st.markdown("🚀 **VIRAL HOOK ANALYZER**")
-                    hook_to_test = st.text_input("Paste Hook for Analysis")
-                    if st.button("ANALYZE HOOK"):
-                        res = groq_c.chat.completions.create(
-                            model="llama-3.3-70b-versatile", 
-                            messages=[{"role": "user", "content": f"Rate this hook 1-10 and rewrite for virality: {hook_to_test}"}]
-                        )
-                        st.success(res.choices[0].message.content)
+            st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
+            st.warning("PROTOCOL RESTRICTED: Pro License Required.")
+            st.image("https://img.icons8.com/neon/100/lock.png")
+            if st.button("🚀 UPGRADE TO PRO"):
+                st.session_state.page = "💎 Upgrade to Pro"
+                st.rerun()
+            st.stop()
 
-            with opt_col2:
-                with st.container(border=True):
-                    st.markdown("🧠 **RETENTION ENGINE**")
-                    st.caption("Scans for 'Boredom Gaps' in your script.")
-                    if st.button("SCAN SCRIPT"):
-                        st.warning("Pattern Interrupt needed at 0:15. Narrative flow is currently 82% efficient.")
+        st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // PRO</h1>", unsafe_allow_html=True)
+        
+        # 2. ADVANCED GENERATION + AUTO-OPTIMIZATION
+        with st.container(border=True):
+            c1, c2 = st.columns([1, 1.5])
+            with c1:
+                st.subheader("Neural Input")
+                topic = st.text_input("Core Concept")
+                framework = st.selectbox("Retention Framework", ["AIDA", "The Controversy Start", "The Hero's Journey"])
+                tone = st.select_slider("Vigor Level", ["High", "Extreme", "Elite"])
+                
+                if st.button("🔥 FORGE ELITE SCRIPT"):
+                    with st.spinner("🌑 SYNTHESIZING..."):
+                        # Uses the 70B Model for Elite Quality
+                        res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Create a script for {topic} using {framework} framework in {tone} tone. Add visual pattern interrupt cues."}])
+                        st.session_state.pro_script = res.choices[0].message.content
+                        st.rerun()
 
-        # 5. ADMIN ROI SECTION (Only visible to you)
-        if is_admin:
-            st.divider()
-            with st.expander("📊 ADMIN ROI PROJECTION ENGINE"):
-                views = st.number_input("Est. Views", value=100000)
-                cpm = st.number_input("CPM ($)", value=15.0)
-                revenue = (views / 1000) * cpm * 83.0
-                st.metric("Potential Revenue", f"₹ {revenue:,.2f}")
+            with c2:
+                if st.session_state.get('pro_script'):
+                    st.session_state.pro_script = st.text_area("Master Editor", value=st.session_state.pro_script, height=350)
+                    
+                    # NEW PRO LOGIC: VIGOR SCRAPER
+                    if st.button("🧬 RUN VIGOR ANALYSIS"):
+                        with st.spinner("Analyzing Retention..."):
+                            analysis = groq_c.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": f"Find the 2 weakest sentences in this script and rewrite them to be 50% shorter and more punchy: {st.session_state.pro_script}"}])
+                            st.success(analysis.choices[0].message.content)
+                else:
+                    st.info("System ready for neural input.")
+                
 
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
@@ -1590,6 +1568,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
