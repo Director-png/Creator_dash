@@ -1306,6 +1306,10 @@ elif page == "🛡️ Admin Console":
                         if response.status_code == 200 and "SUCCESS" in response.text:
                             st.success(f"⚔️ OMNI-SYNC COMPLETE: {target_mail} updated in Google Sheets.")
                             st.balloons()
+                            if target_email == st.session_state.get('user_email'):
+                                st.session_state.user_status = 'Pro' # This unlocks the Forge
+                            st.balloons()
+                            st.rerun()
                         else:
                             st.error(f"📡 SCRIPT RESPONSE: {response.text}")
                     except Exception as e:
@@ -1621,6 +1625,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
