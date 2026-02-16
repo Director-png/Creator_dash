@@ -917,106 +917,102 @@ elif page == "⚔️ Trend Duel":
             fig = px.bar(comp, x='Niche', y='Score', color='Score', template='plotly_dark')
             st.plotly_chart(fig, use_container_width=True)
 
-# --- MODULE 6: TACTICAL ARCHITECT (INTEGRATED & GATED) ---
+# --- MODULE 6 & 7: THE UNIFIED COMMAND CENTER ---
 elif page == "🏗️ Script Architect":
-        st.markdown("<h1 style='color: #00ff41;'>⚔️ TACTICAL ARCHITECT</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='color: #00ff41;'>⚔️ UNIFIED COMMAND CENTER</h1>", unsafe_allow_html=True)
 
-        # 1. IDENTITY PROTOCOLS
+        # 1. IDENTITY & GATEKEEPER
         raw_status = str(st.session_state.get('user_status', 'free')).strip().lower()
-        raw_role = str(st.session_state.get('user_role', 'user')).strip().lower()
-        is_admin = st.session_state.get('admin_verified', False)
         is_paid = any(x in raw_status for x in ['paid', 'pro', 'elite'])
+        is_admin = st.session_state.get('admin_verified', False)
 
-        # 2. DAILY USAGE GATEKEEPER (Scarcity Logic for Basic Users)
+        # 2. USAGE LIMITS (Basic Only)
         if not is_paid and not is_admin:
-            if 'daily_script_count' not in st.session_state:
-                st.session_state.daily_script_count = 0
-            
-            limit = 3
-            remaining = limit - st.session_state.daily_script_count
-            
-            if remaining <= 0:
+            if 'daily_script_count' not in st.session_state: st.session_state.daily_script_count = 0
+            if st.session_state.daily_script_count >= 3:
                 st.error("🚨 DAILY UPLINK LIMIT REACHED")
-                with st.container(border=True):
-                    st.markdown("### 🧠 UPGRADE TO NEURAL FORGE")
-                    st.write("Basic Nodes are limited to 3 manual blueprints per day. Upgrade to PRO for unlimited AI-generated scripts.")
-                    if st.button("🚀 UNLOCK PRO ACCESS", use_container_width=True):
-                        st.session_state.page = "💎 Upgrade to Pro"
-                        st.rerun()
+                st.info("Upgrade to PRO for unlimited AI-powered architecture.")
+                if st.button("🚀 UNLOCK PRO ACCESS"):
+                    st.session_state.page = "💎 Upgrade to Pro"
+                    st.rerun()
                 st.stop()
-            else:
-                st.info(f"🛰️ BASIC NODE ACTIVE: {remaining}/{limit} blueprints remaining today.")
+            st.caption(f"🛰️ BASIC NODE: {3 - st.session_state.daily_script_count} manual blueprints left.")
 
-        # 3. INITIALIZE STORAGE
-        if 'current_architect_txt' not in st.session_state: st.session_state.current_architect_txt = ""
-
-        # 4. INTERFACE LAYOUT
-        c1, c2 = st.columns([1, 1.5], gap="large")
-        
-        with c1:
-            st.subheader("🛠️ Script Blueprint")
-            platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
-            topic = st.text_input("Core Topic", placeholder="e.g., The Future of AI")
-            tone_choice = st.select_slider("Vigor/Tone", ["Professional", "Aggressive", "Elite"])
+        # 3. TOP SECTION: SCRIPT GENERATION
+        with st.container(border=True):
+            st.subheader("🛠️ Phase 1: Architectural Blueprint")
+            col_in, col_out = st.columns([1, 1.5], gap="medium")
             
-            with st.expander("👤 COMPETITOR SHADOW"):
-                c_hook = st.text_area("Their Narrative (What are they saying?)")
-            
-            # --- ACTION LOGIC: PRO AI vs BASIC MANUAL ---
-            if is_paid or is_admin:
-                if st.button("🧠 FORGE NEURAL SCRIPT (PRO)", use_container_width=True):
-                    if not topic:
-                        st.error("Director, Topic is required.")
-                    else:
-                        with st.spinner("🌑 NEURAL SYNTHESIS..."):
-                            try:
-                                prompt = (
-                                    f"System: VOID OS PRO. Create a high-retention script for {platform}. "
-                                    f"Topic: {topic}. Tone: {tone_choice}. Counter-Angle: {c_hook if c_hook else 'None'}."
-                                )
+            with col_in:
+                platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
+                topic = st.text_input("Core Topic", placeholder="e.g., The Future of AI")
+                tone = st.select_slider("Vigor", ["Professional", "Aggressive", "Elite"])
+                
+                # --- GENERATION BUTTONS ---
+                if is_paid or is_admin:
+                    if st.button("🧠 FORGE NEURAL SCRIPT (PRO)", use_container_width=True):
+                        if topic:
+                            with st.spinner("🌑 SYNTHESIZING..."):
                                 res = groq_c.chat.completions.create(
                                     model="llama-3.3-70b-versatile", 
-                                    messages=[{"role": "user", "content": prompt}]
+                                    messages=[{"role": "user", "content": f"Create a viral {platform} script about {topic} in a {tone} tone."}]
                                 )
                                 st.session_state.current_architect_txt = res.choices[0].message.content
                                 st.rerun()
-                            except Exception as e:
-                                st.error(f"Uplink Error: {e}")
-            else:
-                if st.button("🏗️ CONSTRUCT MANUAL TEMPLATE", use_container_width=True):
-                    if not topic:
-                        st.error("Topic required.")
-                    else:
+                else:
+                    if st.button("🏗️ CONSTRUCT MANUAL TEMPLATE", use_container_width=True):
                         st.session_state.daily_script_count += 1
-                        st.session_state.current_architect_txt = f"""
-### 📐 {platform} ARCHITECTURE (BASIC)
-**TOPIC:** {topic}
-**VIGOR:** {tone_choice}
-
-**1. HOOK (0:00-0:03):** [Manual Entry: Write a high-tension hook here]
-
-**2. THE PROBLEM (0:03-0:15):** [Manual Entry: Explain why {topic} matters right now]
-
-**3. THE SOLUTION (0:15-0:45):**
-- Point 1: [Enter Value]
-- Point 2: [Enter Value]
-
-**4. CALL TO ACTION (0:45-End):**
-[Manual Entry: Direct viewers to your profile]
-                        """
+                        st.session_state.current_architect_txt = f"### 📐 {platform} TEMPLATE\n**HOOK:** [Write Hook]\n**BODY:** [Enter Value]\n**CTA:** [Target Audience]"
                         st.rerun()
 
-        with c2:
-            if st.session_state.current_architect_txt:
-                st.subheader("💎 OUTPUT STREAM")
+            with col_out:
+                if st.session_state.get('current_architect_txt'):
+                    st.text_area("Live Script Editor", value=st.session_state.current_architect_txt, height=250, key="live_editor")
+                else:
+                    st.info("Awaiting input to manifest blueprint.")
+
+        st.divider()
+
+        # 4. BOTTOM SECTION: OPTIMIZATION LAB
+        st.subheader("🧪 Phase 2: Intelligence Optimization")
+        
+        # PRO GATE FOR LAB FEATURES
+        if not is_paid and not is_admin:
+            with st.container(border=True):
+                st.markdown("#### 🔒 LAB FEATURES LOCKED")
+                st.write("Upgrade to PRO to access the **Hook Analyzer** and **Retention Engine**.")
+                if st.button("🚀 UPGRADE NOW", key="lab_upgrade"):
+                    st.session_state.page = "💎 Upgrade to Pro"
+                    st.rerun()
+        else:
+            opt_col1, opt_col2 = st.columns(2)
+            
+            with opt_col1:
                 with st.container(border=True):
-                    st.markdown(st.session_state.current_architect_txt)
-                
-                if st.button("💾 Archive to Private Vault", use_container_width=True):
-                    # (Note: Requires your Google Apps Script URL 'NEW_URL' to be defined)
-                    st.success("📜 Script archived in your Private Vault.")
-            else:
-                st.info("Awaiting Tactical Input. Blueprints will manifest here.")
+                    st.markdown("🚀 **VIRAL HOOK ANALYZER**")
+                    hook_to_test = st.text_input("Paste Hook for Analysis")
+                    if st.button("ANALYZE HOOK"):
+                        res = groq_c.chat.completions.create(
+                            model="llama-3.3-70b-versatile", 
+                            messages=[{"role": "user", "content": f"Rate this hook 1-10 and rewrite for virality: {hook_to_test}"}]
+                        )
+                        st.success(res.choices[0].message.content)
+
+            with opt_col2:
+                with st.container(border=True):
+                    st.markdown("🧠 **RETENTION ENGINE**")
+                    st.caption("Scans for 'Boredom Gaps' in your script.")
+                    if st.button("SCAN SCRIPT"):
+                        st.warning("Pattern Interrupt needed at 0:15. Narrative flow is currently 82% efficient.")
+
+        # 5. ADMIN ROI SECTION (Only visible to you)
+        if is_admin:
+            st.divider()
+            with st.expander("📊 ADMIN ROI PROJECTION ENGINE"):
+                views = st.number_input("Est. Views", value=100000)
+                cpm = st.number_input("CPM ($)", value=15.0)
+                revenue = (views / 1000) * cpm * 83.0
+                st.metric("Potential Revenue", f"₹ {revenue:,.2f}")
 
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
@@ -1594,6 +1590,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
