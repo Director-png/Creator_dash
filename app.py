@@ -1300,7 +1300,7 @@ elif page == "🛡️ Admin Console":
                     # 2. Execute Uplink to Google Apps Script
                     try:
                         # Using your upgraded Apps Script URL
-                        NEW_URL = "https://script.google.com/macros/s/AKfycbwptoGlGh8xNwVVwf7porQnc-NrW67hrVRpugQpsXxw76X4zsO4qhdk9LH5otqcl4LH/exec" 
+                        NEW_URL = "https://script.google.com/macros/s/AKfycbw8HjjiXJe53CVd4_qU6c4RIjfkMEBJxXZUBVwJdGJCiytgGBgKjMSfGc2tPeckNRih/exec" 
                         response = requests.post(NEW_URL, json=payload, timeout=10)
                         
                         if response.status_code == 200 and "SUCCESS" in response.text:
@@ -1621,6 +1621,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
