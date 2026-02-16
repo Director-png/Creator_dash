@@ -518,7 +518,7 @@ with st.sidebar:
     
     # Dynamic Status Badge
     user_status = st.session_state.get('user_status', 'free').strip().lower()
-    if user_status == 'paid' or st.session_state.user_role == "admin":
+    if user_status == 'Pro' or st.session_state.user_role == "admin":
         st.success("💎 PRO NODE ACTIVE")
     else:
         st.warning("📡 BASIC NODE")
@@ -1623,6 +1623,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
