@@ -76,7 +76,7 @@ SCRIPT_VAULT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup1
 VAULT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfeDAY3gnWYlpH90EaJirxUc8d4obYUgiX72WJIah7Cya1VNQ/formResponse"
 VAULT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQTrDvNWe810s55puzBodFKvfUbfMV_l-QoQIfbdPxeQknClGGCQT33UQ471NyGTw4aHLrDTw/pub?gid=1490190727&single=true&output=csv"
 FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbz1mLI3YkbjVsA4a8rMgMe_07w_1sS8H-f2Wvz1FtFCU-ZN4zCH7kDUGaDPDaaMbrvaPw/exec"
-NEW_URL = "https://script.google.com/macros/s/AKfycbwVz0mo8MNhz1X9poAwi97EyqcEIJuHuMLRMzTnJBN0x6kvdtq0E1gbVPQlVNIcZ55-/exec"
+NEW_URL = "https://script.google.com/macros/s/AKfycbxWGwFa1X_7bqoLq17LqrJvSj56wK-lNItlvH1vQtprgDfZfDQlgr7M3cIk01_7_cOB/exec"
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
 
 def typewriter_effect(text):
@@ -1343,7 +1343,7 @@ elif page == "🛡️ Admin Console":
                     # 2. Execute Uplink to Google Apps Script
                     try:
                         # Using your upgraded Apps Script URL
-                        NEW_URL = "https://script.google.com/macros/s/AKfycbwVz0mo8MNhz1X9poAwi97EyqcEIJuHuMLRMzTnJBN0x6kvdtq0E1gbVPQlVNIcZ55-/exec" 
+                        NEW_URL = "https://script.google.com/macros/s/AKfycbxWGwFa1X_7bqoLq17LqrJvSj56wK-lNItlvH1vQtprgDfZfDQlgr7M3cIk01_7_cOB/exec" 
                         response = requests.post(NEW_URL, json=payload, timeout=30)
                         
                         if response.status_code == 200 and "SUCCESS" in response.text:
@@ -1668,6 +1668,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
