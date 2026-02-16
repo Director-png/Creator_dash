@@ -604,6 +604,18 @@ with st.sidebar:
         st.session_state.logged_in = False
         st.rerun()
 
+with st.sidebar:
+    st.markdown("---")
+    st.subheader("📡 Connection")
+    if st.button("🔄 Sync Neural Status", use_container_width=True):
+        with st.spinner("Checking Uplink..."):
+            # Re-run the verification function
+            if verify_and_sync_status(st.session_state.user_email):
+                st.toast(f"Clearance Level: {st.session_state.user_status}", icon="🛡️")
+                st.rerun()
+            else:
+                st.error("Uplink Timeout.")
+
 # --- PAGE ROUTING ---
 # This variable 'page' is what your module if/elif blocks should use
 page = st.session_state.current_page
@@ -1653,6 +1665,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
