@@ -551,7 +551,49 @@ with st.sidebar:
     st.divider()
     
     if st.button("🔄 SYNC NODE STATUS", use_container_width=True):
-        st.cache_data.clear() # Clears the load_user_db cache
+        st.cache_data.clear() 
+        # --- SYNC PROTOCOL ---
+with st.sidebar:
+    st.markdown("---")
+    st.subheader("🛰️ NETWORK STATUS")
+    
+    # We display the current status for clarity
+    current_status = st.session_state.get('user_status', 'Free').upper()
+    st.caption(f"CURRENT CLEARANCE: {current_status}")
+
+    if st.button("🔄 RE-SYNC NEURAL LINK", use_container_width=True):
+        if 'user_email' in st.session_state:
+            with st.spinner("Accessing Users_DB..."):
+                try:
+                    # Payload for the 'CHECK_STATUS' logic we just fixed in Apps Script
+                    payload = {
+                        "email": st.session_state.user_email,
+                        "action": "CHECK_STATUS"
+                    }
+                    
+                    # Direct uplink to Google
+                    response = requests.post(NEW_URL, json=payload, timeout=15)
+                    
+                    if response.status_code == 200:
+                        new_status = response.text.strip()
+                        
+                        # Update the session brain
+                        st.session_state.user_status = new_status
+                        
+                        # Provide immediate feedback
+                        if new_status.lower() == "pro":
+                            st.toast("PRO CLEARANCE VERIFIED", icon="💎")
+                        else:
+                            st.toast("BASIC CLEARANCE ACTIVE", icon="🌑")
+                        
+                        # THE KEY: Hard reset the UI to show/hide Pro features
+                        st.rerun()
+                    else:
+                        st.error("GATEWAY TIMEOUT")
+                except Exception as e:
+                    st.error(f"UPLINK ERROR: {e}")
+        else:
+            st.warning("NO ACTIVE SESSION DETECTED")# Clears the load_user_db cache
         st.rerun()
 
     if st.button("📩 NEURAL FEEDBACK", use_container_width=True):
@@ -1623,6 +1665,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
