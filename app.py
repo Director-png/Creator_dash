@@ -970,8 +970,9 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (SHADOW INTEGRATED) ---
+# --- MODULE 7: THE NEURAL FORGE (ELITE VIGOR EDITION) ---
 elif page == "🧠 Neural Forge":
+    # 1. ACCESS CONTROL
     if not is_paid and not is_admin:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
         st.warning("PROTOCOL RESTRICTED: Pro License Required.")
@@ -979,22 +980,22 @@ elif page == "🧠 Neural Forge":
 
     st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
     
-    # 1. THE CENTRAL CONTROL PANEL
+    # 2. THE CENTRAL CONTROL PANEL
     with st.container(border=True):
         col_a, col_b = st.columns([1, 1], gap="medium")
         
         with col_a:
             st.subheader("🧬 Core Configuration")
-            # --- NEW: MODE SELECTOR ---
+            # Mode Switch for Shadow Re-engineering
             forge_mode = st.radio("Forge Strategy", ["Cold Start (Original)", "Competitor Shadow (Re-engineer)"], horizontal=True)
             
             f_platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form", "X-Thread"], key="forge_plat")
             f_topic = st.text_input("Core Concept", placeholder="e.g., The psychology of luxury branding", key="forge_top")
             
-            # --- NEW: SHADOW INPUT (Conditional) ---
+            # Shadow Input Area
             shadow_data = ""
             if forge_mode == "Competitor Shadow (Re-engineer)":
-                shadow_data = st.text_area("🛰️ Competitor Transcript / Hook", placeholder="Paste the transcript of the viral video you want to shadow...", height=150)
+                shadow_data = st.text_area("🛰️ Competitor Transcript / DNA", placeholder="Paste the viral transcript here for re-engineering...", height=150)
             
             f_framework = st.selectbox("Retention Framework", [
                 "The Controversy Start (High Vigor)", 
@@ -1013,28 +1014,33 @@ elif page == "🧠 Neural Forge":
             f_audience = st.text_input("Target Audience Persona", "High-Performance Creators")
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
 
-        # 2. THE ACTIVATION BUTTON
+        # 3. THE ACTIVATION ENGINE (With Elite Prompt Logic)
         if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
             if f_topic:
                 with st.spinner("🌑 FORGING ELITE CONTENT..."):
                     try:
-                        # DYNAMIC PROMPT LOGIC
+                        # --- ELITE PROMPT ARCHITECTURE ---
                         if forge_mode == "Competitor Shadow (Re-engineer)" and shadow_data:
                             forge_prompt = (
-                                f"Act as an elite content engineer. Use COMPETITOR SHADOW strategy. "
-                                f"Analyze this competitor transcript for hook structure and retention pacing: '{shadow_data}'. "
-                                f"Re-engineer it for {f_platform} in the niche of '{f_topic}'. "
-                                f"Framework: {f_framework}. Trend Mapping: {f_trend}. Audience: {f_audience}. "
-                                f"Tone Vigor: {f_vigor}. Ensure the new script maintains the viral DNA of the original but is unique to our topic."
+                                f"Role: Elite Viral Growth Engineer. Strategy: COMPETITOR SHADOW.\n"
+                                f"1. ANALYZE DNA: Extract psychological triggers and pacing from: '{shadow_data}'.\n"
+                                f"2. RE-ENGINEER: Create a {f_platform} script for the niche '{f_topic}'.\n"
+                                f"3. RETENTION RULES: NO SENTENCE OVER 12 WORDS. Use 'Pattern Interrupts' every 5 seconds. "
+                                f"Replace generic advice with a 'Unique Mechanism' (give the framework a proprietary name).\n"
+                                f"4. TONE: {f_vigor} Vigor. BANNED WORDS: 'Delve', 'Unleash', 'Imagine', 'In today's world', 'Furthermore'. Use aggressive, punchy language.\n"
+                                f"5. STRUCTURE: Include [Visual Cues] and [Text Overlays]."
                             )
                         else:
                             forge_prompt = (
-                                f"Act as an elite content engineer. Create a script for {f_platform}. "
-                                f"Topic: {f_topic}. Framework: {f_framework}. "
-                                f"Trend Mapping: {f_trend}. Audience: {f_audience}. "
-                                f"Tone Vigor: {f_vigor}. Structure with timestamps, B-roll cues, and psychological triggers."
+                                f"Role: Elite Content Architect. Platform: {f_platform}.\n"
+                                f"Objective: Create a high-retention script for '{f_topic}' using the {f_framework} framework.\n"
+                                f"Constraint: SENTENCES MUST BE SHORT. Max 10-12 words per line. High impact only.\n"
+                                f"BANNED WORDS: 'Delve', 'Unleash', 'Imagine', 'In today's world'. Avoid all AI-sounding filler.\n"
+                                f"Style: {f_vigor} Vigor. Audience: {f_audience}. Trend Sync: {f_trend}.\n"
+                                f"Format: Provide timestamps, B-roll cues, and psychological triggers (Hooks, Open Loops, CTAs)."
                             )
 
+                        # Call Groq
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "user", "content": forge_prompt}]
@@ -1044,22 +1050,24 @@ elif page == "🧠 Neural Forge":
                     except Exception as e:
                         st.error("🚦 UPLINK DELAY: System is recalibrating. Please wait 60 seconds.")
 
-    # 3. OUTPUT & OPTIMIZATION SUITE
+    # 4. OUTPUT & OPTIMIZATION SUITE
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         c_out, c_tools = st.columns([1.5, 1])
         
         with c_out:
             st.subheader("💎 NEURAL OUTPUT")
-            st.session_state.pro_forge_txt = st.text_area("Master Editor", value=st.session_state.pro_forge_txt, height=450)
+            # Text area for manual editing
+            st.session_state.pro_forge_txt = st.text_area("Master Editor", value=st.session_state.pro_forge_txt, height=500)
         
         with c_tools:
             st.subheader("🧪 Intelligence Tools")
+            
             if st.button("🚀 ANALYZE HOOK VIRALITY", use_container_width=True):
                 with st.spinner("Neural Scan..."):
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile", 
-                        messages=[{"role": "user", "content": f"Analyze this hook for viral potential: {st.session_state.pro_forge_txt[:200]}"}]
+                        messages=[{"role": "user", "content": f"Score this hook out of 10 for virality and list why: {st.session_state.pro_forge_txt[:250]}"}]
                     )
                     st.info(res.choices[0].message.content)
 
@@ -1067,9 +1075,18 @@ elif page == "🧠 Neural Forge":
                 with st.spinner("Scanning Pacing..."):
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile", 
-                        messages=[{"role": "user", "content": f"Identify 'wordy' sections in: {st.session_state.pro_forge_txt}"}]
+                        messages=[{"role": "user", "content": f"Highlight any sentence longer than 12 words and suggest a shorter version: {st.session_state.pro_forge_txt}"}]
                     )
                     st.warning(res.choices[0].message.content)
+
+            if st.button("🎭 GENERATE THUMBNAIL CONCEPT", use_container_width=True):
+                with st.spinner("Visualizing..."):
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile", 
+                        messages=[{"role": "user", "content": f"Based on this script, suggest 3 high-CTR thumbnail concepts with text-overlay ideas: {st.session_state.pro_forge_txt}"}]
+                    )
+                    st.success(res.choices[0].message.content)
+
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -1650,6 +1667,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
