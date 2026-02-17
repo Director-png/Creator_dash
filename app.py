@@ -279,35 +279,59 @@ def display_feedback_tab():
                 st.warning("Cannot transmit an empty message.")
 
 def extract_dna_from_url(url):
-    """Extracts DNA and handles auto-translation for non-English videos."""
+    """
+    Extracts DNA with polyglot translation and anti-429 defensive logic.
+    """
     try:
         if "youtube.com" in url or "youtu.be" in url or "shorts" in url:
-            # Universal ID extraction
+            # 1. Clean Extraction of Video ID
+            video_id = ""
             if "shorts/" in url:
                 video_id = url.split("shorts/")[1].split("?")[0]
             elif "v=" in url:
                 video_id = url.split("v=")[1].split("&")[0]
             else:
                 video_id = url.split("/")[-1].split("?")[0]
-            
-            # THE LOGIC UPGRADE: Fetch all available transcripts
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-            
-            try:
-                # Try finding manually created or auto-generated English
-                transcript = transcript_list.find_transcript(['en'])
-            except:
-                # If no English, find the FIRST available (like 'hi' for Hindi) 
-                # and translate it to English on the fly
-                first_available = transcript_list.find_generated_transcript(transcript_list._generated_transcripts.keys())
-                transcript = first_available.translate('en')
 
-            full_text = " ".join([i['text'] for i in transcript.fetch()])
-            return full_text
-            
+            # 2. Attempt Polyglot Extraction
+            try:
+                transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+                
+                try:
+                    # Priority 1: English (Natural or Generated)
+                    transcript = transcript_list.find_transcript(['en'])
+                except:
+                    # Priority 2: Auto-translate whatever is available to English
+                    # Grabs the first key from the generated transcripts dictionary
+                    all_generated = transcript_list._generated_transcripts
+                    if all_generated:
+                        first_lang_code = list(all_generated.keys())[0]
+                        transcript = transcript_list.find_generated_transcript([first_lang_code]).translate('en')
+                    else:
+                        # Fallback to any manual transcript translated
+                        first_manual = list(transcript_list._manually_created_transcripts.keys())[0]
+                        transcript = transcript_list.find_manually_created_transcript([first_manual]).translate('en')
+
+                full_text = " ".join([i['text'] for i in transcript.fetch()])
+                return full_text
+
+            except Exception as e:
+                if "429" in str(e):
+                    return (
+                        "🛰️ YOUTUBE UPLINK BLOCKED (Error 429)\n\n"
+                        "YouTube is limiting automated requests from this server IP.\n\n"
+                        "DIRECTOR'S WORKAROUND:\n"
+                        "1. Open the video in a new tab.\n"
+                        "2. Click 'Show Transcript' on YouTube.\n"
+                        "3. Copy-paste the text directly into the 'Extracted DNA' box below."
+                    )
+                raise e # Pass other errors to the main handler
+                
         elif "instagram.com" in url:
-            return "INSTAGRAM REEL DETECTED: [Extraction mode active]"
+            return "INSTAGRAM REEL DETECTED: [Metadata extraction active - ensure public accessibility]"
+            
         return "ERROR: Unsupported URL format."
+
     except Exception as e:
         return f"EXTRACTION ERROR: {str(e)}"
           
@@ -1705,6 +1729,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
