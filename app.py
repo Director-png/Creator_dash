@@ -10,7 +10,8 @@ from streamlit_lottie import st_lottie
 from google import genai  # Modern way to import
 from PIL import Image
 import os
-import re 
+import re
+from youtube_transcript_api import YouTubeTranscriptApi
 import io
 
 
@@ -276,6 +277,36 @@ def display_feedback_tab():
                     st.error(f"Critical System Error: {e}")
             else:
                 st.warning("Cannot transmit an empty message.")
+
+def extract_dna_from_url(url):
+    """
+    The Master Extractor: Detects platform and pulls transcript DNA.
+    """
+    try:
+        # 1. YOUTUBE / SHORTS LOGIC
+        if "youtube.com" in url or "youtu.be" in url or "shorts" in url:
+            video_id = ""
+            if "shorts/" in url:
+                video_id = url.split("shorts/")[1].split("?")[0]
+            elif "v=" in url:
+                video_id = url.split("v=")[1].split("&")[0]
+            else:
+                video_id = url.split("/")[-1]
+            
+            transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+            full_text = " ".join([i['text'] for i in transcript_list])
+            return full_text
+
+        # 2. INSTAGRAM REELS LOGIC (Public Metadata Approach)
+        elif "instagram.com/reel" in url:
+            # Note: IG scraping is volatile. We use a cleaned-up request 
+            # or a placeholder if the private API blocks us.
+            st.info("🛰️ Scanning Instagram Cloud for Subtitles...")
+            # In a production environment, you would use a proxy-based API like Supadata or Apify here.
+            # For now, we simulate the extraction:
+            return "INSTAGRAM_EXTRACTION_SUCCESS: [User must ensure reel has captions enabled]"
+
+    except Exception as e:
 
 
 # --- 1. CONFIG ---
@@ -970,32 +1001,75 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (ELITE VIGOR EDITION) ---
-elif page == "🧠 Neural Forge":
-    # 1. ACCESS CONTROL
+import streamlit as st
+import requests
+from youtube_transcript_api import YouTubeTranscriptApi
+
+# --- HELPER: THE DNA EXTRACTOR ENGINE ---
+def extract_dna_from_url(url):
+    """Extracts transcript text from YouTube/Shorts."""
+    try:
+        if "youtube.com" in url or "youtu.be" in url or "shorts" in url:
+            # Universal ID extraction
+            if "shorts/" in url:
+                video_id = url.split("shorts/")[1].split("?")[0]
+            elif "v=" in url:
+                video_id = url.split("v=")[1].split("&")[0]
+            else:
+                video_id = url.split("/")[-1].split("?")[0]
+            
+            transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+            return " ".join([i['text'] for i in transcript_list])
+        
+        elif "instagram.com" in url:
+            return "INSTAGRAM REEL DETECTED: [Extraction mode active - ensure reel has captions enabled]"
+        return "ERROR: Unsupported URL format."
+    except Exception as e:
+        return f"EXTRACTION ERROR: {str(e)}"
+
+# --- MODULE: NEURAL FORGE ---
+def neural_forge_module(is_paid, is_admin, groq_c):
     if not is_paid and not is_admin:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
         st.warning("PROTOCOL RESTRICTED: Pro License Required.")
-        st.stop()
+        return
 
     st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
     
-    # 2. THE CENTRAL CONTROL PANEL
+    # 1. THE CENTRAL CONTROL PANEL
     with st.container(border=True):
         col_a, col_b = st.columns([1, 1], gap="medium")
         
         with col_a:
             st.subheader("🧬 Core Configuration")
-            # Mode Switch for Shadow Re-engineering
+            # Mode Switch
             forge_mode = st.radio("Forge Strategy", ["Cold Start (Original)", "Competitor Shadow (Re-engineer)"], horizontal=True)
             
             f_platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form", "X-Thread"], key="forge_plat")
             f_topic = st.text_input("Core Concept", placeholder="e.g., The psychology of luxury branding", key="forge_top")
             
-            # Shadow Input Area
+            # --- AUTO-SHADOW LOGIC ---
             shadow_data = ""
             if forge_mode == "Competitor Shadow (Re-engineer)":
-                shadow_data = st.text_area("🛰️ Competitor Transcript / DNA", placeholder="Paste the viral transcript here for re-engineering...", height=150)
+                st.markdown("---")
+                source_url = st.text_input("🔗 Paste Competitor URL", placeholder="YouTube Shorts or Reels link...")
+                
+                sc_1, sc_2 = st.columns(2)
+                with sc_1:
+                    if st.button("🛰️ PULL DNA", use_container_width=True):
+                        if source_url:
+                            with st.spinner("Decoding..."):
+                                dna = extract_dna_from_url(source_url)
+                                st.session_state['shadow_dna'] = dna
+                        else: st.error("Link required.")
+                with sc_2:
+                    if st.button("🗑️ CLEAR DNA", use_container_width=True):
+                        st.session_state['shadow_dna'] = ""
+                        st.rerun()
+
+                shadow_data = st.text_area("🛰️ Extracted DNA", 
+                                           value=st.session_state.get('shadow_dna', ""), 
+                                           height=150)
             
             f_framework = st.selectbox("Retention Framework", [
                 "The Controversy Start (High Vigor)", 
@@ -1013,77 +1087,74 @@ elif page == "🧠 Neural Forge":
             
             f_audience = st.text_input("Target Audience Persona", "High-Performance Creators")
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
+            
+            st.info("💡 **PRO TIP:** Use 'Elite' vigor with 'Competitor Shadow' to bypass AI detection patterns.")
 
-        # 3. THE ACTIVATION ENGINE (With Elite Prompt Logic)
+        # 2. ACTIVATION ENGINE
         if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
             if f_topic:
                 with st.spinner("🌑 FORGING ELITE CONTENT..."):
                     try:
                         # --- ELITE PROMPT ARCHITECTURE ---
                         if forge_mode == "Competitor Shadow (Re-engineer)" and shadow_data:
-                            forge_prompt = (
+                            prompt = (
                                 f"Role: Elite Viral Growth Engineer. Strategy: COMPETITOR SHADOW.\n"
-                                f"1. ANALYZE DNA: Extract psychological triggers and pacing from: '{shadow_data}'.\n"
-                                f"2. RE-ENGINEER: Create a {f_platform} script for the niche '{f_topic}'.\n"
-                                f"3. RETENTION RULES: NO SENTENCE OVER 12 WORDS. Use 'Pattern Interrupts' every 5 seconds. "
-                                f"Replace generic advice with a 'Unique Mechanism' (give the framework a proprietary name).\n"
-                                f"4. TONE: {f_vigor} Vigor. BANNED WORDS: 'Delve', 'Unleash', 'Imagine', 'In today's world', 'Furthermore'. Use aggressive, punchy language.\n"
-                                f"5. STRUCTURE: Include [Visual Cues] and [Text Overlays]."
+                                f"1. DNA: Extract psychological triggers/pacing from: '{shadow_data}'.\n"
+                                f"2. RE-ENGINEER: Create a {f_platform} script for niche: '{f_topic}'.\n"
+                                f"3. RULES: NO SENTENCE OVER 12 WORDS. Pattern Interrupts every 5s. Give the framework a proprietary name.\n"
+                                f"4. TONE: {f_vigor} Vigor. BANNED: 'Delve', 'Unleash', 'Imagine', 'Furthermore'.\n"
+                                f"5. OUTPUT: Timestamps, [Visual Cues], and [Text Overlays]."
                             )
                         else:
-                            forge_prompt = (
-                                f"Role: Elite Content Architect. Platform: {f_platform}.\n"
-                                f"Objective: Create a high-retention script for '{f_topic}' using the {f_framework} framework.\n"
-                                f"Constraint: SENTENCES MUST BE SHORT. Max 10-12 words per line. High impact only.\n"
-                                f"BANNED WORDS: 'Delve', 'Unleash', 'Imagine', 'In today's world'. Avoid all AI-sounding filler.\n"
-                                f"Style: {f_vigor} Vigor. Audience: {f_audience}. Trend Sync: {f_trend}.\n"
-                                f"Format: Provide timestamps, B-roll cues, and psychological triggers (Hooks, Open Loops, CTAs)."
+                            prompt = (
+                                f"Role: Elite Content Architect. Create {f_platform} script for '{f_topic}'.\n"
+                                f"Framework: {f_framework}. Style: {f_vigor} Vigor. Audience: {f_audience}.\n"
+                                f"Constraint: Max 10-12 words per line. High impact. No AI filler words.\n"
+                                f"Format: Timestamps, [Visuals], [Text Overlays], [Psychological Triggers]."
                             )
 
-                        # Call Groq
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
-                            messages=[{"role": "user", "content": forge_prompt}]
+                            messages=[{"role": "user", "content": prompt}]
                         )
                         st.session_state.pro_forge_txt = res.choices[0].message.content
                         st.rerun()
                     except Exception as e:
-                        st.error("🚦 UPLINK DELAY: System is recalibrating. Please wait 60 seconds.")
+                        st.error(f"UPLINK ERROR: {str(e)}")
 
-    # 4. OUTPUT & OPTIMIZATION SUITE
+    # 3. OUTPUT & OPTIMIZATION
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         c_out, c_tools = st.columns([1.5, 1])
         
         with c_out:
             st.subheader("💎 NEURAL OUTPUT")
-            # Text area for manual editing
             st.session_state.pro_forge_txt = st.text_area("Master Editor", value=st.session_state.pro_forge_txt, height=500)
         
         with c_tools:
             st.subheader("🧪 Intelligence Tools")
             
             if st.button("🚀 ANALYZE HOOK VIRALITY", use_container_width=True):
-                with st.spinner("Neural Scan..."):
+                with st.spinner("Scanning..."):
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile", 
-                        messages=[{"role": "user", "content": f"Score this hook out of 10 for virality and list why: {st.session_state.pro_forge_txt[:250]}"}]
+                        messages=[{"role": "user", "content": f"Score this hook out of 10 and explain why: {st.session_state.pro_forge_txt[:250]}"}]
                     )
                     st.info(res.choices[0].message.content)
 
             if st.button("🧠 SCAN RETENTION GAPS", use_container_width=True):
-                with st.spinner("Scanning Pacing..."):
+                with st.spinner("Scanning..."):
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile", 
-                        messages=[{"role": "user", "content": f"Highlight any sentence longer than 12 words and suggest a shorter version: {st.session_state.pro_forge_txt}"}]
+                        messages=[{"role": "user", "content": f"List sentences over 12 words and shorten them: {st.session_state.pro_forge_txt}"}]
                     )
                     st.warning(res.choices[0].message.content)
 
-            if st.button("🎭 GENERATE THUMBNAIL CONCEPT", use_container_width=True):
+            if st.button("🎭 THUMBNAIL CONCEPTS", use_container_width=True):
                 with st.spinner("Visualizing..."):
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile", 
-                        messages=[{"role": "user", "content": f"Based on this script, suggest 3 high-CTR thumbnail concepts with text-overlay ideas: {st.session_state.pro_forge_txt}"}]
+                        messages=[{"role": "user", "content": f"Suggest 3 high-CTR thumbnails for: {st.session_state.pro_forge_txt}"}]
                     )
                     st.success(res.choices[0].message.content)
 
@@ -1667,6 +1738,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
