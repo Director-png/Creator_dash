@@ -14,7 +14,7 @@ import re
 from youtube_transcript_api import YouTubeTranscriptApi
 import io
 import yt_dlp
-
+import tempfile
 
 # --- INITIALIZE STATE (Place this near the top of your script) ---
 if "current_page" not in st.session_state:
@@ -333,33 +333,56 @@ def extract_dna_from_url(url):
         return f"EXTRACTION ERROR: {str(e)}"
 
 
-def download_media(url, format_type="video"):
-    """
-    The Master Downloader: Handles YouTube, Instagram, and TikTok.
-    """
-    save_path = "downloads/%(title)s.%(ext)s"
+def download_media_high_res(url, format_type):
+    # Use a temporary directory so we don't clutter the server
+    temp_dir = tempfile.mkdtemp()
     
-    # Configuration for yt-dlp
+    # Force MP4 and ensure high-quality stitching
     ydl_opts = {
-        'format': 'bestvideo+bestaudio/best' if format_type == "video" else 'bestaudio/best',
-        'outtmpl': save_path,
-        'postprocessors': [{
+        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+        'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
+        'merge_output_format': 'mp4',
+        'quiet': True,
+    }
+    
+    if "Audio" in format_type:
+        ydl_opts['format'] = 'bestaudio/best'
+        ydl_opts['postprocessors'] = [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': '192',
-        }] if format_type == "audio" else [],
-    }
+        }]
 
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info)
-            if format_type == "audio":
-                filename = filename.rsplit('.', 1)[0] + ".mp3"
-            return filename
-    except Exception as e:
-        return f"ERROR: {str(e)}"
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(url, download=True)
+        # Get the actual final filename (post-processing can change extensions)
+        file_path = ydl.prepare_filename(info)
+        if "Audio" in format_type:
+            file_path = file_path.rsplit('.', 1)[0] + ".mp3"
+        return file_path
 
+# --- INSIDE YOUR MODULE 8 BUTTON LOGIC ---
+if st.button("⚡ INITIATE EXTRACTION", use_container_width=True):
+    if uplink_url:
+        try:
+            with st.spinner("🌑 EXECUTING UPLINK..."):
+                final_path = download_media_high_res(uplink_url, f_ext)
+                
+                # CRITICAL: Read the actual binary data of the file
+                with open(final_path, "rb") as f:
+                    file_data = f.read()
+                
+                # Now the button has the REAL DATA, not just a path
+                st.download_button(
+                    label="💾 SAVE TO COMPUTER",
+                    data=file_data,
+                    file_name=os.path.basename(final_path),
+                    mime="video/mp4" if "Video" in f_ext else "audio/mpeg"
+                )
+                st.success("✅ DNA EXTRACTION COMPLETE")
+                
+        except Exception as e:
+            st.error(f"UPLINK FAILED: {str(e)}")
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -1806,6 +1829,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
