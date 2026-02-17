@@ -1684,7 +1684,7 @@ elif page == "🛰️ Media Uplink":
     if not is_paid and not is_admin:
         st.info("💡 BASIC USER: Standard quality enabled. Upgrade to ELITE for 4K and Social-Thread Archiving.")
     
-    if st.button("⚡ INITIATE EXTRACTION", use_container_width=True):
+    if st.button("⚡ INITIATE EXTRACTION", use_container_width=True, key="media_uplink_btn"):
         if uplink_url:
             progress_bar = st.progress(0, text="Establishing Uplink...")
             
@@ -1861,6 +1861,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
