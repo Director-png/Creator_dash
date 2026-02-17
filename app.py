@@ -516,9 +516,12 @@ with st.sidebar:
     # 1. Identity Header
     st.markdown(f"<h3 style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</h3>", unsafe_allow_html=True)
     
-    # Dynamic Status Badge
+    # Normalizing status for the logic check
     user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
-    if user_status == 'Pro' or st.session_state.user_role == "admin":
+    user_role = str(st.session_state.get('user_role', 'user')).strip().lower()
+
+    # Dynamic Status Badge - Supports 'pro' or 'paid' based on your logic
+    if user_status in ['pro', 'paid'] or user_role == "admin":
         st.success("💎 PRO NODE ACTIVE")
     else:
         st.warning("📡 BASIC NODE")
@@ -527,9 +530,10 @@ with st.sidebar:
     st.divider()
 
     # 2. Define Options based on Role AND Status
-    if st.session_state.user_role == "admin":
+    # Fixed the 'paid' vs 'pro' check to ensure consistent menu rendering
+    if user_role == "admin":
         options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "🧠 Neural Forge", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
-    elif user_status == 'paid':
+    elif user_status in ['pro', 'paid']:
         options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
     else:
         options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "⚖️ Legal Archive", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
@@ -541,83 +545,44 @@ with st.sidebar:
         current_index = 0
 
     # 4. The Unified Radio Menu
-    # Note: We use the variable 'choice' to update current_page
     choice = st.radio("COMMAND CENTER", options, index=current_index)
     
     if choice != st.session_state.current_page and st.session_state.current_page != "FEEDBACK":
         st.session_state.current_page = choice
+        st.rerun()
 
     # 5. Global Action Buttons
     st.divider()
     
-    if st.button("🔄 SYNC NODE STATUS", use_container_width=True):
-        st.cache_data.clear() 
-        # --- SYNC PROTOCOL ---
-with st.sidebar:
-    st.markdown("---")
-    st.subheader("🛰️ NETWORK STATUS")
-    
-    # We display the current status for clarity
-    current_status = st.session_state.get('user_status', 'Free').upper()
-    st.caption(f"CURRENT CLEARANCE: {current_status}")
-
+    # CONSOLIDATED SYNC BUTTON (Combines all your previous versions into one stable uplink)
     if st.button("🔄 RE-SYNC NEURAL LINK", use_container_width=True):
         if 'user_email' in st.session_state:
             with st.spinner("Accessing Users_DB..."):
                 try:
-                    # Payload for the 'CHECK_STATUS' logic we just fixed in Apps Script
-                    payload = {
-                        "email": st.session_state.user_email,
-                        "action": "CHECK_STATUS"
-                    }
-                    
-                    # Direct uplink to Google
+                    payload = {"email": st.session_state.user_email, "action": "CHECK_STATUS"}
                     response = requests.post(NEW_URL, json=payload, timeout=15)
                     
                     if response.status_code == 200:
                         new_status = response.text.strip()
-                        
-                        # Update the session brain
                         st.session_state.user_status = new_status
-                        
-                        # Provide immediate feedback
-                        if new_status.lower() == "pro":
-                            st.toast("PRO CLEARANCE VERIFIED", icon="💎")
-                        else:
-                            st.toast("BASIC CLEARANCE ACTIVE", icon="🌑")
-                        
-                        # THE KEY: Hard reset the UI to show/hide Pro features
+                        st.toast(f"Clearance: {new_status.upper()}", icon="🛡️")
                         st.rerun()
                     else:
                         st.error("GATEWAY TIMEOUT")
                 except Exception as e:
                     st.error(f"UPLINK ERROR: {e}")
         else:
-            st.warning("NO ACTIVE SESSION DETECTED")
-            if response.status_code == 200:
-               new_status = response.text.strip()
-               st.write(f"DEBUG: Google returned: '{new_status}'") # <--- TEMP DEBUG LINE
-        st.rerun()
+            st.warning("NO ACTIVE SESSION")
 
     if st.button("📩 NEURAL FEEDBACK", use_container_width=True):
         st.session_state.current_page = "FEEDBACK"
         st.rerun()
 
     if st.button("🔒 LOGOUT", use_container_width=True):
-        st.session_state.logged_in = False
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
         st.rerun()
 
-with st.sidebar:
-    st.markdown("---")
-    st.subheader("📡 Connection")
-    if st.button("🔄 Sync Neural Status", use_container_width=True):
-        with st.spinner("Checking Uplink..."):
-            # Re-run the verification function
-            if verify_and_sync_status(st.session_state.user_email):
-                st.toast(f"Clearance Level: {st.session_state.user_status}", icon="🛡️")
-                st.rerun()
-            else:
-                st.error("Uplink Timeout.")
 
 # --- PAGE ROUTING ---
 # This variable 'page' is what your module if/elif blocks should use
@@ -1668,6 +1633,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
