@@ -361,28 +361,6 @@ def download_media_high_res(url, format_type):
             file_path = file_path.rsplit('.', 1)[0] + ".mp3"
         return file_path
 
-# --- INSIDE YOUR MODULE 8 BUTTON LOGIC ---
-if st.button("⚡ INITIATE EXTRACTION", use_container_width=True):
-    if uplink_url:
-        try:
-            with st.spinner("🌑 EXECUTING UPLINK..."):
-                final_path = download_media_high_res(uplink_url, f_ext)
-                
-                # CRITICAL: Read the actual binary data of the file
-                with open(final_path, "rb") as f:
-                    file_data = f.read()
-                
-                # Now the button has the REAL DATA, not just a path
-                st.download_button(
-                    label="💾 SAVE TO COMPUTER",
-                    data=file_data,
-                    file_name=os.path.basename(final_path),
-                    mime="video/mp4" if "Video" in f_ext else "audio/mpeg"
-                )
-                st.success("✅ DNA EXTRACTION COMPLETE")
-                
-        except Exception as e:
-            st.error(f"UPLINK FAILED: {str(e)}")
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -1861,6 +1839,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
