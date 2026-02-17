@@ -279,7 +279,7 @@ def display_feedback_tab():
                 st.warning("Cannot transmit an empty message.")
 
 def extract_dna_from_url(url):
-    """Extracts transcript text from YouTube/Shorts."""
+    """Extracts DNA and handles auto-translation for non-English videos."""
     try:
         if "youtube.com" in url or "youtu.be" in url or "shorts" in url:
             # Universal ID extraction
@@ -290,12 +290,23 @@ def extract_dna_from_url(url):
             else:
                 video_id = url.split("/")[-1].split("?")[0]
             
-            # THE FIX: Ensure we call the list_transcripts or get_transcript correctly
-            transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-            return " ".join([i['text'] for i in transcript_list])
-        
+            # THE LOGIC UPGRADE: Fetch all available transcripts
+            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            
+            try:
+                # Try finding manually created or auto-generated English
+                transcript = transcript_list.find_transcript(['en'])
+            except:
+                # If no English, find the FIRST available (like 'hi' for Hindi) 
+                # and translate it to English on the fly
+                first_available = transcript_list.find_generated_transcript(transcript_list._generated_transcripts.keys())
+                transcript = first_available.translate('en')
+
+            full_text = " ".join([i['text'] for i in transcript.fetch()])
+            return full_text
+            
         elif "instagram.com" in url:
-            return "INSTAGRAM REEL DETECTED: [Extraction mode active - ensure reel has captions enabled]"
+            return "INSTAGRAM REEL DETECTED: [Extraction mode active]"
         return "ERROR: Unsupported URL format."
     except Exception as e:
         return f"EXTRACTION ERROR: {str(e)}"
@@ -1694,6 +1705,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
