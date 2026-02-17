@@ -280,11 +280,12 @@ def display_feedback_tab():
 
 def extract_dna_from_url(url):
     """
-    Extracts DNA with polyglot translation and anti-429 defensive logic.
+    The Polyglot Extractor: Handles multiple languages, 
+    auto-translation, and missing caption fallbacks.
     """
     try:
         if "youtube.com" in url or "youtu.be" in url or "shorts" in url:
-            # 1. Clean Extraction of Video ID
+            # 1. Precise ID Extraction
             video_id = ""
             if "shorts/" in url:
                 video_id = url.split("shorts/")[1].split("?")[0]
@@ -293,47 +294,43 @@ def extract_dna_from_url(url):
             else:
                 video_id = url.split("/")[-1].split("?")[0]
 
-            # 2. Attempt Polyglot Extraction
+            # 2. Advanced Transcript Logic
             try:
                 transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
                 
+                # Priority: Try English first, then Hindi/Spanish/French to Translate
                 try:
-                    # Priority 1: English (Natural or Generated)
                     transcript = transcript_list.find_transcript(['en'])
                 except:
-                    # Priority 2: Auto-translate whatever is available to English
-                    # Grabs the first key from the generated transcripts dictionary
-                    all_generated = transcript_list._generated_transcripts
-                    if all_generated:
-                        first_lang_code = list(all_generated.keys())[0]
-                        transcript = transcript_list.find_generated_transcript([first_lang_code]).translate('en')
+                    # Look for the first available language and force translation to English
+                    available_langs = list(transcript_list._generated_transcripts.keys()) + \
+                                     list(transcript_list._manually_created_transcripts.keys())
+                    if available_langs:
+                        transcript = transcript_list.find_transcript([available_langs[0]]).translate('en')
                     else:
-                        # Fallback to any manual transcript translated
-                        first_manual = list(transcript_list._manually_created_transcripts.keys())[0]
-                        transcript = transcript_list.find_manually_created_transcript([first_manual]).translate('en')
+                        raise Exception("No usable transcripts found.")
 
                 full_text = " ".join([i['text'] for i in transcript.fetch()])
                 return full_text
 
-            except Exception as e:
-                if "429" in str(e):
-                    return (
-                        "🛰️ YOUTUBE UPLINK BLOCKED (Error 429)\n\n"
-                        "YouTube is limiting automated requests from this server IP.\n\n"
-                        "DIRECTOR'S WORKAROUND:\n"
-                        "1. Open the video in a new tab.\n"
-                        "2. Click 'Show Transcript' on YouTube.\n"
-                        "3. Copy-paste the text directly into the 'Extracted DNA' box below."
-                    )
-                raise e # Pass other errors to the main handler
-                
+            except Exception as sub_e:
+                # This catches 'Subtitles Disabled' or '429 Too Many Requests'
+                return (
+                    "⚠️ DNA ACCESS RESTRICTED\n\n"
+                    "REASON: YouTube has disabled captions for this video or is blocking the request.\n\n"
+                    "DIRECTOR'S ACTION:\n"
+                    "1. Paste the link in the VOID Chat and ask for a 'Visual DNA Scan'.\n"
+                    "2. Copy VOID's summary and paste it manually into the box below."
+                )
+        
         elif "instagram.com" in url:
-            return "INSTAGRAM REEL DETECTED: [Metadata extraction active - ensure public accessibility]"
+            return "INSTAGRAM REEL DETECTED: [Metadata scan active]"
             
         return "ERROR: Unsupported URL format."
 
     except Exception as e:
         return f"EXTRACTION ERROR: {str(e)}"
+
           
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -1729,6 +1726,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
