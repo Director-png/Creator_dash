@@ -1002,32 +1002,6 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-import streamlit as st
-import requests
-from youtube_transcript_api import YouTubeTranscriptApi
-
-# --- HELPER: THE DNA EXTRACTOR ENGINE ---
-def extract_dna_from_url(url):
-    """Extracts transcript text from YouTube/Shorts."""
-    try:
-        if "youtube.com" in url or "youtu.be" in url or "shorts" in url:
-            # Universal ID extraction
-            if "shorts/" in url:
-                video_id = url.split("shorts/")[1].split("?")[0]
-            elif "v=" in url:
-                video_id = url.split("v=")[1].split("&")[0]
-            else:
-                video_id = url.split("/")[-1].split("?")[0]
-            
-            transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-            return " ".join([i['text'] for i in transcript_list])
-        
-        elif "instagram.com" in url:
-            return "INSTAGRAM REEL DETECTED: [Extraction mode active - ensure reel has captions enabled]"
-        return "ERROR: Unsupported URL format."
-    except Exception as e:
-        return f"EXTRACTION ERROR: {str(e)}"
-
 # --- MODULE 7: THE NEURAL FORGE (INTEGRATED ELIF) ---
 elif page == "🧠 Neural Forge":
     if not is_paid and not is_admin:
@@ -1730,6 +1704,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
