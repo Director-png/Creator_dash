@@ -8,5 +8,6 @@ beautifulsoup4
 streamlit-lottie
 google-genai
 Pillow
+youtube-transcript-api
 
 
