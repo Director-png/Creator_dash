@@ -529,7 +529,7 @@ with st.sidebar:
     # 2. Define Options based on Role AND Status
     if st.session_state.user_role == "admin":
         options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "🧠 Neural Forge", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
-    elif user_status == 'paid':
+    elif user_status == 'Pro':
         options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
     else:
         options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "⚖️ Legal Archive", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
@@ -1668,6 +1668,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
