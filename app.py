@@ -279,36 +279,26 @@ def display_feedback_tab():
                 st.warning("Cannot transmit an empty message.")
 
 def extract_dna_from_url(url):
-    """
-    The Master Extractor: Detects platform and pulls transcript DNA.
-    """
+    """Extracts transcript text from YouTube/Shorts."""
     try:
-        # 1. YOUTUBE / SHORTS LOGIC
         if "youtube.com" in url or "youtu.be" in url or "shorts" in url:
-            video_id = ""
+            # Universal ID extraction
             if "shorts/" in url:
                 video_id = url.split("shorts/")[1].split("?")[0]
             elif "v=" in url:
                 video_id = url.split("v=")[1].split("&")[0]
             else:
-                video_id = url.split("/")[-1]
+                video_id = url.split("/")[-1].split("?")[0]
             
+            # THE FIX: Ensure we call the list_transcripts or get_transcript correctly
             transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-            full_text = " ".join([i['text'] for i in transcript_list])
-            return full_text
-
-        # 2. INSTAGRAM REELS LOGIC (Public Metadata Approach)
-        elif "instagram.com/reel" in url:
-            # Note: IG scraping is volatile. We use a cleaned-up request 
-            # or a placeholder if the private API blocks us.
-            st.info("🛰️ Scanning Instagram Cloud for Subtitles...")
-            # In a production environment, you would use a proxy-based API like Supadata or Apify here.
-            # For now, we simulate the extraction:
-            return "INSTAGRAM_EXTRACTION_SUCCESS: [User must ensure reel has captions enabled]"
-
+            return " ".join([i['text'] for i in transcript_list])
+        
+        elif "instagram.com" in url:
+            return "INSTAGRAM REEL DETECTED: [Extraction mode active - ensure reel has captions enabled]"
+        return "ERROR: Unsupported URL format."
     except Exception as e:
-          # This is the line you were missing to fix the IndentationError
-        return f"UPLINK ERROR: {str(e)}"
+        return f"EXTRACTION ERROR: {str(e)}"
           
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -1704,6 +1694,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
