@@ -1639,117 +1639,97 @@ elif page == "💎 Upgrade to Pro":
                     else:
                         st.error("Invalid Input Details.")
 
-
 # --- MODULE 8: MEDIA UPLINK (THE MASTER EXTRACTOR) ---
 elif page == "🛰️ Media Uplink":
-    # 1. INITIALIZE VARIABLES (Prevents NameError)
-    if 'uplink_url' not in st.session_state:
-        st.session_state.uplink_url = ""
-    if 'f_ext' not in st.session_state:
-        st.session_state.f_ext = "Video (MP4)"
+    # 1. INITIALIZE VARIABLES (Kills NameError)
+    if 'uplink_url' not in st.session_state: st.session_state.uplink_url = ""
+    if 'f_ext' not in st.session_state: st.session_state.f_ext = "Video (MP4)"
 
     st.markdown("<h1 style='color: #00ff41;'>🛰️ MEDIA UPLINK // ARCHIVE</h1>", unsafe_allow_html=True)
     
     with st.container(border=True):
         col_url, col_type = st.columns([2, 1])
         with col_url:
-            uplink_url = st.text_input("🔗 Source URL", placeholder="Paste YouTube, Instagram, TikTok, etc.", key="url_input_main")
+            uplink_url = st.text_input("🔗 Source URL", placeholder="Paste YouTube link...", key="url_input_final")
         with col_type:
             available_formats = ["Video (MP4)", "Audio (MP3)"]
             if is_paid or is_admin:
-                available_formats += ["High-Res 4K", "X-Thread (PDF)", "LinkedIn Archive"]
-            
-            f_ext = st.selectbox("Extraction Format", available_formats, key="format_select_main")
+                available_formats += ["High-Res 4K", "X-Thread (PDF)"]
+            f_ext = st.selectbox("Extraction Format", available_formats, key="format_select_final")
 
-    # Tiered UI feedback
-    if not is_paid and not is_admin:
-        st.info("💡 BASIC USER: Standard quality enabled. Upgrade to ELITE for 4K and Social Archiving.")
-    
-    # 2. THE EXTRACTION BUTTON
-    if st.button("⚡ INITIATE EXTRACTION", use_container_width=True, key="uplink_execute_btn"):
+    # 2. THE EXECUTION ENGINE
+    if st.button("⚡ INITIATE EXTRACTION", use_container_width=True, key="master_uplink_btn"):
         if uplink_url:
-            progress_bar = st.progress(0, text="Establishing Secure Uplink...")
+            progress_bar = st.progress(0, text="Shadowing IP...")
             
             try:
-                # Platform Detection (Elite Logic)
-                if ("x.com" in uplink_url or "twitter.com" in uplink_url) or ("linkedin.com" in uplink_url):
-                    if not (is_paid or is_admin):
-                        st.error("Protocol Restricted: This platform requires an ELITE license.")
-                    else:
-                        st.success("✅ Content captured to Archive (Full logic in next update).")
+                import yt_dlp
+                import os
+                import tempfile
+
+                # Create a safe temp folder for the cloud server
+                temp_dir = tempfile.mkdtemp()
+                out_path = os.path.join(temp_dir, 'media_%(id)s.%(ext)s')
+
+                # THE "ZERO DOLLAR" 403 BYPASS SETTINGS (Updated for 2026)
+                ydl_opts = {
+                    # Avoid the 'android' client (currently blocked on cloud)
+                    # Use 'web_embedded' and 'tv' which are more lenient
+                    'extractor_args': {
+                        'youtube': {
+                            'player_client': ['web_embedded', 'tv', 'web'],
+                            'player_skip': ['webpage', 'configs'],
+                        }
+                    },
+                    'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+                    'outtmpl': out_path,
+                    'merge_output_format': 'mp4',
+                    'quiet': True,
+                    'nocheckcertificate': True,
+                    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0 Safari/537.36',
+                }
                 
-                else:
-                    # THE REAL ENGINE: yt-dlp with Stealth Bypass
-                    import yt_dlp
-                    import os
-                    import tempfile
+                if "Audio" in f_ext:
+                    ydl_opts['format'] = 'bestaudio/best'
+                    ydl_opts['postprocessors'] = [{
+                        'key': 'FFmpegExtractAudio',
+                        'preferredcodec': 'mp3',
+                        'preferredquality': '192',
+                    }]
 
-                    progress_bar.progress(30, text="Bypassing Firewalls (Applying Stealth Headers)...")
-                    
-                    # Create a temporary directory for the download
-                    temp_dir = tempfile.mkdtemp()
-                    out_path = os.path.join(temp_dir, 'extracted_media.%(ext)s')
-
-                    # STEALTH OPTIONS to prevent 403 Forbidden Errors
-                    ydl_opts = {
-                        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-                        'outtmpl': out_path,
-                        'merge_output_format': 'mp4',
-                        'quiet': True,
-                        'no_warnings': True,
-                        'nocheckcertificate': True,
-                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
-                    }
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    progress_bar.progress(40, text="Extracting Data Shards...")
+                    info = ydl.extract_info(uplink_url, download=True)
+                    final_file_path = ydl.prepare_filename(info)
                     
                     if "Audio" in f_ext:
-                        ydl_opts['format'] = 'bestaudio/best'
-                        ydl_opts['postprocessors'] = [{
-                            'key': 'FFmpegExtractAudio',
-                            'preferredcodec': 'mp3',
-                            'preferredquality': '192',
-                        }]
+                        final_file_path = final_file_path.rsplit('.', 1)[0] + ".mp3"
 
-                    # Execution
-                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        progress_bar.progress(60, text="Downloading Data Shards...")
-                        info = ydl.extract_info(uplink_url, download=True)
-                        final_file_path = ydl.prepare_filename(info)
-                        
-                        # Correcting extension for Audio-only conversions
-                        if "Audio" in f_ext:
-                            final_file_path = final_file_path.rsplit('.', 1)[0] + ".mp3"
-
-                    progress_bar.progress(100, text="Uplink Successful.")
-                    st.balloons()
-                    
-                    # 3. CONVERT TO BINARY (Fixes 0.1kb crash files)
-                    with open(final_file_path, "rb") as f:
-                        file_bytes = f.read()
-                    
-                    # 4. DOWNLOAD BUTTON (Only shows once file is ready)
-                    st.download_button(
-                        label="💾 SAVE ASSETS TO LOCAL DISK",
-                        data=file_bytes,
-                        file_name=os.path.basename(final_file_path),
-                        mime="video/mp4" if "Video" in f_ext else "audio/mpeg",
-                        use_container_width=True,
-                        key="final_download_trigger"
-                    )
-                    
-                    # Cleanup server storage
-                    os.remove(final_file_path)
+                progress_bar.progress(100, text="Uplink Secured.")
+                
+                # 3. BINARY HANDOFF (Ensures file isn't 0.1kb)
+                with open(final_file_path, "rb") as f:
+                    file_data = f.read()
+                
+                st.download_button(
+                    label="💾 DOWNLOAD ASSET",
+                    data=file_data,
+                    file_name=os.path.basename(final_file_path),
+                    mime="video/mp4" if "Video" in f_ext else "audio/mpeg",
+                    use_container_width=True,
+                    key="trigger_download_final"
+                )
+                
+                # Auto-delete to save server space
+                os.remove(final_file_path)
 
             except Exception as e:
-                # Custom error handling for common 2026 blocks
                 if "403" in str(e):
-                    st.error("UPLINK BLOCKED: YouTube is detecting a Cloud IP. We are rotating stealth headers...")
-                elif "Instagram" in str(e):
-                    st.warning("Instagram requires local cookie authentication. Use YouTube for full functionality.")
+                    st.error("🚨 403 FORBIDDEN: YouTube blocked this cloud IP. Try again in 60 seconds or use a different link.")
                 else:
                     st.error(f"UPLINK FAILED: {str(e)}")
         else:
-            st.warning("Director, I need a valid URL to begin extraction.")
+            st.warning("Director, insert a URL to begin.")
 
 elif page == "⚙️ Settings":
     st.markdown("<h1 style='color: #00ff41;'>⚙️ SYSTEM SETTINGS</h1>", unsafe_allow_html=True)
@@ -1859,6 +1839,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
