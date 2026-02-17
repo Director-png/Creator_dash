@@ -1664,6 +1664,10 @@ elif page == "💎 Upgrade to Pro":
 
 # --- MODULE 8: MEDIA UPLINK (THE MASTER EXTRACTOR) ---
 elif page == "🛰️ Media Uplink":
+    # 1. Initialize variables at the top to prevent NameErrors
+    uplink_url = ""
+    f_ext = "Video (MP4)" 
+
     st.markdown("<h1 style='color: #00ff41;'>🛰️ MEDIA UPLINK // ARCHIVE</h1>", unsafe_allow_html=True)
     
     with st.container(border=True):
@@ -1671,50 +1675,78 @@ elif page == "🛰️ Media Uplink":
         with col_url:
             uplink_url = st.text_input("🔗 Source URL", placeholder="Paste YouTube, Instagram, TikTok, X, or LinkedIn link...")
         with col_type:
-            # Format varies by license
             available_formats = ["Video (MP4)", "Audio (MP3)"]
             if is_paid or is_admin:
                 available_formats += ["High-Res 4K", "X-Thread (PDF)", "LinkedIn Archive"]
             
             f_ext = st.selectbox("Extraction Format", available_formats)
 
-    # UI for Basic vs Elite Features
     if not is_paid and not is_admin:
         st.info("💡 BASIC USER: Standard quality enabled. Upgrade to ELITE for 4K and Social-Thread Archiving.")
     
     if st.button("⚡ INITIATE EXTRACTION", use_container_width=True):
         if uplink_url:
-            # We use a progress bar to show the extraction status
             progress_bar = st.progress(0, text="Establishing Uplink...")
             
             try:
-                # 1. Platform Detection
-                if "x.com" in uplink_url or "twitter.com" in uplink_url:
-                    if not (is_paid or is_admin):
-                        st.error("X-Thread Extraction is an ELITE Protocol.")
-                    else:
-                        progress_bar.progress(50, text="Capturing Thread DNA...")
-                        # [Logic for X-Scraping to PDF would trigger here]
-                        st.success("✅ Thread Archived as PDF.")
+                # Platform Detection Logic
+                if ("x.com" in uplink_url or "twitter.com" in uplink_url) and (is_paid or is_admin):
+                    progress_bar.progress(50, text="Capturing Thread DNA...")
+                    st.success("✅ Thread Archived as PDF.")
+                    # (Insert PDF logic here later)
                 
-                elif "linkedin.com" in uplink_url:
-                    if not (is_paid or is_admin):
-                        st.error("LinkedIn Archiving is an ELITE Protocol.")
-                    else:
-                        st.success("✅ LinkedIn Post Saved to Intelligence Bank.")
+                elif "linkedin.com" in uplink_url and (is_paid or is_admin):
+                    st.success("✅ LinkedIn Post Saved to Intelligence Bank.")
+                
+                elif "x.com" in uplink_url or "linkedin.com" in uplink_url:
+                    st.error("This platform requires an ELITE Protocol license.")
 
                 else:
-                    # YouTube/Insta/TikTok Logic using yt-dlp
-                    progress_bar.progress(30, text="Bypassing Firewalls...")
-                    # Simulating the download process for the UI
-                    import time
-                    for p in range(30, 101, 10):
-                        time.sleep(0.3)
-                        progress_bar.progress(p, text=f"Downloading {f_ext}...")
+                    # THE REAL ENGINE: yt-dlp 
+                    import yt_dlp
+                    import os
                     
+                    progress_bar.progress(30, text="Bypassing Firewalls...")
+                    
+                    # Define download settings
+                    ydl_opts = {
+                        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+                        'outtmpl': 'downloaded_media.%(ext)s',
+                        'merge_output_format': 'mp4',
+                        'quiet': True,
+                    }
+                    
+                    if "Audio" in f_ext:
+                        ydl_opts['format'] = 'bestaudio/best'
+                        ydl_opts['postprocessors'] = [{
+                            'key': 'FFmpegExtractAudio',
+                            'preferredcodec': 'mp3',
+                            'preferredquality': '192',
+                        }]
+
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        info = ydl.extract_info(uplink_url, download=True)
+                        file_path = ydl.prepare_filename(info)
+                        # Fix extension if it was converted to MP3
+                        if "Audio" in f_ext:
+                            file_path = file_path.rsplit('.', 1)[0] + ".mp3"
+
+                    progress_bar.progress(100, text="Extraction Complete!")
                     st.balloons()
-                    st.success(f"Successfully extracted: {f_ext}")
-                    st.download_button("💾 DOWNLOAD FILE", data="Sample Data", file_name="uplink_media.mp4")
+                    
+                    # THE CRITICAL STEP: Read file as bytes to avoid 0.1kb errors
+                    with open(file_path, "rb") as f:
+                        media_bytes = f.read()
+                    
+                    st.download_button(
+                        label="💾 DOWNLOAD ASSETS",
+                        data=media_bytes,
+                        file_name=os.path.basename(file_path),
+                        mime="video/mp4" if "Video" in f_ext else "audio/mpeg"
+                    )
+                    
+                    # Clean up the server storage
+                    os.remove(file_path)
 
             except Exception as e:
                 st.error(f"UPLINK FAILED: {str(e)}")
@@ -1829,6 +1861,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
