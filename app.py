@@ -970,89 +970,106 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (STABLE & EXPOSED) ---
+# --- MODULE 7: THE NEURAL FORGE (SHADOW INTEGRATED) ---
 elif page == "🧠 Neural Forge":
-        if not is_paid and not is_admin:
-            st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
-            st.warning("PROTOCOL RESTRICTED: Pro License Required.")
-            st.stop()
+    if not is_paid and not is_admin:
+        st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
+        st.warning("PROTOCOL RESTRICTED: Pro License Required.")
+        st.stop()
 
-        st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
+    
+    # 1. THE CENTRAL CONTROL PANEL
+    with st.container(border=True):
+        col_a, col_b = st.columns([1, 1], gap="medium")
         
-        # 1. THE CENTRAL CONTROL PANEL
-        with st.container(border=True):
-            col_a, col_b = st.columns([1, 1], gap="medium")
+        with col_a:
+            st.subheader("🧬 Core Configuration")
+            # --- NEW: MODE SELECTOR ---
+            forge_mode = st.radio("Forge Strategy", ["Cold Start (Original)", "Competitor Shadow (Re-engineer)"], horizontal=True)
             
-            with col_a:
-                st.subheader("🧬 Core Configuration")
-                f_platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form", "X-Thread"], key="forge_plat")
-                f_topic = st.text_input("Core Concept", placeholder="e.g., The psychology of luxury branding", key="forge_top")
-                
-                f_framework = st.selectbox("Retention Framework", [
-                    "The Controversy Start (High Vigor)", 
-                    "The Hero's Journey (Storytelling)", 
-                    "Statistical Shock (Educational)",
-                    "The 'Mistake' Hook (Click-through Focus)",
-                    "Day in the Life (Relatability)",
-                    "The Deep-Dive (Authority)"
-                ])
+            f_platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form", "X-Thread"], key="forge_plat")
+            f_topic = st.text_input("Core Concept", placeholder="e.g., The psychology of luxury branding", key="forge_top")
+            
+            # --- NEW: SHADOW INPUT (Conditional) ---
+            shadow_data = ""
+            if forge_mode == "Competitor Shadow (Re-engineer)":
+                shadow_data = st.text_area("🛰️ Competitor Transcript / Hook", placeholder="Paste the transcript of the viral video you want to shadow...", height=150)
+            
+            f_framework = st.selectbox("Retention Framework", [
+                "The Controversy Start (High Vigor)", 
+                "The Hero's Journey (Storytelling)", 
+                "Statistical Shock (Educational)",
+                "The 'Mistake' Hook (Click-through Focus)",
+                "Day in the Life (Relatability)",
+                "The Deep-Dive (Authority)"
+            ])
 
-            with col_b:
-                st.subheader("📡 Trend Mapper")
-                # FIXED: Options and Default now match perfectly to prevent API Exception
-                trend_options = ["None", "Viral Audio", "Niche Commentary", "POV/Relatable", "Educational Breakdown"]
-                f_trend = st.radio("Current Trend Sync", options=trend_options, index=0, horizontal=True)
-                
-                f_audience = st.text_input("Target Audience Persona", "High-Performance Creators")
-                f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
+        with col_b:
+            st.subheader("📡 Trend Mapper")
+            trend_options = ["None", "Viral Audio", "Niche Commentary", "POV/Relatable", "Educational Breakdown"]
+            f_trend = st.radio("Current Trend Sync", options=trend_options, index=0, horizontal=True)
+            
+            f_audience = st.text_input("Target Audience Persona", "High-Performance Creators")
+            f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
 
-            # 2. THE ACTIVATION BUTTON
-            if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
-                if f_topic:
-                    with st.spinner("🌑 FORGING ELITE CONTENT..."):
-                        try:
+        # 2. THE ACTIVATION BUTTON
+        if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
+            if f_topic:
+                with st.spinner("🌑 FORGING ELITE CONTENT..."):
+                    try:
+                        # DYNAMIC PROMPT LOGIC
+                        if forge_mode == "Competitor Shadow (Re-engineer)" and shadow_data:
+                            forge_prompt = (
+                                f"Act as an elite content engineer. Use COMPETITOR SHADOW strategy. "
+                                f"Analyze this competitor transcript for hook structure and retention pacing: '{shadow_data}'. "
+                                f"Re-engineer it for {f_platform} in the niche of '{f_topic}'. "
+                                f"Framework: {f_framework}. Trend Mapping: {f_trend}. Audience: {f_audience}. "
+                                f"Tone Vigor: {f_vigor}. Ensure the new script maintains the viral DNA of the original but is unique to our topic."
+                            )
+                        else:
                             forge_prompt = (
                                 f"Act as an elite content engineer. Create a script for {f_platform}. "
                                 f"Topic: {f_topic}. Framework: {f_framework}. "
                                 f"Trend Mapping: {f_trend}. Audience: {f_audience}. "
                                 f"Tone Vigor: {f_vigor}. Structure with timestamps, B-roll cues, and psychological triggers."
                             )
-                            res = groq_c.chat.completions.create(
-                                model="llama-3.3-70b-versatile", 
-                                messages=[{"role": "user", "content": forge_prompt}]
-                            )
-                            st.session_state.pro_forge_txt = res.choices[0].message.content
-                            st.rerun()
-                        except Exception as e:
-                            st.error("🚦 UPLINK DELAY: System is recalibrating. Please wait 60 seconds.")
 
-        # 3. OUTPUT & OPTIMIZATION SUITE
-        if st.session_state.get('pro_forge_txt'):
-            st.divider()
-            c_out, c_tools = st.columns([1.5, 1])
-            
-            with c_out:
-                st.subheader("💎 NEURAL OUTPUT")
-                st.session_state.pro_forge_txt = st.text_area("Master Editor", value=st.session_state.pro_forge_txt, height=450)
-            
-            with c_tools:
-                st.subheader("🧪 Intelligence Tools")
-                if st.button("🚀 ANALYZE HOOK VIRALITY", use_container_width=True):
-                    with st.spinner("Neural Scan..."):
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
-                            messages=[{"role": "user", "content": f"Analyze this hook for viral potential: {st.session_state.pro_forge_txt[:200]}"}]
+                            messages=[{"role": "user", "content": forge_prompt}]
                         )
-                        st.info(res.choices[0].message.content)
+                        st.session_state.pro_forge_txt = res.choices[0].message.content
+                        st.rerun()
+                    except Exception as e:
+                        st.error("🚦 UPLINK DELAY: System is recalibrating. Please wait 60 seconds.")
 
-                if st.button("🧠 SCAN RETENTION GAPS", use_container_width=True):
-                    with st.spinner("Scanning Pacing..."):
-                        res = groq_c.chat.completions.create(
-                            model="llama-3.3-70b-versatile", 
-                            messages=[{"role": "user", "content": f"Identify 'wordy' sections in: {st.session_state.pro_forge_txt}"}]
-                        )
-                        st.warning(res.choices[0].message.content)
+    # 3. OUTPUT & OPTIMIZATION SUITE
+    if st.session_state.get('pro_forge_txt'):
+        st.divider()
+        c_out, c_tools = st.columns([1.5, 1])
+        
+        with c_out:
+            st.subheader("💎 NEURAL OUTPUT")
+            st.session_state.pro_forge_txt = st.text_area("Master Editor", value=st.session_state.pro_forge_txt, height=450)
+        
+        with c_tools:
+            st.subheader("🧪 Intelligence Tools")
+            if st.button("🚀 ANALYZE HOOK VIRALITY", use_container_width=True):
+                with st.spinner("Neural Scan..."):
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile", 
+                        messages=[{"role": "user", "content": f"Analyze this hook for viral potential: {st.session_state.pro_forge_txt[:200]}"}]
+                    )
+                    st.info(res.choices[0].message.content)
 
+            if st.button("🧠 SCAN RETENTION GAPS", use_container_width=True):
+                with st.spinner("Scanning Pacing..."):
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile", 
+                        messages=[{"role": "user", "content": f"Identify 'wordy' sections in: {st.session_state.pro_forge_txt}"}]
+                    )
+                    st.warning(res.choices[0].message.content)
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -1633,6 +1650,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
