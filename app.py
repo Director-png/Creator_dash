@@ -1028,12 +1028,12 @@ def extract_dna_from_url(url):
     except Exception as e:
         return f"EXTRACTION ERROR: {str(e)}"
 
-# --- MODULE: NEURAL FORGE ---
-def neural_forge_module(is_paid, is_admin, groq_c):
+# --- MODULE 7: THE NEURAL FORGE (INTEGRATED ELIF) ---
+elif page == "🧠 Neural Forge":
     if not is_paid and not is_admin:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
         st.warning("PROTOCOL RESTRICTED: Pro License Required.")
-        return
+        st.stop()
 
     st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
     
@@ -1043,7 +1043,6 @@ def neural_forge_module(is_paid, is_admin, groq_c):
         
         with col_a:
             st.subheader("🧬 Core Configuration")
-            # Mode Switch
             forge_mode = st.radio("Forge Strategy", ["Cold Start (Original)", "Competitor Shadow (Re-engineer)"], horizontal=True)
             
             f_platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form", "X-Thread"], key="forge_plat")
@@ -1060,6 +1059,7 @@ def neural_forge_module(is_paid, is_admin, groq_c):
                     if st.button("🛰️ PULL DNA", use_container_width=True):
                         if source_url:
                             with st.spinner("Decoding..."):
+                                # Ensure this function is defined at the TOP of your app script
                                 dna = extract_dna_from_url(source_url)
                                 st.session_state['shadow_dna'] = dna
                         else: st.error("Link required.")
@@ -1088,15 +1088,12 @@ def neural_forge_module(is_paid, is_admin, groq_c):
             
             f_audience = st.text_input("Target Audience Persona", "High-Performance Creators")
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
-            
-            st.info("💡 **PRO TIP:** Use 'Elite' vigor with 'Competitor Shadow' to bypass AI detection patterns.")
 
         # 2. ACTIVATION ENGINE
         if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
             if f_topic:
                 with st.spinner("🌑 FORGING ELITE CONTENT..."):
                     try:
-                        # --- ELITE PROMPT ARCHITECTURE ---
                         if forge_mode == "Competitor Shadow (Re-engineer)" and shadow_data:
                             prompt = (
                                 f"Role: Elite Viral Growth Engineer. Strategy: COMPETITOR SHADOW.\n"
@@ -1127,14 +1124,11 @@ def neural_forge_module(is_paid, is_admin, groq_c):
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         c_out, c_tools = st.columns([1.5, 1])
-        
         with c_out:
             st.subheader("💎 NEURAL OUTPUT")
             st.session_state.pro_forge_txt = st.text_area("Master Editor", value=st.session_state.pro_forge_txt, height=500)
-        
         with c_tools:
             st.subheader("🧪 Intelligence Tools")
-            
             if st.button("🚀 ANALYZE HOOK VIRALITY", use_container_width=True):
                 with st.spinner("Scanning..."):
                     res = groq_c.chat.completions.create(
@@ -1142,7 +1136,6 @@ def neural_forge_module(is_paid, is_admin, groq_c):
                         messages=[{"role": "user", "content": f"Score this hook out of 10 and explain why: {st.session_state.pro_forge_txt[:250]}"}]
                     )
                     st.info(res.choices[0].message.content)
-
             if st.button("🧠 SCAN RETENTION GAPS", use_container_width=True):
                 with st.spinner("Scanning..."):
                     res = groq_c.chat.completions.create(
@@ -1150,7 +1143,6 @@ def neural_forge_module(is_paid, is_admin, groq_c):
                         messages=[{"role": "user", "content": f"List sentences over 12 words and shorten them: {st.session_state.pro_forge_txt}"}]
                     )
                     st.warning(res.choices[0].message.content)
-
             if st.button("🎭 THUMBNAIL CONCEPTS", use_container_width=True):
                 with st.spinner("Visualizing..."):
                     res = groq_c.chat.completions.create(
@@ -1158,7 +1150,6 @@ def neural_forge_module(is_paid, is_admin, groq_c):
                         messages=[{"role": "user", "content": f"Suggest 3 high-CTR thumbnails for: {st.session_state.pro_forge_txt}"}]
                     )
                     st.success(res.choices[0].message.content)
-
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -1739,6 +1730,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
