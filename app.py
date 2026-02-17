@@ -307,8 +307,9 @@ def extract_dna_from_url(url):
             return "INSTAGRAM_EXTRACTION_SUCCESS: [User must ensure reel has captions enabled]"
 
     except Exception as e:
-
-
+          # This is the line you were missing to fix the IndentationError
+        return f"UPLINK ERROR: {str(e)}"
+          
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 # --- GLOBAL PERSONA DETECTION (Do this before any pages load) ---
@@ -1738,6 +1739,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
