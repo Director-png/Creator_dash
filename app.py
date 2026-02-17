@@ -1039,43 +1039,38 @@ elif page == "🧠 Neural Forge":
         
         with col_a:
             st.subheader("🧬 Core Configuration")
-            forge_mode = st.radio("Forge Strategy", ["Cold Start (Original)", "Competitor Shadow (Re-engineer)"], horizontal=True)
+            # Strategy selection with 'Coming Soon' label for Shadow mode
+            forge_mode = st.radio("Forge Strategy", ["Cold Start (Original)", "Competitor Shadow (Coming Soon 🔒)"], horizontal=True)
             
             f_platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form", "X-Thread"], key="forge_plat")
             f_topic = st.text_input("Core Concept", placeholder="e.g., The psychology of luxury branding", key="forge_top")
             
-            # --- AUTO-SHADOW LOGIC ---
-            shadow_data = ""
-            if forge_mode == "Competitor Shadow (Re-engineer)":
+            # Gated Shadow Logic
+            if forge_mode == "Competitor Shadow (Coming Soon 🔒)":
                 st.markdown("---")
-                source_url = st.text_input("🔗 Paste Competitor URL", placeholder="YouTube Shorts or Reels link...")
-                
-                sc_1, sc_2 = st.columns(2)
-                with sc_1:
-                    if st.button("🛰️ PULL DNA", use_container_width=True):
-                        if source_url:
-                            with st.spinner("Decoding..."):
-                                # Ensure this function is defined at the TOP of your app script
-                                dna = extract_dna_from_url(source_url)
-                                st.session_state['shadow_dna'] = dna
-                        else: st.error("Link required.")
-                with sc_2:
-                    if st.button("🗑️ CLEAR DNA", use_container_width=True):
-                        st.session_state['shadow_dna'] = ""
-                        st.rerun()
-
-                shadow_data = st.text_area("🛰️ Extracted DNA", 
-                                           value=st.session_state.get('shadow_dna', ""), 
-                                           height=150)
+                st.markdown("""
+                    <div style="background-color: #1a1a1a; padding: 20px; border-radius: 10px; border: 1px dashed #00ff41; text-align: center;">
+                        <h4 style="color: #00ff41; margin-bottom: 5px;">🛰️ SHADOW MODE LOCKED</h4>
+                        <p style="color: #cccccc; font-size: 0.9em;">
+                            The Neural Uplink is being re-calibrated for high-speed DNA extraction. 
+                        </p>
+                        <p style="color: #666; font-size: 0.8em;">Expected Deployment: v2.0 Update</p>
+                    </div>
+                """, unsafe_allow_html=True)
+                # Placeholder inputs to keep the UI layout consistent
+                st.text_input("🔗 Paste Competitor URL", placeholder="Feature locked...", disabled=True)
+                shadow_data = ""
             
-            f_framework = st.selectbox("Retention Framework", [
-                "The Controversy Start (High Vigor)", 
-                "The Hero's Journey (Storytelling)", 
-                "Statistical Shock (Educational)",
-                "The 'Mistake' Hook (Click-through Focus)",
-                "Day in the Life (Relatability)",
-                "The Deep-Dive (Authority)"
-            ])
+            else:
+                # Standard Framework selection for Cold Start
+                f_framework = st.selectbox("Retention Framework", [
+                    "The Controversy Start (High Vigor)", 
+                    "The Hero's Journey (Storytelling)", 
+                    "Statistical Shock (Educational)",
+                    "The 'Mistake' Hook (Click-through Focus)",
+                    "Day in the Life (Relatability)",
+                    "The Deep-Dive (Authority)"
+                ])
 
         with col_b:
             st.subheader("📡 Trend Mapper")
@@ -1086,20 +1081,12 @@ elif page == "🧠 Neural Forge":
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
 
         # 2. ACTIVATION ENGINE
-        if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
-            if f_topic:
-                with st.spinner("🌑 FORGING ELITE CONTENT..."):
-                    try:
-                        if forge_mode == "Competitor Shadow (Re-engineer)" and shadow_data:
-                            prompt = (
-                                f"Role: Elite Viral Growth Engineer. Strategy: COMPETITOR SHADOW.\n"
-                                f"1. DNA: Extract psychological triggers/pacing from: '{shadow_data}'.\n"
-                                f"2. RE-ENGINEER: Create a {f_platform} script for niche: '{f_topic}'.\n"
-                                f"3. RULES: NO SENTENCE OVER 12 WORDS. Pattern Interrupts every 5s. Give the framework a proprietary name.\n"
-                                f"4. TONE: {f_vigor} Vigor. BANNED: 'Delve', 'Unleash', 'Imagine', 'Furthermore'.\n"
-                                f"5. OUTPUT: Timestamps, [Visual Cues], and [Text Overlays]."
-                            )
-                        else:
+        # The button only executes if NOT in locked shadow mode
+        if forge_mode == "Cold Start (Original)":
+            if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
+                if f_topic:
+                    with st.spinner("🌑 FORGING ELITE CONTENT..."):
+                        try:
                             prompt = (
                                 f"Role: Elite Content Architect. Create {f_platform} script for '{f_topic}'.\n"
                                 f"Framework: {f_framework}. Style: {f_vigor} Vigor. Audience: {f_audience}.\n"
@@ -1107,14 +1094,19 @@ elif page == "🧠 Neural Forge":
                                 f"Format: Timestamps, [Visuals], [Text Overlays], [Psychological Triggers]."
                             )
 
-                        res = groq_c.chat.completions.create(
-                            model="llama-3.3-70b-versatile", 
-                            messages=[{"role": "user", "content": prompt}]
-                        )
-                        st.session_state.pro_forge_txt = res.choices[0].message.content
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"UPLINK ERROR: {str(e)}")
+                            res = groq_c.chat.completions.create(
+                                model="llama-3.3-70b-versatile", 
+                                messages=[{"role": "user", "content": prompt}]
+                            )
+                            st.session_state.pro_forge_txt = res.choices[0].message.content
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"UPLINK ERROR: {str(e)}")
+                else:
+                    st.warning("Director, enter a Core Concept to begin.")
+        else:
+            # Button is disabled/notifies for Shadow mode
+            st.button("🔥 EXECUTE NEURAL SYNTHESIS (LOCKED)", use_container_width=True, disabled=True)
 
     # 3. OUTPUT & OPTIMIZATION
     if st.session_state.get('pro_forge_txt'):
@@ -1726,6 +1718,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
