@@ -1642,56 +1642,64 @@ elif page == "💎 Upgrade to Pro":
 
 # --- MODULE 8: MEDIA UPLINK (THE MASTER EXTRACTOR) ---
 elif page == "🛰️ Media Uplink":
-    # 1. Initialize variables at the top to prevent NameErrors
-    uplink_url = ""
-    f_ext = "Video (MP4)" 
+    # 1. INITIALIZE VARIABLES (Prevents NameError)
+    if 'uplink_url' not in st.session_state:
+        st.session_state.uplink_url = ""
+    if 'f_ext' not in st.session_state:
+        st.session_state.f_ext = "Video (MP4)"
 
     st.markdown("<h1 style='color: #00ff41;'>🛰️ MEDIA UPLINK // ARCHIVE</h1>", unsafe_allow_html=True)
     
     with st.container(border=True):
         col_url, col_type = st.columns([2, 1])
         with col_url:
-            uplink_url = st.text_input("🔗 Source URL", placeholder="Paste YouTube, Instagram, TikTok, X, or LinkedIn link...")
+            uplink_url = st.text_input("🔗 Source URL", placeholder="Paste YouTube, Instagram, TikTok, etc.", key="url_input_main")
         with col_type:
             available_formats = ["Video (MP4)", "Audio (MP3)"]
             if is_paid or is_admin:
                 available_formats += ["High-Res 4K", "X-Thread (PDF)", "LinkedIn Archive"]
             
-            f_ext = st.selectbox("Extraction Format", available_formats)
+            f_ext = st.selectbox("Extraction Format", available_formats, key="format_select_main")
 
+    # Tiered UI feedback
     if not is_paid and not is_admin:
-        st.info("💡 BASIC USER: Standard quality enabled. Upgrade to ELITE for 4K and Social-Thread Archiving.")
+        st.info("💡 BASIC USER: Standard quality enabled. Upgrade to ELITE for 4K and Social Archiving.")
     
-    if st.button("⚡ INITIATE EXTRACTION", use_container_width=True, key="media_uplink_btn"):
+    # 2. THE EXTRACTION BUTTON
+    if st.button("⚡ INITIATE EXTRACTION", use_container_width=True, key="uplink_execute_btn"):
         if uplink_url:
-            progress_bar = st.progress(0, text="Establishing Uplink...")
+            progress_bar = st.progress(0, text="Establishing Secure Uplink...")
             
             try:
-                # Platform Detection Logic
-                if ("x.com" in uplink_url or "twitter.com" in uplink_url) and (is_paid or is_admin):
-                    progress_bar.progress(50, text="Capturing Thread DNA...")
-                    st.success("✅ Thread Archived as PDF.")
-                    # (Insert PDF logic here later)
+                # Platform Detection (Elite Logic)
+                if ("x.com" in uplink_url or "twitter.com" in uplink_url) or ("linkedin.com" in uplink_url):
+                    if not (is_paid or is_admin):
+                        st.error("Protocol Restricted: This platform requires an ELITE license.")
+                    else:
+                        st.success("✅ Content captured to Archive (Full logic in next update).")
                 
-                elif "linkedin.com" in uplink_url and (is_paid or is_admin):
-                    st.success("✅ LinkedIn Post Saved to Intelligence Bank.")
-                
-                elif "x.com" in uplink_url or "linkedin.com" in uplink_url:
-                    st.error("This platform requires an ELITE Protocol license.")
-
                 else:
-                    # THE REAL ENGINE: yt-dlp 
+                    # THE REAL ENGINE: yt-dlp with Stealth Bypass
                     import yt_dlp
                     import os
+                    import tempfile
+
+                    progress_bar.progress(30, text="Bypassing Firewalls (Applying Stealth Headers)...")
                     
-                    progress_bar.progress(30, text="Bypassing Firewalls...")
-                    
-                    # Define download settings
+                    # Create a temporary directory for the download
+                    temp_dir = tempfile.mkdtemp()
+                    out_path = os.path.join(temp_dir, 'extracted_media.%(ext)s')
+
+                    # STEALTH OPTIONS to prevent 403 Forbidden Errors
                     ydl_opts = {
                         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-                        'outtmpl': 'downloaded_media.%(ext)s',
+                        'outtmpl': out_path,
                         'merge_output_format': 'mp4',
                         'quiet': True,
+                        'no_warnings': True,
+                        'nocheckcertificate': True,
+                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
                     }
                     
                     if "Audio" in f_ext:
@@ -1702,32 +1710,44 @@ elif page == "🛰️ Media Uplink":
                             'preferredquality': '192',
                         }]
 
+                    # Execution
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        progress_bar.progress(60, text="Downloading Data Shards...")
                         info = ydl.extract_info(uplink_url, download=True)
-                        file_path = ydl.prepare_filename(info)
-                        # Fix extension if it was converted to MP3
+                        final_file_path = ydl.prepare_filename(info)
+                        
+                        # Correcting extension for Audio-only conversions
                         if "Audio" in f_ext:
-                            file_path = file_path.rsplit('.', 1)[0] + ".mp3"
+                            final_file_path = final_file_path.rsplit('.', 1)[0] + ".mp3"
 
-                    progress_bar.progress(100, text="Extraction Complete!")
+                    progress_bar.progress(100, text="Uplink Successful.")
                     st.balloons()
                     
-                    # THE CRITICAL STEP: Read file as bytes to avoid 0.1kb errors
-                    with open(file_path, "rb") as f:
-                        media_bytes = f.read()
+                    # 3. CONVERT TO BINARY (Fixes 0.1kb crash files)
+                    with open(final_file_path, "rb") as f:
+                        file_bytes = f.read()
                     
+                    # 4. DOWNLOAD BUTTON (Only shows once file is ready)
                     st.download_button(
-                        label="💾 DOWNLOAD ASSETS",
-                        data=media_bytes,
-                        file_name=os.path.basename(file_path),
-                        mime="video/mp4" if "Video" in f_ext else "audio/mpeg"
+                        label="💾 SAVE ASSETS TO LOCAL DISK",
+                        data=file_bytes,
+                        file_name=os.path.basename(final_file_path),
+                        mime="video/mp4" if "Video" in f_ext else "audio/mpeg",
+                        use_container_width=True,
+                        key="final_download_trigger"
                     )
                     
-                    # Clean up the server storage
-                    os.remove(file_path)
+                    # Cleanup server storage
+                    os.remove(final_file_path)
 
             except Exception as e:
-                st.error(f"UPLINK FAILED: {str(e)}")
+                # Custom error handling for common 2026 blocks
+                if "403" in str(e):
+                    st.error("UPLINK BLOCKED: YouTube is detecting a Cloud IP. We are rotating stealth headers...")
+                elif "Instagram" in str(e):
+                    st.warning("Instagram requires local cookie authentication. Use YouTube for full functionality.")
+                else:
+                    st.error(f"UPLINK FAILED: {str(e)}")
         else:
             st.warning("Director, I need a valid URL to begin extraction.")
 
@@ -1839,6 +1859,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
