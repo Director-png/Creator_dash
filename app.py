@@ -133,16 +133,29 @@ def load_history_db():
         st.error(f"Vault Connection Error: {e}")
         return pd.DataFrame()
 
-
-# --- ENGINE 1: GOOGLE SHEET DATA ---
 def fetch_live_market_data():
-    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
+    # We switch to the 'export' format which is the most stable vector in 2026
+    SHEET_ID = "1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS"
+    url = f"https://docs.google.com/spreadsheets/d/e/{SHEET_ID}/pub?output=csv"
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+
     try:
-        # Cache busting ensures the "Nothingness" doesn't return stale data
-        df = pd.read_csv(f"{url}&cache={datetime.now().timestamp()}")
+        # Step 1: Request the data as a browser would
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status() # Check if the link is truly alive
+        
+        # Step 2: Convert the text response into a CSV format Pandas can read
+        df = pd.read_csv(io.StringIO(response.text))
+        
+        # Step 3: Standardize the column names
         df.columns = [c.lower().strip() for c in df.columns]
         return df
-    except Exception:
+    except Exception as e:
+        # This will show you the ACTUAL error in your console if it fails
+        print(f"DEBUG: Neural Link Error -> {e}")
         return pd.DataFrame()
 
 def generate_visual_dna(platform, tone):
@@ -1827,6 +1840,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
