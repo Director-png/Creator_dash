@@ -1098,12 +1098,10 @@ elif page == "🧠 Neural Forge":
                         <p style="color: #666; font-size: 0.8em;">Expected Deployment: v2.0 Update</p>
                     </div>
                 """, unsafe_allow_html=True)
-                # Placeholder inputs to keep the UI layout consistent
                 st.text_input("🔗 Paste Competitor URL", placeholder="Feature locked...", disabled=True)
                 shadow_data = ""
             
             else:
-                # Standard Framework selection for Cold Start
                 f_framework = st.selectbox("Retention Framework", [
                     "The Controversy Start (High Vigor)", 
                     "The Hero's Journey (Storytelling)", 
@@ -1122,22 +1120,36 @@ elif page == "🧠 Neural Forge":
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
 
         # 2. ACTIVATION ENGINE
-        # The button only executes if NOT in locked shadow mode
         if forge_mode == "Cold Start (Original)":
             if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
                 if f_topic:
                     with st.spinner("🌑 FORGING ELITE CONTENT..."):
                         try:
+                            # ENHANCED PROMPT ARCHITECTURE
                             prompt = (
-                                f"Role: Elite Content Architect. Create {f_platform} script for '{f_topic}'.\n"
-                                f"Framework: {f_framework}. Style: {f_vigor} Vigor. Audience: {f_audience}.\n"
-                                f"Constraint: Max 10-12 words per line. High impact. No AI filler words.\n"
-                                f"Format: Timestamps, [Visuals], [Text Overlays], [Psychological Triggers]."
+                                f"ACT AS: Elite Content Architect & Viral Growth Strategist.\n"
+                                f"MISSION: Create a high-retention {f_platform} script for '{f_topic}'.\n\n"
+                                f"PARAMETERS:\n"
+                                f"- Framework: {f_framework}\n"
+                                f"- Vigor Level: {f_vigor} (Aggressive, punchy, no fluff)\n"
+                                f"- Trend Overlay: {f_trend}\n"
+                                f"- Target: {f_audience}\n\n"
+                                f"CONSTRAINTS:\n"
+                                f"1. Use the 'Zeigarnik Effect' (Open curiosity loops early).\n"
+                                f"2. MAX 10 words per line for visual reading speed.\n"
+                                f"3. NO 'In a world' or 'Ever wondered' cliché AI intros.\n"
+                                f"4. Pattern Interrupts every 3 seconds.\n\n"
+                                f"OUTPUT FORMAT:\n"
+                                f"00:00 - [VISUAL: Description] | [AUDIO: Hook text] | (TRIGGER: Psychological impact)"
                             )
 
                             res = groq_c.chat.completions.create(
                                 model="llama-3.3-70b-versatile", 
-                                messages=[{"role": "user", "content": prompt}]
+                                messages=[
+                                    {"role": "system", "content": "You are the Neural Forge. You don't make content; you make weapons for the attention economy."},
+                                    {"role": "user", "content": prompt}
+                                ],
+                                temperature=0.8 # Higher creativity for the forge
                             )
                             st.session_state.pro_forge_txt = res.choices[0].message.content
                             st.rerun()
@@ -1146,7 +1158,6 @@ elif page == "🧠 Neural Forge":
                 else:
                     st.warning("Director, enter a Core Concept to begin.")
         else:
-            # Button is disabled/notifies for Shadow mode
             st.button("🔥 EXECUTE NEURAL SYNTHESIS (LOCKED)", use_container_width=True, disabled=True)
 
     # 3. OUTPUT & OPTIMIZATION
@@ -1158,25 +1169,31 @@ elif page == "🧠 Neural Forge":
             st.session_state.pro_forge_txt = st.text_area("Master Editor", value=st.session_state.pro_forge_txt, height=500)
         with c_tools:
             st.subheader("🧪 Intelligence Tools")
+            
+            # --- TOOL 1: VIRALITY SCAN ---
             if st.button("🚀 ANALYZE HOOK VIRALITY", use_container_width=True):
                 with st.spinner("Scanning..."):
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile", 
-                        messages=[{"role": "user", "content": f"Score this hook out of 10 and explain why: {st.session_state.pro_forge_txt[:250]}"}]
+                        messages=[{"role": "user", "content": f"Score this hook 1-10 on 'The Scroll-Stop Scale'. Identify the specific psychological trigger used: {st.session_state.pro_forge_txt[:300]}"}]
                     )
                     st.info(res.choices[0].message.content)
+            
+            # --- TOOL 2: RETENTION SCAN ---
             if st.button("🧠 SCAN RETENTION GAPS", use_container_width=True):
                 with st.spinner("Scanning..."):
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile", 
-                        messages=[{"role": "user", "content": f"List sentences over 12 words and shorten them: {st.session_state.pro_forge_txt}"}]
+                        messages=[{"role": "user", "content": f"Where will viewers drop off in this script? Find sentences over 12 words and rewrite them for speed: {st.session_state.pro_forge_txt}"}]
                     )
                     st.warning(res.choices[0].message.content)
+            
+            # --- TOOL 3: VISUAL SCAN ---
             if st.button("🎭 THUMBNAIL CONCEPTS", use_container_width=True):
                 with st.spinner("Visualizing..."):
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile", 
-                        messages=[{"role": "user", "content": f"Suggest 3 high-CTR thumbnails for: {st.session_state.pro_forge_txt}"}]
+                        messages=[{"role": "user", "content": f"Design 3 extreme high-CTR thumbnail concepts for: {f_topic}. Include 'Face expression' and 'On-screen text' details."}]
                     )
                     st.success(res.choices[0].message.content)
 
@@ -1842,6 +1859,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
