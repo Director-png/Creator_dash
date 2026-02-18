@@ -996,7 +996,6 @@ elif page == "🌐 Global Pulse":
     else:
         st.error("INTELLIGENCE DATA DISCONNECTED. Please re-sync the Neural Link.")
 
-
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
     st.title("⚔️ TREND DUEL")
@@ -1826,6 +1825,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
