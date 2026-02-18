@@ -397,14 +397,33 @@ def get_live_stats(url):
         except Exception as e:
             return None, None
 
-def get_weekly_pulse():
-    """Generates the Monday morning report based on categories."""
-    import random
-    report = []
-    for niche, keywords in TREND_DATABASE.items():
-        chosen = random.choice(keywords)
-        report.append(f"**[{niche}]** Target: {chosen}")
-    return report
+# --- INDEPENDENT MONDAY PULSE TRIGGER ---
+# Place this before your 'if page == ...' blocks
+
+import datetime
+
+def trigger_monday_pulse():
+    """Independent logic to fire the weekly trend report."""
+    today = datetime.datetime.now()
+    # 0 is Monday
+    if today.weekday() == 0: 
+        current_monday = today.strftime("%Y-%m-%d")
+        
+        # Check if we've already fired the pulse today
+        if st.session_state.get('last_pulse_fired') != current_monday:
+            st.balloons()
+            st.toast("🛰️ MONDAY PULSE: New weekly trend vectors initialized.", icon="🚀")
+            
+            # This is where the 'Pulse' content lives
+            st.info(f"📅 **WEEKLY PULSE // {current_monday}**\n\n"
+                    "The algorithm has shifted toward high-retention cinematic storytelling. "
+                    "Focus your 'Neural Forge' on storytelling-driven hooks this week.")
+            
+            # Lock the trigger so it doesn't fire again today
+            st.session_state.last_pulse_fired = current_monday
+
+# Call the function to check status
+trigger_monday_pulse()
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -911,49 +930,71 @@ elif page == "📡 My Growth Hub":
     else:
         st.caption("No tasks currently forged in the matrix.")
 
-# --- MODULE 11: GLOBAL PULSE (LOGIC PRESERVED) ---
 elif page == "🌐 Global Pulse":
-    # CSS Fix: Wrap the text in <span> to protect emoji color
-    st.markdown("<h1>🌐 <span>GLOBAL PULSE</span></h1>", unsafe_allow_html=True)
+    st.markdown("<h1>🌐 <span>GLOBAL INTELLIGENCE PULSE</span></h1>", unsafe_allow_html=True)
     
-    # --- 1. MONDAY PULSE LOGIC (NEW INTEGRATION) ---
-    # Detects Monday and performs a single sync per day
-    today_name = datetime.now().strftime("%A")
-    today_date = datetime.now().strftime("%Y-%m-%d")
-    
-    if today_name == "Monday" and st.session_state.get('last_pulse_sync') != today_date:
-        # This only runs once every Monday morning
-        st.session_state.last_pulse_sync = today_date
-        # Storing the pulse message in session state to keep it persistent
-        st.session_state.monday_pulse_msg = "🛰️ SYSTEM UPLINK: Weekly trend vectors have been recalibrated for the Monday launch."
-        st.balloons()
+    # 1. 🛡️ PULSE STATUS HEADER
+    with st.container():
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.info("**UPLINK STATUS**\n\nConnected to Global Trends")
+        with c2:
+            st.success("**LAST SYNC**\n\nLive: Real-Time Data")
+        with c3:
+            st.warning("**ACTIVE NODES**\n\n12 Intelligence Streams")
 
-    # --- 2. YOUR ORIGINAL MARKET PULSE LOGIC (UNTOUCHED) ---
-    # I am keeping your exact structure for the pulse data here
-    if 'market_pulse' in st.session_state:
-        st.subheader("📡 CURRENT MARKET SIGNALS")
-        
-        # Display the Monday Message if it exists
-        if st.session_state.get('monday_pulse_msg'):
-            st.info(st.session_state.monday_pulse_msg)
-
-        # YOUR ORIGINAL DATA DISPLAY LOOP
-        # (Replace the below placeholder with your exact existing loop)
-        for pulse in st.session_state.market_pulse:
-            with st.container(border=True):
-                col_a, col_b = st.columns([3, 1])
-                with col_a:
-                    st.markdown(f"**Trend:** {pulse['keyword']}")
-                    st.caption(f"Niche: {pulse['category']}")
-                with col_b:
-                    st.metric("Velocity", pulse['velocity'])
-    else:
-        st.warning("Director: Market Pulse data not found. Please initiate Re-Sync in Sidebar.")
-
-    # --- 3. SYSTEM LOG (OPTIONAL PREVIEW) ---
     st.divider()
-    st.caption(f"Last Intelligence Sync: {st.session_state.get('last_pulse_sync', 'N/A')}")
 
+    # 2. THE INTELLIGENCE FEED
+    # This is the exact data structure we used previously
+    if 'market_pulse' in st.session_state and not st.session_state.market_pulse.empty:
+        st.subheader("📡 SURGING TREND VECTORS")
+        
+        # Original Data Editor / Table View
+        st.data_editor(
+            st.session_state.market_pulse,
+            column_config={
+                "keyword": "Intelligence Target",
+                "velocity": st.column_config.ProgressColumn(
+                    "Growth Velocity",
+                    help="The speed at which this trend is scaling",
+                    format="%d",
+                    min_value=0,
+                    max_value=100,
+                ),
+                "category": "Niche",
+                "relevance": "Director's Priority"
+            },
+            hide_index=True,
+            use_container_width=True,
+            disabled=True # Keep it as a readout only
+        )
+
+        st.divider()
+
+        # 3. DETAILED VECTOR ANALYSIS
+        st.subheader("🧠 VECTOR BREAKDOWN")
+        col_left, col_right = st.columns(2)
+        
+        # Logic to split the pulse into two columns for deep analysis
+        pulse_data = st.session_state.market_pulse.to_dict('records')
+        half = len(pulse_data) // 2
+        
+        with col_left:
+            for item in pulse_data[:half]:
+                with st.expander(f"🔹 {item['keyword'].upper()}"):
+                    st.write(f"**Velocity:** {item['velocity']}% growth detected.")
+                    st.write(f"**Strategic Note:** High demand in {item['category']} niche.")
+                    st.caption("Recommended for immediate Neural Forge processing.")
+
+        with col_right:
+            for item in pulse_data[half:]:
+                with st.expander(f"🔹 {item['keyword'].upper()}"):
+                    st.write(f"**Velocity:** {item['velocity']}% growth detected.")
+                    st.write(f"**Strategic Note:** High demand in {item['category']} niche.")
+                    st.caption("Recommended for immediate Neural Forge processing.")
+    else:
+        st.error("INTELLIGENCE DATA DISCONNECTED. Please re-sync the Neural Link.")
 
 
 # --- MODULE 5: TREND DUEL ---
@@ -1785,6 +1826,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
