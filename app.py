@@ -134,29 +134,16 @@ def load_history_db():
         return pd.DataFrame()
 
 
-def load_market_pulse_data(url=None): # <--- Added '=None' to make it optional
-    # Use the global URL if none is provided in the parentheses
-    if url is None:
-        url = MARKET_PULSE_URL 
-        
+# --- ENGINE 1: GOOGLE SHEET DATA ---
+def fetch_live_market_data():
+    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
     try:
-        # Pull data and drop completely empty rows
-        df = pd.read_csv(url).dropna(how='all')
-        
-        # IRONCLAD RE-LABEL: Force column names by position
-        expected_cols = ['Niche', 'Score', 'Growth', 'Saturation', 'Reason']
-        new_columns = {df.columns[i]: expected_cols[i] for i in range(min(len(df.columns), len(expected_cols)))}
-        df.rename(columns=new_columns, inplace=True)
-        
-        # Data Type Safety
-        if 'Score' in df.columns:
-            df['Score'] = pd.to_numeric(df['Score'], errors='coerce').fillna(0).astype(int)
-            
+        # Cache busting ensures the "Nothingness" doesn't return stale data
+        df = pd.read_csv(f"{url}&cache={datetime.now().timestamp()}")
+        df.columns = [c.lower().strip() for c in df.columns]
         return df
-    except Exception as e:
-        st.error(f"Sync Error at Line 523: {e}")
+    except Exception:
         return pd.DataFrame()
-
 
 def generate_visual_dna(platform, tone):
     styles = {
@@ -945,23 +932,26 @@ elif page == "📡 My Growth Hub":
 elif page == "🌐 Global Pulse":
     st.markdown("<h1>🌐 <span>GLOBAL INTELLIGENCE PULSE</span></h1>", unsafe_allow_html=True)
 
-    # Trigger Data Fetch
+    # 1. TRIGGER ENGINES
+    # No more NameError because the functions are defined at the top
     df_pulse = fetch_live_market_data()
+    NEWS_API_KEY = "YOUR_NEWS_API_KEY" 
     
     if not df_pulse.empty:
-        # --- 3. SEARCH TERMINAL ---
+        # 2. SEARCH TERMINAL
         st.markdown("### 🔍 SEARCH TREND VECTORS")
         search_query = st.text_input("Intercept Keyword...", placeholder="Search global database...", label_visibility="collapsed")
 
-        # --- 4. TOP 10 PERFORMANCE VECTORS (From GSheet) ---
+        # 3. TOP 10 PERFORMANCE VECTORS
         st.subheader("📊 TOP 10 PERFORMANCE VECTORS")
         
+        # Sort by Velocity (The pressure of the trend)
         if 'velocity' in df_pulse.columns:
             top_10 = df_pulse.sort_values(by="velocity", ascending=False).head(10)
         else:
             top_10 = df_pulse.head(10)
 
-        # Apply Search Filter to Table
+        # Apply Search Filter to the Table
         if search_query:
             top_10 = top_10[top_10.astype(str).apply(lambda x: x.str.contains(search_query, case=False)).any(axis=1)]
 
@@ -980,40 +970,33 @@ elif page == "🌐 Global Pulse":
 
         st.divider()
 
-        # --- 5. LIVE NEWS UPLINK (The API Integration) ---
+        # 4. LIVE NEWS UPLINK (The Dynamic Image Feed)
         st.subheader("📰 LIVE WORLD INTELLIGENCE")
         
-        # We use your top keyword from the GSheet to drive the news relevance
-        news_topic = search_query if search_query else (top_10['keyword'].iloc[0] if not top_10.empty else "AI Technology")
+        # We drive the News API using the Search Query or the Top Trend
+        news_topic = search_query if search_query else (top_10['keyword'].iloc[0] if not top_10.empty else "Technology")
         
-        articles = fetch_live_news(news_topic)
+        articles = fetch_live_news(news_topic, NEWS_API_KEY)
         
         if articles:
             for art in articles:
-                # Basic validation: only show if there is an image and a title
-                if art.get('title') and art.get('urlToImage'):
+                # Filter: Only show articles with images to maintain the "Expensive" look
+                if art.get('urlToImage'):
                     with st.container(border=True):
-                        c1, c2 = st.columns([1, 2])
-                        with c1:
+                        col_img, col_txt = st.columns([1, 2])
+                        with col_img:
                             st.image(art['urlToImage'], use_container_width=True)
-                        with c2:
+                        with col_txt:
                             st.markdown(f"#### {art['title']}")
-                            st.write(art.get('description', 'No description available.'))
-                            # LIVE LINKING: Opens the actual source
+                            st.write(art.get('description', 'Information redacted.'))
+                            # THE REAL-TIME HYPERLINK
                             st.markdown(f"🔗 [Read Intelligence Report]({art['url']})")
                             st.caption(f"Source: {art['source']['name']} | {art['publishedAt'][:10]}")
         else:
-            st.info(f"🛰️ SCANNING... No live news found for '{news_topic}'. Showing default intelligence.")
+            st.info(f"🛰️ SCANNING... No live news found for '{news_topic}'. Adjust search or check API key.")
 
     else:
-        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable.")
-
-# --- MONDAY PULSE (OUTSIDE TAB) ---
-now = datetime.now()
-if now.strftime("%A") == "Monday":
-    if st.session_state.get('last_monday_pulse') != now.strftime("%Y-%m-%d"):
-        st.toast("🛰️ MONDAY BROADCAST INITIALIZED", icon="🚀")
-        st.session_state.last_monday_pulse = now.strftime("%Y-%m-%d")
+        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Please check the GSheet link.")
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
@@ -1844,6 +1827,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
