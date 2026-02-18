@@ -733,24 +733,11 @@ elif page == "🏠 Dashboard":
         core_display = active_core if 'active_core' in globals() else "STANDBY"
         st.code(f"AI Core: {core_display}\nHandshake: STABLE\nLaunch: T-Minus 48h")
 
+# --- MODULE 10: MY GROWTH HUB ---
 elif page == "📡 My Growth Hub":
     st.markdown("<h1 style='color: #00d4ff;'>📡 SOCIAL INTEL MATRIX</h1>", unsafe_allow_html=True)
     
-    # --- 💎 PRO-TIER UPGRADE TEASER ---
-    with st.container(border=True):
-        col_t1, col_t2 = st.columns([3, 1])
-        with col_t1:
-            st.markdown("### 🧬 Neural Scanner (OCR)")
-            st.caption("Auto-sync analytics via screenshot. Currently in Alpha.")
-        with col_t2:
-            if st.button("🚀 UNLOCK PRO", use_container_width=True):
-                st.toast("Redirecting to Razorpay Gateway...", icon="💳")
-        
-        # Disabled scanner to prevent 429 errors during testing
-        st.button("📷 UPLOAD SCREENSHOT (PRO ONLY)", disabled=True, use_container_width=True)
-
     # --- 📈 GROWTH TRACKER (Manual Intelligence) ---
-    st.divider()
     with st.container(border=True):
         st.subheader("📈 GROWTH DATA INPUT")
         col1, col2 = st.columns(2)
@@ -767,13 +754,11 @@ elif page == "📡 My Growth Hub":
             growth_rate_pct = (growth_diff / start_count) / days_passed if start_count > 0 else 0
             projection_30d = current_count + (daily_avg * 30)
             
-            # Metric Row
             m1, m2, m3 = st.columns(3)
             m1.metric("DAILY VELOCITY", f"+{int(daily_avg)}/day")
             m2.metric("GROWTH RATE", f"{round(growth_rate_pct*100, 2)}%")
             m3.metric("30D FORECAST", f"{int(projection_30d):,}")
             
-            # Dynamic Feedback
             if growth_rate_pct > 0.05:
                 st.success(f"🔥 Viral Momentum Detected! Projection: **{int(projection_30d):,}**")
             elif growth_rate_pct > 0:
@@ -781,25 +766,28 @@ elif page == "📡 My Growth Hub":
         else:
             st.warning("Director: Current count must be higher than starting count for projections.")
 
-    # --- 🗓️ TASK FORGE (Notion-Style Manager) ---
+    # --- 🗓️ TASK FORGE (The CRM & Outreach Engine) ---
     st.divider()
-    st.subheader("🗓️ CONTENT CALENDAR & TASK FORGE")
+    st.subheader("🗓️ CONTENT CALENDAR & OUTREACH FORGE")
 
-    # Initialize task data in session state so it doesn't vanish on refresh
     if 'tasks' not in st.session_state:
-        st.session_state.tasks = pd.DataFrame(
-            columns=["Task", "Node", "Status", "Deadline"]
-        )
+        st.session_state.tasks = pd.DataFrame(columns=["Task", "Node", "Status", "Deadline"])
 
-    # Input Form
-    with st.expander("➕ FORGE NEW CONTENT TASK", expanded=False):
+    # 1. NEW IDEA INTEGRATION: COLD OUTREACH GENERATOR
+    with st.expander("➕ FORGE NEW TARGET & OUTREACH", expanded=False):
         with st.form("task_form", clear_on_submit=True):
-            t_name = st.text_input("Task Description", placeholder="e.g. Record Cinematic B-Roll")
+            t_name = st.text_input("Creator/Task Name", placeholder="e.g. @MrBeast Outreach")
             t_plat = st.selectbox("Node", ["YouTube", "Instagram", "X", "LinkedIn", "TikTok"])
             t_date = st.date_input("Deadline")
+            
+            st.markdown("---")
+            st.caption("Optional: Generate Cold Outreach DM")
+            generate_dm = st.checkbox("Generate High-Impact Outreach?")
+            
             submit_task = st.form_submit_button("SYNC TO FORGE")
             
             if submit_task and t_name:
+                # Add to task list
                 new_task = pd.DataFrame([{
                     "Task": t_name, 
                     "Node": t_plat, 
@@ -807,19 +795,39 @@ elif page == "📡 My Growth Hub":
                     "Deadline": t_date.strftime("%Y-%m-%d")
                 }])
                 st.session_state.tasks = pd.concat([st.session_state.tasks, new_task], ignore_index=True)
-                st.success("Task Synchronized.")
+                
+                # Logic for the New Idea (Outreach Generation)
+                if generate_dm:
+                    with st.spinner("Forging Psychological Hook..."):
+                        dm_prompt = f"Write a cold DM for {t_name} on {t_plat}. Tone: Professional, 30-year old founder, no fluff. Offer: High-retention editing and viral strategy. Mention that I have analyzed their recent content gaps."
+                        try:
+                            res = groq_c.chat.completions.create(
+                                model="llama-3.3-70b-versatile",
+                                messages=[{"role": "user", "content": dm_prompt}]
+                            )
+                            st.session_state.last_outreach = res.choices[0].message.content
+                        except:
+                            st.error("Uplink to Groq failed for outreach.")
 
-    # Interactive Table (The heart of the Notion-style view)
+    # Show the generated outreach if it exists
+    if 'last_outreach' in st.session_state:
+        with st.container(border=True):
+            st.subheader("✉️ GENERATED OUTREACH")
+            st.code(st.session_state.last_outreach, language="text")
+            if st.button("Clear Outreach"):
+                del st.session_state.last_outreach
+                st.rerun()
+
+    # 2. THE INTERACTIVE MATRIX
     if not st.session_state.tasks.empty:
-        # User can edit status or task names directly in the table
         edited_df = st.data_editor(
             st.session_state.tasks,
             use_container_width=True,
-            num_rows="dynamic", # Allows users to delete/add rows manually
+            num_rows="dynamic",
             column_config={
                 "Status": st.column_config.SelectboxColumn(
                     "Status",
-                    options=["⏳ Pending", "🎬 Filming", "✂️ Editing", "✅ Uploaded"],
+                    options=["⏳ Pending", "🎬 Filming/Forging", "✉️ Outreach Sent", "✅ Signed"],
                     required=True,
                 ),
                 "Node": st.column_config.SelectboxColumn(
@@ -829,17 +837,16 @@ elif page == "📡 My Growth Hub":
                 )
             }
         )
-        # Save changes back to session state
         st.session_state.tasks = edited_df
     else:
-        st.caption("No tasks currently forged in the matrix.")
+        st.caption("No targets currently forged in the matrix.")
 
-    # --- 🌑 DIRECTOR'S ANALYTICS IDEA: PROGRESS BAR ---
+    # --- 🌑 PROGRESS ANALYTICS ---
     if not st.session_state.tasks.empty:
-        done = len(st.session_state.tasks[st.session_state.tasks['Status'] == "✅ Uploaded"])
+        done = len(st.session_state.tasks[st.session_state.tasks['Status'] == "✅ Signed"])
         total = len(st.session_state.tasks)
         progress = done / total if total > 0 else 0
-        st.write(f"**Total Campaign Progress: {int(progress*100)}%**")
+        st.write(f"**Closing Velocity: {int(progress*100)}%**")
         st.progress(progress)
 
 
@@ -1832,6 +1839,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
