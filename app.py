@@ -758,7 +758,7 @@ elif page == "🏠 Dashboard":
         core_display = active_core if 'active_core' in globals() else "STANDBY"
         st.code(f"AI Core: {core_display}\nHandshake: STABLE\nLaunch: T-Minus 48h")
 
-# --- MODULE 10: MY GROWTH HUB ---
+# --- MODULE 10: MY GROWTH HUB (THE INTEGRATED HUB) ---
 elif page == "📡 My Growth Hub":
     st.markdown("<h1 style='color: #00d4ff;'>📡 SOCIAL INTEL MATRIX</h1>", unsafe_allow_html=True)
 
@@ -790,24 +790,41 @@ elif page == "📡 My Growth Hub":
             with col_b2:
                 st.session_state.current_count = st.number_input("Current Followers", value=1200)
 
-    # 2. THE ANALYTICS VISUALIZER (Shared Logic)
+    # 2. THE ANALYTICS VISUALIZER (Refined Reality-Check)
     if 'current_count' in st.session_state:
         st.divider()
-        # Logic Calculation
+        
+        # --- THE REALITY CALIBRATOR ---
         start = st.session_state.get('start_count', 1000)
         current = st.session_state.current_count
         days = st.session_state.get('days_passed', 1)
         
         growth_diff = current - start
         daily_avg = growth_diff / days if days > 0 else 0
-        projection_30d = current + (daily_avg * 30)
         
+        # Adjusted Projections (Non-Linear Decay Model)
+        projection_conservative = current + (daily_avg * 30 * 0.7)  # 70% momentum
+        projection_viral = current + (daily_avg * 30)             # 100% momentum
+        
+        # Metric Row
         m1, m2, m3 = st.columns(3)
         m1.metric("LIVE FOLLOWERS", f"{current:,}")
         m2.metric("DAILY VELOCITY", f"+{int(daily_avg)}/day")
-        m3.metric("30D FORECAST", f"{int(projection_30d):,}")
+        m3.metric("30D FORECAST (LIKELY)", f"{int(projection_conservative):,}")
 
-    # 3. 🗓️ TASK FORGE (The Command Table)
+        # Expanded Intelligence Breakdown
+        with st.expander("📊 PROJECTION SCENARIOS"):
+            c1, c2 = st.columns(2)
+            with c1:
+                st.write("**🛡️ Conservative (70%)**")
+                st.subheader(f"{int(projection_conservative):,}")
+                st.caption("Accounts for content fatigue and algorithm cooling.")
+            with c2:
+                st.write("**🔥 Viral (100%)**")
+                st.subheader(f"{int(projection_viral):,}")
+                st.caption("Assumes current velocity is maintained perfectly.")
+
+    # 3. 🗓️ TASK FORGE (Preserved Logic)
     st.divider()
     st.subheader("🗓️ CONTENT CALENDAR & TASK FORGE")
 
@@ -832,7 +849,7 @@ elif page == "📡 My Growth Hub":
                 st.session_state.tasks = pd.concat([st.session_state.tasks, new_task], ignore_index=True)
                 st.success("Task Synchronized.")
 
-    # Interactive Editor
+    # Interactive Table (Notion-Style)
     if not st.session_state.tasks.empty:
         edited_df = st.data_editor(
             st.session_state.tasks,
@@ -853,7 +870,7 @@ elif page == "📡 My Growth Hub":
         )
         st.session_state.tasks = edited_df
         
-        # 4. PROGRESS ANALYTICS
+        # 4. PROGRESS BAR
         done = len(st.session_state.tasks[st.session_state.tasks['Status'] == "✅ Uploaded"])
         total = len(st.session_state.tasks)
         progress = done / total if total > 0 else 0
@@ -861,7 +878,6 @@ elif page == "📡 My Growth Hub":
         st.progress(progress)
     else:
         st.caption("No tasks currently forged in the matrix.")
-
 
 # --- MODULE 4: GLOBAL PULSE ---
 elif page == "🌐 Global Pulse":
@@ -1785,6 +1801,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
