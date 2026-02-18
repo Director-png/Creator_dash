@@ -1,0 +1,3 @@
+# Netscape HTTP Cookie File
+.youtube.com	TRUE	/	TRUE	2147483647	IDE  AHWqTUleZZbvUyeiODF5Avzkc6RHPJv6D0jY9EevjsTn6SEIxsPJkAtcSbhAzl-
+.youtube.com	TRUE	/	TRUE	2147483647	APC	AfxxVi6hcTsBxdXu9gLkR5m4U6VTcFicrWZups-CT4ZVR9nHbWRObg
