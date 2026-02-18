@@ -134,28 +134,20 @@ def load_history_db():
         return pd.DataFrame()
 
 def fetch_live_market_data():
-    # We switch to the 'export' format which is the most stable vector in 2026
+    """Industrial-grade fetch using the Google Visualization API vector."""
+    # Extracted from your provided URL
     SHEET_ID = "1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS"
-    url = f"https://docs.google.com/spreadsheets/d/e/{SHEET_ID}/pub?output=csv"
+    # The 'gviz' endpoint is more stable for automated apps than the 'pub' link
+    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv"
     
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-    }
-
     try:
-        # Step 1: Request the data as a browser would
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status() # Check if the link is truly alive
-        
-        # Step 2: Convert the text response into a CSV format Pandas can read
-        df = pd.read_csv(io.StringIO(response.text))
-        
-        # Step 3: Standardize the column names
-        df.columns = [c.lower().strip() for c in df.columns]
+        # We add a timestamp to the URL to force Google to give us fresh data (no caching)
+        df = pd.read_csv(f"{url}&timestamp={datetime.now().timestamp()}")
+        # Clean the column names to avoid "Space" or "Case" errors
+        df.columns = [str(c).lower().strip() for c in df.columns]
         return df
     except Exception as e:
-        # This will show you the ACTUAL error in your console if it fails
-        print(f"DEBUG: Neural Link Error -> {e}")
+        st.warning(f"⚠️ DEBUG: Connection jitter detected. {e}")
         return pd.DataFrame()
 
 def generate_visual_dna(platform, tone):
@@ -1840,6 +1832,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
