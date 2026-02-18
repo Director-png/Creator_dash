@@ -1065,14 +1065,14 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (ARCHITECT EDITION) ---
+# --- MODULE 7: THE NEURAL FORGE (FULL COMMAND SUITE) ---
 elif page == "🧠 Neural Forge":
     if not is_paid and not is_admin:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
         st.warning("PROTOCOL RESTRICTED: Pro License Required.")
         st.stop()
 
-    st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ARCHITECT</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
     
     with st.container(border=True):
         col_a, col_b = st.columns([1, 1], gap="medium")
@@ -1081,79 +1081,94 @@ elif page == "🧠 Neural Forge":
             st.subheader("🧬 Core Configuration")
             forge_mode = st.radio("Forge Strategy", ["Cold Start (Original)", "Competitor Shadow (Coming Soon 🔒)"], horizontal=True)
             f_platform = st.selectbox("Target Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form", "X-Thread"], key="forge_plat")
-            f_topic = st.text_input("Core Concept", placeholder="e.g., Why 99% of startups fail in Year 1", key="forge_top")
+            f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of Productivity", key="forge_top")
             
-            if forge_mode == "Cold Start (Original)":
-                f_framework = st.selectbox("Retention Framework", [
-                    "The Controversy Start (High Vigor)", 
-                    "The Hero's Journey (Storytelling)", 
-                    "Statistical Shock (Educational)",
-                    "The 'Mistake' Hook (Click-through Focus)",
-                    "Day in the Life (Relatability)",
-                    "The Deep-Dive (Authority)"
-                ])
+            f_framework = st.selectbox("Retention Framework", [
+                "The Controversy Start (High Vigor)", 
+                "The Hero's Journey (Storytelling)", 
+                "Statistical Shock (Educational)",
+                "The 'Mistake' Hook (Click-through Focus)",
+                "Day in the Life (Relatability)",
+                "The Deep-Dive (Authority)"
+            ])
 
         with col_b:
             st.subheader("📡 Trend Mapper")
             f_trend = st.radio("Current Trend Sync", ["None", "Viral Audio", "Niche Commentary", "POV/Relatable", "Educational Breakdown"], horizontal=True)
-            f_audience = st.text_input("Target Audience Persona", "High-Performance Founders/Creators")
+            f_audience = st.text_input("Target Audience Persona", "High-Performance Creators")
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
 
-        if forge_mode == "Cold Start (Original)":
-            if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
-                if f_topic:
-                    with st.spinner("🌑 ARCHITECTING LONG-FORM BLUEPRINT..."):
-                        try:
-                            # THE "ETERNITY" PROMPT - High Detail, High Accuracy
-                            prompt = (
-                                f"Act as an Elite Content Architect for a top 0.1% YouTube channel. "
-                                f"Create a comprehensive, high-retention {f_platform} script for the concept: '{f_topic}'.\n\n"
-                                f"### STRATEGIC PARAMETERS:\n"
-                                f"- Framework: {f_framework}\n"
-                                f"- Tone: {f_vigor} Vigor (Aggressive, authoritative, zero fluff)\n"
-                                f"- Audience: {f_audience}\n"
-                                f"- Trend: {f_trend}\n\n"
-                                f"### OUTPUT STRUCTURE (MANDATORY):\n"
-                                f"1. **Concept Analysis**: Explain the psychological hook of this topic (2 sentences).\n"
-                                f"2. **The Blueprint**: Provide a detailed script with: \n"
-                                f"   - [TIMESTAMP] | [VISUAL & EDITING NOTES] | [AUDIO/NARRATION]\n"
-                                f"   - Note: For every visual, explain WHY it's being used (e.g., 'To break the pattern').\n"
-                                f"3. **Retention Triggers**: List 3 'Open Loops' to keep viewers until the end.\n"
-                                f"4. **The Viral Hook**: Provide 3 alternative 3-second hook variations.\n\n"
-                                f"### SCRIPT CONSTRAINTS:\n"
-                                f"- No AI-clichés (No 'In a world', 'Unlock your potential').\n"
-                                f"- Use short, punchy sentences (Max 12 words).\n"
-                                f"- Ensure the script length is substantial and covers the 'Core Concept' in depth."
-                            )
+        # PRIMARY EXECUTION
+        if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
+            if f_topic:
+                with st.spinner("🌑 ARCHITECTING PRODUCTION BLUEPRINT..."):
+                    try:
+                        prompt = (
+                            f"Act as a World-Class Content Strategist. Create a detailed Production Blueprint for: '{f_topic}'.\n\n"
+                            f"PLATFORM: {f_platform}\n"
+                            f"STRATEGY: {f_framework}\n"
+                            f"AUDIENCE: {f_audience}\n"
+                            f"VIGOR: {f_vigor}\n\n"
+                            f"OUTPUT FORMAT:\n"
+                            f"1. STRATEGIC ANALYSIS: Why this concept works.\n"
+                            f"2. THE SCRIPT: [TIMESTAMP] | [VISUALS/EDITS] | [AUDIO/VOICEOVER].\n"
+                            f"3. RETENTION LOOPS: List 3 triggers to prevent scrolling.\n"
+                            f"Make it substantial, accurate, and high-impact."
+                        )
+                        res = groq_c.chat.completions.create(
+                            model="llama-3.3-70b-versatile", 
+                            messages=[{"role": "system", "content": "You are the Neural Forge. You build attention-grabbing weapons."},
+                                      {"role": "user", "content": prompt}]
+                        )
+                        st.session_state.pro_forge_txt = res.choices[0].message.content
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"UPLINK ERROR: {str(e)}")
+            else:
+                st.warning("Director, input a concept first.")
 
-                            res = groq_c.chat.completions.create(
-                                model="llama-3.3-70b-versatile", 
-                                messages=[
-                                    {"role": "system", "content": "You are the Neural Forge. You do not write 'nice' content. You write psychological weapons designed to steal attention and convert viewers into followers."},
-                                    {"role": "user", "content": prompt}
-                                ],
-                                temperature=0.75 # Balanced for precision and creativity
-                            )
-                            st.session_state.pro_forge_txt = res.choices[0].message.content
-                            st.rerun()
-                        except Exception as e:
-                            st.error(f"UPLINK ERROR: {str(e)}")
-                else:
-                    st.warning("Director, enter a Core Concept to begin.")
-
-    # 3. OUTPUT & OPTIMIZATION
+    # 3. OUTPUT & INTELLIGENCE TOOLS
     if st.session_state.get('pro_forge_txt'):
         st.divider()
-        st.subheader("💎 THE PRODUCTION BLUEPRINT")
-        # Displaying the output in a clean, scrollable area
+        
+        # Display the Main Blueprint
+        st.markdown("### 💎 THE PRODUCTION BLUEPRINT")
         st.markdown(st.session_state.pro_forge_txt)
         
-        # Tools stay on the side or below for further refining
-        col_t1, col_t2, col_t3 = st.columns(3)
-        with col_t1:
+        st.divider()
+        st.subheader("🧪 Intelligence Tools")
+        t_col1, t_col2, t_col3 = st.columns(3)
+        
+        with t_col1:
             if st.button("🚀 SCORE VIRALITY", use_container_width=True):
-                # logic to score...
-                pass
+                with st.spinner("Analyzing Viral Potential..."):
+                    analysis_prompt = f"Analyze this script for viral potential on a scale of 1-10. Explain why and give 1 'Power Fix': {st.session_state.pro_forge_txt[:500]}"
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": analysis_prompt}]
+                    )
+                    st.info(res.choices[0].message.content)
+                    
+        with t_col2:
+            if st.button("🎭 THUMBNAIL CONCEPTS", use_container_width=True):
+                with st.spinner("Designing Concepts..."):
+                    thumb_prompt = f"Design 3 High-CTR Thumbnail concepts for this script: {st.session_state.pro_forge_txt[:500]}. Include visual composition and text overlay."
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": thumb_prompt}]
+                    )
+                    st.success(res.choices[0].message.content)
+
+        with t_col3:
+            if st.button("🧠 RETENTION SCAN", use_container_width=True):
+                with st.spinner("Scanning Gaps..."):
+                    gap_prompt = f"Identify the weakest part of this script where a viewer might scroll away. Suggest a 'Pattern Interrupt' to fix it: {st.session_state.pro_forge_txt}"
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": gap_prompt}]
+                    )
+                    st.warning(res.choices[0].message.content)
+
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -1817,6 +1832,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
