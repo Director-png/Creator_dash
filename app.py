@@ -80,6 +80,7 @@ VAULT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfeDAY3gnWYlpH90EaJir
 VAULT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQTrDvNWe810s55puzBodFKvfUbfMV_l-QoQIfbdPxeQknClGGCQT33UQ471NyGTw4aHLrDTw/pub?gid=1490190727&single=true&output=csv"
 FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbz1mLI3YkbjVsA4a8rMgMe_07w_1sS8H-f2Wvz1FtFCU-ZN4zCH7kDUGaDPDaaMbrvaPw/exec"
 NEW_URL = "https://script.google.com/macros/s/AKfycbzBLwNA-37KxZ5mDyHp1DMNw23n8xyfBVaVbmg_zRs-oQAZGue6Zuxo44UwztuBvFIC/exec"
+NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68"
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
 
 def typewriter_effect(text):
@@ -424,6 +425,17 @@ def trigger_monday_pulse():
 
 # Call the function to check status
 trigger_monday_pulse()
+
+def fetch_live_news(query="technology"):
+    """Fetches real-time news from NewsAPI.org based on a trend keyword."""
+    url = f"https://newsapi.org/v2/everything?q={query}&sortBy=relevancy&language=en&pageSize=5&apiKey={NEWS_API_KEY}"
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.json().get('articles', [])
+        return []
+    except Exception:
+        return []
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -933,23 +945,23 @@ elif page == "📡 My Growth Hub":
 elif page == "🌐 Global Pulse":
     st.markdown("<h1>🌐 <span>GLOBAL INTELLIGENCE PULSE</span></h1>", unsafe_allow_html=True)
 
-    # 1. THE DATA UPLINK
+    # Trigger Data Fetch
     df_pulse = fetch_live_market_data()
     
     if not df_pulse.empty:
-        # 2. SEARCH TERMINAL
+        # --- 3. SEARCH TERMINAL ---
         st.markdown("### 🔍 SEARCH TREND VECTORS")
         search_query = st.text_input("Intercept Keyword...", placeholder="Search global database...", label_visibility="collapsed")
 
-        # 3. TOP 10 PERFORMANCE VECTORS
+        # --- 4. TOP 10 PERFORMANCE VECTORS (From GSheet) ---
         st.subheader("📊 TOP 10 PERFORMANCE VECTORS")
         
-        # Ensure 'velocity' column exists and sort
         if 'velocity' in df_pulse.columns:
             top_10 = df_pulse.sort_values(by="velocity", ascending=False).head(10)
         else:
             top_10 = df_pulse.head(10)
 
+        # Apply Search Filter to Table
         if search_query:
             top_10 = top_10[top_10.astype(str).apply(lambda x: x.str.contains(search_query, case=False)).any(axis=1)]
 
@@ -968,55 +980,40 @@ elif page == "🌐 Global Pulse":
 
         st.divider()
 
-        # 4. LIVE NEWS FEED (DYNAMIC)
+        # --- 5. LIVE NEWS UPLINK (The API Integration) ---
         st.subheader("📰 LIVE WORLD INTELLIGENCE")
         
-        # In a production environment, you'd call a NewsAPI here.
-        # For this build, we are using a dynamic structure that links to real articles.
-        live_news = [
-            {
-                "title": "AI's Impact on the 2026 Creative Economy",
-                "url": "https://www.theverge.com/ai-artificial-intelligence",
-                "img": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400",
-                "desc": "How neural storytelling is redefining 'Time' for creators globally."
-            },
-            {
-                "title": "SaaS Market Shifts: The Rise of Invisible UI",
-                "url": "https://techcrunch.com/enterprise/",
-                "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400",
-                "desc": "Efficiency tools are currently outperforming traditional social apps."
-            },
-            {
-                "title": "Short-Form Video Algorithm Update",
-                "url": "https://newsroom.tiktok.com/",
-                "img": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400",
-                "desc": "New data suggests cinematic editing is the primary retention driver."
-            }
-        ]
+        # We use your top keyword from the GSheet to drive the news relevance
+        news_topic = search_query if search_query else (top_10['keyword'].iloc[0] if not top_10.empty else "AI Technology")
+        
+        articles = fetch_live_news(news_topic)
+        
+        if articles:
+            for art in articles:
+                # Basic validation: only show if there is an image and a title
+                if art.get('title') and art.get('urlToImage'):
+                    with st.container(border=True):
+                        c1, c2 = st.columns([1, 2])
+                        with c1:
+                            st.image(art['urlToImage'], use_container_width=True)
+                        with c2:
+                            st.markdown(f"#### {art['title']}")
+                            st.write(art.get('description', 'No description available.'))
+                            # LIVE LINKING: Opens the actual source
+                            st.markdown(f"🔗 [Read Intelligence Report]({art['url']})")
+                            st.caption(f"Source: {art['source']['name']} | {art['publishedAt'][:10]}")
+        else:
+            st.info(f"🛰️ SCANNING... No live news found for '{news_topic}'. Showing default intelligence.")
 
-        for article in live_news:
-            # Filter news based on search
-            if not search_query or search_query.lower() in article['title'].lower():
-                with st.container(border=True):
-                    col_img, col_txt = st.columns([1, 2])
-                    with col_img:
-                        st.image(article['img'], use_container_width=True)
-                    with col_txt:
-                        st.markdown(f"#### {article['title']}")
-                        st.write(article['desc'])
-                        # This creates the "Direct Link" as requested
-                        st.markdown(f"[Read Full Article]({article['url']})")
-                        st.caption(f"Source: Intelligence Uplink | {datetime.now().strftime('%H:%M')}")
     else:
-        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable or the format is invalid.")
-        if st.button("RE-ATTEMPT CONNECTION"):
-            st.rerun()
+        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable.")
 
-# --- MONDAY PULSE TRIGGER (STABLE) ---
-if datetime.now().strftime("%A") == "Monday":
-    if st.session_state.get('last_monday_pulse') != datetime.now().strftime("%Y-%m-%d"):
+# --- MONDAY PULSE (OUTSIDE TAB) ---
+now = datetime.now()
+if now.strftime("%A") == "Monday":
+    if st.session_state.get('last_monday_pulse') != now.strftime("%Y-%m-%d"):
         st.toast("🛰️ MONDAY BROADCAST INITIALIZED", icon="🚀")
-        st.session_state.last_monday_pulse = datetime.now().strftime("%Y-%m-%d")
+        st.session_state.last_monday_pulse = now.strftime("%Y-%m-%d")
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
@@ -1847,6 +1844,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
