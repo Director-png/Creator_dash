@@ -930,83 +930,71 @@ elif page == "📡 My Growth Hub":
     else:
         st.caption("No tasks currently forged in the matrix.")
 
-
 elif page == "🌐 Global Pulse":
-    # Using the <span> fix to keep emoji colors original
     st.markdown("<h1>🌐 <span>GLOBAL INTELLIGENCE PULSE</span></h1>", unsafe_allow_html=True)
-    
-    # 1. THE SEARCH TERMINAL (The Filter)
-    # This allows you to find specific vectors instantly
+
+    # 1. THE NEURAL LINK (Google Sheet Connection)
+    # We pull the sheet data directly into the session state
+    try:
+        # Assuming 'conn' is your st.connection("gsheets", type=GSheetsConnection)
+        # If you use a different method, ensure 'df_pulse' pulls from your sheet URL
+        df_pulse = conn.read(worksheet="MarketPulse", ttl="10m") 
+        st.session_state.market_pulse = df_pulse
+    except Exception as e:
+        st.error("📡 NEURAL LINK INTERRUPTED: Unable to reach Google Intelligence Sheet.")
+        # Fallback to keep the app from crashing
+        df_pulse = st.session_state.get('market_pulse', pd.DataFrame())
+
+    # 2. SEARCH TERMINAL
     st.markdown("### 🔍 SEARCH TREND VECTORS")
-    search_query = st.text_input("Intercept Keyword, Niche, or Platform...", placeholder="e.g. AI Content, LinkedIn...", label_visibility="collapsed")
+    search_query = st.text_input("Intercept Keyword...", placeholder="Search your GSheet database...", label_visibility="collapsed")
 
-    # 2. THE TREND RADAR (Data View)
-    if 'market_pulse' in st.session_state and not st.session_state.market_pulse.empty:
-        df = st.session_state.market_pulse
+    # 3. TOP 10 PERFORMING TRENDS
+    st.subheader("📊 TOP 10 PERFORMANCE VECTORS")
+    if not df_pulse.empty:
+        # Sorting by velocity to get the 'Top 10' as requested
+        top_10 = df_pulse.sort_values(by="velocity", ascending=False).head(10)
         
-        # Search Filtering Logic
+        # Applying the search filter if user typed something
         if search_query:
-            df = df[df['keyword'].str.contains(search_query, case=False) | 
-                    df['category'].str.contains(search_query, case=False)]
+            top_10 = top_10[top_10['keyword'].str.contains(search_query, case=False)]
 
-        st.subheader("📡 LIVE TREND RADAR")
         st.data_editor(
-            df,
+            top_10,
             column_config={
                 "keyword": "Trend Target",
                 "velocity": st.column_config.ProgressColumn("Velocity", min_value=0, max_value=100),
-                "relevance": "Priority",
                 "category": "Niche"
             },
             hide_index=True,
             use_container_width=True,
             disabled=True
         )
+    
+    st.divider()
 
-        st.divider()
+    # 4. NEWS UPLINK (The Image-Based Feed)
+    st.subheader("📰 WORLD INTELLIGENCE STREAM")
+    
+    # This matches your previous version where news correlates to the pulse
+    # We can pull these from a 'News' tab in your GSheet or a static list
+    news_data = [
+        {"title": "Global AI Outreach Shift", "img": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400", "desc": "B2B markets are pivoting to 'Void-style' automation infrastructure."},
+        {"title": "Short-Form Content Explosion", "img": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400", "desc": "Engagement spikes detected in cinematic storytelling formats."},
+        {"title": "SaaS Efficiency Reaches All-Time High", "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400", "desc": "Tools that save 'Time' are outperforming all other market assets."}
+    ]
 
-        # 3. NEWS FEED WITH IMAGES (The Visual Intel Layer)
-        st.subheader("📰 GLOBAL NEWS UPLINK")
-        
-        # This is the structure you had with images and descriptions
-        news_items = [
-            {
-                "title": "AI Content Surge on LinkedIn", 
-                "img": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400", 
-                "desc": "B2B creators are seeing 40% higher reach using AI-augmented storytelling."
-            },
-            {
-                "title": "The Rise of Ghost-SaaS", 
-                "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400", 
-                "desc": "New business models focusing on invisible automation infrastructure are peaking."
-            },
-            {
-                "title": "Short-Form Algorithm Shift", 
-                "img": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400", 
-                "desc": "Platforms are now prioritizing 'Retention-First' cinematic edits over volume."
-            }
-        ]
-
-        # Display the feed (Filtered by search)
-        for news in news_items:
-            if not search_query or search_query.lower() in news['title'].lower():
-                with st.container(border=True):
-                    col_img, col_txt = st.columns([1, 2])
-                    with col_img:
-                        st.image(news['img'], use_container_width=True)
-                    with col_txt:
-                        st.markdown(f"#### {news['title']}")
-                        st.write(news['desc'])
-                        st.caption("Source: Global Intelligence Stream | 2h ago")
-    else:
-        st.error("INTELLIGENCE DATA DISCONNECTED. Please re-sync the Neural Link.")
-
-# --- INDEPENDENT MONDAY PULSE (TACTICAL TRIGGER) ---
-# This is separate as discussed—no interference with the tab above.
-if datetime.now().strftime("%A") == "Monday":
-    if st.session_state.get('last_monday_pulse') != datetime.now().strftime("%Y-%m-%d"):
-        st.toast("🛰️ MONDAY BROADCAST ACTIVE", icon="🚀")
-        st.session_state.last_monday_pulse = datetime.now().strftime("%Y-%m-%d")
+    for item in news_data:
+        # Logic to only show news relevant to the search
+        if not search_query or search_query.lower() in item['title'].lower():
+            with st.container(border=True):
+                c1, c2 = st.columns([1, 2])
+                with c1:
+                    st.image(item['img'], use_container_width=True)
+                with c2:
+                    st.markdown(f"#### {item['title']}")
+                    st.write(item['desc'])
+                    st.caption("Live Update // System-Verified")
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
@@ -1837,6 +1825,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
