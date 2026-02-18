@@ -337,12 +337,25 @@ def download_media_high_res(url, format_type):
     # Use a temporary directory so we don't clutter the server
     temp_dir = tempfile.mkdtemp()
     
-    # Force MP4 and ensure high-quality stitching
+    # THE SHIELD: Advanced Options to prevent 0.1KB corrupt files
     ydl_opts = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
         'merge_output_format': 'mp4',
         'quiet': True,
+        'nocheckcertificate': True,
+        'no_warnings': True,
+        'ignoreerrors': False,
+        # FORCE AUTHENTICATION
+        'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None,
+        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'referer': 'https://www.google.com/',
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['web', 'tv'],
+                'player_skip': ['webpage', 'configs'],
+            }
+        },
     }
     
     if "Audio" in format_type:
@@ -355,12 +368,10 @@ def download_media_high_res(url, format_type):
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
-        # Get the actual final filename (post-processing can change extensions)
         file_path = ydl.prepare_filename(info)
         if "Audio" in format_type:
             file_path = file_path.rsplit('.', 1)[0] + ".mp3"
         return file_path
-
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -1638,6 +1649,7 @@ elif page == "💎 Upgrade to Pro":
                             st.error("Uplink Failure. Contact Support.")
                     else:
                         st.error("Invalid Input Details.")
+
 # --- MODULE 8: MEDIA UPLINK (THE MASTER EXTRACTOR) ---
 elif page == "🛰️ Media Uplink":
     if 'uplink_url' not in st.session_state: st.session_state.uplink_url = ""
@@ -1660,29 +1672,20 @@ elif page == "🛰️ Media Uplink":
             progress_bar = st.progress(0, text="Injecting Authentication Shards...")
             
             try:
-                import yt_dlp
-                import os
-                import tempfile
-
-                temp_dir = tempfile.mkdtemp()
-                out_path = os.path.join(temp_dir, 'media_%(id)s.%(ext)s')
-
-                # ANTI-BLOCKING OPTIONS
+                # ANTI-BLOCKING OPTIONS (Localized within the button execution)
                 ydl_opts = {
                     'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-                    'outtmpl': out_path,
+                    'outtmpl': os.path.join(tempfile.gettempdir(), 'media_%(id)s.%(ext)s'),
                     'merge_output_format': 'mp4',
                     'quiet': True,
                     'nocheckcertificate': True,
-                    # THE KEY FIX: Using cookies if they exist in your root folder
                     'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None,
+                    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
                     'extractor_args': {
                         'youtube': {
                             'player_client': ['web', 'tv'],
-                            'player_skip': ['webpage', 'configs'],
                         }
                     },
-                    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0 Safari/537.36',
                 }
                 
                 if "Audio" in f_ext:
@@ -1701,22 +1704,35 @@ elif page == "🛰️ Media Uplink":
                     if "Audio" in f_ext:
                         final_file_path = final_file_path.rsplit('.', 1)[0] + ".mp3"
 
-                progress_bar.progress(100, text="Uplink Secured.")
-                
-                with open(final_file_path, "rb") as f:
-                    file_data = f.read()
-                
-                st.download_button(label="💾 DOWNLOAD ASSET", data=file_data, file_name=os.path.basename(final_file_path), mime="video/mp4" if "Video" in f_ext else "audio/mpeg", use_container_width=True, key="dl_v3")
-                
-                os.remove(final_file_path)
+                # Check if file is valid before proceeding
+                if os.path.exists(final_file_path) and os.path.getsize(final_file_path) > 1000:
+                    progress_bar.progress(100, text="Uplink Secured.")
+                    
+                    with open(final_file_path, "rb") as f:
+                        file_data = f.read()
+                    
+                    st.download_button(
+                        label="💾 DOWNLOAD ASSET", 
+                        data=file_data, 
+                        file_name=os.path.basename(final_file_path), 
+                        mime="video/mp4" if "Video" in f_ext else "audio/mpeg", 
+                        use_container_width=True, 
+                        key="dl_v3"
+                    )
+                    
+                    os.remove(final_file_path)
+                else:
+                    st.error("🚨 CORRUPT UPLINK: File size is too small. Refresh 'cookies.txt'.")
 
             except Exception as e:
-                if "152" in str(e) or "Sign in" in str(e):
-                    st.error("🚨 AUTHENTICATION FAILED (Error 152): YouTube is blocking the bot. Please upload a fresh 'cookies.txt' to the server.")
+                error_msg = str(e)
+                if "152" in error_msg or "Sign in" in error_msg:
+                    st.error("🚨 AUTHENTICATION FAILED: YouTube has blocked the request. Please update your 'cookies.txt' using the browser console method.")
                 else:
-                    st.error(f"UPLINK FAILED: {str(e)}")
+                    st.error(f"UPLINK FAILED: {error_msg}")
         else:
             st.warning("Director, insert a URL to begin.")
+
 
 elif page == "⚙️ Settings":
     st.markdown("<h1 style='color: #00ff41;'>⚙️ SYSTEM SETTINGS</h1>", unsafe_allow_html=True)
@@ -1826,6 +1842,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
