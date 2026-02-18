@@ -15,6 +15,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 import io
 import yt_dlp
 import tempfile
+from datetime import datetime
 
 # --- INITIALIZE STATE (Place this near the top of your script) ---
 if "current_page" not in st.session_state:
@@ -372,6 +373,30 @@ def download_media_high_res(url, format_type):
         if "Audio" in format_type:
             file_path = file_path.rsplit('.', 1)[0] + ".mp3"
         return file_path
+
+# --- CORE UTILITY: PRO-SYNC ENGINE ---
+def get_live_stats(url):
+    """
+    PRO FEATURE: Extracts public metadata (Subs/Views) without DRM issues.
+    """
+    ydl_opts = {
+        'quiet': True, 
+        'no_warnings': True, 
+        'extract_flat': True,
+        'skip_download': True,
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        try:
+            info = ydl.extract_info(url, download=False)
+            # Subscriber count for channels, follower count for others
+            subs = info.get('channel_follower_count') or info.get('subscriber_count', 0)
+            # Sum views of the last 5 entries
+            entries = info.get('entries', [])
+            total_views = sum([v.get('view_count', 0) for v in entries[:5] if v.get('view_count')])
+            return subs, total_views
+        except Exception as e:
+            return None, None
+
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -736,58 +761,68 @@ elif page == "🏠 Dashboard":
 # --- MODULE 10: MY GROWTH HUB ---
 elif page == "📡 My Growth Hub":
     st.markdown("<h1 style='color: #00d4ff;'>📡 SOCIAL INTEL MATRIX</h1>", unsafe_allow_html=True)
-    
-    # --- 📈 GROWTH TRACKER (Manual Intelligence) ---
-    with st.container(border=True):
-        st.subheader("📈 GROWTH DATA INPUT")
-        col1, col2 = st.columns(2)
-        with col1:
-            start_count = st.number_input("Starting Followers", min_value=0, value=1000, help="Count when you started tracking")
-            days_passed = st.slider("Days since tracking started", 1, 60, 7)
-        with col2:
-            current_count = st.number_input("Current Followers", min_value=0, value=1200)
-            
-        # --- MATHEMATICAL FORECASTING LOGIC ---
-        if current_count >= start_count and days_passed > 0:
-            growth_diff = current_count - start_count
-            daily_avg = growth_diff / days_passed
-            growth_rate_pct = (growth_diff / start_count) / days_passed if start_count > 0 else 0
-            projection_30d = current_count + (daily_avg * 30)
-            
-            m1, m2, m3 = st.columns(3)
-            m1.metric("DAILY VELOCITY", f"+{int(daily_avg)}/day")
-            m2.metric("GROWTH RATE", f"{round(growth_rate_pct*100, 2)}%")
-            m3.metric("30D FORECAST", f"{int(projection_30d):,}")
-            
-            if growth_rate_pct > 0.05:
-                st.success(f"🔥 Viral Momentum Detected! Projection: **{int(projection_30d):,}**")
-            elif growth_rate_pct > 0:
-                st.info(f"🔮 Linear Growth Confirmed. Projection: **{int(projection_30d):,}**")
-        else:
-            st.warning("Director: Current count must be higher than starting count for projections.")
 
-    # --- 🗓️ TASK FORGE (The CRM & Outreach Engine) ---
+    # 1. THE DATA ACQUISITION LAYER
+    with st.container(border=True):
+        if is_paid or is_admin:
+            st.markdown("### 🛰️ PRO-SYNC TERMINAL")
+            st.caption("Real-time API Uplink: Active")
+            
+            target_url = st.text_input("🔗 Target Profile/Channel URL", placeholder="Paste YouTube or Instagram link...")
+            
+            if st.button("🔄 INITIATE LIVE SYNC", use_container_width=True):
+                if target_url:
+                    with st.spinner("Intercepting Public Metadata..."):
+                        subs, views = get_live_stats(target_url)
+                        if subs:
+                            st.session_state.current_count = subs
+                            st.session_state.total_views = views
+                            st.success(f"Sync Successful: {subs:,} Followers detected.")
+                        else:
+                            st.error("Uplink failed. Ensure the URL is public.")
+        else:
+            st.markdown("### 📉 MANUAL TRACKER (BASIC)")
+            st.info("Upgrade to PRO to unlock Automated Live Sync.")
+            col_b1, col_b2 = st.columns(2)
+            with col_b1:
+                st.session_state.start_count = st.number_input("Starting Followers", value=1000)
+                st.session_state.days_passed = st.slider("Days since start", 1, 60, 7)
+            with col_b2:
+                st.session_state.current_count = st.number_input("Current Followers", value=1200)
+
+    # 2. THE ANALYTICS VISUALIZER (Shared Logic)
+    if 'current_count' in st.session_state:
+        st.divider()
+        # Logic Calculation
+        start = st.session_state.get('start_count', 1000)
+        current = st.session_state.current_count
+        days = st.session_state.get('days_passed', 1)
+        
+        growth_diff = current - start
+        daily_avg = growth_diff / days if days > 0 else 0
+        projection_30d = current + (daily_avg * 30)
+        
+        m1, m2, m3 = st.columns(3)
+        m1.metric("LIVE FOLLOWERS", f"{current:,}")
+        m2.metric("DAILY VELOCITY", f"+{int(daily_avg)}/day")
+        m3.metric("30D FORECAST", f"{int(projection_30d):,}")
+
+    # 3. 🗓️ TASK FORGE (The Command Table)
     st.divider()
-    st.subheader("🗓️ CONTENT CALENDAR & OUTREACH FORGE")
+    st.subheader("🗓️ CONTENT CALENDAR & TASK FORGE")
 
     if 'tasks' not in st.session_state:
         st.session_state.tasks = pd.DataFrame(columns=["Task", "Node", "Status", "Deadline"])
 
-    # 1. NEW IDEA INTEGRATION: COLD OUTREACH GENERATOR
-    with st.expander("➕ FORGE NEW TARGET & OUTREACH", expanded=False):
+    # Input Form
+    with st.expander("➕ FORGE NEW CONTENT TASK", expanded=False):
         with st.form("task_form", clear_on_submit=True):
-            t_name = st.text_input("Creator/Task Name", placeholder="e.g. @MrBeast Outreach")
+            t_name = st.text_input("Task Description", placeholder="e.g. Record Cinematic B-Roll")
             t_plat = st.selectbox("Node", ["YouTube", "Instagram", "X", "LinkedIn", "TikTok"])
             t_date = st.date_input("Deadline")
-            
-            st.markdown("---")
-            st.caption("Optional: Generate Cold Outreach DM")
-            generate_dm = st.checkbox("Generate High-Impact Outreach?")
-            
             submit_task = st.form_submit_button("SYNC TO FORGE")
             
             if submit_task and t_name:
-                # Add to task list
                 new_task = pd.DataFrame([{
                     "Task": t_name, 
                     "Node": t_plat, 
@@ -795,30 +830,9 @@ elif page == "📡 My Growth Hub":
                     "Deadline": t_date.strftime("%Y-%m-%d")
                 }])
                 st.session_state.tasks = pd.concat([st.session_state.tasks, new_task], ignore_index=True)
-                
-                # Logic for the New Idea (Outreach Generation)
-                if generate_dm:
-                    with st.spinner("Forging Psychological Hook..."):
-                        dm_prompt = f"Write a cold DM for {t_name} on {t_plat}. Tone: Professional, 30-year old founder, no fluff. Offer: High-retention editing and viral strategy. Mention that I have analyzed their recent content gaps."
-                        try:
-                            res = groq_c.chat.completions.create(
-                                model="llama-3.3-70b-versatile",
-                                messages=[{"role": "user", "content": dm_prompt}]
-                            )
-                            st.session_state.last_outreach = res.choices[0].message.content
-                        except:
-                            st.error("Uplink to Groq failed for outreach.")
+                st.success("Task Synchronized.")
 
-    # Show the generated outreach if it exists
-    if 'last_outreach' in st.session_state:
-        with st.container(border=True):
-            st.subheader("✉️ GENERATED OUTREACH")
-            st.code(st.session_state.last_outreach, language="text")
-            if st.button("Clear Outreach"):
-                del st.session_state.last_outreach
-                st.rerun()
-
-    # 2. THE INTERACTIVE MATRIX
+    # Interactive Editor
     if not st.session_state.tasks.empty:
         edited_df = st.data_editor(
             st.session_state.tasks,
@@ -827,7 +841,7 @@ elif page == "📡 My Growth Hub":
             column_config={
                 "Status": st.column_config.SelectboxColumn(
                     "Status",
-                    options=["⏳ Pending", "🎬 Filming/Forging", "✉️ Outreach Sent", "✅ Signed"],
+                    options=["⏳ Pending", "🎬 Filming", "✂️ Editing", "✅ Uploaded"],
                     required=True,
                 ),
                 "Node": st.column_config.SelectboxColumn(
@@ -838,83 +852,15 @@ elif page == "📡 My Growth Hub":
             }
         )
         st.session_state.tasks = edited_df
-    else:
-        st.caption("No targets currently forged in the matrix.")
-
-    # --- 🌑 PROGRESS ANALYTICS ---
-    if not st.session_state.tasks.empty:
-        done = len(st.session_state.tasks[st.session_state.tasks['Status'] == "✅ Signed"])
+        
+        # 4. PROGRESS ANALYTICS
+        done = len(st.session_state.tasks[st.session_state.tasks['Status'] == "✅ Uploaded"])
         total = len(st.session_state.tasks)
         progress = done / total if total > 0 else 0
-        st.write(f"**Closing Velocity: {int(progress*100)}%**")
+        st.write(f"**Total Campaign Progress: {int(progress*100)}%**")
         st.progress(progress)
-
-
-# --- MODULE 10: CLIENT ASSIGNED SCRIPTS ---
-elif page == "💎 Assigned Scripts":
-    # Using session_state safely with a fallback to 'Director'
-    current_user = st.session_state.get('user_name', 'Director').upper()
-    st.markdown(f"<h1 style='color: #00ff41;'>💎 {current_user}'S VAULT</h1>", unsafe_allow_html=True)
-    
-    # 🛰️ Define URL (Ensure this is in your secrets or defined here)
-    # VAULT_SHEET_CSV_URL = st.secrets["https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQTrDvNWe810s55puzBodFKvfUbfMV_l-QoQIfbdPxeQknClGGCQT33UQ471NyGTw4aHLrDTw/pub?gid=1490190727&single=true&output=csv"] 
-    
-    try:
-        # Load the database
-        scripts_df = pd.read_csv(VAULT_SHEET_CSV_URL)
-        
-        # Clean column whitespace for safety
-        scripts_df.columns = [str(c).strip() for c in scripts_df.columns]
-        
-        # FILTER: Using .iloc[1] for Client Name as per your logic
-        # We use .fillna('') to prevent crashes on empty rows
-        user_name_lower = st.session_state.get('user_name', '').lower()
-        my_vault = scripts_df[scripts_df.iloc[:, 1].astype(str).str.lower() == user_name_lower].fillna("N/A")
-        
-        if my_vault.empty:
-            st.info("🛰️ VAULT EMPTY: No scripts assigned to your node yet. Contact the Director.")
-            st.image("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueXZueXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKMGpxxcaNnU6w8/giphy.gif", width=300)
-        else:
-            st.subheader(f"Total Deliverables: {len(my_vault)}")
-            
-            for i, row in my_vault.iterrows():
-                # Logic Preservation: row.iloc[3]=Title, row.iloc[2]=Platform
-                title = row.iloc[3] if len(row) > 3 else "Untitled Script"
-                platform = str(row.iloc[2]).upper() if len(row) > 2 else "GENERAL"
-                content = row.iloc[4] if len(row) > 4 else "No content available."
-                visual_dna = row.iloc[5] if len(row) > 5 else "No DNA data provided."
-
-                with st.expander(f"🎬 {title} | {platform}"):
-                    col_text, col_status = st.columns([3, 1])
-                    
-                    with col_text:
-                        st.markdown("### The Script")
-                        st.write(content) 
-                        st.divider()
-                        st.caption(f"🧬 Visual DNA: {visual_dna}")
-                    
-                    with col_status:
-                        st.markdown("### Status")
-                        # Keys must be unique, adding index 'i' is perfect
-                        st.checkbox("Filmed", key=f"check_film_{i}")
-                        st.checkbox("Edited", key=f"check_edit_{i}")
-                        st.checkbox("Posted", key=f"check_post_{i}")
-                        
-                        st.divider()
-                        # RECTIFIED DOWNLOAD: Download buttons should stand alone
-                        st.download_button(
-                            label="📥 DOWNLOAD", 
-                            data=str(content), 
-                            file_name=f"script_{i}.txt",
-                            key=f"dl_btn_{i}",
-                            use_container_width=True
-                        )
-
-    except Exception as e:
-        st.error("DATABASE OFFLINE: Connection to Master Vault timed out or URL invalid.")
-        # Only show the raw error if you are in 'Dev' mode, otherwise it looks messy
-        with st.expander("📡 Diagnostic Error Log"):
-            st.code(str(e))
+    else:
+        st.caption("No tasks currently forged in the matrix.")
 
 
 # --- MODULE 4: GLOBAL PULSE ---
@@ -1839,6 +1785,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
