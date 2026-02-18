@@ -618,10 +618,9 @@ if not st.session_state.logged_in:
 
 # --- MAIN APP UI BEGINS HERE (Only accessible if logged_in is True) ---
 
-# --- SIDEBAR NAVIGATION (EXPENSIVE UI EDITION) ---
+# --- SIDEBAR NAVIGATION (HIGH-VELOCITY EDITION) ---
 with st.sidebar:
-    # 1. THE IDENTITY CORE
-    # Using a stylized 'Glassmorphism' header
+    # 1. THE IDENTITY CORE (Static HTML - Fast)
     st.markdown(f"""
         <div style='background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px;'>
             <p style='margin: 0; color: #888; font-size: 10px; letter-spacing: 2px; text-align: center;'>OPERATOR IDENTIFIED</p>
@@ -633,7 +632,6 @@ with st.sidebar:
     user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
     user_role = str(st.session_state.get('user_role', 'user')).strip().lower()
 
-    # Expensive-looking Status Badges
     if user_status in ['pro', 'paid'] or user_role == "admin":
         st.markdown("<div style='background-color: #00ff41; color: #000; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>💎 ELITE CLEARANCE</div>", unsafe_allow_html=True)
     else:
@@ -650,40 +648,38 @@ with st.sidebar:
     else:
         options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "⚖️ Legal Archive", "🛰️ Media Uplink", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
 
-    # 4. HANDLE INDEXING & SELECTION
+    # 4. INSTANT NAVIGATION (The Speed Fix)
+    # We set the index based on the current session state so it doesn't jump around
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = options[0]
+
     try:
         current_index = options.index(st.session_state.current_page)
-    except (ValueError, KeyError):
+    except:
         current_index = 0
 
-    # Custom Radio Styling (Implemented via standard Radio for stability)
-    choice = st.radio("COMMAND CENTER", options, index=current_index)
-    
-    if choice != st.session_state.current_page and st.session_state.current_page != "FEEDBACK":
-        st.session_state.current_page = choice
-        st.rerun()
+    # Using 'key' makes the change instant without needing st.rerun()
+    st.radio("COMMAND CENTER", options, index=current_index, key="nav_sync")
+    st.session_state.current_page = st.session_state.nav_key = st.session_state.nav_sync
 
     # 5. GLOBAL ACTION SUITE
     st.divider()
     
-    # RE-SYNC (PRO STYLING)
+    # API SYNC (Wrapped to prevent lag)
     if st.button("🔄 RE-CALIBRATE NEURAL LINK", use_container_width=True):
         if 'user_email' in st.session_state:
-            with st.spinner("Pinging Global DB..."):
+            with st.spinner("Uplinking..."):
                 try:
-                    payload = {"email": st.session_state.user_email, "action": "CHECK_STATUS"}
-                    response = requests.post(NEW_URL, json=payload, timeout=15)
+                    # Timeout set low to prevent hanging the UI
+                    response = requests.post(NEW_URL, json={"email": st.session_state.user_email, "action": "CHECK_STATUS"}, timeout=5)
                     if response.status_code == 200:
-                        new_status = response.text.strip()
-                        st.session_state.user_status = new_status
-                        st.toast(f"Clearance Level Updated: {new_status.upper()}", icon="🛡️")
+                        st.session_state.user_status = response.text.strip()
+                        st.toast("SYNC COMPLETE", icon="🛡️")
                         st.rerun()
-                except Exception as e:
+                except:
                     st.error("UPLINK TIMEOUT")
-        else:
-            st.warning("SESSION EXPIRED")
 
-    # SECONDARY ACTIONS (Subtle grouping)
+    # SECONDARY ACTIONS
     c1, c2 = st.columns(2)
     with c1:
         if st.button("📩 FEEDBACK", use_container_width=True):
@@ -691,13 +687,10 @@ with st.sidebar:
             st.rerun()
     with c2:
         if st.button("🔒 LOGOUT", use_container_width=True):
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
+            st.session_state.clear() # Faster than manual deletion
             st.rerun()
 
-    # FOOTER LOGO
     st.markdown("<br><p style='text-align: center; color: #222; font-size: 12px; font-weight: bold;'>VOYAGER v1.0.4</p>", unsafe_allow_html=True)
-
 # --- PAGE ROUTING ---
 # This variable 'page' is what your module if/elif blocks should use
 page = st.session_state.current_page
@@ -1795,6 +1788,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
