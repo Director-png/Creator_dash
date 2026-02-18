@@ -421,81 +421,68 @@ if 'first_load' not in st.session_state:
     st.session_state.first_load = True
     st.rerun()
 
-# --- 🎨 VOID OS NEURAL VISUAL IDENTITY ---
-st.markdown("""
+# --- SPEED OPTIMIZATION ---
+@st.cache_resource
+def get_neural_styles():
+    return """
     <style>
-    /* Global Background & Text */
-    .main { background-color: #050505; color: #e0e0e0; }
+    /* High-Performance Fluid UI */
+    .main { background: radial-gradient(circle at top, #0a0a0a 0%, #000000 100%); color: #e0e0e0; }
     
-    /* Sidebar Styling */
+    /* Sleek Sidebar */
     [data-testid="stSidebar"] { 
-        background-image: linear-gradient(180deg, #000000 0%, #080808 100%); 
-        border-right: 1px solid #00d4ff33; 
+        background-color: #000000;
+        border-right: 1px solid rgba(0, 212, 255, 0.1); 
     }
 
-    /* Cyan Neural Glow for Titles */
+    /* Modern Typography */
     h1, h2, h3 { 
-        font-family: 'Courier New', Courier, monospace; 
-        letter-spacing: 2px; 
-        color: #00d4ff !important;
-        text-shadow: 0 0 10px #00d4ff55;
+        font-family: 'Inter', sans-serif; 
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: -1px;
+        background: linear-gradient(90deg, #00d4ff, #00ff41);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
-    /* Elite Button Design */
+    /* Refined Button Design (Glassmorphism) */
     .stButton>button {
-        background: transparent;
+        background: rgba(255, 255, 255, 0.03);
         color: #00d4ff; 
-        font-weight: bold; 
-        border: 1px solid #00d4ff; 
-        border-radius: 5px;
-        letter-spacing: 2px;
-        font-family: monospace;
-        transition: 0.4s all ease-in-out;
-        width: 100%;
+        border: 1px solid rgba(0, 212, 255, 0.3); 
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+        transition: 0.2s all ease-in-out;
+        height: 45px;
     }
     
     .stButton>button:hover {
-        background: #00d4ff;
-        color: black;
-        box-shadow: 0px 0px 20px #00d4ff;
-        transform: translateY(-2px);
+        border: 1px solid #00ff41;
+        color: #00ff41;
+        background: rgba(0, 255, 65, 0.05);
+        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2);
     }
 
-    /* Input Field Styling */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea { 
-        background-color: #080808; 
-        color: #00d4ff; 
-        border: 1px solid #00d4ff33 !important; 
-    }
-    
-    .stSelectbox>div>div { 
-        background-color: #080808; 
-        color: #00d4ff; 
+    /* Input Fields - Clean & Sharp */
+    .stTextInput>div>div>input {
+        border-radius: 8px !important;
+        background-color: #0f0f0f !important;
+        border: 1px solid #333 !important;
     }
 
-    /* Metrics & Cards */
-    .stMetric { 
-        background: #0a0a0a; 
-        padding: 15px; 
-        border-radius: 10px; 
-        border-left: 5px solid #00d4ff;
-        box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+    /* Cards/Metric Styling */
+    [data-testid="stMetricValue"] { color: #00ff41 !important; font-family: monospace; }
+    .stMetric {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 12px;
+        padding: 20px !important;
     }
-
-    /* Expander Styling */
-    div[data-testid="stExpander"] { 
-        background: #0a0a0a; 
-        border: 1px solid #00d4ff22 !important; 
-        border-radius: 8px;
-    }
-
-    /* Custom Scrollbar for the Elite look */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: #000; }
-    ::-webkit-scrollbar-thumb { background: #00d4ff; border-radius: 10px; }
     </style>
-    """, unsafe_allow_html=True)
+    """
 
+st.markdown(get_neural_styles(), unsafe_allow_html=True)
 
 
 # --- EMERGENCY DIAGNOSTIC ---
@@ -1808,6 +1795,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
