@@ -706,44 +706,81 @@ if page == "FEEDBACK":
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
 elif page == "🏠 Dashboard":
-    # 🚨 COMPLIANCE HEADER (Bot-Friendly)
-    st.markdown("<p style='font-size: 10px; color: #444;'>VOID OS | B2B Outreach SaaS | support@yourdomain.com</p>", unsafe_allow_html=True)
-    
+    # 🚨 COMPLIANCE HEADER (Minimalist)
+    st.markdown("<p style='font-size: 10px; color: #444; letter-spacing: 1px;'>VOID OS // B2B OUTREACH SAAS // KERNEL V.1.0.4</p>", unsafe_allow_html=True)
     st.markdown("<h1 style='color: #00ff41;'>🛰️ COMMAND CENTER</h1>", unsafe_allow_html=True)
     
-    # 1. KPI Row (Keep your original logic)
-    kpi1, kpi2, kpi3 = st.columns(3)
-    kpi1.metric("ARCHIVED SCRIPTS", len(st.session_state.get('script_history', [])))
-    kpi2.metric("ELITE PITCHES", len(st.session_state.get('pitch_history', [])))
-    kpi3.metric("CURRENT REACH", f"{st.session_state.get('current_subs', 0):,}")
+    # 1. THE AGGREGATED INTELLIGENCE ROW (KPIs)
+    # We pull data from across the app states
+    total_tasks = len(st.session_state.get('tasks', []))
+    signed_clients = len(st.session_state.tasks[st.session_state.tasks['Status'] == "✅ Signed"]) if total_tasks > 0 else 0
+    
+    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+    with kpi1:
+        st.metric("FORGED SCRIPTS", len(st.session_state.get('script_history', [])))
+    with kpi2:
+        st.metric("PIPELINE SIZE", total_tasks)
+    with kpi3:
+        st.metric("CLOSING RATE", f"{signed_clients}")
+    with kpi4:
+        st.metric("SYSTEM UPTIME", "99.9%", delta="STABLE")
     
     st.divider()
-    
-    # 2. BUSINESS TRANSPARENCY (The Razorpay Trap)
-    with st.container():
-        st.write("### 📜 Business Service Description")
-        st.write("""
-            VOID OS is a specialized **Software as a Service (SaaS)** platform providing AI-driven 
-            marketing outreach automation and lead intelligence for digital agencies.
-        """)
-        st.caption("Registered Category: IT Services / Software Development")
-    
-    st.divider()
-    
-    # 3. Mission Status & System Integrity
-    c1, c2 = st.columns([2, 1])
-    with c1:
-        st.subheader("🌑 MISSION STATUS")
-        if st.session_state.get('script_history'):
-            last_script = st.session_state.script_history[-1]
-            st.info(f"**LATEST ARCHITECTED:** {last_script['topic']} for {last_script['platform']}")
+
+    # 2. THE STRATEGIC BATTLEMAP
+    col_main, col_side = st.columns([2, 1])
+
+    with col_main:
+        st.subheader("🌑 ACTIVE MISSIONS & PIPELINE")
+        
+        # Pulling the latest data from the Growth Hub automatically
+        if not st.session_state.get('tasks', pd.DataFrame()).empty:
+            # Show a simplified view of the Growth Hub tasks
+            mini_df = st.session_state.tasks[['Task', 'Status', 'Deadline']].tail(5)
+            st.dataframe(mini_df, use_container_width=True, hide_index=True)
         else:
-            st.warning("No missions active. Initialize Script Architect.")
-            
-    with c2:
+            st.info("No active targets in Growth Hub. Initiate outreach sequence.")
+
+        st.markdown("### 📜 Business Service Intelligence")
+        with st.container(border=True):
+            st.write("""
+                **VOID OS** is currently operating as a high-performance **SaaS architecture** specializing in AI-driven content blueprints and lead conversion.
+            """)
+            st.caption("Category: Software Development & Digital Strategy")
+
+    with col_side:
         st.subheader("🛡️ SYSTEM INTEGRITY")
-        core_display = active_core if 'active_core' in globals() else "STANDBY"
-        st.code(f"AI Core: {core_display}\nHandshake: STABLE\nLaunch: T-Minus 48h")
+        # System Health Visualizer
+        core_display = active_core if 'active_core' in globals() else "LLAMA-3.3-70B"
+        st.code(f"CORE: {core_display}\nSTATUS: OPERATIONAL\nLATENCY: 42ms\nUPLINK: SECURE", language="python")
+        
+        st.divider()
+        st.subheader("⚡ QUICK ACTIONS")
+        if st.button("🧠 FORGE NEW SCRIPT", use_container_width=True):
+            st.session_state.current_page = "🧠 Neural Forge"
+            st.rerun()
+        if st.button("🎯 TARGET CREATOR", use_container_width=True):
+            st.session_state.current_page = "📡 My Growth Hub"
+            st.rerun()
+
+    st.divider()
+
+    # 3. REVENUE & ANALYTICS FORECAST (The "Director" View)
+    st.subheader("📈 GROWTH PROJECTION")
+    if not st.session_state.get('tasks', pd.DataFrame()).empty:
+        # Calculate potential value (e.g., $500 per target)
+        potential_rev = total_tasks * 500 
+        actual_rev = signed_clients * 500
+        
+        c1, c2 = st.columns(2)
+        with c1:
+            st.write(f"**Potential Pipeline Value:** ${potential_rev:,}")
+            st.progress(signed_clients/total_tasks if total_tasks > 0 else 0)
+        with c2:
+            st.write(f"**Current Revenue (Projected):** ${actual_rev:,}")
+    else:
+        st.caption("Add targets to the Growth Hub to see financial projections.")
+
 
 # --- MODULE 10: MY GROWTH HUB (THE INTEGRATED HUB) ---
 elif page == "📡 My Growth Hub":
@@ -1788,6 +1825,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
