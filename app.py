@@ -631,26 +631,31 @@ if not st.session_state.logged_in:
 
 # --- MAIN APP UI BEGINS HERE (Only accessible if logged_in is True) ---
 
-# --- SIDEBAR NAVIGATION (UNIFIED & ALIGNED) ---
+# --- SIDEBAR NAVIGATION (EXPENSIVE UI EDITION) ---
 with st.sidebar:
-    # 1. Identity Header
-    st.markdown(f"<h3 style='text-align: center; color: #00ff41;'>● {st.session_state.user_name.upper()}</h3>", unsafe_allow_html=True)
+    # 1. THE IDENTITY CORE
+    # Using a stylized 'Glassmorphism' header
+    st.markdown(f"""
+        <div style='background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px;'>
+            <p style='margin: 0; color: #888; font-size: 10px; letter-spacing: 2px; text-align: center;'>OPERATOR IDENTIFIED</p>
+            <h2 style='text-align: center; color: #00ff41; margin: 0; font-family: "Courier New", Courier, monospace;'>{st.session_state.user_name.upper()}</h2>
+        </div>
+    """, unsafe_allow_html=True)
     
-    # Normalizing status for the logic check
+    # 2. CLEARANCE LOGIC
     user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
     user_role = str(st.session_state.get('user_role', 'user')).strip().lower()
 
-    # Dynamic Status Badge - Supports 'pro' or 'paid' based on your logic
+    # Expensive-looking Status Badges
     if user_status in ['pro', 'paid'] or user_role == "admin":
-        st.success("💎 PRO NODE ACTIVE")
+        st.markdown("<div style='background-color: #00ff41; color: #000; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>💎 ELITE CLEARANCE</div>", unsafe_allow_html=True)
     else:
-        st.warning("📡 BASIC NODE")
+        st.markdown("<div style='background-color: #333; color: #888; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>📡 BASIC ACCESS</div>", unsafe_allow_html=True)
     
-    st.markdown("<p style='text-align: center; color: #444; font-size: 10px;'>ENCRYPTED CONNECTION : ACTIVE</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #444; font-size: 10px; letter-spacing: 1px;'>ENCRYPTED UPLINK : STABLE</p>", unsafe_allow_html=True)
     st.divider()
 
-    # 2. Define Options based on Role AND Status
-    # Fixed the 'paid' vs 'pro' check to ensure consistent menu rendering
+    # 3. DYNAMIC MENU MAPPING
     if user_role == "admin":
         options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
     elif user_status in ['pro', 'paid']:
@@ -658,51 +663,53 @@ with st.sidebar:
     else:
         options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "⚖️ Legal Archive", "🛰️ Media Uplink", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
 
-    # 3. Handle Page Indexing
+    # 4. HANDLE INDEXING & SELECTION
     try:
         current_index = options.index(st.session_state.current_page)
     except (ValueError, KeyError):
         current_index = 0
 
-    # 4. The Unified Radio Menu
+    # Custom Radio Styling (Implemented via standard Radio for stability)
     choice = st.radio("COMMAND CENTER", options, index=current_index)
     
     if choice != st.session_state.current_page and st.session_state.current_page != "FEEDBACK":
         st.session_state.current_page = choice
         st.rerun()
 
-    # 5. Global Action Buttons
+    # 5. GLOBAL ACTION SUITE
     st.divider()
     
-    # CONSOLIDATED SYNC BUTTON (Combines all your previous versions into one stable uplink)
-    if st.button("🔄 RE-SYNC NEURAL LINK", use_container_width=True):
+    # RE-SYNC (PRO STYLING)
+    if st.button("🔄 RE-CALIBRATE NEURAL LINK", use_container_width=True):
         if 'user_email' in st.session_state:
-            with st.spinner("Accessing Users_DB..."):
+            with st.spinner("Pinging Global DB..."):
                 try:
                     payload = {"email": st.session_state.user_email, "action": "CHECK_STATUS"}
                     response = requests.post(NEW_URL, json=payload, timeout=15)
-                    
                     if response.status_code == 200:
                         new_status = response.text.strip()
                         st.session_state.user_status = new_status
-                        st.toast(f"Clearance: {new_status.upper()}", icon="🛡️")
+                        st.toast(f"Clearance Level Updated: {new_status.upper()}", icon="🛡️")
                         st.rerun()
-                    else:
-                        st.error("GATEWAY TIMEOUT")
                 except Exception as e:
-                    st.error(f"UPLINK ERROR: {e}")
+                    st.error("UPLINK TIMEOUT")
         else:
-            st.warning("NO ACTIVE SESSION")
+            st.warning("SESSION EXPIRED")
 
-    if st.button("📩 NEURAL FEEDBACK", use_container_width=True):
-        st.session_state.current_page = "FEEDBACK"
-        st.rerun()
+    # SECONDARY ACTIONS (Subtle grouping)
+    c1, c2 = st.columns(2)
+    with c1:
+        if st.button("📩 FEEDBACK", use_container_width=True):
+            st.session_state.current_page = "FEEDBACK"
+            st.rerun()
+    with c2:
+        if st.button("🔒 LOGOUT", use_container_width=True):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.rerun()
 
-    if st.button("🔒 LOGOUT", use_container_width=True):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.rerun()
-
+    # FOOTER LOGO
+    st.markdown("<br><p style='text-align: center; color: #222; font-size: 12px; font-weight: bold;'>VOYAGER v1.0.4</p>", unsafe_allow_html=True)
 
 # --- PAGE ROUTING ---
 # This variable 'page' is what your module if/elif blocks should use
@@ -1801,6 +1808,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
