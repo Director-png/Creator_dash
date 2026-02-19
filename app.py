@@ -134,16 +134,29 @@ def load_history_db():
         return pd.DataFrame()
 
 def fetch_live_market_data():
-    """Industrial-grade fetch using a direct CSV export vector."""
-    SHEET_ID = "1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS"
-    url = f"https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
+    """Bypasses Google's 'bot-check' redirects using browser emulation."""
+    # Your verified Published CSV link
+    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "Accept": "text/csv"
+    }
+
     try:
-        # Using datetime.now() with the correct import above
-        response = requests.get(f"{url}&t={datetime.now().timestamp()}", timeout=10)
+        # allow_redirects=True is critical for 'pub?output=csv' links
+        response = requests.get(url, headers=headers, allow_redirects=True, timeout=15)
+        response.raise_for_status()
+        
+        # Convert the raw content to a format Pandas understands
         df = pd.read_csv(io.StringIO(response.text))
+        
+        # Standardize columns (lowercase, no trailing spaces)
         df.columns = [str(c).lower().strip() for c in df.columns]
         return df
-    except Exception:
+    except Exception as e:
+        # This will output the error to your Streamlit logs for precise tracking
+        st.sidebar.error(f"🛰️ Signal Error: {e}")
         return pd.DataFrame()
 
 def fetch_live_news(query, api_key):
@@ -928,28 +941,30 @@ elif page == "📡 My Growth Hub":
     else:
         st.caption("No tasks currently forged in the matrix.")
 
-
 elif page == "🌐 Global Pulse":
     st.markdown("<h1 style='color: #00d4ff;'>🌐 GLOBAL INTELLIGENCE PULSE</h1>", unsafe_allow_html=True)
     
     # 🔑 CONFIGURATION
-    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" # Replace with your key
+    # Insert your key here from newsapi.org
+    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" 
 
-    # 1. TRIGGER DATA UPLINK
+    # 1. ATTEMPT DATA RECOVERY
     df_pulse = fetch_live_market_data()
 
     if not df_pulse.empty:
-        # 2. SEARCH TERMINAL
+        # --- 2. THE SEARCH TERMINAL ---
         st.markdown("### 🔍 SEARCH TREND VECTORS")
         search_query = st.text_input("Intercept Keyword...", placeholder="Search trends...", label_visibility="collapsed")
 
-        # 3. TOP 10 PERFORMANCE VECTORS
+        # --- 3. TOP 10 PERFORMANCE VECTORS ---
         st.subheader("📊 TOP 10 PERFORMANCE VECTORS")
         display_df = df_pulse.copy()
         
+        # Sorting by the 'velocity' column from your GSheet
         if 'velocity' in display_df.columns:
             display_df = display_df.sort_values(by="velocity", ascending=False).head(10)
         
+        # Dynamic search filtering
         if search_query:
             display_df = display_df[display_df.astype(str).apply(lambda x: x.str.contains(search_query, case=False)).any(axis=1)]
 
@@ -967,15 +982,16 @@ elif page == "🌐 Global Pulse":
 
         st.divider()
 
-        # 4. LIVE WORLD INTELLIGENCE (Side-by-Side News API)
+        # --- 4. LIVE NEWS UPLINK (The Side-by-Side Visual Feed) ---
         st.subheader("📰 LIVE WORLD INTELLIGENCE")
         
-        # Use search or top keyword to find news
-        topic = search_query if search_query else (display_df['keyword'].iloc[0] if not display_df.empty else "Technology")
-        articles = fetch_live_news(topic, NEWS_API_KEY)
+        # Feed search term to News API, or use the top trend if search is empty
+        news_topic = search_query if search_query else (display_df['keyword'].iloc[0] if not display_df.empty else "Technology")
+        articles = fetch_live_news(news_topic, NEWS_API_KEY)
 
         if articles:
             for art in articles:
+                # We filter for quality: must have a title and an image
                 if art.get('urlToImage') and art.get('title'):
                     with st.container(border=True):
                         c_img, c_txt = st.columns([1, 2])
@@ -983,15 +999,17 @@ elif page == "🌐 Global Pulse":
                             st.image(art['urlToImage'], use_container_width=True)
                         with c_txt:
                             st.markdown(f"<h4 style='color: #00ff41; margin:0;'>{art['title']}</h4>", unsafe_allow_html=True)
-                            st.write(art.get('description', 'Intel redacted.'))
-                            # DIRECT LINK
+                            st.write(art.get('description', 'Detailed intel unavailable.'))
+                            # PORTAL: Open direct link
                             st.markdown(f"🔗 [READ FULL REPORT]({art['url']})")
-                            st.caption(f"Source: {art['source']['name']} | {art['publishedAt'][:10]}")
+                            st.caption(f"Source: {art['source']['name']} | Published: {art['publishedAt'][:10]}")
         else:
-            st.info(f"🛰️ Scanning the Void for '{topic}'... No live articles found.")
+            st.info(f"🛰️ Scanning the Void for '{news_topic}'... No live articles detected.")
             
     else:
-        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Please verify the GSheet 'Publish to Web' settings.")
+        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable.")
+        st.info("💡 TIP: In your GSheet, go to File > Share > Publish to Web. Ensure 'Entire Document' and 'CSV' are selected, then hit 'Publish'.")
+
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
@@ -1822,6 +1840,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
