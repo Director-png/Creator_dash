@@ -934,71 +934,74 @@ elif page == "📡 My Growth Hub":
     else:
         st.caption("No tasks currently forged in the matrix.")
 
-elif page == "🌐 Global Pulse":
-    st.markdown("<h1>🌐 <span>GLOBAL INTELLIGENCE PULSE</span></h1>", unsafe_allow_html=True)
+elif nav == "🌐 Global Pulse":
+    st.markdown("<h1 style='color: #00d4ff;'>🌐 GLOBAL INTELLIGENCE PULSE</h1>", unsafe_allow_html=True)
     
-    # Configuration
-    # NOTE: Replace with your actual NewsAPI.org key
-    NEWS_API_KEY = "YOUR_API_KEY_HERE" 
-
-    # 1. FETCH DATA VECTORS
+    # 1. THE DATA UPLINK (Google Sheets Logic)
+    # This connects to the specific URL you provided
     df_pulse = fetch_live_market_data()
+    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" # <--- Ensure your key is here
 
     if not df_pulse.empty:
-        # 2. SEARCH & DATA TABLE
+        # --- 2. SEARCH TERMINAL ---
+        # This acts as the filter for the entire "Creation Void"
         st.markdown("### 🔍 SEARCH TREND VECTORS")
-        search_query = st.text_input("Intercept Keyword...", placeholder="Search global database...", label_visibility="collapsed")
+        search_query = st.text_input("Intercept Keyword...", placeholder="Search global trends or niches...", label_visibility="collapsed")
+
+        # --- 3. TOP 10 PERFORMANCE VECTORS ---
+        # Sorting by 'velocity' to show only the highest pressure trends
+        st.subheader("📊 TOP 10 PERFORMANCE VECTORS")
         
         display_df = df_pulse.copy()
-        if search_query:
-            # Filter the table based on search
-            display_df = display_df[display_df.astype(str).apply(lambda x: x.str.contains(search_query, case=False)).any(axis=1)]
+        if 'velocity' in display_df.columns:
+            display_df = display_df.sort_values(by="velocity", ascending=False).head(10)
         
-        st.subheader("📊 PERFORMANCE VECTORS")
+        if search_query:
+            display_df = display_df[display_df.astype(str).apply(lambda x: x.str.contains(search_query, case=False)).any(axis=1)]
+
         st.data_editor(
-            display_df.head(10), 
-            use_container_width=True, 
-            hide_index=True,
+            display_df,
             column_config={
-                "velocity": st.column_config.ProgressColumn("Velocity", min_value=0, max_value=100)
-            }
+                "keyword": "Trend Target",
+                "velocity": st.column_config.ProgressColumn("Velocity", min_value=0, max_value=100),
+                "category": "Niche",
+                "relevance": "Priority"
+            },
+            hide_index=True,
+            use_container_width=True,
+            disabled=True
         )
 
         st.divider()
 
-        # 3. LIVE NEWS FEED (The Side-by-Side View)
+        # --- 4. LIVE WORLD INTELLIGENCE (The Image-Based News Feed) ---
         st.subheader("📰 LIVE WORLD INTELLIGENCE")
         
-        # Determine the best topic for news: Search query first, then top trend from sheet
-        topic = search_query if search_query else (df_pulse['keyword'].iloc[0] if 'keyword' in df_pulse.columns else "Technology")
+        # Determine the topic: Use Search Query if active, otherwise the #1 Trend from GSheet
+        news_topic = search_query if search_query else (display_df['keyword'].iloc[0] if not display_df.empty else "Technology")
         
-        articles = fetch_live_news(topic, NEWS_API_KEY)
+        # Fetch news from the API Engine we built
+        articles = fetch_live_news(news_topic, NEWS_API_KEY)
 
         if articles:
             for art in articles:
-                # Filter for quality: only show articles with headlines and images
-                if art.get('title') and art.get('urlToImage'):
+                # We only show articles with images to maintain the "Expensive UI" feel
+                if art.get('urlToImage') and art.get('title'):
                     with st.container(border=True):
                         col_img, col_txt = st.columns([1, 2])
                         with col_img:
                             st.image(art['urlToImage'], use_container_width=True)
                         with col_txt:
-                            st.markdown(f"#### {art['title']}")
-                            st.write(art.get('description', 'Information redacted...'))
-                            # HYPERLINK: Direct connection to specific article
-                            st.markdown(f"🔗 [Open Full Report]({art['url']})")
+                            st.markdown(f"<h4 style='color: #00ff41; margin:0;'>{art['title']}</h4>", unsafe_allow_html=True)
+                            st.write(art.get('description', 'Data redacted by source.'))
+                            # THE HYPERLINK: Direct connection to the specific article
+                            st.markdown(f"🔗 [READ FULL REPORT]({art['url']})")
                             st.caption(f"Source: {art['source']['name']} | {art['publishedAt'][:10]}")
         else:
-            st.info(f"🛰️ Scanning the void for '{topic}' intelligence. Please ensure API key is valid.")
-
+            st.info(f"🛰️ Scanning the Void for '{news_topic}'... No live articles detected in this sector.")
+            
     else:
-        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Please check GSheet sharing settings.")
-
-# --- MONDAY TRIGGER (Standalone) ---
-if dt.now().strftime("%A") == "Monday":
-    if st.session_state.get('last_monday_pulse') != dt.now().strftime("%Y-%m-%d"):
-        st.toast("🛰️ MONDAY BROADCAST INITIALIZED", icon="🚀")
-        st.session_state.last_monday_pulse = dt.now().strftime("%Y-%m-%d")
+        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Please verify the GSheet ID and Sharing permissions.")
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
@@ -1829,6 +1832,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
