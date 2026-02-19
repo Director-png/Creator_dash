@@ -664,9 +664,13 @@ if not st.session_state.logged_in:
 
 
 # --- MAIN APP UI BEGINS HERE (Only accessible if logged_in is True) ---
-# --- SIDEBAR NAVIGATION (THE FINAL SYNC) ---
+# --- 0. SAFETY INITIALIZATION (Prevents NameError) ---
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = "🏠 Dashboard" if st.session_state.get('user_role') == "admin" else "📡 My Growth Hub"
+
+# --- SIDEBAR NAVIGATION ---
 with st.sidebar:
-    # 1. IDENTITY & CLEARANCE (STAYS THE SAME)
+    # 1. IDENTITY CORE
     st.markdown(f"""
         <div style='background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px;'>
             <p style='margin: 0; color: #888; font-size: 10px; letter-spacing: 2px; text-align: center;'>OPERATOR IDENTIFIED</p>
@@ -674,19 +678,27 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
     
-    user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
-    user_role = str(st.session_state.get('user_role', 'user')).strip().lower()
+    # 2. CLEARANCE LOGIC
+    u_status = str(st.session_state.get('user_status', 'free')).lower()
+    u_role = str(st.session_state.get('user_role', 'user')).lower()
 
-    # NAVIGATION MENU
-    if user_role == "admin":
+    # 3. DYNAMIC MENU
+    if u_role == "admin":
         options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
     else:
         options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "📜 History", "⚙️ Settings"]
 
-    nav_selection = st.radio("COMMAND CENTER", options, key="nav_radio")
+    # 4. NAVIGATION SELECTION
+    # We ensure the index is always valid to prevent crashes
+    try:
+        default_index = options.index(st.session_state.current_page)
+    except ValueError:
+        default_index = 0
+
+    nav_selection = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
     st.session_state.current_page = nav_selection
 
-    # --- 🤖 THE VOID MANAGER: RE-WIRED BRAIN ---
+    # --- 🤖 THE VOID MANAGER (MULTI-INTEL) ---
     st.divider()
     st.markdown("### 🤖 VOID MANAGER")
     
@@ -694,42 +706,40 @@ with st.sidebar:
         agent_input = st.chat_input("Command the Void...")
         
         if agent_input:
+            # Note: Ensure fetch_live_market_data() is defined above this block
             m_data = fetch_live_market_data() 
             
             with st.chat_message("assistant", avatar="🌌"):
                 query = agent_input.lower().strip()
                 
                 if not m_data.empty:
-                    # RE-SYNC DATA CLEANING
+                    # Data Cleaning
                     m_data['growth_clean'] = m_data['growth'].astype(str).str.replace('%', '').str.replace(',', '').str.strip()
                     m_data['growth_clean'] = pd.to_numeric(m_data['growth_clean'], errors='coerce').fillna(0)
                     
-                    # --- INTENT 1: SPECIFIC SEARCH (HIGHEST PRIORITY) ---
-                    # We check if the user is asking about a specific niche first
+                    # Intent 1: Search
                     matched_row = m_data[m_data['niche name'].str.lower().apply(lambda x: x in query)]
                     
                     if not matched_row.empty:
                         target = matched_row.iloc[0]
-                        st.write(f"Direct Intercept: **{target['niche name']}**")
-                        st.write(f"Velocity: **{target['growth']}** | Density: **{target['saturation']}**")
-                        st.info(f"**Vector Analysis:** {target['reason']}")
-
-                    # --- INTENT 2: SUMMARY REPORT ---
-                    elif any(word in query for word in ["summary", "list", "report", "overview", "all"]):
-                        st.write("🌌 **Current Sector Overview (Top 5):**")
+                        st.write(f"Intercepted Data: **{target['niche name']}**")
+                        st.write(f"Velocity: **{target['growth']}**")
+                        st.info(f"**Analysis:** {target['reason']}")
+                    
+                    # Intent 2: Summary
+                    elif any(word in query for word in ["summary", "list", "all"]):
+                        st.write("🌌 **Sector Overview (Top 5):**")
                         summary_df = m_data.sort_values(by='growth_clean', ascending=False).head(5)
                         for _, r in summary_df.iterrows():
                             st.write(f"🔹 **{r['niche name']}** | Velocity: {r['growth']}")
-
-                    # --- INTENT 3: TOP TREND (ONLY IF EXPLICITLY ASKED) ---
-                    elif any(word in query for word in ["top", "best", "winner", "leading"]):
+                    
+                    # Intent 3: Top Trend
+                    elif any(word in query for word in ["top", "best", "leading"]):
                         top_v = m_data.sort_values(by='growth_clean', ascending=False).iloc[0]
-                        st.write(f"The leading vector is **{top_v['niche name']}** at **{top_v['growth']} velocity**.")
-                        st.info(f"**Vector Intel:** {top_v['reason']}")
-
-                    # --- FALLBACK ---
+                        st.write(f"Leader: **{top_v['niche name']}** ({top_v['growth']})")
+                        st.info(f"**Intel:** {top_v['reason']}")
                     else:
-                        st.write(f"Command '{agent_input}' received. Please specify a niche to audit or ask for a 'market summary'.")
+                        st.write("I am monitoring the Void. State a niche or ask for a 'summary'.")
                 else:
                     st.error("Market data link is offline.")
 
@@ -748,6 +758,10 @@ with st.sidebar:
         if st.button("🔒 LOGOUT", use_container_width=True):
             st.session_state.clear()
             st.rerun()
+
+# --- FINAL ROUTING VARIABLE ---
+# This line MUST be outside the 'with st.sidebar' block
+page = st.session_state.current_page
 
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
@@ -1904,6 +1918,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
