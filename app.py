@@ -125,6 +125,19 @@ def save_script_to_vault(title, content):
     except:
         st.error("Uplink failed.")
 
+def ask_void_agent(user_query, context_data):
+    # This is where the magic happens
+    prompt = f"""
+    You are the VOID-OS Manager. 
+    Current Market Context: {context_data}
+    User Question: {user_query}
+    
+    Instructions: Be helpful, witty, and strategic. If a user is stuck, 
+    guide them to the right tab or explain the data simply.
+    """
+    # We call the Gemini API here
+    response = call_gemini_api(prompt) 
+    return response
 
 @st.cache_data(ttl=0)
 def load_user_db():
@@ -668,9 +681,18 @@ if not st.session_state.logged_in:
 if 'current_page' not in st.session_state:
     st.session_state.current_page = "🏠 Dashboard" if st.session_state.get('user_role') == "admin" else "📡 My Growth Hub"
 
+from google import genai
+from google.genai import types
+import streamlit as st
+
+# --- 0. NEURAL CONFIGURATION ---
+API_KEY = "AIzaSyDdL8NipdVJXDbgg2mB_-Seq5oGjd18KyU" 
+client = genai.Client(api_key=API_KEY)
+MODEL_ID = "gemini-2.0-flash" 
+
 # --- SIDEBAR NAVIGATION ---
 with st.sidebar:
-    # 1. IDENTITY CORE
+    # 1. THE IDENTITY CORE
     st.markdown(f"""
         <div style='background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px;'>
             <p style='margin: 0; color: #888; font-size: 10px; letter-spacing: 2px; text-align: center;'>OPERATOR IDENTIFIED</p>
@@ -678,27 +700,36 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
     
-    # 2. CLEARANCE LOGIC
-    u_status = str(st.session_state.get('user_status', 'free')).lower()
-    u_role = str(st.session_state.get('user_role', 'user')).lower()
+    # 2. CLEARANCE LOGIC (Restored to Original)
+    user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
+    user_role = str(st.session_state.get('user_role', 'user')).strip().lower()
 
-    # 3. DYNAMIC MENU
-    if u_role == "admin":
-        options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+    if user_role == "admin" or user_status in ['pro', 'paid']:
+        st.markdown("<div style='background-color: #00ff41; color: #000; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>💎 ELITE CLEARANCE</div>", unsafe_allow_html=True)
     else:
-        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "📜 History", "⚙️ Settings"]
+        st.markdown("<div style='background-color: #333; color: #888; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>📡 BASIC ACCESS</div>", unsafe_allow_html=True)
 
-    # 4. NAVIGATION SELECTION
-    # We ensure the index is always valid to prevent crashes
+    # 3. DYNAMIC MENU MAPPING (RESTORED TO ORIGINAL TIERS)
+    if user_role == "admin":
+        options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+    elif user_status in ['pro', 'paid']:
+        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🛰️ Media Uplink", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+    else:
+        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "⚖️ Legal Archive", "🛰️ Media Uplink", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
+
+    # 4. INSTANT NAVIGATION
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = options[0]
+
     try:
-        default_index = options.index(st.session_state.current_page)
-    except ValueError:
-        default_index = 0
+        current_index = options.index(st.session_state.current_page)
+    except:
+        current_index = 0
 
-    nav_selection = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
+    nav_selection = st.radio("COMMAND CENTER", options, index=current_index, key="nav_radio")
     st.session_state.current_page = nav_selection
 
-    # --- 🤖 THE VOID MANAGER (MULTI-INTEL) ---
+    # --- 🤖 THE "GOOGLE-GENAI" MANAGER ---
     st.divider()
     st.markdown("### 🤖 VOID MANAGER")
     
@@ -706,47 +737,34 @@ with st.sidebar:
         agent_input = st.chat_input("Command the Void...")
         
         if agent_input:
-            # Note: Ensure fetch_live_market_data() is defined above this block
-            m_data = fetch_live_market_data() 
+            m_data = fetch_live_market_data()
+            context_summary = m_data.head(5).to_string() if not m_data.empty else "Data offline."
             
             with st.chat_message("assistant", avatar="🌌"):
-                query = agent_input.lower().strip()
-                
-                if not m_data.empty:
-                    # Data Cleaning
-                    m_data['growth_clean'] = m_data['growth'].astype(str).str.replace('%', '').str.replace(',', '').str.strip()
-                    m_data['growth_clean'] = pd.to_numeric(m_data['growth_clean'], errors='coerce').fillna(0)
+                try:
+                    config = types.GenerateContentConfig(
+                        system_instruction=f"""You are the VOID-OS Manager.
+                        Context: User is {st.session_state.get('user_name')}, Role: {user_role}, Page: {st.session_state.current_page}.
+                        Instructions: Be witty and strategic. Help the user navigate their specific menu: {options}.""",
+                        temperature=0.7,
+                    )
                     
-                    # Intent 1: Search
-                    matched_row = m_data[m_data['niche name'].str.lower().apply(lambda x: x in query)]
-                    
-                    if not matched_row.empty:
-                        target = matched_row.iloc[0]
-                        st.write(f"Intercepted Data: **{target['niche name']}**")
-                        st.write(f"Velocity: **{target['growth']}**")
-                        st.info(f"**Analysis:** {target['reason']}")
-                    
-                    # Intent 2: Summary
-                    elif any(word in query for word in ["summary", "list", "all"]):
-                        st.write("🌌 **Sector Overview (Top 5):**")
-                        summary_df = m_data.sort_values(by='growth_clean', ascending=False).head(5)
-                        for _, r in summary_df.iterrows():
-                            st.write(f"🔹 **{r['niche name']}** | Velocity: {r['growth']}")
-                    
-                    # Intent 3: Top Trend
-                    elif any(word in query for word in ["top", "best", "leading"]):
-                        top_v = m_data.sort_values(by='growth_clean', ascending=False).iloc[0]
-                        st.write(f"Leader: **{top_v['niche name']}** ({top_v['growth']})")
-                        st.info(f"**Intel:** {top_v['reason']}")
-                    else:
-                        st.write("I am monitoring the Void. State a niche or ask for a 'summary'.")
-                else:
-                    st.error("Market data link is offline.")
+                    response = client.models.generate_content(
+                        model=MODEL_ID,
+                        contents=f"Market context: {context_summary}. User asked: {agent_input}",
+                        config=config
+                    )
+                    st.write(response.text)
+                except Exception as e:
+                    st.error("Neural Link Jitter.")
+                    st.caption(f"Error: {e}")
 
-    # 5. ACTION SUITE
+    # 5. GLOBAL ACTION SUITE
     st.divider()
-    if st.button("🔄 RE-CALIBRATE", use_container_width=True):
+    
+    if st.button("🔄 RE-CALIBRATE NEURAL LINK", use_container_width=True):
         st.cache_data.clear()
+        st.toast("RE-SYNCING DATA...")
         st.rerun()
 
     c1, c2 = st.columns(2)
@@ -759,10 +777,8 @@ with st.sidebar:
             st.session_state.clear()
             st.rerun()
 
-# --- FINAL ROUTING VARIABLE ---
-# This line MUST be outside the 'with st.sidebar' block
+# --- FINAL ROUTING ---
 page = st.session_state.current_page
-
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
 if page == "🏠 Dashboard":
@@ -1918,6 +1934,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
