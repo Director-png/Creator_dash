@@ -945,35 +945,37 @@ elif page == "🌐 Global Pulse":
     st.markdown("<h1 style='color: #00d4ff;'>🌐 GLOBAL INTELLIGENCE PULSE</h1>", unsafe_allow_html=True)
     
     # 🔑 CONFIGURATION
-    # Insert your key here from newsapi.org
-    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" 
+    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" # <--- Insert your key from newsapi.org
 
-    # 1. ATTEMPT DATA RECOVERY
+    # 1. TRIGGER DATA UPLINK
     df_pulse = fetch_live_market_data()
 
     if not df_pulse.empty:
-        # --- 2. THE SEARCH TERMINAL ---
+        # --- 2. SEARCH TERMINAL ---
         st.markdown("### 🔍 SEARCH TREND VECTORS")
-        search_query = st.text_input("Intercept Keyword...", placeholder="Search trends...", label_visibility="collapsed")
+        search_query = st.text_input("Intercept Keyword...", placeholder="Search niches or reasons...", label_visibility="collapsed")
 
-        # --- 3. TOP 10 PERFORMANCE VECTORS ---
+        # --- 3. PERFORMANCE VECTORS (Matched to your Columns) ---
         st.subheader("📊 TOP 10 PERFORMANCE VECTORS")
         display_df = df_pulse.copy()
         
-        # Sorting by the 'velocity' column from your GSheet
-        if 'velocity' in display_df.columns:
-            display_df = display_df.sort_values(by="velocity", ascending=False).head(10)
+        # Sort by 'growth' (your velocity metric)
+        if 'growth' in display_df.columns:
+            display_df = display_df.sort_values(by="growth", ascending=False).head(10)
         
-        # Dynamic search filtering
+        # Apply Search Filter
         if search_query:
             display_df = display_df[display_df.astype(str).apply(lambda x: x.str.contains(search_query, case=False)).any(axis=1)]
 
+        # Map your exact column names to the UI
         st.data_editor(
             display_df,
             column_config={
-                "keyword": "Trend Target",
-                "velocity": st.column_config.ProgressColumn("Velocity", min_value=0, max_value=100),
-                "category": "Niche"
+                "niche name": "Trend Target",
+                "growth": st.column_config.ProgressColumn("Growth Velocity", min_value=0, max_value=100),
+                "score": "Intelligence Score",
+                "saturation": "Market Density",
+                "reason": "Vector Analysis"
             },
             hide_index=True,
             use_container_width=True,
@@ -982,34 +984,34 @@ elif page == "🌐 Global Pulse":
 
         st.divider()
 
-        # --- 4. LIVE NEWS UPLINK (The Side-by-Side Visual Feed) ---
+        # --- 4. LIVE WORLD INTELLIGENCE (Side-by-Side News) ---
         st.subheader("📰 LIVE WORLD INTELLIGENCE")
         
-        # Feed search term to News API, or use the top trend if search is empty
-        news_topic = search_query if search_query else (display_df['keyword'].iloc[0] if not display_df.empty else "Technology")
+        # Drive News by 'niche name' or Search query
+        default_topic = display_df['niche name'].iloc[0] if not display_df.empty else "Technology"
+        news_topic = search_query if search_query else default_topic
+        
         articles = fetch_live_news(news_topic, NEWS_API_KEY)
 
         if articles:
             for art in articles:
-                # We filter for quality: must have a title and an image
                 if art.get('urlToImage') and art.get('title'):
                     with st.container(border=True):
+                        # Side-by-side Layout
                         c_img, c_txt = st.columns([1, 2])
                         with c_img:
                             st.image(art['urlToImage'], use_container_width=True)
                         with c_txt:
                             st.markdown(f"<h4 style='color: #00ff41; margin:0;'>{art['title']}</h4>", unsafe_allow_html=True)
-                            st.write(art.get('description', 'Detailed intel unavailable.'))
-                            # PORTAL: Open direct link
+                            st.write(art.get('description', 'Intel redacted.'))
+                            # DIRECT PORTAL
                             st.markdown(f"🔗 [READ FULL REPORT]({art['url']})")
-                            st.caption(f"Source: {art['source']['name']} | Published: {art['publishedAt'][:10]}")
+                            st.caption(f"Source: {art['source']['name']} | {art['publishedAt'][:10]}")
         else:
-            st.info(f"🛰️ Scanning the Void for '{news_topic}'... No live articles detected.")
+            st.info(f"🛰️ Scanning the Void for '{news_topic}' intelligence...")
             
     else:
-        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable.")
-        st.info("💡 TIP: In your GSheet, go to File > Share > Publish to Web. Ensure 'Entire Document' and 'CSV' are selected, then hit 'Publish'.")
-
+        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Verify your GSheet is published to web as CSV.")
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
@@ -1840,6 +1842,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
