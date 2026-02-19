@@ -945,73 +945,75 @@ elif page == "🌐 Global Pulse":
     st.markdown("<h1 style='color: #00d4ff;'>🌐 GLOBAL INTELLIGENCE PULSE</h1>", unsafe_allow_html=True)
     
     # 🔑 CONFIGURATION
-    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" # <--- Insert your key from newsapi.org
+    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" 
 
     # 1. TRIGGER DATA UPLINK
     df_pulse = fetch_live_market_data()
 
     if not df_pulse.empty:
         # --- 2. SEARCH TERMINAL ---
-        st.markdown("### 🔍 SEARCH TREND VECTORS")
-        search_query = st.text_input("Intercept Keyword...", placeholder="Search niches or reasons...", label_visibility="collapsed")
+        search_query = st.text_input("🔍 Intercept Keyword...", placeholder="Search niches...", label_visibility="collapsed")
 
-        # --- 3. PERFORMANCE VECTORS (Matched to your Columns) ---
+        # --- 3. PERFORMANCE VECTORS ---
         st.subheader("📊 TOP 10 PERFORMANCE VECTORS")
         display_df = df_pulse.copy()
         
-        # Sort by 'growth' (your velocity metric)
-        if 'growth' in display_df.columns:
-            display_df = display_df.sort_values(by="growth", ascending=False).head(10)
+        # Mapping to your specific columns
+        vel_col = 'growth' if 'growth' in display_df.columns else display_df.columns[2]
+        name_col = 'niche name' if 'niche name' in display_df.columns else display_df.columns[0]
+
+        display_df = display_df.sort_values(by=vel_col, ascending=False).head(10)
         
-        # Apply Search Filter
         if search_query:
             display_df = display_df[display_df.astype(str).apply(lambda x: x.str.contains(search_query, case=False)).any(axis=1)]
 
-        # Map your exact column names to the UI
         st.data_editor(
             display_df,
             column_config={
-                "niche name": "Trend Target",
-                "growth": st.column_config.ProgressColumn("Growth Velocity", min_value=0, max_value=100),
-                "score": "Intelligence Score",
-                "saturation": "Market Density",
-                "reason": "Vector Analysis"
+                name_col: "Trend Target",
+                vel_col: st.column_config.ProgressColumn("Growth Velocity", min_value=0, max_value=100),
             },
-            hide_index=True,
-            use_container_width=True,
-            disabled=True
+            hide_index=True, use_container_width=True, disabled=True
         )
 
         st.divider()
 
-        # --- 4. LIVE WORLD INTELLIGENCE (Side-by-Side News) ---
+        # --- 4. LIVE WORLD INTELLIGENCE (The Multi-News Feed) ---
         st.subheader("📰 LIVE WORLD INTELLIGENCE")
         
-        # Drive News by 'niche name' or Search query
-        default_topic = display_df['niche name'].iloc[0] if not display_df.empty else "Technology"
-        news_topic = search_query if search_query else default_topic
+        # Use Search or the Top Niche from your sheet
+        news_topic = search_query if search_query else (display_df[name_col].iloc[0] if not display_df.empty else "Technology")
         
+        # We increase pageSize to 10 to ensure we have plenty of options
         articles = fetch_live_news(news_topic, NEWS_API_KEY)
 
         if articles:
-            for art in articles:
-                if art.get('urlToImage') and art.get('title'):
-                    with st.container(border=True):
-                        # Side-by-side Layout
-                        c_img, c_txt = st.columns([1, 2])
-                        with c_img:
-                            st.image(art['urlToImage'], use_container_width=True)
-                        with c_txt:
-                            st.markdown(f"<h4 style='color: #00ff41; margin:0;'>{art['title']}</h4>", unsafe_allow_html=True)
-                            st.write(art.get('description', 'Intel redacted.'))
-                            # DIRECT PORTAL
-                            st.markdown(f"🔗 [READ FULL REPORT]({art['url']})")
-                            st.caption(f"Source: {art['source']['name']} | {art['publishedAt'][:10]}")
+            # We loop through all articles found
+            for art in articles[:8]: # Display top 8 relevant results
+                with st.container(border=True):
+                    c_img, c_txt = st.columns([1, 2])
+                    
+                    with c_img:
+                        # FALLBACK: If the news article has no image, use a high-tech placeholder
+                        img_url = art.get('urlToImage')
+                        if not img_url:
+                            img_url = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400"
+                        st.image(img_url, use_container_width=True)
+                        
+                    with c_txt:
+                        st.markdown(f"<h4 style='color: #00ff41; margin:0;'>{art['title']}</h4>", unsafe_allow_html=True)
+                        # Clean up description
+                        desc = art.get('description') or "Detailed intel for this vector is encrypted. Click below for full access."
+                        st.write(f"{desc[:200]}...")
+                        
+                        # THE PORTAL
+                        st.markdown(f"🔗 [READ FULL REPORT]({art['url']})")
+                        st.caption(f"Source: {art['source']['name']} | {art['publishedAt'][:10]}")
         else:
-            st.info(f"🛰️ Scanning the Void for '{news_topic}' intelligence...")
+            st.info(f"🛰️ No live news for '{news_topic}'. Searching broader vectors...")
             
     else:
-        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Verify your GSheet is published to web as CSV.")
+        st.error("📡 NEURAL LINK FAILURE: The CSV is unreachable.")
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
@@ -1842,6 +1844,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
