@@ -681,18 +681,15 @@ if not st.session_state.logged_in:
 if 'current_page' not in st.session_state:
     st.session_state.current_page = "🏠 Dashboard" if st.session_state.get('user_role') == "admin" else "📡 My Growth Hub"
 
-from google import genai
-from google.genai import types
-import streamlit as st
-
-# --- 0. NEURAL CONFIGURATION ---
-API_KEY = "AIzaSyDdL8NipdVJXDbgg2mB_-Seq5oGjd18KyU" 
+# --- 0. NEURAL CONFIGURATION (GEMINI 3 FLASH) ---
+# Replace with your key or use st.secrets["GEMINI_KEY"]
+API_KEY = "AIzaSyDdL8NipdVJXDbgg2mB_-Seq5oGjd18KyU"
 client = genai.Client(api_key=API_KEY)
-MODEL_ID = "gemini-2.0-flash" 
+MODEL_ID = "gemini-3-flash-preview" 
 
 # --- SIDEBAR NAVIGATION ---
 with st.sidebar:
-    # 1. THE IDENTITY CORE
+    # 1. IDENTITY CORE
     st.markdown(f"""
         <div style='background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px;'>
             <p style='margin: 0; color: #888; font-size: 10px; letter-spacing: 2px; text-align: center;'>OPERATOR IDENTIFIED</p>
@@ -700,7 +697,7 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
     
-    # 2. CLEARANCE LOGIC (Restored to Original)
+    # 2. CLEARANCE LOGIC (ORIGINAL LOGIC UNCHANGED)
     user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
     user_role = str(st.session_state.get('user_role', 'user')).strip().lower()
 
@@ -709,7 +706,7 @@ with st.sidebar:
     else:
         st.markdown("<div style='background-color: #333; color: #888; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>📡 BASIC ACCESS</div>", unsafe_allow_html=True)
 
-    # 3. DYNAMIC MENU MAPPING (RESTORED TO ORIGINAL TIERS)
+    # 3. DYNAMIC MENU MAPPING (ORIGINAL TIERS)
     if user_role == "admin":
         options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
     elif user_status in ['pro', 'paid']:
@@ -717,68 +714,76 @@ with st.sidebar:
     else:
         options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "⚖️ Legal Archive", "🛰️ Media Uplink", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
 
-    # 4. INSTANT NAVIGATION
+    # 4. NAVIGATION STATE
     if 'current_page' not in st.session_state:
         st.session_state.current_page = options[0]
 
-    try:
-        current_index = options.index(st.session_state.current_page)
-    except:
-        current_index = 0
-
-    nav_selection = st.radio("COMMAND CENTER", options, index=current_index, key="nav_radio")
+    nav_selection = st.radio("COMMAND CENTER", options, key="nav_radio")
     st.session_state.current_page = nav_selection
 
-    # --- 🤖 THE "GOOGLE-GENAI" MANAGER ---
+    # --- 🤖 THE "GEMINI-INTEGRATED" VOID MANAGER ---
     st.divider()
     st.markdown("### 🤖 VOID MANAGER")
     
-    with st.expander("📡 NEURAL CHAT", expanded=True):
-        agent_input = st.chat_input("Command the Void...")
+    with st.expander("📡 NEURAL UPLINK", expanded=True):
+        # Local state for manager chat history
+        if "manager_chat" not in st.session_state:
+            st.session_state.manager_chat = []
+
+        # Display history within the expander
+        for msg in st.session_state.manager_chat:
+            with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
+                st.markdown(msg["content"])
+
+        agent_input = st.chat_input("Command Gemini...")
         
         if agent_input:
-            m_data = fetch_live_market_data()
-            context_summary = m_data.head(5).to_string() if not m_data.empty else "Data offline."
+            # Display user message
+            st.session_state.manager_chat.append({"role": "user", "content": agent_input})
+            with st.chat_message("user", avatar="👤"):
+                st.markdown(agent_input)
             
+            # Fetch context for reasoning
+            m_data = fetch_live_market_data() # Ensure this function is defined
+            context = f"Page: {st.session_state.current_page}. Top Market Trend: {m_data.iloc[0,0] if not m_data.empty else 'Unknown'}."
+
             with st.chat_message("assistant", avatar="🌌"):
                 try:
+                    # GEMINI 3 FLASH CONFIGURATION
                     config = types.GenerateContentConfig(
-                        system_instruction=f"""You are the VOID-OS Manager.
-                        Context: User is {st.session_state.get('user_name')}, Role: {user_role}, Page: {st.session_state.current_page}.
-                        Instructions: Be witty and strategic. Help the user navigate their specific menu: {options}.""",
-                        temperature=0.7,
+                        system_instruction=f"""You are the VOID-OS Manager. You ARE Gemini integrated directly into the system. 
+                        Witty, strategic, and direct. Help the Director dominate the industry.
+                        Clearance: {user_role}/{user_status}. Context: {context}.""",
+                        thinking_config=types.ThinkingConfig(thinking_level="low"), # Fast responses
+                        temperature=0.8
                     )
                     
                     response = client.models.generate_content(
-                        model="gemini-1.5-flash",
-                        contents=f"Market context: {context_summary}. User asked: {agent_input}",
+                        model=MODEL_ID,
+                        contents=agent_input,
                         config=config
                     )
-                    st.write(response.text)
+                    
+                    st.markdown(response.text)
+                    st.session_state.manager_chat.append({"role": "assistant", "content": response.text})
+                    
                 except Exception as e:
-                    st.error("Neural Link Jitter.")
-                    st.caption(f"Error: {e}")
+                    if "429" in str(e):
+                        st.warning("Uplink cooling down. (Quota Reached)")
+                    else:
+                        st.error("Neural Jitter.")
+                        st.caption(f"Error: {e}")
 
-    # 5. GLOBAL ACTION SUITE
+    # 5. GLOBAL ACTIONS
     st.divider()
-    
-    if st.button("🔄 RE-CALIBRATE NEURAL LINK", use_container_width=True):
+    if st.button("🔄 RE-CALIBRATE", use_container_width=True):
         st.cache_data.clear()
-        st.toast("RE-SYNCING DATA...")
         st.rerun()
 
-    c1, c2 = st.columns(2)
-    with c1:
-        if st.button("📩 FEEDBACK", use_container_width=True):
-            st.session_state.current_page = "FEEDBACK"
-            st.rerun()
-    with c2:
-        if st.button("🔒 LOGOUT", use_container_width=True):
-            st.session_state.clear()
-            st.rerun()
+    if st.button("🔒 LOGOUT", use_container_width=True):
+        st.session_state.clear()
+        st.rerun()
 
-# --- FINAL ROUTING ---
-page = st.session_state.current_page
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
 if page == "🏠 Dashboard":
@@ -1934,6 +1939,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
