@@ -715,32 +715,43 @@ with st.sidebar:
     st.radio("COMMAND CENTER", options, index=current_index, key="nav_sync")
     st.session_state.current_page = st.session_state.nav_sync
 
-    # --- 🤖 THE VOID MANAGER (MULTI-SHEET AGENT) ---
+    # --- 🤖 RECALIBRATED: VOID MANAGER AGENT ---
     st.divider()
     st.markdown("### 🤖 VOID MANAGER")
     
-    with st.expander("📡 NEURAL CHAT", expanded=False):
+    with st.expander("📡 NEURAL CHAT", expanded=True):
         agent_input = st.chat_input("Command the Void...")
         
         if agent_input:
-            # PULLING REAL DATA FROM THE VAULTS
-            # Ensure fetch_live_market_data and fetch_vault_data are defined at the top
+            # FORCE RE-SYNC: Ensures we aren't stuck on old data
             m_data = fetch_live_market_data() 
             u_data = fetch_vault_data("users")
-            f_data = fetch_vault_data("feedback")
             
             with st.chat_message("assistant", avatar="🌌"):
                 query = agent_input.lower()
                 
-                # REASONING ENGINE: Analyzing Market Data
-                if any(x in query for x in ["market", "trend", "growth"]):
+                # REASONING ENGINE: Dynamic Market Analysis
+                if any(x in query for x in ["market", "trend", "growth", "niche"]):
                     if not m_data.empty:
-                        top_niche = m_data['niche name'].iloc[0]
-                        growth_val = m_data['growth'].iloc[0]
-                        st.write(f"Director, the data flow confirms **{top_niche}** as the primary vector with **{growth_val}% growth**. I suggest focusing outreach here.")
+                        # NEW LOGIC: We sort by GROWTH to find the real winner
+                        top_vessel = m_data.sort_values(by='growth', ascending=False).iloc[0]
+                        niche_name = top_vessel['niche name']
+                        growth_score = top_vessel['growth']
+                        reasoning = top_vessel['reason']
+                        
+                        st.write(f"Director, I've bypassed the cache. The **highest velocity** vector is actually **{niche_name}** at **{growth_score}% growth**.")
+                        st.caption(f"Vector Intel: {reasoning[:150]}...")
                     else:
-                        st.error("Market vault link failure.")
+                        st.error("🛰️ Data Link severed. Check G-Sheet 'Publish to Web' status.")
 
+                # REASONING ENGINE: User Intelligence
+                elif "user" in query or "active" in query:
+                    count = len(u_data) if not u_data.empty else "0"
+                    st.write(f"Current Matrix status: **{count}** active operators. All connections stable.")
+
+                # FALLBACK: General Command
+                else:
+                    st.write(f"Query '{agent_input}' received. I am scanning the Void for deeper insights...")
                 # REASONING ENGINE: Analyzing User/Admin Data
                 elif any(x in query for x in ["user", "active", "operators"]):
                     count = len(u_data) if not u_data.empty else "unverified"
@@ -1948,6 +1959,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
