@@ -664,7 +664,7 @@ if not st.session_state.logged_in:
 
 
 # --- MAIN APP UI BEGINS HERE (Only accessible if logged_in is True) ---
-# --- SIDEBAR NAVIGATION (THE ARCHITECT'S VERSION) ---
+# --- SIDEBAR NAVIGATION (MULTI-INTEL AGENT EDITION) ---
 with st.sidebar:
     # 1. IDENTITY CORE
     st.markdown(f"""
@@ -697,17 +697,14 @@ with st.sidebar:
     if 'current_page' not in st.session_state:
         st.session_state.current_page = options[0]
 
-    # Ensure current_page is valid
     if st.session_state.current_page not in options:
         st.session_state.current_page = options[0]
 
     current_index = options.index(st.session_state.current_page)
-    
-    # Nav Radio
     nav_selection = st.radio("COMMAND CENTER", options, index=current_index, key="nav_radio")
     st.session_state.current_page = nav_selection
 
-    # --- 🤖 THE VOID MANAGER (SELF-CORRECTING DATA LOGIC) ---
+    # --- 🤖 THE VOID MANAGER (MULTI-INTEL LOGIC) ---
     st.divider()
     st.markdown("### 🤖 VOID MANAGER")
     
@@ -715,42 +712,54 @@ with st.sidebar:
         agent_input = st.chat_input("Command the Void...")
         
         if agent_input:
-            # PULL DATA
-            m_data = fetch_live_market_data() # Ensure this function is in your script
+            # 🔄 FORCE DATA UPLINK
+            m_data = fetch_live_market_data() 
             
             with st.chat_message("assistant", avatar="🌌"):
                 query = agent_input.lower()
                 
-                if any(x in query for x in ["market", "trend", "growth", "niche"]):
-                    if not m_data.empty:
-                        # CRITICAL FIX: Clean the 'growth' column before sorting
-                        try:
-                            m_data['growth_clean'] = m_data['growth'].astype(str).str.replace('%', '').str.replace(',', '').str.strip()
-                            m_data['growth_clean'] = pd.to_numeric(m_data['growth_clean'], errors='coerce').fillna(0)
-                            
-                            # Sort by the cleaned numeric column
-                            sorted_df = m_data.sort_values(by='growth_clean', ascending=False)
-                            top_vessel = sorted_df.iloc[0]
-                            
-                            st.write(f"Director, the sensors are recalibrated. The leading vector is **{top_vessel['niche name']}** with **{top_vessel['growth']} velocity**.")
-                            st.info(f"**Vector Intel:** {top_vessel['reason']}")
-                        except Exception as e:
-                            st.error(f"Logic Error: Could not parse growth data. {e}")
+                if not m_data.empty:
+                    # DATA SCRUBBING (Fixes the nan% error)
+                    m_data['growth_clean'] = m_data['growth'].astype(str).str.replace('%', '').str.replace(',', '').str.strip()
+                    m_data['growth_clean'] = pd.to_numeric(m_data['growth_clean'], errors='coerce').fillna(0)
+                    
+                    # --- INTENT A: SEARCH FOR SPECIFIC NICHE ---
+                    found_row = None
+                    for _, row in m_data.iterrows():
+                        if str(row['niche name']).lower() in query:
+                            found_row = row
+                            break
+                    
+                    if found_row is not None:
+                        st.write(f"Intercepted Data for: **{found_row['niche name']}**")
+                        st.write(f"Velocity: **{found_row['growth']}** | Density: **{found_row['saturation']}**")
+                        st.info(f"**Vector Analysis:** {found_row['reason']}")
+
+                    # --- INTENT B: MARKET SUMMARY ---
+                    elif any(x in query for x in ["summary", "report", "all", "overview", "list"]):
+                        st.write("🌌 **Current Sector Overview (Top 5):**")
+                        summary_df = m_data.sort_values(by='growth_clean', ascending=False).head(5)
+                        for _, r in summary_df.iterrows():
+                            st.write(f"🔹 **{r['niche name']}** | Velocity: {r['growth']}")
+                        st.caption("Ask about a specific niche for deep vector analysis.")
+
+                    # --- INTENT C: TOP TREND (DEFAULT) ---
+                    elif any(x in query for x in ["top", "best", "leading", "trend"]):
+                        top_v = m_data.sort_values(by='growth_clean', ascending=False).iloc[0]
+                        st.write(f"The leading vector is **{top_v['niche name']}** at **{top_v['growth']} velocity**.")
+                        st.info(f"**Vector Intel:** {top_v['reason']}")
+
                     else:
-                        st.error("Market vault link is empty or offline.")
-                
-                elif "user" in query:
-                    st.write("I am monitoring the Hive. Total operator count is currently being tallied from the Users sheet.")
-                
+                        st.write("I am monitoring the Void. You can ask for a 'market summary', the 'top trend', or details on a specific niche.")
                 else:
-                    st.write(f"Command '{agent_input}' received. I am standing by to optimize the Void.")
+                    st.error("Neural link to Market Vault is offline.")
 
     # 5. GLOBAL ACTION SUITE
     st.divider()
     
     if st.button("🔄 RE-CALIBRATE NEURAL LINK", use_container_width=True):
         st.cache_data.clear()
-        st.toast("CACHE PURGED - RE-SYNCING...")
+        st.toast("CACHE PURGED")
         st.rerun()
 
     c1, c2 = st.columns(2)
@@ -763,7 +772,7 @@ with st.sidebar:
             st.session_state.clear()
             st.rerun()
 
-    st.markdown("<br><p style='text-align: center; color: #222; font-size: 10px;'>VOYAGER v1.0.7</p>", unsafe_allow_html=True)
+    st.markdown("<br><p style='text-align: center; color: #222; font-size: 10px;'>VOYAGER v1.0.8</p>", unsafe_allow_html=True)
 
 # --- GLOBAL ROUTING ---
 page = st.session_state.current_page
@@ -1922,6 +1931,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
