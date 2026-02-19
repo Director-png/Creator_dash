@@ -1017,20 +1017,79 @@ elif page == "🌐 Global Pulse":
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
-    st.title("⚔️ TREND DUEL")
+    st.markdown("<h1 style='color: #00d4ff;'>⚔️ TREND DUEL: MARKET AUDIT</h1>", unsafe_allow_html=True)
+    
+    # 1. TRIGGER DATA UPLINK
     pulse_df = load_market_pulse_data()
+    
     if not pulse_df.empty:
-        st.subheader("🌑 Market Density Analysis")
-        target = st.selectbox("Select Niche to Audit", pulse_df['Niche'].unique())
-        row = pulse_df[pulse_df['Niche'] == target].iloc[0]
-        st.metric(label=f"{target} Entry Status", value=get_saturation_status(row['Score']))
-        st.table(pulse_df[pulse_df['Niche'] == target][['Niche', 'Score', 'Reason']])
+        # --- PHASE 1: INDIVIDUAL SECTOR AUDIT ---
+        st.subheader("🌑 Deep Vector Analysis")
+        
+        # Using the correct column name 'niche name'
+        target = st.selectbox("Select Niche to Audit", pulse_df['niche name'].unique())
+        
+        # Isolate the specific vector data
+        row = pulse_df[pulse_df['niche name'] == target].iloc[0]
+        
+        # Create a high-fidelity audit card
+        with st.container(border=True):
+            col_a, col_b, col_c = st.columns(3)
+            
+            # Score Metric
+            col_a.metric(label="Intelligence Score", value=f"{row['score']}/100")
+            
+            # Growth Metric
+            col_b.metric(label="Growth Velocity", value=f"{row['growth']}%")
+            
+            # Saturation Status (Dynamic coloring logic)
+            sat_val = str(row['saturation']).lower()
+            col_c.metric(label="Market Density", value=sat_val.upper())
+
+        # Detailed Reasoning Display
+        st.info(f"**VECTOR ANALYSIS FOR {target.upper()}:**\n\n{row['reason']}")
+        
         st.divider()
-        sel = st.multiselect("Compare Niches", options=pulse_df['Niche'].unique().tolist(), default=pulse_df['Niche'].unique().tolist()[:5])
-        comp = pulse_df[pulse_df['Niche'].isin(sel)]
-        if not comp.empty: 
-            fig = px.bar(comp, x='Niche', y='Score', color='Score', template='plotly_dark')
+
+        # --- PHASE 2: THE COMPARISON DUEL ---
+        st.subheader("📊 COMPETITIVE VECTOR MAPPING")
+        
+        # Multiselect for comparison (Defaults to first 5 niches)
+        selections = st.multiselect(
+            "Select Niches to Compare", 
+            options=pulse_df['niche name'].unique().tolist(), 
+            default=pulse_df['niche name'].unique().tolist()[:5]
+        )
+        
+        comparison_df = pulse_df[pulse_df['niche name'].isin(selections)]
+        
+        if not comparison_df.empty: 
+            # We duel based on Score and Growth simultaneously
+            import plotly.express as px
+            
+            fig = px.bar(
+                comparison_df, 
+                x='niche name', 
+                y='growth', 
+                color='score',
+                text='score',
+                title="Growth Velocity vs. Intelligence Score Duel",
+                labels={'growth': 'Growth %', 'niche name': 'Niche Sector', 'score': 'Score'},
+                template='plotly_dark',
+                color_continuous_scale='Viridis'
+            )
+            
+            fig.update_traces(textposition='outside')
             st.plotly_chart(fig, use_container_width=True)
+            
+            # Comparative Data Table
+            st.dataframe(
+                comparison_df[['niche name', 'score', 'growth', 'saturation']], 
+                hide_index=True, 
+                use_container_width=True
+            )
+    else:
+        st.error("📡 NEURAL LINK FAILURE: Data stream for the duel is offline. Verify GSheet connection.")
 
 elif page == "🏗️ Script Architect":
         st.markdown("<h1 style='color: #00ff41;'>⚔️ SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
@@ -1844,6 +1903,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
