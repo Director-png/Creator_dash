@@ -44,6 +44,23 @@ if 'current_subs' not in st.session_state:
 
 
 # --- ANIMATION UTILITY ---
+def fetch_vault_data(sheet_name):
+    """Fetches any specific sheet from your empire's vault."""
+    SHEET_IDS = {
+        "market": "2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS",
+        "users": "2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes",
+        "feedback": "AKfycbz1mLI3YkbjVsA4a8rMgMe_07w_1sS8H-f2Wvz1FtFCU-ZN4zCH7kDUGaDPDaaMbrvaPw",
+        "history": "2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes"
+    }
+    url = f"https://docs.google.com/spreadsheets/d/e/{SHEET_IDS[sheet_name]}/pub?output=csv"
+    try:
+        res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
+        df = pd.read_csv(io.StringIO(res.text))
+        df.columns = [str(c).strip().lower() for c in df.columns]
+        return df
+    except:
+        return pd.DataFrame()
+
 def load_lottieurl(url: str):
     try:
         r = requests.get(url)
@@ -655,8 +672,7 @@ if not st.session_state.logged_in:
 
 
 # --- MAIN APP UI BEGINS HERE (Only accessible if logged_in is True) ---
-
-# --- SIDEBAR NAVIGATION (HIGH-VELOCITY EDITION) ---
+# --- SIDEBAR NAVIGATION (AGENTIC EDITION) ---
 with st.sidebar:
     # 1. THE IDENTITY CORE (Static HTML - Fast)
     st.markdown(f"""
@@ -686,8 +702,7 @@ with st.sidebar:
     else:
         options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "⚖️ Legal Archive", "🛰️ Media Uplink", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
 
-    # 4. INSTANT NAVIGATION (The Speed Fix)
-    # We set the index based on the current session state so it doesn't jump around
+    # 4. INSTANT NAVIGATION
     if 'current_page' not in st.session_state:
         st.session_state.current_page = options[0]
 
@@ -696,19 +711,38 @@ with st.sidebar:
     except:
         current_index = 0
 
-    # Using 'key' makes the change instant without needing st.rerun()
     st.radio("COMMAND CENTER", options, index=current_index, key="nav_sync")
-    st.session_state.current_page = st.session_state.nav_key = st.session_state.nav_sync
+    st.session_state.current_page = st.session_state.nav_sync
+
+    # --- 🤖 NEW: VOID-OS MANAGER AGENT (AUTO-PILOT) ---
+    st.divider()
+    st.markdown("### 🤖 VOID MANAGER")
+    with st.expander("📡 NEURAL CHAT", expanded=False):
+        # This chat input can now access your multi-sheet logic
+        agent_input = st.chat_input("Command the Void...")
+        if agent_input:
+            # We fetch all relevant vaults
+            m_data = fetch_live_market_data() # Market Sheet
+            u_data = fetch_vault_data("users") # User Sheet (if defined)
+            
+            with st.chat_message("assistant", avatar="🌌"):
+                # Initial logic: The agent identifies the context
+                if "status" in agent_input.lower():
+                    st.write(f"Director, system integrity is nominal. {len(options)} modules online.")
+                elif "trend" in agent_input.lower() or "market" in agent_input.lower():
+                    top_niche = m_data.iloc[0]['niche name'] if not m_data.empty else "Unknown"
+                    st.write(f"The most potent vector currently is **{top_niche}**.")
+                else:
+                    st.write("I am monitoring the Users, Feedback, and Market sheets. State your command.")
 
     # 5. GLOBAL ACTION SUITE
     st.divider()
     
-    # API SYNC (Wrapped to prevent lag)
+    # API SYNC (Wrapped)
     if st.button("🔄 RE-CALIBRATE NEURAL LINK", use_container_width=True):
         if 'user_email' in st.session_state:
             with st.spinner("Uplinking..."):
                 try:
-                    # Timeout set low to prevent hanging the UI
                     response = requests.post(NEW_URL, json={"email": st.session_state.user_email, "action": "CHECK_STATUS"}, timeout=5)
                     if response.status_code == 200:
                         st.session_state.user_status = response.text.strip()
@@ -725,22 +759,14 @@ with st.sidebar:
             st.rerun()
     with c2:
         if st.button("🔒 LOGOUT", use_container_width=True):
-            st.session_state.clear() # Faster than manual deletion
+            st.session_state.clear()
             st.rerun()
 
     st.markdown("<br><p style='text-align: center; color: #222; font-size: 12px; font-weight: bold;'>VOYAGER v1.0.4</p>", unsafe_allow_html=True)
+
 # --- PAGE ROUTING ---
-# This variable 'page' is what your module if/elif blocks should use
 page = st.session_state.current_page
 
-# --- MAIN PAGE ROUTING ---
-page = st.session_state.current_page
-
-if page == "FEEDBACK":
-    display_feedback_tab()
-    if st.button("← Back to Mission Control"):
-        st.session_state.current_page = "🏠 Dashboard" if st.session_state.user_role == "admin" else "📡 My Growth Hub"
-        st.rerun()
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
 elif page == "🏠 Dashboard":
@@ -1896,6 +1922,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
