@@ -151,29 +151,21 @@ def load_history_db():
         return pd.DataFrame()
 
 def fetch_live_market_data():
-    """Bypasses Google's 'bot-check' redirects using browser emulation."""
-    # Your verified Published CSV link
     url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
-    
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-        "Accept": "text/csv"
-    }
-
     try:
-        # allow_redirects=True is critical for 'pub?output=csv' links
-        response = requests.get(url, headers=headers, allow_redirects=True, timeout=15)
-        response.raise_for_status()
+        res = requests.get(url, timeout=10)
+        df = pd.read_csv(io.StringIO(res.text))
+        df.columns = [str(c).strip().lower() for c in df.columns]
         
-        # Convert the raw content to a format Pandas understands
-        df = pd.read_csv(io.StringIO(response.text))
-        
-        # Standardize columns (lowercase, no trailing spaces)
-        df.columns = [str(c).lower().strip() for c in df.columns]
+        # --- THE FIX: SCRUB THE GROWTH COLUMN ---
+        if 'growth' in df.columns:
+            # Remove %, commas, and whitespace, then convert to float
+            df['growth'] = df['growth'].astype(str).str.replace('%', '').str.replace(',', '').str.strip()
+            df['growth'] = pd.to_numeric(df['growth'], errors='coerce').fillna(0)
+            
         return df
     except Exception as e:
-        # This will output the error to your Streamlit logs for precise tracking
-        st.sidebar.error(f"🛰️ Signal Error: {e}")
+        st.error(f"Uplink Error: {e}")
         return pd.DataFrame()
 
 def fetch_live_news(query, api_key):
@@ -672,13 +664,13 @@ if not st.session_state.logged_in:
 
 
 # --- MAIN APP UI BEGINS HERE (Only accessible if logged_in is True) ---
-# --- SIDEBAR NAVIGATION (DATA-AWARE AGENT EDITION) ---
+# --- SIDEBAR NAVIGATION (THE ARCHITECT'S VERSION) ---
 with st.sidebar:
-    # 1. THE IDENTITY CORE
+    # 1. IDENTITY CORE
     st.markdown(f"""
         <div style='background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px;'>
             <p style='margin: 0; color: #888; font-size: 10px; letter-spacing: 2px; text-align: center;'>OPERATOR IDENTIFIED</p>
-            <h2 style='text-align: center; color: #00ff41; margin: 0; font-family: "Courier New", Courier, monospace;'>{st.session_state.user_name.upper()}</h2>
+            <h2 style='text-align: center; color: #00ff41; margin: 0; font-family: "Courier New", Courier, monospace;'>{st.session_state.get('user_name', 'DIRECTOR').upper()}</h2>
         </div>
     """, unsafe_allow_html=True)
     
@@ -686,12 +678,11 @@ with st.sidebar:
     user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
     user_role = str(st.session_state.get('user_role', 'user')).strip().lower()
 
-    if user_status in ['pro', 'paid'] or user_role == "admin":
+    if user_role == "admin" or user_status in ['pro', 'paid']:
         st.markdown("<div style='background-color: #00ff41; color: #000; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>💎 ELITE CLEARANCE</div>", unsafe_allow_html=True)
     else:
         st.markdown("<div style='background-color: #333; color: #888; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>📡 BASIC ACCESS</div>", unsafe_allow_html=True)
     
-    st.markdown("<p style='text-align: center; color: #444; font-size: 10px; letter-spacing: 1px;'>ENCRYPTED UPLINK : STABLE</p>", unsafe_allow_html=True)
     st.divider()
 
     # 3. DYNAMIC MENU MAPPING
@@ -706,15 +697,17 @@ with st.sidebar:
     if 'current_page' not in st.session_state:
         st.session_state.current_page = options[0]
 
-    try:
-        current_index = options.index(st.session_state.current_page)
-    except:
-        current_index = 0
+    # Ensure current_page is valid
+    if st.session_state.current_page not in options:
+        st.session_state.current_page = options[0]
 
-    st.radio("COMMAND CENTER", options, index=current_index, key="nav_sync")
-    st.session_state.current_page = st.session_state.nav_sync
+    current_index = options.index(st.session_state.current_page)
+    
+    # Nav Radio
+    nav_selection = st.radio("COMMAND CENTER", options, index=current_index, key="nav_radio")
+    st.session_state.current_page = nav_selection
 
-    # --- 🤖 THE VOID MANAGER (FIXED LOGIC LOOP) ---
+    # --- 🤖 THE VOID MANAGER (SELF-CORRECTING DATA LOGIC) ---
     st.divider()
     st.markdown("### 🤖 VOID MANAGER")
     
@@ -722,63 +715,44 @@ with st.sidebar:
         agent_input = st.chat_input("Command the Void...")
         
         if agent_input:
-            # 🔄 LIVE RE-SCAN: We bypass cache to get fresh G-Sheet data
-            m_data = fetch_live_market_data() 
-            u_data = fetch_vault_data("users")
-            f_data = fetch_vault_data("feedback")
+            # PULL DATA
+            m_data = fetch_live_market_data() # Ensure this function is in your script
             
             with st.chat_message("assistant", avatar="🌌"):
                 query = agent_input.lower()
                 
-                # AGENT REASONING: DYNAMIC TREND ANALYSIS
                 if any(x in query for x in ["market", "trend", "growth", "niche"]):
                     if not m_data.empty:
-                        # THE FIX: Sort by growth so it doesn't just read the top row
-                        m_data['growth'] = pd.to_numeric(m_data['growth'], errors='coerce')
-                        sorted_trends = m_data.sort_values(by='growth', ascending=False)
-                        
-                        top_niche = sorted_trends.iloc[0]['niche name']
-                        top_growth = sorted_trends.iloc[0]['growth']
-                        reasoning = sorted_trends.iloc[0]['reason']
-                        
-                        st.write(f"Director, current scans show **{top_niche}** has overtaken the Void with **{top_growth}% growth**.")
-                        st.info(f"**Strategy:** {reasoning}")
+                        # CRITICAL FIX: Clean the 'growth' column before sorting
+                        try:
+                            m_data['growth_clean'] = m_data['growth'].astype(str).str.replace('%', '').str.replace(',', '').str.strip()
+                            m_data['growth_clean'] = pd.to_numeric(m_data['growth_clean'], errors='coerce').fillna(0)
+                            
+                            # Sort by the cleaned numeric column
+                            sorted_df = m_data.sort_values(by='growth_clean', ascending=False)
+                            top_vessel = sorted_df.iloc[0]
+                            
+                            st.write(f"Director, the sensors are recalibrated. The leading vector is **{top_vessel['niche name']}** with **{top_vessel['growth']} velocity**.")
+                            st.info(f"**Vector Intel:** {top_vessel['reason']}")
+                        except Exception as e:
+                            st.error(f"Logic Error: Could not parse growth data. {e}")
                     else:
-                        st.error("Market vault link failure.")
-
-                # AGENT REASONING: USER ANALYTICS
-                elif any(x in query for x in ["user", "active", "operators"]):
-                    count = len(u_data) if not u_data.empty else "unverified"
-                    st.write(f"The Hive currently holds **{count}** active operators. All biometric signatures are green.")
-
-                # AGENT REASONING: AUTO-REPAIR & FEEDBACK
-                elif any(x in query for x in ["feedback", "bug", "fix"]):
-                    if not f_data.empty:
-                        issue = f_data['issue'].iloc[-1]
-                        st.write(f"Analyzing anomaly report: *'{issue}'*. I can initiate a neural patch if required.")
-                    else:
-                        st.write("Feedback vault is clear. System is operating at peak efficiency.")
-
+                        st.error("Market vault link is empty or offline.")
+                
+                elif "user" in query:
+                    st.write("I am monitoring the Hive. Total operator count is currently being tallied from the Users sheet.")
+                
                 else:
-                    st.write(f"Command '{agent_input}' logged. I am monitoring all 4 sheets to optimize your workflow.")
+                    st.write(f"Command '{agent_input}' received. I am standing by to optimize the Void.")
 
     # 5. GLOBAL ACTION SUITE
     st.divider()
     
-    # RE-CALIBRATION
     if st.button("🔄 RE-CALIBRATE NEURAL LINK", use_container_width=True):
-        if 'user_email' in st.session_state:
-            with st.spinner("Re-syncing..."):
-                try:
-                    response = requests.post(NEW_URL, json={"email": st.session_state.user_email, "action": "CHECK_STATUS"}, timeout=5)
-                    if response.status_code == 200:
-                        st.session_state.user_status = response.text.strip()
-                        st.toast("SYNC COMPLETE", icon="🛡️")
-                        st.rerun()
-                except:
-                    st.error("UPLINK TIMEOUT")
+        st.cache_data.clear()
+        st.toast("CACHE PURGED - RE-SYNCING...")
+        st.rerun()
 
-    # SECONDARY ACTIONS
     c1, c2 = st.columns(2)
     with c1:
         if st.button("📩 FEEDBACK", use_container_width=True):
@@ -789,11 +763,10 @@ with st.sidebar:
             st.session_state.clear()
             st.rerun()
 
-    st.markdown("<br><p style='text-align: center; color: #222; font-size: 12px; font-weight: bold;'>VOYAGER v1.0.6</p>", unsafe_allow_html=True)
+    st.markdown("<br><p style='text-align: center; color: #222; font-size: 10px;'>VOYAGER v1.0.7</p>", unsafe_allow_html=True)
 
 # --- GLOBAL ROUTING ---
 page = st.session_state.current_page
-
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
 if page == "🏠 Dashboard":
@@ -1949,6 +1922,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
