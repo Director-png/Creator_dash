@@ -682,19 +682,20 @@ if 'current_page' not in st.session_state:
     st.session_state.current_page = "🏠 Dashboard" if st.session_state.get('user_role') == "admin" else "📡 My Growth Hub"
 
 # --- 0. NEURAL CONFIGURATION ---
+# Using 1.5 Flash for the highest RPM/Quota stability
 API_KEY = "AIzaSyDdL8NipdVJXDbgg2mB_-Seq5oGjd18KyU"
 client = genai.Client(api_key=API_KEY)
-MODEL_ID = "gemini-1.5-flash" # Stable Workhorse to avoid 429 errors
+MODEL_ID = "gemini-1.5-flash" 
 
-# --- 1. GLOBAL SAFETY INITIALIZATION ---
-# This ensures that even if the sidebar crashes, the rest of the app knows where to go
+# --- 1. SAFETY INITIALIZATION ---
+# Ensures the main app never sees a 'NameError' for the page variable
 if 'current_page' not in st.session_state:
     st.session_state.current_page = "🏠 Dashboard"
 
-# --- SIDEBAR NAVIGATION ---
+# --- 2. SIDEBAR ARCHITECTURE ---
 with st.sidebar:
     try:
-        # 2. IDENTITY CORE
+        # IDENTITY CORE
         st.markdown(f"""
             <div style='background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px;'>
                 <p style='margin: 0; color: #888; font-size: 10px; letter-spacing: 2px; text-align: center;'>OPERATOR IDENTIFIED</p>
@@ -702,10 +703,16 @@ with st.sidebar:
             </div>
         """, unsafe_allow_html=True)
         
-        # 3. CLEARANCE & MENU MAPPING (Original Logic)
+        # CLEARANCE LOGIC (ORIGINAL)
         user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
         user_role = str(st.session_state.get('user_role', 'user')).strip().lower()
 
+        if user_role == "admin" or user_status in ['pro', 'paid']:
+            st.markdown("<div style='background-color: #00ff41; color: #000; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>💎 ELITE CLEARANCE</div>", unsafe_allow_html=True)
+        else:
+            st.markdown("<div style='background-color: #333; color: #888; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>📡 BASIC ACCESS</div>", unsafe_allow_html=True)
+
+        # DYNAMIC MENU MAPPING (ORIGINAL LOGIC)
         if user_role == "admin":
             options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
         elif user_status in ['pro', 'paid']:
@@ -713,7 +720,7 @@ with st.sidebar:
         else:
             options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "⚖️ Legal Archive", "🛰️ Media Uplink", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
 
-        # 4. NAVIGATION STATE
+        # NAVIGATION SELECTION
         try:
             default_index = options.index(st.session_state.current_page)
         except ValueError:
@@ -722,7 +729,7 @@ with st.sidebar:
         nav_selection = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = nav_selection
 
-        # --- 🤖 THE INTEGRATED VOID MANAGER ---
+        # --- 🤖 INTEGRATED VOID MANAGER (THE NEURAL LINK) ---
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
@@ -730,6 +737,7 @@ with st.sidebar:
             if "manager_chat" not in st.session_state:
                 st.session_state.manager_chat = []
 
+            # Display Conversation History
             for msg in st.session_state.manager_chat:
                 with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
                     st.markdown(msg["content"])
@@ -741,26 +749,33 @@ with st.sidebar:
                 with st.chat_message("user", avatar="👤"):
                     st.markdown(agent_input)
                 
-                # Fetch Context
-                m_data = fetch_live_market_data() # Ensure this function is defined above
-                context = f"Page: {st.session_state.current_page}. Data: {m_data.iloc[0,0] if not m_data.empty else 'Syncing...'}"
+                # Fetch Data for AI Context
+                m_data = fetch_live_market_data() # Logic remains untouched
+                top_niche = m_data.iloc[0,0] if not m_data.empty else "Syncing..."
 
                 with st.chat_message("assistant", avatar="🌌"):
                     try:
+                        # CORE BRAIN (GEMINI INTEGRATION)
                         response = client.models.generate_content(
                             model=MODEL_ID,
                             contents=agent_input,
                             config=types.GenerateContentConfig(
-                                system_instruction=f"You are the VOID-OS Manager (Gemini). witty/strategic. Role: {user_role}. Context: {context}",
+                                system_instruction=f"""You are the VOID-OS Manager. You are Gemini.
+                                Witty, strategic, and concise. 
+                                Operator: {st.session_state.get('user_name')} | Page: {st.session_state.current_page}
+                                Top Niche Context: {top_niche}.""",
                                 temperature=0.7
                             )
                         )
                         st.markdown(response.text)
                         st.session_state.manager_chat.append({"role": "assistant", "content": response.text})
                     except Exception as ai_err:
-                        st.error("Neural Link throttled. Please wait.")
+                        if "429" in str(ai_err):
+                            st.warning("📡 **QUOTA REACHED.** Throttling Neural Link for 60s.")
+                        else:
+                            st.error("Neural Jitter detected.")
 
-        # 5. GLOBAL ACTIONS
+        # 3. GLOBAL ACTIONS
         st.divider()
         if st.button("🔄 RE-CALIBRATE", use_container_width=True):
             st.cache_data.clear()
@@ -771,10 +786,10 @@ with st.sidebar:
             st.rerun()
 
     except Exception as sidebar_err:
-        st.error(f"Sidebar System Error: {sidebar_err}")
+        st.error(f"System Error in Sidebar: {sidebar_err}")
 
-# --- 6. CRITICAL FIX: THE PAGE DEFINITION ---
-# This line MUST be outside the 'with st.sidebar' block and after it.
+# --- 3. FINAL ROUTING (CRITICAL FIX FOR LINE 789) ---
+# This variable assignment MUST remain outside the sidebar block.
 page = st.session_state.current_page
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
@@ -1931,6 +1946,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
