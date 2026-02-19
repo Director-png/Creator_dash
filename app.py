@@ -937,25 +937,26 @@ elif page == "📡 My Growth Hub":
 elif nav == "🌐 Global Pulse":
     st.markdown("<h1 style='color: #00d4ff;'>🌐 GLOBAL INTELLIGENCE PULSE</h1>", unsafe_allow_html=True)
     
-    # 1. THE DATA UPLINK (Google Sheets Logic)
-    # This connects to the specific URL you provided
+    # 🔑 REPLACE WITH YOUR NEWSAPI.ORG KEY
+    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" 
+
+    # 1. TRIGGER DATA UPLINK
     df_pulse = fetch_live_market_data()
-    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" # <--- Ensure your key is here
 
     if not df_pulse.empty:
         # --- 2. SEARCH TERMINAL ---
-        # This acts as the filter for the entire "Creation Void"
         st.markdown("### 🔍 SEARCH TREND VECTORS")
-        search_query = st.text_input("Intercept Keyword...", placeholder="Search global trends or niches...", label_visibility="collapsed")
+        search_query = st.text_input("Intercept Keyword...", placeholder="Search global database...", label_visibility="collapsed")
 
         # --- 3. TOP 10 PERFORMANCE VECTORS ---
-        # Sorting by 'velocity' to show only the highest pressure trends
         st.subheader("📊 TOP 10 PERFORMANCE VECTORS")
         
         display_df = df_pulse.copy()
+        # Sorting by velocity to show the highest pressure trends
         if 'velocity' in display_df.columns:
             display_df = display_df.sort_values(by="velocity", ascending=False).head(10)
         
+        # Apply Search Filter to the Table
         if search_query:
             display_df = display_df[display_df.astype(str).apply(lambda x: x.str.contains(search_query, case=False)).any(axis=1)]
 
@@ -974,34 +975,34 @@ elif nav == "🌐 Global Pulse":
 
         st.divider()
 
-        # --- 4. LIVE WORLD INTELLIGENCE (The Image-Based News Feed) ---
+        # --- 4. LIVE NEWS UPLINK (The Side-by-Side View) ---
         st.subheader("📰 LIVE WORLD INTELLIGENCE")
         
-        # Determine the topic: Use Search Query if active, otherwise the #1 Trend from GSheet
+        # Topic selection: Use search if active, else use top keyword from GSheet
         news_topic = search_query if search_query else (display_df['keyword'].iloc[0] if not display_df.empty else "Technology")
         
-        # Fetch news from the API Engine we built
         articles = fetch_live_news(news_topic, NEWS_API_KEY)
 
         if articles:
             for art in articles:
-                # We only show articles with images to maintain the "Expensive UI" feel
                 if art.get('urlToImage') and art.get('title'):
                     with st.container(border=True):
+                        # Side-by-side Layout as requested
                         col_img, col_txt = st.columns([1, 2])
                         with col_img:
                             st.image(art['urlToImage'], use_container_width=True)
                         with col_txt:
                             st.markdown(f"<h4 style='color: #00ff41; margin:0;'>{art['title']}</h4>", unsafe_allow_html=True)
-                            st.write(art.get('description', 'Data redacted by source.'))
-                            # THE HYPERLINK: Direct connection to the specific article
+                            st.write(art.get('description', 'Information redacted by source.'))
+                            # DIRECT LINKING
                             st.markdown(f"🔗 [READ FULL REPORT]({art['url']})")
                             st.caption(f"Source: {art['source']['name']} | {art['publishedAt'][:10]}")
         else:
-            st.info(f"🛰️ Scanning the Void for '{news_topic}'... No live articles detected in this sector.")
+            st.info(f"🛰️ Scanning the Void for '{news_topic}'... Check your API key or search query.")
             
     else:
-        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Please verify the GSheet ID and Sharing permissions.")
+        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Verify GSheet sharing is 'Public'.")
+
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
@@ -1832,6 +1833,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
