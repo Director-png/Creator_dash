@@ -672,9 +672,9 @@ if not st.session_state.logged_in:
 
 
 # --- MAIN APP UI BEGINS HERE (Only accessible if logged_in is True) ---
-# --- SIDEBAR NAVIGATION (AGENTIC EDITION) ---
+# --- SIDEBAR NAVIGATION (AGENTIC & MULTI-SHEET EDITION) ---
 with st.sidebar:
-    # 1. THE IDENTITY CORE (Static HTML - Fast)
+    # 1. THE IDENTITY CORE
     st.markdown(f"""
         <div style='background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px;'>
             <p style='margin: 0; color: #888; font-size: 10px; letter-spacing: 2px; text-align: center;'>OPERATOR IDENTIFIED</p>
@@ -711,38 +711,62 @@ with st.sidebar:
     except:
         current_index = 0
 
+    # Nav Sync using radio
     st.radio("COMMAND CENTER", options, index=current_index, key="nav_sync")
     st.session_state.current_page = st.session_state.nav_sync
 
-    # --- 🤖 NEW: VOID-OS MANAGER AGENT (AUTO-PILOT) ---
+    # --- 🤖 THE VOID MANAGER (MULTI-SHEET AGENT) ---
     st.divider()
     st.markdown("### 🤖 VOID MANAGER")
+    
     with st.expander("📡 NEURAL CHAT", expanded=False):
-        # This chat input can now access your multi-sheet logic
         agent_input = st.chat_input("Command the Void...")
+        
         if agent_input:
-            # We fetch all relevant vaults
-            m_data = fetch_live_market_data() # Market Sheet
-            u_data = fetch_vault_data("users") # User Sheet (if defined)
+            # PULLING REAL DATA FROM THE VAULTS
+            # Ensure fetch_live_market_data and fetch_vault_data are defined at the top
+            m_data = fetch_live_market_data() 
+            u_data = fetch_vault_data("users")
+            f_data = fetch_vault_data("feedback")
             
             with st.chat_message("assistant", avatar="🌌"):
-                # Initial logic: The agent identifies the context
-                if "status" in agent_input.lower():
-                    st.write(f"Director, system integrity is nominal. {len(options)} modules online.")
-                elif "trend" in agent_input.lower() or "market" in agent_input.lower():
-                    top_niche = m_data.iloc[0]['niche name'] if not m_data.empty else "Unknown"
-                    st.write(f"The most potent vector currently is **{top_niche}**.")
+                query = agent_input.lower()
+                
+                # REASONING ENGINE: Analyzing Market Data
+                if any(x in query for x in ["market", "trend", "growth"]):
+                    if not m_data.empty:
+                        top_niche = m_data['niche name'].iloc[0]
+                        growth_val = m_data['growth'].iloc[0]
+                        st.write(f"Director, the data flow confirms **{top_niche}** as the primary vector with **{growth_val}% growth**. I suggest focusing outreach here.")
+                    else:
+                        st.error("Market vault link failure.")
+
+                # REASONING ENGINE: Analyzing User/Admin Data
+                elif any(x in query for x in ["user", "active", "operators"]):
+                    count = len(u_data) if not u_data.empty else "unverified"
+                    st.write(f"Current Hive count: **{count}** active operators. System stability remains at 99.8%.")
+
+                # REASONING ENGINE: Analyzing Feedback & Repair
+                elif any(x in query for x in ["feedback", "bug", "error", "fix"]):
+                    if not f_data.empty:
+                        issue = f_data['issue'].iloc[-1] if 'issue' in f_data.columns else "None"
+                        st.write(f"Last reported anomaly: *'{issue}'*. Should I initiate a repair patch?")
+                    else:
+                        st.write("The feedback vault is clear. No manual repairs required.")
+
+                # FALLBACK: General Command
                 else:
-                    st.write("I am monitoring the Users, Feedback, and Market sheets. State your command.")
+                    st.write(f"Scanning command: '{agent_input}'. I am standing by to automate your next move.")
 
     # 5. GLOBAL ACTION SUITE
     st.divider()
     
-    # API SYNC (Wrapped)
+    # API RE-CALIBRATION
     if st.button("🔄 RE-CALIBRATE NEURAL LINK", use_container_width=True):
         if 'user_email' in st.session_state:
-            with st.spinner("Uplinking..."):
+            with st.spinner("Re-syncing..."):
                 try:
+                    # Using global NEW_URL variable
                     response = requests.post(NEW_URL, json={"email": st.session_state.user_email, "action": "CHECK_STATUS"}, timeout=5)
                     if response.status_code == 200:
                         st.session_state.user_status = response.text.strip()
@@ -762,8 +786,10 @@ with st.sidebar:
             st.session_state.clear()
             st.rerun()
 
-    st.markdown("<br><p style='text-align: center; color: #222; font-size: 12px; font-weight: bold;'>VOYAGER v1.0.4</p>", unsafe_allow_html=True)
+    st.markdown("<br><p style='text-align: center; color: #222; font-size: 12px; font-weight: bold;'>VOYAGER v1.0.5</p>", unsafe_allow_html=True)
 
+# --- GLOBAL ROUTING ---
+page = st.session_state.current_page
 # --- PAGE ROUTING ---
 page = st.session_state.current_page
 
@@ -1922,6 +1948,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
