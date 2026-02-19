@@ -933,17 +933,17 @@ elif page == "🌐 Global Pulse":
     st.markdown("<h1 style='color: #00d4ff;'>🌐 GLOBAL INTELLIGENCE PULSE</h1>", unsafe_allow_html=True)
     
     # 🔑 CONFIGURATION
-    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" # <--- Insert your key from newsapi.org
+    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" # Replace with your key
 
     # 1. TRIGGER DATA UPLINK
     df_pulse = fetch_live_market_data()
 
     if not df_pulse.empty:
-        # --- 2. SEARCH TERMINAL ---
+        # 2. SEARCH TERMINAL
         st.markdown("### 🔍 SEARCH TREND VECTORS")
         search_query = st.text_input("Intercept Keyword...", placeholder="Search trends...", label_visibility="collapsed")
 
-        # --- 3. TOP 10 PERFORMANCE VECTORS ---
+        # 3. TOP 10 PERFORMANCE VECTORS
         st.subheader("📊 TOP 10 PERFORMANCE VECTORS")
         display_df = df_pulse.copy()
         
@@ -967,11 +967,12 @@ elif page == "🌐 Global Pulse":
 
         st.divider()
 
-        # --- 4. LIVE WORLD INTELLIGENCE (Dynamic Side-by-Side News) ---
+        # 4. LIVE WORLD INTELLIGENCE (Side-by-Side News API)
         st.subheader("📰 LIVE WORLD INTELLIGENCE")
         
-        news_topic = search_query if search_query else (display_df['keyword'].iloc[0] if not display_df.empty else "Technology")
-        articles = fetch_live_news(news_topic, NEWS_API_KEY)
+        # Use search or top keyword to find news
+        topic = search_query if search_query else (display_df['keyword'].iloc[0] if not display_df.empty else "Technology")
+        articles = fetch_live_news(topic, NEWS_API_KEY)
 
         if articles:
             for art in articles:
@@ -983,14 +984,14 @@ elif page == "🌐 Global Pulse":
                         with c_txt:
                             st.markdown(f"<h4 style='color: #00ff41; margin:0;'>{art['title']}</h4>", unsafe_allow_html=True)
                             st.write(art.get('description', 'Intel redacted.'))
-                            # THE PORTAL: Direct link to article
+                            # DIRECT LINK
                             st.markdown(f"🔗 [READ FULL REPORT]({art['url']})")
                             st.caption(f"Source: {art['source']['name']} | {art['publishedAt'][:10]}")
         else:
-            st.info(f"🛰️ Scanning the Void for '{news_topic}'... check API key or search term.")
+            st.info(f"🛰️ Scanning the Void for '{topic}'... No live articles found.")
             
     else:
-        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Verify GSheet sharing is 'Public'.")
+        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Please verify the GSheet 'Publish to Web' settings.")
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
@@ -1821,6 +1822,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
