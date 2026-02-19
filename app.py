@@ -664,9 +664,9 @@ if not st.session_state.logged_in:
 
 
 # --- MAIN APP UI BEGINS HERE (Only accessible if logged_in is True) ---
-# --- SIDEBAR NAVIGATION (MULTI-INTEL AGENT EDITION) ---
+# --- SIDEBAR NAVIGATION (THE FINAL SYNC) ---
 with st.sidebar:
-    # 1. IDENTITY CORE
+    # 1. IDENTITY & CLEARANCE (STAYS THE SAME)
     st.markdown(f"""
         <div style='background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px;'>
             <p style='margin: 0; color: #888; font-size: 10px; letter-spacing: 2px; text-align: center;'>OPERATOR IDENTIFIED</p>
@@ -674,37 +674,19 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
     
-    # 2. CLEARANCE LOGIC
     user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
     user_role = str(st.session_state.get('user_role', 'user')).strip().lower()
 
-    if user_role == "admin" or user_status in ['pro', 'paid']:
-        st.markdown("<div style='background-color: #00ff41; color: #000; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>💎 ELITE CLEARANCE</div>", unsafe_allow_html=True)
-    else:
-        st.markdown("<div style='background-color: #333; color: #888; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>📡 BASIC ACCESS</div>", unsafe_allow_html=True)
-    
-    st.divider()
-
-    # 3. DYNAMIC MENU MAPPING
+    # NAVIGATION MENU
     if user_role == "admin":
         options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
-    elif user_status in ['pro', 'paid']:
-        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🛰️ Media Uplink", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
     else:
-        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "⚖️ Legal Archive", "🛰️ Media Uplink", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
+        options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "📜 History", "⚙️ Settings"]
 
-    # 4. INSTANT NAVIGATION
-    if 'current_page' not in st.session_state:
-        st.session_state.current_page = options[0]
-
-    if st.session_state.current_page not in options:
-        st.session_state.current_page = options[0]
-
-    current_index = options.index(st.session_state.current_page)
-    nav_selection = st.radio("COMMAND CENTER", options, index=current_index, key="nav_radio")
+    nav_selection = st.radio("COMMAND CENTER", options, key="nav_radio")
     st.session_state.current_page = nav_selection
 
-    # --- 🤖 THE VOID MANAGER (MULTI-INTEL LOGIC) ---
+    # --- 🤖 THE VOID MANAGER: RE-WIRED BRAIN ---
     st.divider()
     st.markdown("### 🤖 VOID MANAGER")
     
@@ -712,54 +694,49 @@ with st.sidebar:
         agent_input = st.chat_input("Command the Void...")
         
         if agent_input:
-            # 🔄 FORCE DATA UPLINK
             m_data = fetch_live_market_data() 
             
             with st.chat_message("assistant", avatar="🌌"):
-                query = agent_input.lower()
+                query = agent_input.lower().strip()
                 
                 if not m_data.empty:
-                    # DATA SCRUBBING (Fixes the nan% error)
+                    # RE-SYNC DATA CLEANING
                     m_data['growth_clean'] = m_data['growth'].astype(str).str.replace('%', '').str.replace(',', '').str.strip()
                     m_data['growth_clean'] = pd.to_numeric(m_data['growth_clean'], errors='coerce').fillna(0)
                     
-                    # --- INTENT A: SEARCH FOR SPECIFIC NICHE ---
-                    found_row = None
-                    for _, row in m_data.iterrows():
-                        if str(row['niche name']).lower() in query:
-                            found_row = row
-                            break
+                    # --- INTENT 1: SPECIFIC SEARCH (HIGHEST PRIORITY) ---
+                    # We check if the user is asking about a specific niche first
+                    matched_row = m_data[m_data['niche name'].str.lower().apply(lambda x: x in query)]
                     
-                    if found_row is not None:
-                        st.write(f"Intercepted Data for: **{found_row['niche name']}**")
-                        st.write(f"Velocity: **{found_row['growth']}** | Density: **{found_row['saturation']}**")
-                        st.info(f"**Vector Analysis:** {found_row['reason']}")
+                    if not matched_row.empty:
+                        target = matched_row.iloc[0]
+                        st.write(f"Direct Intercept: **{target['niche name']}**")
+                        st.write(f"Velocity: **{target['growth']}** | Density: **{target['saturation']}**")
+                        st.info(f"**Vector Analysis:** {target['reason']}")
 
-                    # --- INTENT B: MARKET SUMMARY ---
-                    elif any(x in query for x in ["summary", "report", "all", "overview", "list"]):
+                    # --- INTENT 2: SUMMARY REPORT ---
+                    elif any(word in query for word in ["summary", "list", "report", "overview", "all"]):
                         st.write("🌌 **Current Sector Overview (Top 5):**")
                         summary_df = m_data.sort_values(by='growth_clean', ascending=False).head(5)
                         for _, r in summary_df.iterrows():
                             st.write(f"🔹 **{r['niche name']}** | Velocity: {r['growth']}")
-                        st.caption("Ask about a specific niche for deep vector analysis.")
 
-                    # --- INTENT C: TOP TREND (DEFAULT) ---
-                    elif any(x in query for x in ["top", "best", "leading", "trend"]):
+                    # --- INTENT 3: TOP TREND (ONLY IF EXPLICITLY ASKED) ---
+                    elif any(word in query for word in ["top", "best", "winner", "leading"]):
                         top_v = m_data.sort_values(by='growth_clean', ascending=False).iloc[0]
                         st.write(f"The leading vector is **{top_v['niche name']}** at **{top_v['growth']} velocity**.")
                         st.info(f"**Vector Intel:** {top_v['reason']}")
 
+                    # --- FALLBACK ---
                     else:
-                        st.write("I am monitoring the Void. You can ask for a 'market summary', the 'top trend', or details on a specific niche.")
+                        st.write(f"Command '{agent_input}' received. Please specify a niche to audit or ask for a 'market summary'.")
                 else:
-                    st.error("Neural link to Market Vault is offline.")
+                    st.error("Market data link is offline.")
 
-    # 5. GLOBAL ACTION SUITE
+    # 5. ACTION SUITE
     st.divider()
-    
-    if st.button("🔄 RE-CALIBRATE NEURAL LINK", use_container_width=True):
+    if st.button("🔄 RE-CALIBRATE", use_container_width=True):
         st.cache_data.clear()
-        st.toast("CACHE PURGED")
         st.rerun()
 
     c1, c2 = st.columns(2)
@@ -771,11 +748,6 @@ with st.sidebar:
         if st.button("🔒 LOGOUT", use_container_width=True):
             st.session_state.clear()
             st.rerun()
-
-    st.markdown("<br><p style='text-align: center; color: #222; font-size: 10px;'>VOYAGER v1.0.8</p>", unsafe_allow_html=True)
-
-# --- GLOBAL ROUTING ---
-page = st.session_state.current_page
 
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
@@ -1932,6 +1904,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
