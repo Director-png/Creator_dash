@@ -750,7 +750,7 @@ with st.sidebar:
                     )
                     
                     response = client.models.generate_content(
-                        model=MODEL_ID,
+                        model="gemini-1.5-flash",
                         contents=f"Market context: {context_summary}. User asked: {agent_input}",
                         config=config
                     )
@@ -1934,6 +1934,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
