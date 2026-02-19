@@ -769,7 +769,7 @@ page = st.session_state.current_page
 
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
-elif page == "🏠 Dashboard":
+if page == "🏠 Dashboard":
     # 🚨 COMPLIANCE HEADER (Minimalist)
     st.markdown("<p style='font-size: 10px; color: #444; letter-spacing: 1px;'>VOID OS // B2B OUTREACH SAAS // KERNEL V.1.0.4</p>", unsafe_allow_html=True)
     st.markdown("<h1 style='color: #00ff41;'>🛰️ COMMAND CENTER</h1>", unsafe_allow_html=True)
@@ -1922,6 +1922,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
