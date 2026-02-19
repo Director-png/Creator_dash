@@ -134,22 +134,27 @@ def load_history_db():
         return pd.DataFrame()
 
 def fetch_live_market_data():
-    """Industrial-grade fetch using the Google Visualization API vector."""
-    # Extracted from your provided URL
+    """Industrial-grade fetch using a direct CSV export vector."""
     SHEET_ID = "1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS"
-    # The 'gviz' endpoint is more stable for automated apps than the 'pub' link
-    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv"
-    
+    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv"
     try:
-        # We add a timestamp to the URL to force Google to give us fresh data (no caching)
-        df = pd.read_csv(f"{url}&timestamp={datetime.now().timestamp()}")
-        # Clean the column names to avoid "Space" or "Case" errors
+        # Using datetime.now() with the correct import above
+        response = requests.get(f"{url}&t={datetime.now().timestamp()}", timeout=10)
+        df = pd.read_csv(io.StringIO(response.text))
         df.columns = [str(c).lower().strip() for c in df.columns]
         return df
-    except Exception as e:
-        st.warning(f"⚠️ DEBUG: Connection jitter detected. {e}")
+    except Exception:
         return pd.DataFrame()
 
+def fetch_live_news(query, api_key):
+    """Fetches real-time world intelligence based on active vectors."""
+    url = f"https://newsapi.org/v2/everything?q={query}&sortBy=relevancy&language=en&pageSize=5&apiKey={api_key}"
+    try:
+        res = requests.get(url, timeout=7)
+        return res.json().get('articles', []) if res.status_code == 200 else []
+    except:
+        return []
+        
 def generate_visual_dna(platform, tone):
     styles = {
         "Instagram Reels": "High-contrast, 0.5s jump cuts, Glow-on-dark aesthetics, grainy film overlays.",
@@ -417,17 +422,6 @@ def trigger_monday_pulse():
 
 # Call the function to check status
 trigger_monday_pulse()
-
-def fetch_live_news(query="technology"):
-    """Fetches real-time news from NewsAPI.org based on a trend keyword."""
-    url = f"https://newsapi.org/v2/everything?q={query}&sortBy=relevancy&language=en&pageSize=5&apiKey={NEWS_API_KEY}"
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json().get('articles', [])
-        return []
-    except Exception:
-        return []
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -939,29 +933,23 @@ elif page == "🌐 Global Pulse":
     st.markdown("<h1 style='color: #00d4ff;'>🌐 GLOBAL INTELLIGENCE PULSE</h1>", unsafe_allow_html=True)
     
     # 🔑 CONFIGURATION
-    # Replace with your actual key from newsapi.org
-    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" 
+    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" # <--- Insert your key from newsapi.org
 
     # 1. TRIGGER DATA UPLINK
-    # This pulls from your MARKET_PULSE_URL via the function at the top
     df_pulse = fetch_live_market_data()
 
     if not df_pulse.empty:
         # --- 2. SEARCH TERMINAL ---
-        # The filter that shapes the incoming data stream
         st.markdown("### 🔍 SEARCH TREND VECTORS")
-        search_query = st.text_input("Intercept Keyword...", placeholder="Search trends or platforms...", label_visibility="collapsed")
+        search_query = st.text_input("Intercept Keyword...", placeholder="Search trends...", label_visibility="collapsed")
 
-        # --- 3. TOP 10 PERFORMANCE VECTORS (Velocity Tracker) ---
+        # --- 3. TOP 10 PERFORMANCE VECTORS ---
         st.subheader("📊 TOP 10 PERFORMANCE VECTORS")
-        
         display_df = df_pulse.copy()
         
-        # Ensure we sort by the most 'active' trends
         if 'velocity' in display_df.columns:
             display_df = display_df.sort_values(by="velocity", ascending=False).head(10)
         
-        # Apply the Real-Time Search Filter to the Table
         if search_query:
             display_df = display_df[display_df.astype(str).apply(lambda x: x.str.contains(search_query, case=False)).any(axis=1)]
 
@@ -970,8 +958,7 @@ elif page == "🌐 Global Pulse":
             column_config={
                 "keyword": "Trend Target",
                 "velocity": st.column_config.ProgressColumn("Velocity", min_value=0, max_value=100),
-                "category": "Niche",
-                "relevance": "Priority"
+                "category": "Niche"
             },
             hide_index=True,
             use_container_width=True,
@@ -980,37 +967,30 @@ elif page == "🌐 Global Pulse":
 
         st.divider()
 
-        # --- 4. LIVE WORLD INTELLIGENCE (Dynamic News Feed) ---
+        # --- 4. LIVE WORLD INTELLIGENCE (Dynamic Side-by-Side News) ---
         st.subheader("📰 LIVE WORLD INTELLIGENCE")
         
-        # News logic: If user is searching, show news for that search. 
-        # Otherwise, show news for the #1 trend in the G-Sheet.
         news_topic = search_query if search_query else (display_df['keyword'].iloc[0] if not display_df.empty else "Technology")
-        
         articles = fetch_live_news(news_topic, NEWS_API_KEY)
 
         if articles:
             for art in articles:
-                # We only display high-quality intel (Headline + Image)
                 if art.get('urlToImage') and art.get('title'):
                     with st.container(border=True):
-                        # The side-by-side "Expensive" layout
                         c_img, c_txt = st.columns([1, 2])
                         with c_img:
                             st.image(art['urlToImage'], use_container_width=True)
                         with c_txt:
                             st.markdown(f"<h4 style='color: #00ff41; margin:0;'>{art['title']}</h4>", unsafe_allow_html=True)
-                            st.write(art.get('description', 'Detailed intel currently redacted.'))
-                            
-                            # LIVE GATEWAY: Direct link to the source as requested
+                            st.write(art.get('description', 'Intel redacted.'))
+                            # THE PORTAL: Direct link to article
                             st.markdown(f"🔗 [READ FULL REPORT]({art['url']})")
-                            st.caption(f"Source: {art['source']['name']} | Published: {art['publishedAt'][:10]}")
+                            st.caption(f"Source: {art['source']['name']} | {art['publishedAt'][:10]}")
         else:
-            st.info(f"🛰️ SCANNING... No live articles found for '{news_topic}'. Adjust search or check API limit.")
+            st.info(f"🛰️ Scanning the Void for '{news_topic}'... check API key or search term.")
             
     else:
-        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Please verify the GSheet ID and Public settings.")
-
+        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Verify GSheet sharing is 'Public'.")
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
@@ -1841,6 +1821,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
