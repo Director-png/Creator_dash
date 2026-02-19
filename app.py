@@ -15,7 +15,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 import io
 import yt_dlp
 import tempfile
-from datetime import datetime
+from datetime import datetime as dt
 
 # --- INITIALIZE STATE (Place this near the top of your script) ---
 if "current_page" not in st.session_state:
@@ -936,72 +936,69 @@ elif page == "📡 My Growth Hub":
 
 elif page == "🌐 Global Pulse":
     st.markdown("<h1>🌐 <span>GLOBAL INTELLIGENCE PULSE</span></h1>", unsafe_allow_html=True)
-
-    # 1. TRIGGER ENGINES
-    # No more NameError because the functions are defined at the top
-    df_pulse = fetch_live_market_data()
-    NEWS_API_KEY = "YOUR_NEWS_API_KEY" 
     
+    # Configuration
+    # NOTE: Replace with your actual NewsAPI.org key
+    NEWS_API_KEY = "YOUR_API_KEY_HERE" 
+
+    # 1. FETCH DATA VECTORS
+    df_pulse = fetch_live_market_data()
+
     if not df_pulse.empty:
-        # 2. SEARCH TERMINAL
+        # 2. SEARCH & DATA TABLE
         st.markdown("### 🔍 SEARCH TREND VECTORS")
         search_query = st.text_input("Intercept Keyword...", placeholder="Search global database...", label_visibility="collapsed")
-
-        # 3. TOP 10 PERFORMANCE VECTORS
-        st.subheader("📊 TOP 10 PERFORMANCE VECTORS")
         
-        # Sort by Velocity (The pressure of the trend)
-        if 'velocity' in df_pulse.columns:
-            top_10 = df_pulse.sort_values(by="velocity", ascending=False).head(10)
-        else:
-            top_10 = df_pulse.head(10)
-
-        # Apply Search Filter to the Table
+        display_df = df_pulse.copy()
         if search_query:
-            top_10 = top_10[top_10.astype(str).apply(lambda x: x.str.contains(search_query, case=False)).any(axis=1)]
-
+            # Filter the table based on search
+            display_df = display_df[display_df.astype(str).apply(lambda x: x.str.contains(search_query, case=False)).any(axis=1)]
+        
+        st.subheader("📊 PERFORMANCE VECTORS")
         st.data_editor(
-            top_10,
-            column_config={
-                "keyword": "Trend Target",
-                "velocity": st.column_config.ProgressColumn("Velocity", min_value=0, max_value=100),
-                "category": "Niche",
-                "relevance": "Priority"
-            },
+            display_df.head(10), 
+            use_container_width=True, 
             hide_index=True,
-            use_container_width=True,
-            disabled=True
+            column_config={
+                "velocity": st.column_config.ProgressColumn("Velocity", min_value=0, max_value=100)
+            }
         )
 
         st.divider()
 
-        # 4. LIVE NEWS UPLINK (The Dynamic Image Feed)
+        # 3. LIVE NEWS FEED (The Side-by-Side View)
         st.subheader("📰 LIVE WORLD INTELLIGENCE")
         
-        # We drive the News API using the Search Query or the Top Trend
-        news_topic = search_query if search_query else (top_10['keyword'].iloc[0] if not top_10.empty else "Technology")
+        # Determine the best topic for news: Search query first, then top trend from sheet
+        topic = search_query if search_query else (df_pulse['keyword'].iloc[0] if 'keyword' in df_pulse.columns else "Technology")
         
-        articles = fetch_live_news(news_topic, NEWS_API_KEY)
-        
+        articles = fetch_live_news(topic, NEWS_API_KEY)
+
         if articles:
             for art in articles:
-                # Filter: Only show articles with images to maintain the "Expensive" look
-                if art.get('urlToImage'):
+                # Filter for quality: only show articles with headlines and images
+                if art.get('title') and art.get('urlToImage'):
                     with st.container(border=True):
                         col_img, col_txt = st.columns([1, 2])
                         with col_img:
                             st.image(art['urlToImage'], use_container_width=True)
                         with col_txt:
                             st.markdown(f"#### {art['title']}")
-                            st.write(art.get('description', 'Information redacted.'))
-                            # THE REAL-TIME HYPERLINK
-                            st.markdown(f"🔗 [Read Intelligence Report]({art['url']})")
+                            st.write(art.get('description', 'Information redacted...'))
+                            # HYPERLINK: Direct connection to specific article
+                            st.markdown(f"🔗 [Open Full Report]({art['url']})")
                             st.caption(f"Source: {art['source']['name']} | {art['publishedAt'][:10]}")
         else:
-            st.info(f"🛰️ SCANNING... No live news found for '{news_topic}'. Adjust search or check API key.")
+            st.info(f"🛰️ Scanning the void for '{topic}' intelligence. Please ensure API key is valid.")
 
     else:
-        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Please check the GSheet link.")
+        st.error("📡 NEURAL LINK FAILURE: The CSV link is unreachable. Please check GSheet sharing settings.")
+
+# --- MONDAY TRIGGER (Standalone) ---
+if dt.now().strftime("%A") == "Monday":
+    if st.session_state.get('last_monday_pulse') != dt.now().strftime("%Y-%m-%d"):
+        st.toast("🛰️ MONDAY BROADCAST INITIALIZED", icon="🚀")
+        st.session_state.last_monday_pulse = dt.now().strftime("%Y-%m-%d")
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
@@ -1832,6 +1829,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
