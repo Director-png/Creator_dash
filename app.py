@@ -1752,119 +1752,52 @@ elif page == "💎 Upgrade to Pro":
                     else:
                         st.error("Invalid Input Details.")
 
-# --- MODULE 8: MEDIA UPLINK (THE MASTER EXTRACTOR) ---
+# --- MODULE 8: MEDIA UPLINK (THE DIRECTOR'S BRIDGE) ---
 elif page == "🛰️ Media Uplink":
-    import random
-    import time
-    import os
-    import tempfile
     import yt_dlp
-    
-    if 'uplink_url' not in st.session_state: st.session_state.uplink_url = ""
-    if 'f_ext' not in st.session_state: st.session_state.f_ext = "Video (MP4)"
+    import os
 
-    st.markdown("<h1 style='color: #00ff41;'>🛰️ MEDIA UPLINK // ARCHIVE</h1>", unsafe_allow_html=True)
-    
-    # --- 🛠️ DYNAMIC AUTH DETECTION & HEADER INJECTION ---
+    st.markdown("<h1 style='color: #00ff41;'>🛰️ MEDIA UPLINK // THE BRIDGE</h1>", unsafe_allow_html=True)
+    st.info("Direct server-side downloading is throttled. Switching to 'Bridge Mode' for 100% reliability.")
+
+    # Detect Shards
     current_files = os.listdir('.')
     found_cookie_file = next((f for f in current_files if f.lower() in ['cookie.txt', 'cookies.txt']), None)
-    
-    if found_cookie_file:
-        try:
-            with open(found_cookie_file, 'r') as f:
-                content = f.read()
-            # If the Netscape header is missing, we inject it dynamically
-            if not content.startswith('# Netscape'):
-                with open(found_cookie_file, 'w') as f:
-                    f.write("# Netscape HTTP Cookie File\n" + content)
-            st.success(f"✅ AUTH SHARDS ENGAGED: '{found_cookie_file}' detected and formatted.")
-        except Exception as e:
-            st.error(f"🚨 SHARD ERROR: {str(e)}")
-    else:
-        st.warning("⚠️ AUTH SHARDS MISSING: Please ensure 'cookie.txt' is in the root directory.")
 
     with st.container(border=True):
-        col_url, col_type = st.columns([2, 1])
-        with col_url:
-            uplink_url = st.text_input("🔗 Source URL", placeholder="Paste YouTube/Instagram link...", key="url_input_final")
-        with col_type:
-            available_formats = ["Video (MP4)", "Audio (MP3)"]
-            if 'is_admin' in globals() and (is_paid or is_admin):
-                available_formats += ["High-Res 4K", "X-Thread (PDF)"]
-            f_ext = st.selectbox("Extraction Format", available_formats, key="format_select_final")
+        uplink_url = st.text_input("🔗 Source URL", placeholder="Paste YouTube link...")
+        
+        if st.button("⚡ GENERATE CLEAN UPLINK", use_container_width=True):
+            if uplink_url:
+                try:
+                    with st.spinner("🛰️ INTERCEPTING RAW STREAM VECTORS..."):
+                        ydl_opts = {
+                            'quiet': True,
+                            'no_warnings': True,
+                            'cookiefile': found_cookie_file if found_cookie_file else None,
+                            'format': 'best', # Get the best combined format
+                        }
+                        
+                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                            # We only fetch info, we do NOT download on the server
+                            info = ydl.extract_info(uplink_url, download=False)
+                            direct_url = info.get('url')
+                            title = info.get('title', 'Asset')
 
-    if st.button("⚡ INITIATE EXTRACTION", use_container_width=True, key="execute_final"):
-        if uplink_url:
-            progress_bar = st.progress(0, text="Injecting Authentication Shards...")
-            
-            try:
-                # 1. ORGANIC BYPASS DELAY
-                time.sleep(random.uniform(1.0, 3.0)) 
-
-                ydl_opts = {
-                    'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-                    'outtmpl': os.path.join(tempfile.gettempdir(), 'media_%(id)s.%(ext)s'),
-                    'merge_output_format': 'mp4',
-                    'quiet': True,
-                    'nocheckcertificate': True,
-                    'cookiefile': found_cookie_file if found_cookie_file else None,
-                    # Rotating User Agents to mimic different residential systems
-                    'user_agent': random.choice([
-                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-                    ]),
-                    'extractor_args': {
-                        'youtube': {
-                            # Using TV client to bypass 403 blocks
-                            'player_client': ['tv', 'web_creator'],
-                            'player_skip': ['webpage', 'configs']
-                        },
-                        'instagram': {'get_video': True}
-                    },
-                    'no_warnings': True,
-                    'ignoreerrors': True,
-                }
-                
-                if "Audio" in f_ext:
-                    ydl_opts['format'] = 'bestaudio/best'
-                    ydl_opts['postprocessors'] = [{
-                        'key': 'FFmpegExtractAudio',
-                        'preferredcodec': 'mp3',
-                        'preferredquality': '192',
-                    }]
-
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    progress_bar.progress(50, text="Bypassing Protocol Walls...")
-                    info = ydl.extract_info(uplink_url, download=True)
-                    
-                    if info:
-                        final_file_path = ydl.prepare_filename(info)
-                        if "Audio" in f_ext:
-                            final_file_path = final_file_path.rsplit('.', 1)[0] + ".mp3"
-
-                        if os.path.exists(final_file_path) and os.path.getsize(final_file_path) > 1000:
-                            progress_bar.progress(100, text="Uplink Secured.")
-                            
-                            with open(final_file_path, "rb") as f:
-                                st.download_button(
-                                    label="💾 DOWNLOAD ASSET", 
-                                    data=f.read(), 
-                                    file_name=os.path.basename(final_file_path), 
-                                    mime="video/mp4" if "Video" in f_ext else "audio/mpeg", 
-                                    use_container_width=True, 
-                                    key="dl_button_final"
-                                )
-                            os.remove(final_file_path)
-                        else:
-                            st.error("🚨 CORRUPT UPLINK: File incomplete. Refresh your browser cookies.")
-                    else:
-                        st.error("🚨 EXTRACTION FAILED: Content restricted or IP throttled. Please use YouTube links for now.")
-
-            except Exception as e:
-                st.error(f"UPLINK FAILED: {str(e)}")
-        else:
-            st.warning("Director, insert a URL to begin.")
-
+                        if direct_url:
+                            st.success(f"🎯 UPLINK SECURED: {title}")
+                            st.markdown(f"""
+                                <a href="{direct_url}" download="{title}.mp4" target="_blank" style="text-decoration: none;">
+                                    <div style="background-color: #00ff41; color: black; padding: 15px; text-align: center; border-radius: 10px; font-weight: bold; cursor: pointer;">
+                                        💾 CLICK TO SAVE ASSET TO DISK
+                                    </div>
+                                </a>
+                                <p style='font-size: 0.8em; color: gray; margin-top: 10px;'>Note: If the video opens in a new tab, right-click and 'Save Video As'.</p>
+                            """, unsafe_allow_html=True)
+                except Exception as e:
+                    st.error(f"UPLINK FAILED: {str(e)}")
+            else:
+                st.warning("Director, please provide a URL.")
 
 elif page == "⚙️ Settings":
     st.markdown("<h1 style='color: #00ff41;'>⚙️ SYSTEM SETTINGS</h1>", unsafe_allow_html=True)
@@ -1974,6 +1907,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
