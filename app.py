@@ -24,76 +24,65 @@ import requests
 
 def ignition_sequence():
     if 'ignition_complete' not in st.session_state:
+        # Create a placeholder that disappears once done
         placeholder = st.empty()
         
         with placeholder.container():
             st.markdown("""
                 <style>
-                /* 1. DARK OVERLAY */
-                .ignition-wrapper {
+                /* FORCE FULL SCREEN OVERLAY */
+                .ignition-overlay {
                     position: fixed;
-                    top: 0; left: 0; width: 100vw; height: 100vh;
-                    background: #000;
+                    top: 0; left: 0; width: 100%; height: 100%;
+                    background: black !important;
+                    z-index: 999999 !important; /* Extremely high to beat default spinners */
                     display: flex; flex-direction: column;
                     align-items: center; justify-content: center;
-                    z-index: 9999;
                 }
 
-                /* 2. THE ROTATING ENGINE CIRCLE */
-                .engine-core {
-                    width: 150px; height: 150px;
-                    border: 3px solid transparent;
-                    border-top: 3px solid #00ff41;
+                /* THE ROTATING CORE */
+                .engine-ring {
+                    width: 120px; height: 120px;
+                    border: 4px solid rgba(0, 255, 65, 0.1);
+                    border-top: 4px solid #00ff41;
                     border-radius: 50%;
-                    animation: spin 1.5s linear infinite;
-                    position: relative;
-                }
-                .engine-core::after {
-                    content: '';
-                    position: absolute;
-                    top: 15px; left: 15px; right: 15px; bottom: 15px;
-                    border: 2px solid transparent;
-                    border-bottom: 2px solid #00d4ff;
-                    border-radius: 50%;
-                    animation: spin 1s linear reverse infinite;
+                    animation: spin-engine 1.2s linear infinite;
+                    box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
                 }
 
-                /* 3. THE LOGO POP */
-                .void-text {
-                    margin-top: 20px;
+                .void-label {
+                    margin-top: 30px;
                     color: #00ff41;
                     font-family: 'Courier New', monospace;
-                    font-size: 40px;
+                    font-size: 32px;
                     font-weight: bold;
-                    letter-spacing: 10px;
-                    opacity: 0;
-                    animation: logo-reveal 2s forwards;
-                    animation-delay: 1s;
-                    text-shadow: 0 0 15px rgba(0, 255, 65, 0.7);
+                    letter-spacing: 8px;
+                    animation: glow-fade 2s ease-in-out forwards;
                 }
 
-                @keyframes spin {
+                @keyframes spin-engine {
                     0% { transform: rotate(0deg); }
                     100% { transform: rotate(360deg); }
                 }
 
-                @keyframes logo-reveal {
-                    0% { transform: scale(0.8); opacity: 0; filter: blur(10px); }
-                    100% { transform: scale(1); opacity: 1; filter: blur(0); }
+                @keyframes glow-fade {
+                    0% { opacity: 0; filter: blur(10px); }
+                    100% { opacity: 1; filter: blur(0); }
                 }
                 </style>
 
-                <div class="ignition-wrapper">
-                    <div class="engine-core"></div>
-                    <div class="void-text">VOID-OS</div>
+                <div class="ignition-overlay">
+                    <div class="engine-ring"></div>
+                    <div class="void-label">VOID-OS</div>
                 </div>
             """, unsafe_allow_html=True)
             
-            # Duration of the sequence
-            time.sleep(3.5)
+            # This sleep MUST happen while the markdown is active
+            time.sleep(3)
             
         placeholder.empty()
         st.session_state.ignition_complete = True
+        st.rerun() # Forces the app to clear the overlay and start the real UI
 
 # --- INITIALIZE STATE (Place this near the top of your script) ---
 if "current_page" not in st.session_state:
@@ -2104,6 +2093,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
