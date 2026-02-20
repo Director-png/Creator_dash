@@ -1191,8 +1191,12 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (ELITE ASSET GENERATION) ---
+# --- MODULE 7: THE NEURAL FORGE (FINAL STABLE BUILD) ---
 elif page == "🧠 Neural Forge":
+    import time
+    import requests
+    import random
+
     # 1. ACCESS CONTROL
     if not is_paid and not is_admin:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
@@ -1206,113 +1210,76 @@ elif page == "🧠 Neural Forge":
         col_a, col_b = st.columns([1, 1], gap="medium")
         
         with col_a:
-            st.subheader("🧬 Core Configuration")
-            # IDENTITY UPLINK: Preps the user for facial consistency
-            f_face = st.file_uploader("Upload Identity Reference", type=['png', 'jpg', 'jpeg'], help="Used by VOID-OS to maintain facial features across thumbnails.")
-            
-            forge_mode = st.radio("Forge Strategy", ["Cold Start (Original)", "Competitor Shadow (🔒)"], horizontal=True)
-            f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok", "X-Thread"], key="forge_plat")
-            f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of Productivity", key="forge_top")
+            st.subheader("🧬 Identity & Core")
+            # This prepares for the future Facial Consistency logic
+            f_face = st.file_uploader("Upload Identity Reference", type=['png', 'jpg', 'jpeg'])
+            f_topic = st.text_input("Core Concept", placeholder="e.g., Why AI will replace devs", key="forge_top")
+            f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels"], key="forge_plat")
             
         with col_b:
             st.subheader("📡 Style & Vigor")
-            f_colors = st.multiselect("Brand DNA Colors", ["Neon Green", "Cyber Blue", "Matte Black", "Hot Pink", "Gold", "Crimson"], default=["Neon Green", "Matte Black"])
-            f_framework = st.selectbox("Retention Framework", [
-                "The Controversy Start (High Vigor)", 
-                "The Hero's Journey (Storytelling)", 
-                "Statistical Shock (Educational)",
-                "The 'Mistake' Hook (Click-through Focus)",
-                "Day in the Life (Relatability)",
-                "The Deep-Dive (Authority)"
-            ])
+            f_colors = st.multiselect("Brand DNA Colors", ["Neon Green", "Cyber Blue", "Matte Black", "Gold", "Crimson"], default=["Neon Green", "Matte Black"])
+            f_framework = st.selectbox("Retention Framework", ["Controversy Start", "Hero's Journey", "Statistical Shock", "The 'Mistake' Hook"])
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
 
-        # PRIMARY EXECUTION: SCRIPT SYNTHESIS
+        # PRIMARY SCRIPT EXECUTION
         if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
             if f_topic:
                 with st.spinner("🌑 ARCHITECTING PRODUCTION BLUEPRINT..."):
                     try:
-                        prompt = (
-                            f"Act as a World-Class Content Strategist. Create a detailed Production Blueprint for: '{f_topic}'.\n\n"
-                            f"PLATFORM: {f_platform}\n"
-                            f"STRATEGY: {f_framework}\n"
-                            f"VIGOR: {f_vigor}\n\n"
-                            f"OUTPUT FORMAT:\n"
-                            f"1. STRATEGIC ANALYSIS: Why this concept works.\n"
-                            f"2. THE SCRIPT: [TIMESTAMP] | [VISUALS/EDITS] | [AUDIO/VOICEOVER].\n"
-                            f"3. RETENTION LOOPS: List 3 triggers to prevent scrolling.\n"
-                            f"Ensure the tone is elite and the hooks are razor-sharp."
-                        )
-                        # Ensure 'groq_c' is initialized in your main script
+                        prompt = (f"Act as a World-Class Strategist. Create a Production Blueprint for: '{f_topic}'. "
+                                  f"Platform: {f_platform}. Strategy: {f_framework}. Vigor: {f_vigor}.")
+                        # Assuming groq_c is defined in your global scope
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
-                            messages=[{"role": "system", "content": "You are the Neural Forge. You build attention-grabbing weapons."},
+                            messages=[{"role": "system", "content": "You are the Neural Forge."},
                                       {"role": "user", "content": prompt}]
                         )
                         st.session_state.pro_forge_txt = res.choices[0].message.content
                         st.rerun()
                     except Exception as e:
                         st.error(f"UPLINK ERROR: {str(e)}")
-            else:
-                st.warning("Director, input a concept first.")
 
-    # 3. OUTPUT & INTELLIGENCE TOOLS
+    # 3. OUTPUT & VISUAL FORGE
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 THE PRODUCTION BLUEPRINT")
-        st.markdown(st.session_state.pro_forge_txt)
+        st.info(st.session_state.pro_forge_txt)
         
         st.divider()
         st.subheader("🧪 Intelligence Tools")
         t_col1, t_col2, t_col3 = st.columns(3)
         
-        with t_col1:
-            if st.button("🚀 SCORE VIRALITY", use_container_width=True):
-                with st.spinner("Analyzing Viral Potential..."):
-                    analysis_prompt = f"Analyze this script for viral potential (1-10) and give 1 'Power Fix': {st.session_state.pro_forge_txt[:500]}"
-                    res = groq_c.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": analysis_prompt}]
-                    )
-                    st.info(res.choices[0].message.content)
-                        
         with t_col2:
-            # THE UPGRADED VISUAL FORGE
             if st.button("🎭 GENERATE 3X THUMBNAILS", use_container_width=True):
                 st.markdown("#### 🖼️ Visual Asset Options")
                 
-                # Dynamic Styles for diversity
-                styles = [
-                    "Cinematic and Moody", 
-                    "High-Contrast with Bold Text", 
-                    "Minimalist Professional"
-                ]
-                
+                # STABLE IMAGE LOGIC
+                styles = ["Cinematic", "Cyberpunk", "Minimalist"]
                 v_cols = st.columns(3)
+                
                 for i, style in enumerate(styles):
                     with v_cols[i]:
-                        with st.spinner(f"Forging {i+1}..."):
-                            # Seed ensures unique results; colors/topic ensure brand alignment
-                            seed = random.randint(0, 10**6)
-                            img_prompt = (f"Professional YouTube Thumbnail, {style}, {f_topic}, "
-                                          f"color palette: {', '.join(f_colors)}, hyper-realistic, 8k, "
-                                          "clean composition, impactful lighting")
-                            
-                            # Using Pollinations API via simple URL request
-                            img_url = f"https://pollinations.ai/p/{requests.utils.quote(img_prompt)}?width=1280&height=720&seed={seed}&nologo=true"
-                            
-                            st.image(img_url, caption=f"Concept: {style}")
-                            st.download_button(f"Save Concept {i+1}", img_url, file_name=f"void_thumb_{i}.png")
+                        # A. Create a unique seed to bypass cache crashes
+                        u_seed = int(time.time()) + i 
+                        
+                        # B. Clean the topic to prevent URL breakage
+                        safe_topic = f_topic.replace(" ", "%20").replace("'", "").replace('"', "")
+                        color_str = "-".join(f_colors).replace(" ", "")
+                        
+                        # C. Build the prompt
+                        img_prompt = f"Professional-YouTube-Thumbnail-{style}-{safe_topic}-colors-{color_str}"
+                        
+                        # D. Stable URL with double-encoding prevention
+                        img_url = f"https://pollinations.ai/p/{img_prompt}?width=1280&height=720&seed={u_seed}&nologo=true"
+                        
+                        # E. Render with error handling
+                        try:
+                            st.image(img_url, caption=f"Style: {style}", use_column_width=True)
+                            st.caption(f"ID: VF-{u_seed}")
+                        except:
+                            st.warning("Visual Link Unstable.")
 
-        with t_col3:
-            if st.button("🧠 RETENTION SCAN", use_container_width=True):
-                with st.spinner("Scanning Gaps..."):
-                    gap_prompt = f"Identify the weakest part of this script and suggest a 'Pattern Interrupt': {st.session_state.pro_forge_txt}"
-                    res = groq_c.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": gap_prompt}]
-                    )
-                    st.warning(res.choices[0].message.content)
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -1976,6 +1943,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
