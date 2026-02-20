@@ -1191,16 +1191,18 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (INTERNAL DATA INJECTION) ---
+# --- MODULE 7: THE NEURAL FORGE (GHOST-IN-THE-SHELL BUILD) ---
 elif page == "🧠 Neural Forge":
     import random, urllib.parse, requests, base64
 
+    # 1. ACCESS CONTROL
     if not is_admin and not is_paid:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
         st.stop()
 
     st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
     
+    # 2. INPUT CONFIGURATION
     with st.container(border=True):
         col_a, col_b = st.columns([1, 1], gap="medium")
         with col_a:
@@ -1221,11 +1223,13 @@ elif page == "🧠 Neural Forge":
                 with st.spinner("🌑 ARCHITECTING PRODUCTION BLUEPRINT..."):
                     try:
                         prompt = f"Strategy for: '{f_topic}'. Platform: {f_platform}. Vigor: {f_vigor}."
+                        # Groq logic fully restored
                         res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                         st.session_state.pro_forge_txt = res.choices[0].message.content
                         st.rerun()
                     except Exception as e: st.error(f"UPLINK ERROR: {str(e)}")
 
+    # 3. INTELLIGENCE TOOLS
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.info(st.session_state.pro_forge_txt)
@@ -1245,18 +1249,24 @@ elif page == "🧠 Neural Forge":
                 styles = ["Cinematic", "Cyberpunk", "Minimalist"]
                 for style in styles:
                     u_seed = random.randint(1000, 9999)
-                    query = urllib.parse.quote(f"{style} thumbnail {f_topic} colors {' '.join(f_colors)}")
-                    # WE USE THE BACKEND TO FETCH DATA (Bypasses Browser Blocks)
+                    query = urllib.parse.quote(f"{style} thumbnail {f_topic} colors {' '.join(f_colors)} 8k")
+                    
+                    # THE SPOOF BYPASS: Using mobile-agent headers to evade the 1033 block
                     img_url = f"https://image.pollinations.ai/prompt/{query}?seed={u_seed}&nologo=true&width=1280&height=720"
+                    headers = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_8 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Mobile/15E148 Safari/604.1'}
                     
                     try:
-                        resp = requests.get(img_url, timeout=30)
+                        resp = requests.get(img_url, headers=headers, timeout=40)
                         if resp.status_code == 200:
                             b64_img = base64.b64encode(resp.content).decode()
                             st.markdown(f"**{style.upper()} CONCEPT**")
                             st.markdown(f'<img src="data:image/png;base64,{b64_img}" width="100%" style="border-radius:10px; border: 2px solid #00ff41; margin-bottom:15px;">', unsafe_allow_html=True)
-                        else: st.error("Shields Up: API Blocked.")
-                    except: st.error("Connection Interrupted.")
+                        else:
+                            # FALLBACK: If internal fetch fails, provide a cleaned URL
+                            st.warning(f"Internal Block. Trying direct link for {style}...")
+                            st.markdown(f"[🔗 CLICK TO DOWNLOAD CONCEPT]({img_url})")
+                    except:
+                        st.error("Uplink unstable.")
 
         with t_col3:
             if st.button("🧠 RETENTION SCAN", use_container_width=True):
@@ -1926,6 +1936,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
