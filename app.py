@@ -16,6 +16,7 @@ import io
 import yt_dlp
 import tempfile
 from datetime import datetime as dt
+import random
 
 # --- INITIALIZE STATE (Place this near the top of your script) ---
 if "current_page" not in st.session_state:
@@ -698,7 +699,7 @@ if not st.session_state.logged_in:
 if 'current_page' not in st.session_state:
     st.session_state.current_page = "🏠 Dashboard" if st.session_state.get('user_role') == "admin" else "📡 My Growth Hub"
 
-# --- 3. SIDEBAR ARCHITECTURE ---
+# --- 2. SIDEBAR ARCHITECTURE ---
 with st.sidebar:
     try:
         # IDENTITY CORE
@@ -718,7 +719,7 @@ with st.sidebar:
         else:
             st.markdown("<div style='background-color: #333; color: #888; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>📡 BASIC ACCESS</div>", unsafe_allow_html=True)
 
-        # DYNAMIC MENU MAPPING (CLEANED OF FUTURE MODULES)
+        # DYNAMIC MENU MAPPING (CLEANED - FUTURE MODULES HIDDEN)
         if user_role == "admin":
             options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Client Pitcher", "📜 History", "⚙️ Settings"]
         elif user_status in ['pro', 'paid']:
@@ -727,6 +728,9 @@ with st.sidebar:
             options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🛰️ Media Uplink", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
 
         # NAVIGATION SELECTION
+        if 'current_page' not in st.session_state:
+            st.session_state.current_page = options[0]
+
         try:
             default_index = options.index(st.session_state.current_page)
         except ValueError:
@@ -735,7 +739,7 @@ with st.sidebar:
         nav_selection = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = nav_selection
 
-        # --- 🤖 INTEGRATED VOID MANAGER (GROQ + VISUAL FORGE) ---
+        # --- 🤖 INTEGRATED VOID MANAGER (ZERO JITTER VERSION) ---
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
@@ -743,11 +747,12 @@ with st.sidebar:
             if "manager_chat" not in st.session_state:
                 st.session_state.manager_chat = []
 
-            # Display History
+            # Display Conversation
             for msg in st.session_state.manager_chat:
                 with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
                     st.markdown(msg["content"])
 
+            # Input Logic
             agent_input = st.chat_input("Command VOID-OS...")
             
             if agent_input:
@@ -755,48 +760,47 @@ with st.sidebar:
                 with st.chat_message("user", avatar="👤"):
                     st.markdown(agent_input)
                 
-                # Market Context Logic (Preserved)
-                # top_niche = m_data.iloc[0,0] if not m_data.empty else "Syncing..."
-                top_niche = "Content Automation" # Placeholder for your specific fetch logic
-
                 with st.chat_message("assistant", avatar="🌌"):
+                    resp_container = st.empty()
+                    full_resp = ""
                     try:
-                        # CORE BRAIN (GROQ INTEGRATION)
-                        response = client.chat.completions.create(
+                        # Groq Streaming Call
+                        stream = client.chat.completions.create(
                             model=MODEL_ID,
                             messages=[
-                                {"role": "system", "content": f"You are VOID-OS. Witty, strategic, and concise. Operator: {st.session_state.get('user_name')} | Page: {st.session_state.current_page} | Niche: {top_niche}"},
+                                {"role": "system", "content": "You are VOID-OS. Witty, elite, and strategic. Be concise."},
                                 {"role": "user", "content": agent_input}
                             ],
-                            temperature=0.7
+                            stream=True,
+                            temperature=0.6
                         )
-                        final_text = response.choices[0].message.content
-                        st.markdown(final_text)
+                        for chunk in stream:
+                            if chunk.choices[0].delta.content:
+                                full_resp += chunk.choices[0].delta.content
+                                resp_container.markdown(full_resp + "▌")
                         
-                        # VISUAL FORGE TRIGGER
-                        # If the AI mentions a thumbnail, we generate it
-                        if "thumbnail" in agent_input.lower() or "visual" in agent_input.lower():
-                            img_url = generate_visual(f"YouTube Thumbnail: {agent_input}")
-                            st.image(img_url, caption="VOID Visual Forge Output")
-                        
-                        st.session_state.manager_chat.append({"role": "assistant", "content": final_text})
-                    except Exception as ai_err:
-                        st.error(f"Neural Jitter: {ai_err}")
+                        resp_container.markdown(full_resp)
+                        st.session_state.manager_chat.append({"role": "assistant", "content": full_resp})
 
-        # 4. GLOBAL ACTIONS
+                        # Trigger Visual Forge
+                        if any(x in agent_input.lower() for x in ["visual", "image", "thumbnail"]):
+                            with st.spinner("Forging visual..."):
+                                img_url = generate_visual(agent_input)
+                                st.image(img_url, caption="Visual Asset Generated")
+                    
+                    except Exception as e:
+                        st.error(f"Uplink Error: {str(e)}")
+
+        # GLOBAL ACTIONS
         st.divider()
         if st.button("🔄 RE-CALIBRATE", use_container_width=True):
             st.cache_data.clear()
             st.rerun()
 
-        if st.button("🔒 LOGOUT", use_container_width=True):
-            st.session_state.clear()
-            st.rerun()
-
     except Exception as sidebar_err:
-        st.error(f"System Error in Sidebar: {sidebar_err}")
+        st.error(f"System Error: {sidebar_err}")
 
-# --- 4. FINAL ROUTING ---
+# --- 3. FINAL ROUTING ---
 page = st.session_state.current_page
 
 
@@ -1954,6 +1958,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
