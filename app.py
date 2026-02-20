@@ -1237,13 +1237,13 @@ elif page == "🧠 Neural Forge":
     
     remaining_credits = st.session_state.max_limit - st.session_state.daily_usage
 
-    st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // SCRIPT & PROMPT ARCHITECT</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // MULTI-COLOR ARCHITECT</h1>", unsafe_allow_html=True)
     st.sidebar.markdown(f"### ⚡ NEURAL CREDITS\n**{remaining_credits} / {st.session_state.max_limit}**")
     
     if 'vault_anchor' not in st.session_state or st.session_state.vault_anchor is None:
         st.warning("⚠️ IDENTITY VAULT EMPTY: Strict Facial Consistency Protocol is on standby.")
 
-    # 2. INPUT CONFIGURATION (RE-INTEGRATED & EXPANDED)
+    # 2. INPUT CONFIGURATION
     with st.container(border=True):
         col_a, col_b, col_c = st.columns([1, 1, 1], gap="small")
         
@@ -1252,47 +1252,48 @@ elif page == "🧠 Neural Forge":
             f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"])
             f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of Productivity")
             
-            # THE COLOR PALETTE (20 VARIETIES)
-            f_color = st.selectbox("Cinematic Color Grade", [
-                "Cyberpunk Neon", "Midnight Teal & Orange", "Moody Noir", "Golden Hour", 
+            # UPGRADED: MULTI-COLOR SELECTION (Max 3)
+            color_options = [
+                "Cyberpunk Neon", "Midnight Teal", "Electric Orange", "Moody Noir", "Golden Hour", 
                 "Vintage Kodachrome", "Ethereal Dream", "Industrial Cold", "Deep Forest Green",
                 "Sunset Violet", "High-Contrast Monochrome", "Earth Tone Pastel", "Royal Gold",
-                "Electric Blue", "Crimson Threat", "Frozen Arctic", "Desert Sand", 
-                "Sepia Memory", "Ultraviolet", "Minimalist White", "Toxic Emerald"
-            ])
+                "Crimson Threat", "Frozen Arctic", "Desert Sand", "Sepia Memory", 
+                "Ultraviolet", "Minimalist White", "Toxic Emerald"
+            ]
+            f_colors = st.multiselect("Cinematic Color Palette (Pick 1-3)", color_options, default=["Midnight Teal", "Electric Orange"])
 
         with col_b:
             st.subheader("📡 Strategy")
-            f_framework = st.selectbox("Retention Framework", [
-                "The Controversy Start", "The Hero's Journey", "Statistical Shock", "The 'Mistake' Hook"
-            ])
+            f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock", "The 'Mistake' Hook"])
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
             
-            # NEW FEATURE: PSYCHOLOGICAL HOOK SELECTOR
-            f_hook_type = st.radio("Emotional Anchor", ["Curiosity", "Fear of Missing Out", "Authority", "Empowerment"])
+            # NEW FEATURE: STRATEGIC LIGHTING MODIFIER
+            f_lighting = st.selectbox("Lighting Style", ["Dramatic Rim Light", "Soft Cinematic Glow", "Hard Shadows (High-Key)", "Bi-Color Split"])
 
         with col_c:
             st.subheader("🎬 Style")
+            f_hook_type = st.radio("Emotional Anchor", ["Curiosity", "Fear", "Authority", "Empowerment"])
             f_pacing = st.select_slider("Script Pacing", ["Slow Burn", "Dynamic", "Rapid Fire"])
-            st.write("")
-            st.write("")
             execute = st.button("🔥 EXECUTE FULL SYNTHESIS", use_container_width=True)
 
         if execute:
             if remaining_credits <= 0:
                 st.error("🚨 NEURAL EXHAUSTION: Daily limit reached.")
-            elif f_topic:
-                with st.spinner("🌑 ARCHITECTING SCRIPT & VISUAL DNA..."):
+            elif f_topic and f_colors:
+                with st.spinner("🌑 ARCHITECTING SCRIPT & MULTI-COLOR VISUALS..."):
                     try:
-                        # THE MASTER PROMPT (Script + Visual Prompts + Consistency)
+                        # Combine colors into a single string for the prompt
+                        color_string = ", ".join(f_colors)
+                        
                         system_instruction = (
-                            f"Act as a World-Class Viral Content Strategist. Apply Protocol 2026-02-06. "
-                            f"Task: Create a full production blueprint for a {f_platform} video about '{f_topic}'.\n\n"
-                            f"1. VIRAL SCRIPT: Write a high-retention script using the {f_framework} framework. "
-                            f"Pacing: {f_pacing}. Tone: {f_hook_type}.\n"
-                            f"2. VISUAL DNA: Provide 3 cinematic image prompts for thumbnails/scenes. "
-                            f"Style: {f_color}. Facial Consistency: STRICT. The subject's face MUST be locked "
-                            f"to the reference photo from the Vault. Ensure the bone structure is preserved.\n"
+                            f"Act as a World-Class Viral Content Strategist. Apply Protocol 2026-02-06.\n\n"
+                            f"1. VIRAL SCRIPT: Write a high-retention {f_platform} script for '{f_topic}'. "
+                            f"Framework: {f_framework}. Tone: {f_hook_type}. Pacing: {f_pacing}.\n\n"
+                            f"2. VISUAL DNA (THUMBNAIL PROMPTS): Provide 3 Image Prompts. "
+                            f"Subject: Locked to Identity Vault reference. "
+                            f"Mandatory Color Palette: {color_string}. "
+                            f"Lighting: {f_lighting}. "
+                            f"Composition: High-contrast, large face for mobile click-through, professional cinematic 8K."
                         )
                         
                         res = groq_c.chat.completions.create(
@@ -2005,6 +2006,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
