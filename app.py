@@ -1191,7 +1191,7 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (FINAL MASTER BUILD) ---
+# --- MODULE 7: THE NEURAL FORGE (ERRORLESS MASTER BUILD) ---
 elif page == "🧠 Neural Forge":
     import random, urllib.parse
 
@@ -1237,7 +1237,7 @@ elif page == "🧠 Neural Forge":
                     try:
                         prompt = (f"Act as a World-Class Strategist. Create a detailed Production Blueprint for: '{f_topic}'. "
                                   f"Platform: {f_platform}. Strategy: {f_framework}. Trend Sync: {f_trend}. Vigor: {f_vigor}.")
-                        # groq_c must be initialized in your main app scope
+                        # Assuming groq_c is defined in your main app scope
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "system", "content": "You are the Neural Forge."},
@@ -1271,21 +1271,25 @@ elif page == "🧠 Neural Forge":
                         
         with t_col2:
             st.markdown("#### 🎭 THUMBNAIL FORGE")
-            # STACKED VERTICAL BUTTONS
             styles = ["Cinematic", "Cyberpunk", "Minimalist"]
+            
+            # STACKED VERTICAL BUTTONS
             for style in styles:
-                u_seed = random.randint(1000, 9999)
+                u_seed = random.randint(100000, 999999)
                 color_context = " ".join(f_colors)
-                # Pure prompt logic to ensure external tab renders correctly
-                clean_query = urllib.parse.quote(f"{style} YouTube thumbnail {f_topic} colors {color_context} high quality")
-                final_url = f"https://pollinations.ai/p/{clean_query}?width=1280&height=720&seed={u_seed}&nologo=true"
+                # THE BYPASS: Aggressive sanitization and Flux model forcing
+                raw_prompt = f"{style} YouTube thumbnail {f_topic} colors {color_context}"
+                safe_prompt = urllib.parse.quote(raw_prompt)
+                
+                # Direct URL structure to bypass home-page redirection
+                final_url = f"https://pollinations.ai/p/{safe_prompt}?width=1280&height=720&seed={u_seed}&nologo=true&model=flux"
                 
                 st.markdown(f"""
-                <div style="background-color: #111; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 8px; text-align: center;">
-                    <p style="color: #00ff41; font-size: 0.75rem; margin-bottom: 5px;">{style.upper()} STYLE</p>
-                    <a href="{final_url}" target="_blank" style="text-decoration: none;">
-                        <button style="background-color: #00ff41; color: black; border: none; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">
-                            OPEN CONCEPT
+                <div style="background-color: #111; padding: 12px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; text-align: center;">
+                    <p style="color: #00ff41; font-size: 0.8rem; margin-bottom: 8px; letter-spacing: 1px;">{style.upper()} CONCEPT</p>
+                    <a href="{final_url}" target="_blank" rel="noopener noreferrer">
+                        <button style="background-color: #00ff41; color: black; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.3s;">
+                            🚀 GENERATE & OPEN
                         </button>
                     </a>
                 </div>
@@ -1299,7 +1303,6 @@ elif page == "🧠 Neural Forge":
                         messages=[{"role": "user", "content": f"Identify retention gaps: {st.session_state.pro_forge_txt}"}]
                     )
                     st.warning(r_res.choices[0].message.content)
-
 
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
@@ -1964,6 +1967,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
