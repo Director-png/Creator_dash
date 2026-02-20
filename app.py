@@ -1220,71 +1220,79 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (ELITE PROMPT ARCHITECT) ---
+# --- MODULE 7: THE NEURAL FORGE (ELITE PROMPT & SCRIPT ARCHITECT) ---
 elif page == "🧠 Neural Forge":
     import random
     import datetime
 
-    # 1. ACCESS & CREDIT CONTROL (Fixed: Synced with Gatekeeper 'logged_in')
+    # 1. ACCESS & CREDIT CONTROL
     if not st.session_state.get('logged_in'):
         st.error("🚨 CLEARANCE REQUIRED: Enter your Elite Cipher in the terminal.")
         st.stop()
 
-    # Ensure Credit Variables exist even if login was a bypass
-    if 'daily_usage' not in st.session_state:
-        st.session_state.daily_usage = 0
-    if 'last_reset' not in st.session_state:
-        st.session_state.last_reset = datetime.date.today()
+    if 'daily_usage' not in st.session_state: st.session_state.daily_usage = 0
+    if 'last_reset' not in st.session_state: st.session_state.last_reset = datetime.date.today()
     if 'max_limit' not in st.session_state:
         st.session_state.max_limit = 15 if st.session_state.get('user_status') == "Pro" else 5
-
-    # Credit Tracking Logic
-    if st.session_state.last_reset < datetime.date.today():
-        st.session_state.daily_usage = 0
-        st.session_state.last_reset = datetime.date.today()
     
     remaining_credits = st.session_state.max_limit - st.session_state.daily_usage
 
-    st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE PROMPT ARCHITECT</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // SCRIPT & PROMPT ARCHITECT</h1>", unsafe_allow_html=True)
     st.sidebar.markdown(f"### ⚡ NEURAL CREDITS\n**{remaining_credits} / {st.session_state.max_limit}**")
     
-    # Check for Identity Vault Anchor (Protocol 2026-02-06)
     if 'vault_anchor' not in st.session_state or st.session_state.vault_anchor is None:
-        st.warning("⚠️ IDENTITY VAULT EMPTY: Upload your face reference in the Vault for facial consistency.")
+        st.warning("⚠️ IDENTITY VAULT EMPTY: Strict Facial Consistency Protocol is on standby.")
 
-    # 2. INPUT CONFIGURATION
+    # 2. INPUT CONFIGURATION (RE-INTEGRATED & EXPANDED)
     with st.container(border=True):
-        col_a, col_b = st.columns([1, 1], gap="medium")
+        col_a, col_b, col_c = st.columns([1, 1, 1], gap="small")
         
         with col_a:
-            st.subheader("🧬 Production Core")
+            st.subheader("🧬 Production")
             f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"])
             f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of Productivity")
+            
+            # THE COLOR PALETTE (20 VARIETIES)
+            f_color = st.selectbox("Cinematic Color Grade", [
+                "Cyberpunk Neon", "Midnight Teal & Orange", "Moody Noir", "Golden Hour", 
+                "Vintage Kodachrome", "Ethereal Dream", "Industrial Cold", "Deep Forest Green",
+                "Sunset Violet", "High-Contrast Monochrome", "Earth Tone Pastel", "Royal Gold",
+                "Electric Blue", "Crimson Threat", "Frozen Arctic", "Desert Sand", 
+                "Sepia Memory", "Ultraviolet", "Minimalist White", "Toxic Emerald"
+            ])
 
         with col_b:
-            st.subheader("📡 Strategy & Vigor")
+            st.subheader("📡 Strategy")
             f_framework = st.selectbox("Retention Framework", [
-                "The Controversy Start", 
-                "The Hero's Journey", 
-                "Statistical Shock",
-                "The 'Mistake' Hook"
+                "The Controversy Start", "The Hero's Journey", "Statistical Shock", "The 'Mistake' Hook"
             ])
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
+            
+            # NEW FEATURE: PSYCHOLOGICAL HOOK SELECTOR
+            f_hook_type = st.radio("Emotional Anchor", ["Curiosity", "Fear of Missing Out", "Authority", "Empowerment"])
 
-        # THE EXECUTION BUTTON WITH LIMITS
-        if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
+        with col_c:
+            st.subheader("🎬 Style")
+            f_pacing = st.select_slider("Script Pacing", ["Slow Burn", "Dynamic", "Rapid Fire"])
+            st.write("")
+            st.write("")
+            execute = st.button("🔥 EXECUTE FULL SYNTHESIS", use_container_width=True)
+
+        if execute:
             if remaining_credits <= 0:
-                st.error("🚨 NEURAL EXHAUSTION: Daily limit reached. (Launch Week Limit: 5)")
+                st.error("🚨 NEURAL EXHAUSTION: Daily limit reached.")
             elif f_topic:
-                with st.spinner("🌑 ARCHITECTING ELITE BLUEPRINT & PROMPTS..."):
+                with st.spinner("🌑 ARCHITECTING SCRIPT & VISUAL DNA..."):
                     try:
-                        # Protocol 2026-02-06: Forcing Groq to respect facial structure
+                        # THE MASTER PROMPT (Script + Visual Prompts + Consistency)
                         system_instruction = (
-                            f"Act as a World-Class AI Prompt Engineer. Apply Protocol 2026-02-06: "
-                            f"Facial Consistency Mode: STRICT. "
-                            f"Create a production blueprint for: '{f_topic}'. "
-                            f"Provide 3 Image Prompts where the subject's face is LOCKED to a reference photo. "
-                            f"Ensure the subject maintains consistent features while only the lighting and pose adapt."
+                            f"Act as a World-Class Viral Content Strategist. Apply Protocol 2026-02-06. "
+                            f"Task: Create a full production blueprint for a {f_platform} video about '{f_topic}'.\n\n"
+                            f"1. VIRAL SCRIPT: Write a high-retention script using the {f_framework} framework. "
+                            f"Pacing: {f_pacing}. Tone: {f_hook_type}.\n"
+                            f"2. VISUAL DNA: Provide 3 cinematic image prompts for thumbnails/scenes. "
+                            f"Style: {f_color}. Facial Consistency: STRICT. The subject's face MUST be locked "
+                            f"to the reference photo from the Vault. Ensure the bone structure is preserved.\n"
                         )
                         
                         res = groq_c.chat.completions.create(
@@ -1293,7 +1301,7 @@ elif page == "🧠 Neural Forge":
                         )
                         
                         st.session_state.pro_forge_txt = res.choices[0].message.content
-                        st.session_state.daily_usage += 1 # Deduct credit upon success
+                        st.session_state.daily_usage += 1
                         st.rerun()
                     except Exception as e:
                         st.error(f"UPLINK ERROR: {str(e)}")
@@ -1301,7 +1309,7 @@ elif page == "🧠 Neural Forge":
     # 3. THE REVEAL
     if st.session_state.get('pro_forge_txt'):
         st.divider()
-        st.markdown("### 💎 PRODUCTION BLUEPRINT & PROMPT VAULT")
+        st.markdown("### 💎 COMPLETED PRODUCTION BLUEPRINT")
         st.info(st.session_state.pro_forge_txt)
         
         # INTELLIGENCE TOOLS
@@ -1313,7 +1321,7 @@ elif page == "🧠 Neural Forge":
             if st.button("🚀 SCORE VIRALITY", use_container_width=True):
                 v_res = groq_c.chat.completions.create(
                     model="llama-3.3-70b-versatile",
-                    messages=[{"role": "user", "content": f"Audit this for CTR: {st.session_state.pro_forge_txt[:800]}"}]
+                    messages=[{"role": "user", "content": f"Audit this script for CTR and Virality: {st.session_state.pro_forge_txt[:1000]}"}]
                 )
                 st.info(v_res.choices[0].message.content)
                         
@@ -1321,7 +1329,7 @@ elif page == "🧠 Neural Forge":
             if st.button("🧠 RETENTION SCAN", use_container_width=True):
                 r_res = groq_c.chat.completions.create(
                     model="llama-3.3-70b-versatile",
-                    messages=[{"role": "user", "content": f"Scan for drop-offs: {st.session_state.pro_forge_txt[:800]}"}]
+                    messages=[{"role": "user", "content": f"Scan for audience drop-off points: {st.session_state.pro_forge_txt[:1000]}"}]
                 )
                 st.warning(r_res.choices[0].message.content)
 
@@ -1997,6 +2005,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
