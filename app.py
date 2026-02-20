@@ -1225,10 +1225,18 @@ elif page == "🧠 Neural Forge":
     import random
     import datetime
 
-    # 1. ACCESS & CREDIT CONTROL (The Gatekeeper)
-    if not st.session_state.get('authenticated'):
+    # 1. ACCESS & CREDIT CONTROL (Fixed: Synced with Gatekeeper 'logged_in')
+    if not st.session_state.get('logged_in'):
         st.error("🚨 CLEARANCE REQUIRED: Enter your Elite Cipher in the terminal.")
         st.stop()
+
+    # Ensure Credit Variables exist even if login was a bypass
+    if 'daily_usage' not in st.session_state:
+        st.session_state.daily_usage = 0
+    if 'last_reset' not in st.session_state:
+        st.session_state.last_reset = datetime.date.today()
+    if 'max_limit' not in st.session_state:
+        st.session_state.max_limit = 15 if st.session_state.get('user_status') == "Pro" else 5
 
     # Credit Tracking Logic
     if st.session_state.last_reset < datetime.date.today():
@@ -1989,6 +1997,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
