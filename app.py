@@ -1756,19 +1756,26 @@ elif page == "💎 Upgrade to Pro":
 elif page == "🛰️ Media Uplink":
     import random
     import time
+    import os
+    import tempfile
+    import yt_dlp
     
     if 'uplink_url' not in st.session_state: st.session_state.uplink_url = ""
     if 'f_ext' not in st.session_state: st.session_state.f_ext = "Video (MP4)"
 
     st.markdown("<h1 style='color: #00ff41;'>🛰️ MEDIA UPLINK // ARCHIVE</h1>", unsafe_allow_html=True)
     
+    # Check for authentication shards
+    cookie_exists = os.path.exists('cookies.txt')
+    if not cookie_exists:
+        st.warning("⚠️ AUTH SHARDS MISSING: Upload 'cookies.txt' to root for 100% success.")
+
     with st.container(border=True):
         col_url, col_type = st.columns([2, 1])
         with col_url:
             uplink_url = st.text_input("🔗 Source URL", placeholder="Paste YouTube/Instagram link...", key="url_input_v3")
         with col_type:
             available_formats = ["Video (MP4)", "Audio (MP3)"]
-            # Simplified access check for speed
             if 'is_admin' in globals() and (is_paid or is_admin):
                 available_formats += ["High-Res 4K", "X-Thread (PDF)"]
             f_ext = st.selectbox("Extraction Format", available_formats, key="format_select_v3")
@@ -1778,30 +1785,32 @@ elif page == "🛰️ Media Uplink":
             progress_bar = st.progress(0, text="Injecting Authentication Shards...")
             
             try:
-                # --- ORGANIC BYPASS LOGIC ---
-                # This adds a small, random delay to prevent the "1-per-day" Instagram block
-                if "instagram.com" in uplink_url:
-                    wait_time = random.uniform(2, 5)
-                    progress_bar.progress(10, text=f"Simulating Human Trace... ({wait_time:.1f}s)")
-                    time.sleep(wait_time)
+                # 1. ORGANIC BYPASS DELAY
+                wait_time = random.uniform(1.5, 4.0)
+                time.sleep(wait_time)
+                progress_bar.progress(20, text="Simulating Residential Trace...")
 
+                # 2. MASTER CONFIGURATION
                 ydl_opts = {
                     'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                     'outtmpl': os.path.join(tempfile.gettempdir(), 'media_%(id)s.%(ext)s'),
                     'merge_output_format': 'mp4',
                     'quiet': True,
                     'nocheckcertificate': True,
+                    'cookiefile': 'cookies.txt' if cookie_exists else None,
                     # Rotating User Agents to stay undetected
                     'user_agent': random.choice([
                         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
                     ]),
                     'extractor_args': {
-                        'youtube': {'player_client': ['web', 'tv']},
+                        'youtube': {
+                            # FORCING TV CLIENT TO BYPASS 403 THROTTLING
+                            'player_client': ['tv', 'web_creator'],
+                            'player_skip': ['webpage', 'configs']
+                        },
                         'instagram': {'get_video': True}
                     },
-                    # Helps bypass rate limits by not checking every single format
                     'no_warnings': True,
                     'ignoreerrors': True,
                 }
@@ -1837,7 +1846,7 @@ elif page == "🛰️ Media Uplink":
                                 )
                             os.remove(final_file_path)
                         else:
-                            st.error("🚨 CORRUPT UPLINK: Asset too small. Try a different resolution.")
+                            st.error("🚨 CORRUPT UPLINK: Asset too small. Check your cookies.txt status.")
                     else:
                         st.error("🚨 EXTRACTION FAILED: Content is restricted or IP is throttled.")
 
@@ -1955,6 +1964,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
