@@ -17,6 +17,54 @@ import yt_dlp
 import tempfile
 from datetime import datetime as dt
 import random
+import streamlit as st
+import time
+from streamlit_lottie import st_lottie # You'll need: pip install streamlit-lottie
+import requests
+
+def ignition_sequence():
+    # Only run the intro if it hasn't played this session
+    if 'ignition_complete' not in st.session_state:
+        placeholder = st.empty()
+        
+        with placeholder.container():
+            # CSS for the "Logo Pop" and Background
+            st.markdown("""
+                <style>
+                .stApp { background-color: #000000; }
+                @keyframes logo-pop {
+                    0% { transform: scale(0); opacity: 0; }
+                    80% { transform: scale(1.2); opacity: 1; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+                .void-logo {
+                    text-align: center;
+                    color: #00ff41;
+                    font-family: 'Courier New', monospace;
+                    font-size: 50px;
+                    font-weight: bold;
+                    animation: logo-pop 1s ease-out;
+                    text-shadow: 0 0 20px #00ff41;
+                }
+                </style>
+            """, unsafe_allow_html=True)
+
+            # 1. The Fireworks/Drops Convergence
+            # You can find a "converge" lottie on LottieFiles
+            lottie_url = "https://assets5.lottiefiles.com/packages/lf20_hyper_loop.json" 
+            st_lottie(lottie_url, height=400, key="ignition")
+            
+            time.sleep(2) # Duration of the "Engine Start"
+            
+            # 2. The Logo Pop
+            st.markdown("<div class='void-logo'>VOID-OS</div>", unsafe_allow_html=True)
+            time.sleep(1.5)
+            
+        placeholder.empty()
+        st.session_state.ignition_complete = True
+
+# Start the sequence
+ignition_sequence()
 
 # --- INITIALIZE STATE (Place this near the top of your script) ---
 if "current_page" not in st.session_state:
@@ -2027,6 +2075,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
