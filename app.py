@@ -1191,104 +1191,76 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (BASE64 BINARY INJECTION) ---
+# --- MODULE 7: THE NEURAL FORGE (MULTI-ENGINE & LOGIC LOCK) ---
 elif page == "🧠 Neural Forge":
-    import random, urllib.parse, requests, base64
+    import random, urllib.parse, requests, io
 
-    # 1. ACCESS CONTROL
+    # 1. ACCESS CONTROL (LOCKED)
     if not is_admin and not is_paid:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
-        st.warning("PROTOCOL RESTRICTED: Pro License Required.")
         st.stop()
 
     st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
     
-    # 2. INPUT CONFIGURATION
+    # 2. CORE INPUTS
     with st.container(border=True):
         col_a, col_b = st.columns([1, 1], gap="medium")
         with col_a:
-            st.subheader("🧬 Core Configuration")
-            f_face = st.file_uploader("Upload Identity Reference", type=['png', 'jpg', 'jpeg'])
-            f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"], key="forge_plat")
-            f_topic = st.text_input("Core Concept", placeholder="The Dark Truth of Productivity", key="forge_top")
-            f_trend = st.radio("Current Trend Sync", ["None", "Viral Audio", "Educational Breakdown"], horizontal=True)
+            st.subheader("🧬 Production Core")
+            f_topic = st.text_input("Core Concept", placeholder="The Dark Truth of AI", key="forge_top")
+            f_platform = st.selectbox("Platform", ["YouTube", "Shorts", "TikTok"], key="forge_plat")
 
         with col_b:
             st.subheader("📡 Style & Vigor")
-            f_colors = st.multiselect("Brand DNA Colors", ["Neon Green", "Cyber Blue", "Matte Black", "Gold"], default=["Neon Green", "Matte Black"])
-            f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock", "The 'Mistake' Hook"])
+            f_colors = st.multiselect("Brand DNA", ["Neon Green", "Cyber Blue", "Matte Black"], default=["Neon Green"])
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
 
-        # PRIMARY EXECUTION
         if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
             if f_topic:
-                with st.spinner("🌑 ARCHITECTING BLUEPRINT..."):
-                    try:
-                        # 70B LLAMA CORE LOGIC
-                        prompt = f"Act as a World-Class Strategist. Create a viral blueprint for: '{f_topic}'. Platform: {f_platform}. Strategy: {f_framework}. Vigor: {f_vigor}."
-                        res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
-                        st.session_state.pro_forge_txt = res.choices[0].message.content
-                        # Clear old images
-                        st.session_state.forge_images_b64 = []
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"UPLINK ERROR: {str(e)}")
+                with st.spinner("🌑 ARCHITECTING MASTER BLUEPRINT..."):
+                    # THIS PART WORKS: GROQ 70B BRAIN
+                    prompt = f"Detailed viral blueprint for: '{f_topic}'. Platform: {f_platform}. Vigor: {f_vigor}."
+                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
+                    st.session_state.pro_forge_txt = res.choices[0].message.content
+                    st.rerun()
 
-    # 3. OUTPUT & INTELLIGENCE TOOLS
+    # 3. RESULTS ENGINE
     if st.session_state.get('pro_forge_txt'):
         st.divider()
-        st.markdown("### 💎 THE PRODUCTION BLUEPRINT")
+        st.markdown("### 💎 PRODUCTION BLUEPRINT (Llama 70B)")
         st.info(st.session_state.pro_forge_txt)
         
         st.divider()
-        st.subheader("🧪 Intelligence Tools")
-        t_col1, t_col2, t_col3 = st.columns([1, 2, 1])
+        st.subheader("🧪 Intelligence & Assets")
+        t_col1, t_col2, t_col3 = st.columns([1, 1.5, 1])
         
         with t_col1:
-            # INTEGRATED VIRALITY SCORE
             if st.button("🚀 SCORE VIRALITY", use_container_width=True):
-                with st.spinner("Analyzing..."):
-                    v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Score 1-100 and give 3 viral tips: {st.session_state.pro_forge_txt[:800]}"}])
-                    st.success(v_res.choices[0].message.content)
+                v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Score 1-100: {st.session_state.pro_forge_txt[:600]}"}])
+                st.success(v_res.choices[0].message.content)
                         
         with t_col2:
-            st.markdown("#### 🎭 THUMBNAIL FORGE")
-            if st.button("✨ GENERATE 3X ASSETS", use_container_width=True):
+            st.markdown("#### 🎭 ASSET GENERATOR")
+            # FALLBACK LOGIC: If AI is blocked, we use a custom Unsplash Engine
+            if st.button("⚡ FETCH PRODUCTION ASSETS", use_container_width=True):
                 styles = ["Cinematic", "Cyberpunk", "Minimalist"]
-                st.session_state.forge_images_b64 = []
-                
-                with st.status("Forging Assets (Bypassing Firewalls)..."):
-                    for style in styles:
-                        u_seed = random.randint(1000, 9999)
-                        query = urllib.parse.quote(f"{style} thumbnail {f_topic} colors {' '.join(f_colors)}")
-                        # FETCH VIA BACKEND SERVER (THE NUCLEAR BYPASS)
-                        img_url = f"https://pollinations.ai/p/{query}?seed={u_seed}&width=1000&height=600&nologo=true"
-                        
-                        try:
-                            # We fetch the raw bytes, not the URL
-                            response = requests.get(img_url, timeout=30)
-                            if response.status_code == 200:
-                                b64_data = base64.b64encode(response.content).decode()
-                                st.session_state.forge_images_b64.append({"style": style, "data": b64_data})
-                            else:
-                                st.error(f"Node Blocked Style: {style}")
-                        except:
-                            st.error(f"Uplink Timed Out for: {style}")
-
-            # RENDER THE INJECTED DATA
-            if st.session_state.get('forge_images_b64'):
-                for img in st.session_state.forge_images_b64:
-                    st.markdown(f"**{img['style'].upper()} CONCEPT**")
-                    # Direct Data Injection - No URL for the firewall to block
-                    st.markdown(f'<img src="data:image/png;base64,{img["data"]}" style="width:100%; border-radius:10px; border:2px solid #00ff41; margin-bottom:15px;">', unsafe_allow_html=True)
+                for style in styles:
+                    # TRY AI FIRST
+                    query = urllib.parse.quote(f"{style} {f_topic}")
+                    ai_url = f"https://pollinations.ai/p/{query}?width=800&height=450&nologo=true"
+                    # FALLBACK SEARCH (Unsplash - usually not blocked by libraries)
+                    fallback_url = f"https://source.unsplash.com/featured/800x450?{query}"
+                    
+                    with st.expander(f"✨ {style.upper()} CONCEPT", expanded=True):
+                        # We show the AI image with a fallback link
+                        st.image(ai_url, caption="AI ENGINE (Primary)", use_container_width=True)
+                        st.markdown(f"[🔗 Direct Asset Link]({ai_url})")
+                        st.image(fallback_url, caption="STOCK ENGINE (Fallback)", use_container_width=True)
 
         with t_col3:
-            # INTEGRATED RETENTION SCAN
             if st.button("🧠 RETENTION SCAN", use_container_width=True):
-                with st.spinner("Scanning..."):
-                    r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Find retention drop-off zones: {st.session_state.pro_forge_txt[:800]}"}])
-                    st.warning(r_res.choices[0].message.content)
-
+                r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Scan for drop-offs: {st.session_state.pro_forge_txt[:600]}"}])
+                st.warning(r_res.choices[0].message.content)
 
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
@@ -1953,6 +1925,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
