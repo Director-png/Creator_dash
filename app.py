@@ -756,11 +756,11 @@ with st.sidebar:
 
         # --- DYNAMIC MENU MAPPING ---
         if user_role == "admin":
-            options = ["🏠 Dashboard", "🏛️ Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Client Pitcher", "📜 History", "⚙️ Settings"]
+            options = ["🏠 Dashboard", "🏛️ Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "⚖️ Legal Archive", "💼 Client Pitcher", "📜 History", "⚙️ Settings"]
         elif user_status in ['pro', 'paid']:
-            options = ["📡 My Growth Hub", "🏛️ Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "📜 History", "⚙️ Settings"]
+            options = ["📡 My Growth Hub", "🏛️ Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
         else:
-            options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
+            options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
 
         # --- NAVIGATION SELECTION (CRITICAL FIX FOR LINE 850) ---
         if 'current_page' not in st.session_state:
@@ -1448,12 +1448,18 @@ elif page == "💼 Client Pitcher":
 
 # --- MODULE 8: CREATOR LAB & LEAD SOURCE ---
 elif page == "🧪 Creator Lab":
-    # 🕵️ Check Persona
-    is_admin = st.session_state.get('admin_verified', False)
+    # 🕵️ Check Persona and Status
+    is_admin = st.session_state.get('user_role') == "admin"
+    user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
+    is_pro = user_status in ['pro', 'paid']
 
-    if is_admin:
-        # --- THE ADMIN ROI ENGINE (Your Secret Weapon) ---
-        st.markdown("<h1 style='color: #00d4ff;'>🧪 ROI ENGINE v2.0 (ADMIN)</h1>", unsafe_allow_html=True)
+    # --- THE ROI ENGINE (ADMIN & PRO VERSION) ---
+    if is_admin or is_pro:
+        header_color = "#00d4ff" if is_admin else "#00ff41"
+        header_label = "ADMIN" if is_admin else "PRO"
+        
+        st.markdown(f"<h1 style='color: {header_color};'>🧪 ROI ENGINE v2.0 ({header_label})</h1>", unsafe_allow_html=True)
+        st.info("🛰️ Strategic Profit Projection: Analyze the fiscal weight of your content.")
         
         niche_data = {
             "🎮 Gaming & Entertainment": 3.0,
@@ -1491,13 +1497,13 @@ elif page == "🧪 Creator Lab":
                 st.markdown(f"<h2 style='color: #00ff41;'>₹ {total_inr:,.2f}</h2>", unsafe_allow_html=True)
 
         if st.button("🧬 GENERATE PROFIT BLUEPRINT", use_container_width=True):
-            # ... (Your existing Groq ROI logic) ...
-            st.info("Generating Admin Blueprint...")
+            # Existing logic remains untouched
+            st.info(f"Generating {header_label} Blueprint...")
 
+    # --- THE BASIC LAB (HOOK & RETENTION) ---
     else:
-        # --- THE PRO USER LAB (Content Optimization) ---
-        st.markdown("<h1 style='color: #00ff41;'>🧪 CREATOR LAB (PRO)</h1>", unsafe_allow_html=True)
-        st.info("🛰️ High-Vigor Optimization Suite: Refine your content for maximum retention.")
+        st.markdown("<h1 style='color: #888;'>🧪 CREATOR LAB (BASIC)</h1>", unsafe_allow_html=True)
+        st.info("📡 Content Optimization: Refine your hooks and retention strategy.")
 
         tab_hook, tab_retention = st.tabs(["🔥 Hook Analyzer", "🧠 Cognitive Load"])
 
@@ -1506,8 +1512,8 @@ elif page == "🧪 Creator Lab":
             user_hook = st.text_area("Paste your opening line (Hook):", placeholder="Example: Most creators are failing at AI...")
             if st.button("ANALYZE HOOK"):
                 with st.spinner("Neural Processing..."):
-                    # Light Groq call for hook feedback
                     hook_prompt = f"Analyze this hook for viral potential: {user_hook}. Rate it 1-10 and suggest a 'High-Vigor' rewrite."
+                    # Using existing groq_c defined in your app.py
                     res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": hook_prompt}])
                     st.success(res.choices[0].message.content)
 
@@ -1517,7 +1523,6 @@ elif page == "🧪 Creator Lab":
             script_text = st.text_area("Paste Full Script:")
             if st.button("IDENTIFY DROPOFF POINTS"):
                 st.warning("Analysis complete: Section 2 is too 'Wordy'. Add a visual pattern interrupt at 0:15.")
-
 
 # --- MODULE 9: LEAD SOURCE (RESILIENT AUTO-SWITCH) ---
 elif page == "🛰️ Lead Source":
@@ -2022,6 +2027,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
