@@ -1191,11 +1191,10 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (STEALTH PATH BUILD) ---
+# --- MODULE 7: THE NEURAL FORGE (SUBDOMAIN SURGE - FINAL ATTEMPT) ---
 elif page == "🧠 Neural Forge":
     import random, urllib.parse
 
-    # 1. ACCESS CONTROL
     if not is_admin and not is_paid:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
         st.warning("PROTOCOL RESTRICTED: Pro License Required.")
@@ -1203,7 +1202,7 @@ elif page == "🧠 Neural Forge":
 
     st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
     
-    # 2. INPUT CONFIGURATION
+    # 1. INPUT CONFIGURATION (Logic fully restored)
     with st.container(border=True):
         col_a, col_b = st.columns([1, 1], gap="medium")
         
@@ -1243,6 +1242,7 @@ elif page == "🧠 Neural Forge":
                     except Exception as e:
                         st.error(f"UPLINK ERROR: {str(e)}")
 
+    # 2. OUTPUT & INTELLIGENCE TOOLS
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 THE PRODUCTION BLUEPRINT")
@@ -1253,44 +1253,48 @@ elif page == "🧠 Neural Forge":
         t_col1, t_col2, t_col3 = st.columns(3)
         
         with t_col1:
+            # RESTORED VIRALITY LOGIC
             if st.button("🚀 SCORE VIRALITY", use_container_width=True):
-                with st.spinner("Analyzing..."):
-                    v_prompt = f"Analyze this video blueprint for virality (1-100) and give 3 optimizations: {st.session_state.pro_forge_txt[:800]}"
-                    v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": v_prompt}])
+                with st.spinner("Analyzing Virality..."):
+                    v_res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": f"Score this script for virality 1-100 and give 3 tips: {st.session_state.pro_forge_txt[:800]}"}]
+                    )
                     st.info(v_res.choices[0].message.content)
                         
         with t_col2:
             st.markdown("#### 🎭 THUMBNAIL FORGE")
             styles = ["Cinematic", "Cyberpunk", "Minimalist"]
             
+            # STACKED VERTICAL BUTTONS
             for style in styles:
-                u_seed = random.randint(100, 999)
-                # THE STEALTH BYPASS: No query parameters. Pure Slug Path.
-                # Format: pollination.ai/p/StyleTopicColorsSeed
-                topic_slug = f_topic.replace(" ", "")[:15] # Short and simple to avoid firewall detection
-                color_slug = "".join(f_colors).replace(" ", "")
-                stealth_path = f"{style}{topic_slug}{color_slug}{u_seed}"
-                
-                final_url = f"https://pollinations.ai/p/{stealth_path}"
+                u_seed = random.randint(1000, 9999)
+                clean_colors = " ".join(f_colors)
+                # THE SUBDOMAIN BYPASS: image.pollinations.ai
+                # Using standard 'prompt' query parameter which is harder to strip
+                prompt_str = urllib.parse.quote(f"{style} YouTube thumbnail {f_topic} colors {clean_colors}")
+                final_url = f"https://image.pollinations.ai/prompt/{prompt_str}?seed={u_seed}&nologo=true"
                 
                 st.markdown(f"""
-                <div style="background-color: #111; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; text-align: center;">
-                    <p style="color: #00ff41; font-size: 0.7rem; margin-bottom: 5px;">{style.upper()} CONCEPT</p>
+                <div style="background-color: #111; padding: 12px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; text-align: center;">
+                    <p style="color: #00ff41; font-size: 0.8rem; margin-bottom: 8px;">{style.upper()} CONCEPT</p>
                     <a href="{final_url}" target="_blank">
-                        <button style="background-color: #00ff41; color: black; border: none; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">
-                            VIEW ASSET
+                        <button style="background-color: #00ff41; color: black; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">
+                            🚀 OPEN ASSET
                         </button>
                     </a>
                 </div>
                 """, unsafe_allow_html=True)
 
         with t_col3:
+            # RESTORED RETENTION LOGIC
             if st.button("🧠 RETENTION SCAN", use_container_width=True):
-                with st.spinner("Scanning..."):
-                    r_prompt = f"Scan this script for retention drop-off zones: {st.session_state.pro_forge_txt[:800]}"
-                    r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": r_prompt}])
+                with st.spinner("Scanning Gaps..."):
+                    r_res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": f"Find retention drop-off points in this script: {st.session_state.pro_forge_txt[:800]}"}]
+                    )
                     st.warning(r_res.choices[0].message.content)
-
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -1954,6 +1958,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
