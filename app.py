@@ -1765,47 +1765,57 @@ elif page == "🛰️ Media Uplink":
 
     st.markdown("<h1 style='color: #00ff41;'>🛰️ MEDIA UPLINK // ARCHIVE</h1>", unsafe_allow_html=True)
     
-    # Check for authentication shards
-    cookie_exists = os.path.exists('cookies.txt')
-    if not cookie_exists:
-        st.warning("⚠️ AUTH SHARDS MISSING: Upload 'cookies.txt' to root for 100% success.")
+    # --- 🛠️ DYNAMIC AUTH DETECTION & HEADER INJECTION ---
+    current_files = os.listdir('.')
+    found_cookie_file = next((f for f in current_files if f.lower() in ['cookie.txt', 'cookies.txt']), None)
+    
+    if found_cookie_file:
+        try:
+            with open(found_cookie_file, 'r') as f:
+                content = f.read()
+            # If the Netscape header is missing, we inject it dynamically
+            if not content.startswith('# Netscape'):
+                with open(found_cookie_file, 'w') as f:
+                    f.write("# Netscape HTTP Cookie File\n" + content)
+            st.success(f"✅ AUTH SHARDS ENGAGED: '{found_cookie_file}' detected and formatted.")
+        except Exception as e:
+            st.error(f"🚨 SHARD ERROR: {str(e)}")
+    else:
+        st.warning("⚠️ AUTH SHARDS MISSING: Please ensure 'cookie.txt' is in the root directory.")
 
     with st.container(border=True):
         col_url, col_type = st.columns([2, 1])
         with col_url:
-            uplink_url = st.text_input("🔗 Source URL", placeholder="Paste YouTube/Instagram link...", key="url_input_v3")
+            uplink_url = st.text_input("🔗 Source URL", placeholder="Paste YouTube/Instagram link...", key="url_input_final")
         with col_type:
             available_formats = ["Video (MP4)", "Audio (MP3)"]
             if 'is_admin' in globals() and (is_paid or is_admin):
                 available_formats += ["High-Res 4K", "X-Thread (PDF)"]
-            f_ext = st.selectbox("Extraction Format", available_formats, key="format_select_v3")
+            f_ext = st.selectbox("Extraction Format", available_formats, key="format_select_final")
 
-    if st.button("⚡ INITIATE EXTRACTION", use_container_width=True, key="execute_v3"):
+    if st.button("⚡ INITIATE EXTRACTION", use_container_width=True, key="execute_final"):
         if uplink_url:
             progress_bar = st.progress(0, text="Injecting Authentication Shards...")
             
             try:
                 # 1. ORGANIC BYPASS DELAY
-                wait_time = random.uniform(1.5, 4.0)
-                time.sleep(wait_time)
-                progress_bar.progress(20, text="Simulating Residential Trace...")
+                time.sleep(random.uniform(1.0, 3.0)) 
 
-                # 2. MASTER CONFIGURATION
                 ydl_opts = {
                     'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                     'outtmpl': os.path.join(tempfile.gettempdir(), 'media_%(id)s.%(ext)s'),
                     'merge_output_format': 'mp4',
                     'quiet': True,
                     'nocheckcertificate': True,
-                    'cookiefile': 'cookies.txt' if cookie_exists else None,
-                    # Rotating User Agents to stay undetected
+                    'cookiefile': found_cookie_file if found_cookie_file else None,
+                    # Rotating User Agents to mimic different residential systems
                     'user_agent': random.choice([
                         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+                        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
                     ]),
                     'extractor_args': {
                         'youtube': {
-                            # FORCING TV CLIENT TO BYPASS 403 THROTTLING
+                            # Using TV client to bypass 403 blocks
                             'player_client': ['tv', 'web_creator'],
                             'player_skip': ['webpage', 'configs']
                         },
@@ -1842,13 +1852,13 @@ elif page == "🛰️ Media Uplink":
                                     file_name=os.path.basename(final_file_path), 
                                     mime="video/mp4" if "Video" in f_ext else "audio/mpeg", 
                                     use_container_width=True, 
-                                    key="dl_v3"
+                                    key="dl_button_final"
                                 )
                             os.remove(final_file_path)
                         else:
-                            st.error("🚨 CORRUPT UPLINK: Asset too small. Check your cookies.txt status.")
+                            st.error("🚨 CORRUPT UPLINK: File incomplete. Refresh your browser cookies.")
                     else:
-                        st.error("🚨 EXTRACTION FAILED: Content is restricted or IP is throttled.")
+                        st.error("🚨 EXTRACTION FAILED: Content restricted or IP throttled. Please use YouTube links for now.")
 
             except Exception as e:
                 st.error(f"UPLINK FAILED: {str(e)}")
@@ -1964,6 +1974,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
