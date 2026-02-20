@@ -721,11 +721,26 @@ if 'current_page' not in st.session_state:
 # --- 2. SIDEBAR ARCHITECTURE ---
 with st.sidebar:
     try:
-        # IDENTITY CORE
+        # --- ENHANCED IDENTITY CORE (PROTOCOL 2026-02-06 INTEGRATION) ---
+        # Logic to fetch the Vault Anchor image or use a placeholder
+        profile_img = st.session_state.get('vault_anchor')
+        
+        # If no image exists in Vault, we use a neural-mesh placeholder
+        if profile_img is None:
+            img_html = "<div style='width: 50px; height: 50px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px;'>DNA</div>"
+        else:
+            # Note: In Streamlit, converting a file-uploader object or URL to a circular CSS element
+            img_html = f"<img src='{profile_img}' style='width: 55px; height: 55px; border-radius: 50%; border: 2px solid #00ff41; object-fit: cover;'>"
+
         st.markdown(f"""
-            <div style='background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px;'>
-                <p style='margin: 0; color: #888; font-size: 10px; letter-spacing: 2px; text-align: center;'>OPERATOR IDENTIFIED</p>
-                <h2 style='text-align: center; color: #00ff41; margin: 0; font-family: "Courier New", Courier, monospace;'>{st.session_state.get('user_name', 'DIRECTOR').upper()}</h2>
+            <div style='background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px; display: flex; align-items: center; gap: 15px;'>
+                <div>
+                    {img_html}
+                </div>
+                <div style='flex-grow: 1;'>
+                    <p style='margin: 0; color: #888; font-size: 9px; letter-spacing: 2px;'>OPERATOR IDENTIFIED</p>
+                    <h3 style='color: #00ff41; margin: 0; font-family: "Courier New", Courier, monospace; font-size: 18px;'>{st.session_state.get('user_name', 'DIRECTOR').upper()}</h3>
+                </div>
             </div>
         """, unsafe_allow_html=True)
         
@@ -738,7 +753,7 @@ with st.sidebar:
         else:
             st.markdown("<div style='background-color: #333; color: #888; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>📡 BASIC ACCESS</div>", unsafe_allow_html=True)
 
-        # DYNAMIC MENU MAPPING (CLEANED - FUTURE MODULES HIDDEN)
+        # DYNAMIC MENU MAPPING
         if user_role == "admin":
             options = ["🏠 Dashboard", "🏛️ Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Client Pitcher", "📜 History", "⚙️ Settings"]
         elif user_status in ['pro', 'paid']:
@@ -758,7 +773,7 @@ with st.sidebar:
         nav_selection = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = nav_selection
 
-        # --- 🤖 INTEGRATED VOID MANAGER (ZERO JITTER VERSION) ---
+        # --- 🤖 INTEGRATED VOID MANAGER ---
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
@@ -766,12 +781,10 @@ with st.sidebar:
             if "manager_chat" not in st.session_state:
                 st.session_state.manager_chat = []
 
-            # Display Conversation
             for msg in st.session_state.manager_chat:
                 with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
                     st.markdown(msg["content"])
 
-            # Input Logic
             agent_input = st.chat_input("Command VOID-OS...")
             
             if agent_input:
@@ -783,7 +796,6 @@ with st.sidebar:
                     resp_container = st.empty()
                     full_resp = ""
                     try:
-                        # Groq Streaming Call
                         stream = client.chat.completions.create(
                             model=MODEL_ID,
                             messages=[
@@ -800,12 +812,6 @@ with st.sidebar:
                         
                         resp_container.markdown(full_resp)
                         st.session_state.manager_chat.append({"role": "assistant", "content": full_resp})
-
-                        # Trigger Visual Forge
-                        if any(x in agent_input.lower() for x in ["visual", "image", "thumbnail"]):
-                            with st.spinner("Forging visual..."):
-                                img_url = generate_visual(agent_input)
-                                st.image(img_url, caption="Visual Asset Generated")
                     
                     except Exception as e:
                         st.error(f"Uplink Error: {str(e)}")
@@ -818,9 +824,6 @@ with st.sidebar:
 
     except Exception as sidebar_err:
         st.error(f"System Error: {sidebar_err}")
-
-# --- 3. FINAL ROUTING ---
-page = st.session_state.current_page
 
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
@@ -2007,6 +2010,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
