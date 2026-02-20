@@ -1191,12 +1191,12 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (FINAL STABLE BUILD) ---
+# --- MODULE 7: THE NEURAL FORGE (FRONT-END BYPASS BUILD) ---
 elif page == "🧠 Neural Forge":
-    import random, requests
+    import random, urllib.parse
 
     # 1. ACCESS CONTROL
-    if not is_paid and not is_admin:
+    if not is_admin and not is_paid:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
         st.warning("PROTOCOL RESTRICTED: Pro License Required.")
         st.stop()
@@ -1213,6 +1213,8 @@ elif page == "🧠 Neural Forge":
             forge_mode = st.radio("Forge Strategy", ["Cold Start", "Competitor Shadow (🔒)"], horizontal=True)
             f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"], key="forge_plat")
             f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of Productivity", key="forge_top")
+            
+            # RESTORED: TREND SYNC FRAMEWORKS
             f_trend = st.radio("Current Trend Sync", ["None", "Viral Audio", "Niche Commentary", "POV/Relatable", "Educational Breakdown"], horizontal=True)
 
         with col_b:
@@ -1228,12 +1230,14 @@ elif page == "🧠 Neural Forge":
             ])
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
 
+        # PRIMARY SCRIPT EXECUTION
         if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
             if f_topic:
                 with st.spinner("🌑 ARCHITECTING PRODUCTION BLUEPRINT..."):
                     try:
-                        prompt = (f"Act as a World-Class Strategist. Create a Production Blueprint for: '{f_topic}'. "
-                                  f"Platform: {f_platform}. Strategy: {f_framework}. Trend Sync: {f_trend}. Vigor: {f_vigor}.")
+                        prompt = (f"Act as a World-Class Strategist. Create a detailed Production Blueprint for: '{f_topic}'.\n"
+                                  f"PLATFORM: {f_platform}\nSTRATEGY: {f_framework}\nTREND SYNC: {f_trend}\nVIGOR: {f_vigor}")
+                        
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "system", "content": "You are the Neural Forge."},
@@ -1243,7 +1247,10 @@ elif page == "🧠 Neural Forge":
                         st.rerun()
                     except Exception as e:
                         st.error(f"UPLINK ERROR: {str(e)}")
+            else:
+                st.warning("Director, input a concept first.")
 
+    # 3. OUTPUT & INTELLIGENCE TOOLS
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 THE PRODUCTION BLUEPRINT")
@@ -1255,8 +1262,12 @@ elif page == "🧠 Neural Forge":
         
         with t_col1:
             if st.button("🚀 SCORE VIRALITY", use_container_width=True):
-                # Standard Groq scoring logic
-                pass
+                with st.spinner("Analyzing..."):
+                    v_res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": f"Score this script for virality (1-10): {st.session_state.pro_forge_txt[:500]}"}]
+                    )
+                    st.info(v_res.choices[0].message.content)
                         
         with t_col2:
             if st.button("🎭 GENERATE 3X THUMBNAILS", use_container_width=True):
@@ -1267,19 +1278,30 @@ elif page == "🧠 Neural Forge":
                 for i, style in enumerate(styles):
                     with v_cols[i]:
                         u_seed = random.randint(1000, 9999)
-                        clean_topic = "".join(filter(str.isalnum, f_topic)) 
-                        # This URL uses a Google Images Proxy trick to bypass firewalls
-                        raw_url = f"https://pollinations.ai/p/{style}-{clean_topic}?width=600&height=400&seed={u_seed}&nologo=true"
-                        proxy_url = f"https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url={raw_url}"
+                        clean_topic = urllib.parse.quote(f"{style} {f_topic}")
+                        img_url = f"https://pollinations.ai/p/{clean_topic}?width=1280&height=720&seed={u_seed}&nologo=true"
                         
-                        # We use a standard st.image first, then fallback to a button
-                        st.image(proxy_url, caption=f"Style: {style}", use_column_width=True)
-                        st.link_button(f"👁️ View Concept {i+1}", raw_url)
+                        # THE BYPASS: We provide a clean, high-visibility "Open" Card
+                        # This works because the browser handles the click, not the Python script.
+                        st.markdown(f"""
+                        <div style="background-color: #1e1e1e; padding: 15px; border-radius: 10px; border: 1px solid #00ff41; text-align: center; margin-bottom: 10px;">
+                            <p style="color: #00ff41; margin-bottom: 5px; font-weight: bold;">{style.upper()}</p>
+                            <a href="{img_url}" target="_blank" style="text-decoration: none;">
+                                <button style="background-color: #00ff41; color: black; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; width: 100%;">
+                                    VIEW ASSET
+                                </button>
+                            </a>
+                        </div>
+                        """, unsafe_allow_html=True)
 
         with t_col3:
             if st.button("🧠 RETENTION SCAN", use_container_width=True):
-                # Standard Groq scan logic
-                pass
+                with st.spinner("Scanning..."):
+                    r_res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": f"Identify retention gaps: {st.session_state.pro_forge_txt}"}]
+                    )
+                    st.warning(r_res.choices[0].message.content)
 
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
@@ -1944,6 +1966,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
