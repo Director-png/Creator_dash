@@ -1191,11 +1191,10 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (FULLY FUNCTIONAL MASTER BUILD) ---
+# --- MODULE 7: THE NEURAL FORGE (FINAL PROTOCOL BUILD) ---
 elif page == "🧠 Neural Forge":
     import random, urllib.parse
 
-    # 1. ACCESS CONTROL
     if not is_admin and not is_paid:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
         st.warning("PROTOCOL RESTRICTED: Pro License Required.")
@@ -1203,7 +1202,6 @@ elif page == "🧠 Neural Forge":
 
     st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
     
-    # 2. INPUT CONFIGURATION
     with st.container(border=True):
         col_a, col_b = st.columns([1, 1], gap="medium")
         
@@ -1213,8 +1211,6 @@ elif page == "🧠 Neural Forge":
             forge_mode = st.radio("Forge Strategy", ["Cold Start", "Competitor Shadow (🔒)"], horizontal=True)
             f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"], key="forge_plat")
             f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of Productivity", key="forge_top")
-            
-            # TREND SYNC FRAMEWORKS
             f_trend = st.radio("Current Trend Sync", ["None", "Viral Audio", "Niche Commentary", "POV/Relatable", "Educational Breakdown"], horizontal=True)
 
         with col_b:
@@ -1230,14 +1226,12 @@ elif page == "🧠 Neural Forge":
             ])
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
 
-        # PRIMARY SCRIPT EXECUTION
         if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
             if f_topic:
                 with st.spinner("🌑 ARCHITECTING PRODUCTION BLUEPRINT..."):
                     try:
                         prompt = (f"Act as a World-Class Content Strategist. Create a detailed Production Blueprint for: '{f_topic}'.\n"
                                   f"Platform: {f_platform}\nStrategy: {f_framework}\nTrend Sync: {f_trend}\nVigor: {f_vigor}")
-                        
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "system", "content": "You are the Neural Forge AI."},
@@ -1247,10 +1241,7 @@ elif page == "🧠 Neural Forge":
                         st.rerun()
                     except Exception as e:
                         st.error(f"UPLINK ERROR: {str(e)}")
-            else:
-                st.warning("Director, input a concept first.")
 
-    # 3. OUTPUT & INTELLIGENCE TOOLS
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 THE PRODUCTION BLUEPRINT")
@@ -1261,57 +1252,40 @@ elif page == "🧠 Neural Forge":
         t_col1, t_col2, t_col3 = st.columns(3)
         
         with t_col1:
-            # RESTORED: VIRALITY SCORE LOGIC
             if st.button("🚀 SCORE VIRALITY", use_container_width=True):
                 with st.spinner("Calculating..."):
-                    try:
-                        v_prompt = f"Analyze this video blueprint and give a virality score (1-100) and 3 specific viral optimizations: {st.session_state.pro_forge_txt[:800]}"
-                        v_res = groq_c.chat.completions.create(
-                            model="llama-3.3-70b-versatile",
-                            messages=[{"role": "user", "content": v_prompt}]
-                        )
-                        st.markdown("#### ⚡ Virality Analysis")
-                        st.write(v_res.choices[0].message.content)
-                    except Exception as e:
-                        st.error("Uplink failed.")
+                    v_prompt = f"Analyze this video blueprint for virality (1-100) and give 3 optimizations: {st.session_state.pro_forge_txt[:800]}"
+                    v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": v_prompt}])
+                    st.info(v_res.choices[0].message.content)
                         
         with t_col2:
             st.markdown("#### 🎭 THUMBNAIL FORGE")
             styles = ["Cinematic", "Cyberpunk", "Minimalist"]
             for style in styles:
                 u_seed = random.randint(1000, 9999)
-                color_context = "-".join(f_colors).replace(" ", "")
-                clean_topic = f_topic.replace(" ", "-").replace("'", "").replace('"', "")
-                
-                # Direct-path URL (The Library Bypass)
-                path_prompt = f"{style}-thumbnail-{clean_topic}-{color_context}-{u_seed}"
-                final_url = f"https://pollinations.ai/p/{path_prompt}"
+                # THE ULTIMATE BYPASS: Encoded search query structure
+                # This format is the most "standard" and hardest for firewalls to break.
+                full_prompt = f"{style} YouTube thumbnail for {f_topic} colors {' '.join(f_colors)} 8k"
+                encoded_p = urllib.parse.quote(full_prompt)
+                final_url = f"https://pollinations.ai/p/{encoded_p}?seed={u_seed}&width=1280&height=720&model=flux"
                 
                 st.markdown(f"""
                 <div style="background-color: #111; padding: 12px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; text-align: center;">
                     <p style="color: #00ff41; font-size: 0.8rem; margin-bottom: 8px;">{style.upper()}</p>
                     <a href="{final_url}" target="_blank">
                         <button style="background-color: #00ff41; color: black; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">
-                            🚀 OPEN DIRECT LINK
+                            🚀 VIEW CONCEPT
                         </button>
                     </a>
                 </div>
                 """, unsafe_allow_html=True)
 
         with t_col3:
-            # RESTORED: RETENTION SCAN LOGIC
             if st.button("🧠 RETENTION SCAN", use_container_width=True):
-                with st.spinner("Scanning Script..."):
-                    try:
-                        r_prompt = f"Perform a retention scan on this script. Identify the 'Drop-off Zone' and suggest a 'Re-engagement Hook': {st.session_state.pro_forge_txt[:800]}"
-                        r_res = groq_c.chat.completions.create(
-                            model="llama-3.3-70b-versatile",
-                            messages=[{"role": "user", "content": r_prompt}]
-                        )
-                        st.markdown("#### 🧠 Retention Report")
-                        st.write(r_res.choices[0].message.content)
-                    except Exception as e:
-                        st.error("Scan Interrupted.")
+                with st.spinner("Scanning..."):
+                    r_prompt = f"Scan this script for retention drop-off zones: {st.session_state.pro_forge_txt[:800]}"
+                    r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": r_prompt}])
+                    st.warning(r_res.choices[0].message.content)
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -1975,6 +1949,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
