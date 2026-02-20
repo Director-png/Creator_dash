@@ -1190,11 +1190,11 @@ elif page == "🏗️ Script Architect":
                         st.rerun()
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
-# --- MODULE 7: THE NEURAL FORGE (PRODUCTION MASTER - HOTSPOT READY) ---
+
+# --- MODULE 7: THE NEURAL FORGE (IFRAME OVERRIDE BUILD) ---
 elif page == "🧠 Neural Forge":
     import random, urllib.parse
 
-    # 1. ACCESS CONTROL
     if not is_admin and not is_paid:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
         st.warning("PROTOCOL RESTRICTED: Pro License Required.")
@@ -1202,7 +1202,6 @@ elif page == "🧠 Neural Forge":
 
     st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
     
-    # 2. INPUT CONFIGURATION
     with st.container(border=True):
         col_a, col_b = st.columns([1, 1], gap="medium")
         
@@ -1212,8 +1211,6 @@ elif page == "🧠 Neural Forge":
             forge_mode = st.radio("Forge Strategy", ["Cold Start", "Competitor Shadow (🔒)"], horizontal=True)
             f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"], key="forge_plat")
             f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of Productivity", key="forge_top")
-            
-            # THE TREND SYNC FRAMEWORK
             f_trend = st.radio("Current Trend Sync", ["None", "Viral Audio", "Niche Commentary", "POV/Relatable", "Educational Breakdown"], horizontal=True)
 
         with col_b:
@@ -1229,27 +1226,21 @@ elif page == "🧠 Neural Forge":
             ])
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
 
-        # PRIMARY SCRIPT EXECUTION
         if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
             if f_topic:
                 with st.spinner("🌑 ARCHITECTING PRODUCTION BLUEPRINT..."):
                     try:
                         prompt = (f"Act as a World-Class Strategist. Create a detailed Production Blueprint for: '{f_topic}'. "
                                   f"Platform: {f_platform}. Strategy: {f_framework}. Trend Sync: {f_trend}. Vigor: {f_vigor}.")
-                        # Assuming groq_c is defined in your main app scope
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
-                            messages=[{"role": "system", "content": "You are the Neural Forge AI. Output high-retention scripts."},
-                                      {"role": "user", "content": prompt}]
+                            messages=[{"role": "user", "content": prompt}]
                         )
                         st.session_state.pro_forge_txt = res.choices[0].message.content
                         st.rerun()
                     except Exception as e:
                         st.error(f"UPLINK ERROR: {str(e)}")
-            else:
-                st.warning("Director, input a concept first.")
 
-    # 3. OUTPUT & INTELLIGENCE TOOLS
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 THE PRODUCTION BLUEPRINT")
@@ -1260,41 +1251,43 @@ elif page == "🧠 Neural Forge":
         t_col1, t_col2, t_col3 = st.columns(3)
         
         with t_col1:
-            # BUTTON 1: VIRALITY SCORE (GROQ 70B BRAIN)
             if st.button("🚀 SCORE VIRALITY", use_container_width=True):
                 with st.spinner("Analyzing..."):
-                    v_prompt = f"Analyze this script for virality (1-100) and give 3 optimizations: {st.session_state.pro_forge_txt[:800]}"
-                    v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": v_prompt}])
+                    v_res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": f"Score this script 1-100: {st.session_state.pro_forge_txt[:800]}"}]
+                    )
                     st.info(v_res.choices[0].message.content)
                         
         with t_col2:
-            # BUTTON 2: THUMBNAIL FORGE (VERTICAL STACK)
             st.markdown("#### 🎭 THUMBNAIL FORGE")
             styles = ["Cinematic", "Cyberpunk", "Minimalist"]
             for style in styles:
                 u_seed = random.randint(1000, 9999)
-                color_context = " ".join(f_colors)
-                # Standard URL Encoding - Flux Model Triggered
-                query = urllib.parse.quote(f"{style} YouTube thumbnail for {f_topic} colors {color_context} 8k ultra high resolution")
-                final_url = f"https://image.pollinations.ai/prompt/{query}?seed={u_seed}&nologo=true&width=1280&height=720&model=flux"
+                query = urllib.parse.quote(f"{style} YouTube thumbnail {f_topic} colors {' '.join(f_colors)}")
+                # WE SWITCH BACK TO THE MOST STABLE URL
+                final_url = f"https://pollinations.ai/p/{query}?width=1280&height=720&seed={u_seed}&model=flux"
                 
+                # THE IFRAME BYPASS: We show the link AND an embedded window
                 st.markdown(f"""
-                <div style="background-color: #111; padding: 12px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; text-align: center;">
-                    <p style="color: #00ff41; font-size: 0.8rem; margin-bottom: 8px; font-weight: bold;">{style.upper()}</p>
-                    <a href="{final_url}" target="_blank" rel="noopener noreferrer">
-                        <button style="background-color: #00ff41; color: black; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">
-                            GENERATE ASSET
+                <div style="background-color: #111; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 15px; text-align: center;">
+                    <p style="color: #00ff41; font-size: 0.7rem; margin-bottom: 5px;">{style.upper()}</p>
+                    <a href="{final_url}" target="_blank" style="text-decoration: none;">
+                        <button style="background-color: #00ff41; color: black; border: none; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 10px;">
+                            🚀 FORCE OPEN NEW TAB
                         </button>
                     </a>
+                    <iframe src="{final_url}" width="100%" height="200px" style="border: 1px solid #00ff41; border-radius: 5px; background: #000;"></iframe>
                 </div>
                 """, unsafe_allow_html=True)
 
         with t_col3:
-            # BUTTON 3: RETENTION SCAN (GROQ 70B BRAIN)
             if st.button("🧠 RETENTION SCAN", use_container_width=True):
                 with st.spinner("Scanning..."):
-                    r_prompt = f"Identify the retention drop-off zones in this script: {st.session_state.pro_forge_txt[:800]}"
-                    r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": r_prompt}])
+                    r_res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": f"Scan for drop-offs: {st.session_state.pro_forge_txt[:800]}"}]
+                    )
                     st.warning(r_res.choices[0].message.content)
 
 
@@ -1960,6 +1953,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
