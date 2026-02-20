@@ -1191,18 +1191,17 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (MULTI-ENGINE & LOGIC LOCK) ---
-elif page == "🧠 Neural Forge":
-    import random, urllib.parse, requests, io
 
-    # 1. ACCESS CONTROL (LOCKED)
+# --- MODULE 7: THE NEURAL FORGE (UNBLOCKABLE ASSETS & 70B LOGIC) ---
+elif page == "🧠 Neural Forge":
+    import random, urllib.parse, requests
+
     if not is_admin and not is_paid:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
         st.stop()
 
     st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
     
-    # 2. CORE INPUTS
     with st.container(border=True):
         col_a, col_b = st.columns([1, 1], gap="medium")
         with col_a:
@@ -1218,16 +1217,15 @@ elif page == "🧠 Neural Forge":
         if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
             if f_topic:
                 with st.spinner("🌑 ARCHITECTING MASTER BLUEPRINT..."):
-                    # THIS PART WORKS: GROQ 70B BRAIN
-                    prompt = f"Detailed viral blueprint for: '{f_topic}'. Platform: {f_platform}. Vigor: {f_vigor}."
+                    # 1. BRAIN: GROQ 70B (WORKING)
+                    prompt = f"Detailed viral strategy for: '{f_topic}'. Platform: {f_platform}. Vigor: {f_vigor}."
                     res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                     st.session_state.pro_forge_txt = res.choices[0].message.content
                     st.rerun()
 
-    # 3. RESULTS ENGINE
     if st.session_state.get('pro_forge_txt'):
         st.divider()
-        st.markdown("### 💎 PRODUCTION BLUEPRINT (Llama 70B)")
+        st.markdown("### 💎 PRODUCTION BLUEPRINT")
         st.info(st.session_state.pro_forge_txt)
         
         st.divider()
@@ -1240,22 +1238,20 @@ elif page == "🧠 Neural Forge":
                 st.success(v_res.choices[0].message.content)
                         
         with t_col2:
-            st.markdown("#### 🎭 ASSET GENERATOR")
-            # FALLBACK LOGIC: If AI is blocked, we use a custom Unsplash Engine
-            if st.button("⚡ FETCH PRODUCTION ASSETS", use_container_width=True):
+            st.markdown("#### 🎭 VISUAL CONCEPTS")
+            if st.button("⚡ FETCH UNBLOCKABLE ASSETS", use_container_width=True):
+                # Using Wikimedia/Placeholders - highest chance of bypassing library blocks
+                keywords = f_topic.split()[:2]
+                search = "+".join(keywords)
+                
                 styles = ["Cinematic", "Cyberpunk", "Minimalist"]
                 for style in styles:
-                    # TRY AI FIRST
-                    query = urllib.parse.quote(f"{style} {f_topic}")
-                    ai_url = f"https://pollinations.ai/p/{query}?width=800&height=450&nologo=true"
-                    # FALLBACK SEARCH (Unsplash - usually not blocked by libraries)
-                    fallback_url = f"https://source.unsplash.com/featured/800x450?{query}"
+                    # We use a combined URL that looks like a standard search result
+                    placeholder_url = f"https://loremflickr.com/800/450/{search},{style.lower()}/all"
                     
-                    with st.expander(f"✨ {style.upper()} CONCEPT", expanded=True):
-                        # We show the AI image with a fallback link
-                        st.image(ai_url, caption="AI ENGINE (Primary)", use_container_width=True)
-                        st.markdown(f"[🔗 Direct Asset Link]({ai_url})")
-                        st.image(fallback_url, caption="STOCK ENGINE (Fallback)", use_container_width=True)
+                    with st.expander(f"✨ {style.upper()} VIBE", expanded=True):
+                        st.image(placeholder_url, caption=f"Visual Mood: {style}")
+                        st.caption("Using Lo-Fi Placeholder to bypass network restrictions.")
 
         with t_col3:
             if st.button("🧠 RETENTION SCAN", use_container_width=True):
@@ -1925,6 +1921,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
