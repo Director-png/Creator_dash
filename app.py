@@ -1191,7 +1191,7 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (FRONT-END BYPASS BUILD) ---
+# --- MODULE 7: THE NEURAL FORGE (FINAL MASTER BUILD) ---
 elif page == "🧠 Neural Forge":
     import random, urllib.parse
 
@@ -1214,7 +1214,7 @@ elif page == "🧠 Neural Forge":
             f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"], key="forge_plat")
             f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of Productivity", key="forge_top")
             
-            # RESTORED: TREND SYNC FRAMEWORKS
+            # RE-INTEGRATED: TREND SYNC FRAMEWORKS
             f_trend = st.radio("Current Trend Sync", ["None", "Viral Audio", "Niche Commentary", "POV/Relatable", "Educational Breakdown"], horizontal=True)
 
         with col_b:
@@ -1235,9 +1235,9 @@ elif page == "🧠 Neural Forge":
             if f_topic:
                 with st.spinner("🌑 ARCHITECTING PRODUCTION BLUEPRINT..."):
                     try:
-                        prompt = (f"Act as a World-Class Strategist. Create a detailed Production Blueprint for: '{f_topic}'.\n"
-                                  f"PLATFORM: {f_platform}\nSTRATEGY: {f_framework}\nTREND SYNC: {f_trend}\nVIGOR: {f_vigor}")
-                        
+                        prompt = (f"Act as a World-Class Strategist. Create a detailed Production Blueprint for: '{f_topic}'. "
+                                  f"Platform: {f_platform}. Strategy: {f_framework}. Trend Sync: {f_trend}. Vigor: {f_vigor}.")
+                        # groq_c must be initialized in your main app scope
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "system", "content": "You are the Neural Forge."},
@@ -1270,29 +1270,26 @@ elif page == "🧠 Neural Forge":
                     st.info(v_res.choices[0].message.content)
                         
         with t_col2:
-            if st.button("🎭 GENERATE 3X THUMBNAILS", use_container_width=True):
-                st.markdown("#### 🖼️ Visual Asset Options")
-                styles = ["Cinematic", "Cyberpunk", "Minimalist"]
-                v_cols = st.columns(3)
+            st.markdown("#### 🎭 THUMBNAIL FORGE")
+            # STACKED VERTICAL BUTTONS
+            styles = ["Cinematic", "Cyberpunk", "Minimalist"]
+            for style in styles:
+                u_seed = random.randint(1000, 9999)
+                color_context = " ".join(f_colors)
+                # Pure prompt logic to ensure external tab renders correctly
+                clean_query = urllib.parse.quote(f"{style} YouTube thumbnail {f_topic} colors {color_context} high quality")
+                final_url = f"https://pollinations.ai/p/{clean_query}?width=1280&height=720&seed={u_seed}&nologo=true"
                 
-                for i, style in enumerate(styles):
-                    with v_cols[i]:
-                        u_seed = random.randint(1000, 9999)
-                        clean_topic = urllib.parse.quote(f"{style} {f_topic}")
-                        img_url = f"https://pollinations.ai/p/{clean_topic}?width=1280&height=720&seed={u_seed}&nologo=true"
-                        
-                        # THE BYPASS: We provide a clean, high-visibility "Open" Card
-                        # This works because the browser handles the click, not the Python script.
-                        st.markdown(f"""
-                        <div style="background-color: #1e1e1e; padding: 15px; border-radius: 10px; border: 1px solid #00ff41; text-align: center; margin-bottom: 10px;">
-                            <p style="color: #00ff41; margin-bottom: 5px; font-weight: bold;">{style.upper()}</p>
-                            <a href="{img_url}" target="_blank" style="text-decoration: none;">
-                                <button style="background-color: #00ff41; color: black; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; width: 100%;">
-                                    VIEW ASSET
-                                </button>
-                            </a>
-                        </div>
-                        """, unsafe_allow_html=True)
+                st.markdown(f"""
+                <div style="background-color: #111; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 8px; text-align: center;">
+                    <p style="color: #00ff41; font-size: 0.75rem; margin-bottom: 5px;">{style.upper()} STYLE</p>
+                    <a href="{final_url}" target="_blank" style="text-decoration: none;">
+                        <button style="background-color: #00ff41; color: black; border: none; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">
+                            OPEN CONCEPT
+                        </button>
+                    </a>
+                </div>
+                """, unsafe_allow_html=True)
 
         with t_col3:
             if st.button("🧠 RETENTION SCAN", use_container_width=True):
@@ -1302,6 +1299,7 @@ elif page == "🧠 Neural Forge":
                         messages=[{"role": "user", "content": f"Identify retention gaps: {st.session_state.pro_forge_txt}"}]
                     )
                     st.warning(r_res.choices[0].message.content)
+
 
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
@@ -1966,6 +1964,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
