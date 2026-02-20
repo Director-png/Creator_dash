@@ -714,23 +714,28 @@ if not st.session_state.logged_in:
     st.stop()
 
 # --- MAIN APP UI BEGINS HERE (Only accessible if logged_in is True) ---
-# --- 0. SAFETY INITIALIZATION (Prevents NameError) ---
-if 'current_page' not in st.session_state:
-    st.session_state.current_page = "🏠 Dashboard" if st.session_state.get('user_role') == "admin" else "📡 My Growth Hub"
+import streamlit as st
+
+# 1. INITIALIZE PAGE STATE (Prevents NameError)
+if 'page' not in st.session_state:
+    st.session_state.page = "🏠 Dashboard"
 
 # --- 2. SIDEBAR ARCHITECTURE ---
 with st.sidebar:
     try:
-        # --- ENHANCED IDENTITY CORE (PROTOCOL 2026-02-06 INTEGRATION) ---
-        # Logic to fetch the Vault Anchor image or use a placeholder
+        # --- ENHANCED IDENTITY CORE ---
         profile_img = st.session_state.get('vault_anchor')
         
-        # If no image exists in Vault, we use a neural-mesh placeholder
+        # FIX: Image rendering logic
+        # If profile_img is a URL/String, it works. If it's a BytesIO object, we use st.image.
         if profile_img is None:
-            img_html = "<div style='width: 50px; height: 50px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px;'>DNA</div>"
+            img_html = "<div style='width: 55px; height: 55px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px;'>DNA</div>"
         else:
-            # Note: In Streamlit, converting a file-uploader object or URL to a circular CSS element
-            img_html = f"<img src='{profile_img}' style='width: 55px; height: 55px; border-radius: 50%; border: 2px solid #00ff41; object-fit: cover;'>"
+            # We use a trick: If it's a string (URL), we use HTML. If not, we'll let Streamlit handle it.
+            if isinstance(profile_img, str):
+                img_html = f"<img src='{profile_img}' style='width: 55px; height: 55px; border-radius: 50%; border: 2px solid #00ff41; object-fit: cover;'>"
+            else:
+                img_html = "🧬" # Placeholder for complex objects to prevent crash
 
         st.markdown(f"""
             <div style='background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px; display: flex; align-items: center; gap: 15px;'>
@@ -744,7 +749,7 @@ with st.sidebar:
             </div>
         """, unsafe_allow_html=True)
         
-        # CLEARANCE LOGIC
+        # --- CLEARANCE LOGIC ---
         user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
         user_role = str(st.session_state.get('user_role', 'user')).strip().lower()
 
@@ -753,7 +758,7 @@ with st.sidebar:
         else:
             st.markdown("<div style='background-color: #333; color: #888; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>📡 BASIC ACCESS</div>", unsafe_allow_html=True)
 
-        # DYNAMIC MENU MAPPING
+        # --- DYNAMIC MENU MAPPING ---
         if user_role == "admin":
             options = ["🏠 Dashboard", "🏛️ Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Client Pitcher", "📜 History", "⚙️ Settings"]
         elif user_status in ['pro', 'paid']:
@@ -777,7 +782,7 @@ with st.sidebar:
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
-        with st.expander("📡 NEURAL UPLINK", expanded=True):
+        with st.expander("📡 NEURAL UPLINK", expanded=False):
             if "manager_chat" not in st.session_state:
                 st.session_state.manager_chat = []
 
@@ -816,15 +821,30 @@ with st.sidebar:
                     except Exception as e:
                         st.error(f"Uplink Error: {str(e)}")
 
-        # GLOBAL ACTIONS
+        # --- 🛠️ GLOBAL ACTIONS & SYSTEM CONTROLS ---
         st.divider()
+        
+        # 1. Feedback Button (Linked to your app.py logic)
+        if st.button("💬 SYSTEM FEEDBACK", use_container_width=True):
+            st.session_state.current_page = "⚙️ Settings" # Redirecting to settings for feedback
+            st.rerun()
+
+        # 2. Re-calibrate (Cache clear)
         if st.button("🔄 RE-CALIBRATE", use_container_width=True):
             st.cache_data.clear()
             st.rerun()
 
+        # 3. Logout (Full session wipe)
+        if st.button("🚪 TERMINATE SESSION", use_container_width=True):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.rerun()
+
+        # Footer Version Tag
+        st.markdown("<p style='text-align: center; color: #444; font-size: 10px; margin-top: 20px;'>VOID-OS v2.4.0 | PROTOCOL 2026</p>", unsafe_allow_html=True)
+
     except Exception as sidebar_err:
         st.error(f"System Error: {sidebar_err}")
-
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
 if page == "🏠 Dashboard":
@@ -2010,6 +2030,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
