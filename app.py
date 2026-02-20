@@ -1754,6 +1754,9 @@ elif page == "💎 Upgrade to Pro":
 
 # --- MODULE 8: MEDIA UPLINK (THE MASTER EXTRACTOR) ---
 elif page == "🛰️ Media Uplink":
+    import random
+    import time
+    
     if 'uplink_url' not in st.session_state: st.session_state.uplink_url = ""
     if 'f_ext' not in st.session_state: st.session_state.f_ext = "Video (MP4)"
 
@@ -1762,10 +1765,11 @@ elif page == "🛰️ Media Uplink":
     with st.container(border=True):
         col_url, col_type = st.columns([2, 1])
         with col_url:
-            uplink_url = st.text_input("🔗 Source URL", placeholder="Paste YouTube link...", key="url_input_v3")
+            uplink_url = st.text_input("🔗 Source URL", placeholder="Paste YouTube/Instagram link...", key="url_input_v3")
         with col_type:
             available_formats = ["Video (MP4)", "Audio (MP3)"]
-            if is_paid or is_admin:
+            # Simplified access check for speed
+            if 'is_admin' in globals() and (is_paid or is_admin):
                 available_formats += ["High-Res 4K", "X-Thread (PDF)"]
             f_ext = st.selectbox("Extraction Format", available_formats, key="format_select_v3")
 
@@ -1774,20 +1778,32 @@ elif page == "🛰️ Media Uplink":
             progress_bar = st.progress(0, text="Injecting Authentication Shards...")
             
             try:
-                # ANTI-BLOCKING OPTIONS (Localized within the button execution)
+                # --- ORGANIC BYPASS LOGIC ---
+                # This adds a small, random delay to prevent the "1-per-day" Instagram block
+                if "instagram.com" in uplink_url:
+                    wait_time = random.uniform(2, 5)
+                    progress_bar.progress(10, text=f"Simulating Human Trace... ({wait_time:.1f}s)")
+                    time.sleep(wait_time)
+
                 ydl_opts = {
                     'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                     'outtmpl': os.path.join(tempfile.gettempdir(), 'media_%(id)s.%(ext)s'),
                     'merge_output_format': 'mp4',
                     'quiet': True,
                     'nocheckcertificate': True,
-                    'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None,
-                    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                    # Rotating User Agents to stay undetected
+                    'user_agent': random.choice([
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+                    ]),
                     'extractor_args': {
-                        'youtube': {
-                            'player_client': ['web', 'tv'],
-                        }
+                        'youtube': {'player_client': ['web', 'tv']},
+                        'instagram': {'get_video': True}
                     },
+                    # Helps bypass rate limits by not checking every single format
+                    'no_warnings': True,
+                    'ignoreerrors': True,
                 }
                 
                 if "Audio" in f_ext:
@@ -1799,39 +1815,34 @@ elif page == "🛰️ Media Uplink":
                     }]
 
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    progress_bar.progress(50, text="Bypassing Bot Detection...")
+                    progress_bar.progress(50, text="Bypassing Protocol Walls...")
                     info = ydl.extract_info(uplink_url, download=True)
-                    final_file_path = ydl.prepare_filename(info)
                     
-                    if "Audio" in f_ext:
-                        final_file_path = final_file_path.rsplit('.', 1)[0] + ".mp3"
+                    if info:
+                        final_file_path = ydl.prepare_filename(info)
+                        if "Audio" in f_ext:
+                            final_file_path = final_file_path.rsplit('.', 1)[0] + ".mp3"
 
-                # Check if file is valid before proceeding
-                if os.path.exists(final_file_path) and os.path.getsize(final_file_path) > 1000:
-                    progress_bar.progress(100, text="Uplink Secured.")
-                    
-                    with open(final_file_path, "rb") as f:
-                        file_data = f.read()
-                    
-                    st.download_button(
-                        label="💾 DOWNLOAD ASSET", 
-                        data=file_data, 
-                        file_name=os.path.basename(final_file_path), 
-                        mime="video/mp4" if "Video" in f_ext else "audio/mpeg", 
-                        use_container_width=True, 
-                        key="dl_v3"
-                    )
-                    
-                    os.remove(final_file_path)
-                else:
-                    st.error("🚨 CORRUPT UPLINK: File size is too small. Refresh 'cookies.txt'.")
+                        if os.path.exists(final_file_path) and os.path.getsize(final_file_path) > 1000:
+                            progress_bar.progress(100, text="Uplink Secured.")
+                            
+                            with open(final_file_path, "rb") as f:
+                                st.download_button(
+                                    label="💾 DOWNLOAD ASSET", 
+                                    data=f.read(), 
+                                    file_name=os.path.basename(final_file_path), 
+                                    mime="video/mp4" if "Video" in f_ext else "audio/mpeg", 
+                                    use_container_width=True, 
+                                    key="dl_v3"
+                                )
+                            os.remove(final_file_path)
+                        else:
+                            st.error("🚨 CORRUPT UPLINK: Asset too small. Try a different resolution.")
+                    else:
+                        st.error("🚨 EXTRACTION FAILED: Content is restricted or IP is throttled.")
 
             except Exception as e:
-                error_msg = str(e)
-                if "152" in error_msg or "Sign in" in error_msg:
-                    st.error("🚨 AUTHENTICATION FAILED: YouTube has blocked the request. Please update your 'cookies.txt' using the browser console method.")
-                else:
-                    st.error(f"UPLINK FAILED: {error_msg}")
+                st.error(f"UPLINK FAILED: {str(e)}")
         else:
             st.warning("Director, insert a URL to begin.")
 
@@ -1944,6 +1955,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
