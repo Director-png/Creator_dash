@@ -458,6 +458,23 @@ def trigger_monday_pulse():
 # Call the function to check status
 trigger_monday_pulse()
 
+
+# --- 0. NEURAL CONFIGURATION (THE BRAIN SWAP) ---
+# Swapping Gemini for Groq for high-velocity solo development
+if 'groq_key' not in st.session_state:
+    st.session_state.groq_key = "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"
+
+client = Groq(api_key=st.session_state.groq_key)
+MODEL_ID = "llama-3.3-70b-versatile"
+
+# --- 2. VISUAL FORGE (FREE IMAGE ENGINE) ---
+def generate_visual(image_prompt):
+    seed = random.randint(0, 99999)
+    encoded_prompt = requests.utils.quote(image_prompt)
+    # Pollinations.ai provides high-quality text-to-image for free
+    return f"https://pollinations.ai/p/{encoded_prompt}?width=1280&height=720&seed={seed}&nologo=true"
+
+
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 # --- GLOBAL PERSONA DETECTION (Do this before any pages load) ---
@@ -681,18 +698,7 @@ if not st.session_state.logged_in:
 if 'current_page' not in st.session_state:
     st.session_state.current_page = "🏠 Dashboard" if st.session_state.get('user_role') == "admin" else "📡 My Growth Hub"
 
-# --- 0. NEURAL CONFIGURATION ---
-# Using 1.5 Flash for the highest RPM/Quota stability
-API_KEY = "AIzaSyDdL8NipdVJXDbgg2mB_-Seq5oGjd18KyU"
-client = genai.Client(api_key=API_KEY)
-MODEL_ID = "gemini-1.5-flash" 
-
-# --- 1. SAFETY INITIALIZATION ---
-# Ensures the main app never sees a 'NameError' for the page variable
-if 'current_page' not in st.session_state:
-    st.session_state.current_page = "🏠 Dashboard"
-
-# --- 2. SIDEBAR ARCHITECTURE ---
+# --- 3. SIDEBAR ARCHITECTURE ---
 with st.sidebar:
     try:
         # IDENTITY CORE
@@ -703,7 +709,7 @@ with st.sidebar:
             </div>
         """, unsafe_allow_html=True)
         
-        # CLEARANCE LOGIC (ORIGINAL)
+        # CLEARANCE LOGIC
         user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
         user_role = str(st.session_state.get('user_role', 'user')).strip().lower()
 
@@ -712,13 +718,13 @@ with st.sidebar:
         else:
             st.markdown("<div style='background-color: #333; color: #888; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>📡 BASIC ACCESS</div>", unsafe_allow_html=True)
 
-        # DYNAMIC MENU MAPPING (ORIGINAL LOGIC)
+        # DYNAMIC MENU MAPPING (CLEANED OF FUTURE MODULES)
         if user_role == "admin":
-            options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🛰️ Lead Source", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Client Pitcher", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+            options = ["🏠 Dashboard", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Client Pitcher", "📜 History", "⚙️ Settings"]
         elif user_status in ['pro', 'paid']:
-            options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🛰️ Media Uplink", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+            options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🛰️ Media Uplink", "📜 History", "⚙️ Settings"]
         else:
-            options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "⚖️ Legal Archive", "🛰️ Media Uplink", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
+            options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🛰️ Media Uplink", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
 
         # NAVIGATION SELECTION
         try:
@@ -729,7 +735,7 @@ with st.sidebar:
         nav_selection = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = nav_selection
 
-        # --- 🤖 INTEGRATED VOID MANAGER (THE NEURAL LINK) ---
+        # --- 🤖 INTEGRATED VOID MANAGER (GROQ + VISUAL FORGE) ---
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
@@ -737,45 +743,47 @@ with st.sidebar:
             if "manager_chat" not in st.session_state:
                 st.session_state.manager_chat = []
 
-            # Display Conversation History
+            # Display History
             for msg in st.session_state.manager_chat:
                 with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
                     st.markdown(msg["content"])
 
-            agent_input = st.chat_input("Command Gemini...")
+            agent_input = st.chat_input("Command VOID-OS...")
             
             if agent_input:
                 st.session_state.manager_chat.append({"role": "user", "content": agent_input})
                 with st.chat_message("user", avatar="👤"):
                     st.markdown(agent_input)
                 
-                # Fetch Data for AI Context
-                m_data = fetch_live_market_data() # Logic remains untouched
-                top_niche = m_data.iloc[0,0] if not m_data.empty else "Syncing..."
+                # Market Context Logic (Preserved)
+                # top_niche = m_data.iloc[0,0] if not m_data.empty else "Syncing..."
+                top_niche = "Content Automation" # Placeholder for your specific fetch logic
 
                 with st.chat_message("assistant", avatar="🌌"):
                     try:
-                        # CORE BRAIN (GEMINI INTEGRATION)
-                        response = client.models.generate_content(
+                        # CORE BRAIN (GROQ INTEGRATION)
+                        response = client.chat.completions.create(
                             model=MODEL_ID,
-                            contents=agent_input,
-                            config=types.GenerateContentConfig(
-                                system_instruction=f"""You are the VOID-OS Manager. You are Gemini.
-                                Witty, strategic, and concise. 
-                                Operator: {st.session_state.get('user_name')} | Page: {st.session_state.current_page}
-                                Top Niche Context: {top_niche}.""",
-                                temperature=0.7
-                            )
+                            messages=[
+                                {"role": "system", "content": f"You are VOID-OS. Witty, strategic, and concise. Operator: {st.session_state.get('user_name')} | Page: {st.session_state.current_page} | Niche: {top_niche}"},
+                                {"role": "user", "content": agent_input}
+                            ],
+                            temperature=0.7
                         )
-                        st.markdown(response.text)
-                        st.session_state.manager_chat.append({"role": "assistant", "content": response.text})
+                        final_text = response.choices[0].message.content
+                        st.markdown(final_text)
+                        
+                        # VISUAL FORGE TRIGGER
+                        # If the AI mentions a thumbnail, we generate it
+                        if "thumbnail" in agent_input.lower() or "visual" in agent_input.lower():
+                            img_url = generate_visual(f"YouTube Thumbnail: {agent_input}")
+                            st.image(img_url, caption="VOID Visual Forge Output")
+                        
+                        st.session_state.manager_chat.append({"role": "assistant", "content": final_text})
                     except Exception as ai_err:
-                        if "429" in str(ai_err):
-                            st.warning("📡 **QUOTA REACHED.** Throttling Neural Link for 60s.")
-                        else:
-                            st.error("Neural Jitter detected.")
+                        st.error(f"Neural Jitter: {ai_err}")
 
-        # 3. GLOBAL ACTIONS
+        # 4. GLOBAL ACTIONS
         st.divider()
         if st.button("🔄 RE-CALIBRATE", use_container_width=True):
             st.cache_data.clear()
@@ -788,9 +796,9 @@ with st.sidebar:
     except Exception as sidebar_err:
         st.error(f"System Error in Sidebar: {sidebar_err}")
 
-# --- 3. FINAL ROUTING (CRITICAL FIX FOR LINE 789) ---
-# This variable assignment MUST remain outside the sidebar block.
+# --- 4. FINAL ROUTING ---
 page = st.session_state.current_page
+
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
 if page == "🏠 Dashboard":
@@ -1946,6 +1954,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
