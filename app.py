@@ -1191,9 +1191,9 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (FINAL PRODUCTION BUILD) ---
+# --- MODULE 7: THE NEURAL FORGE (BATTLE-TESTED BUILD) ---
 elif page == "🧠 Neural Forge":
-    import time, requests, random
+    import time, random, requests
 
     # 1. ACCESS CONTROL
     if not is_paid and not is_admin:
@@ -1238,6 +1238,7 @@ elif page == "🧠 Neural Forge":
                         prompt = (f"Act as a World-Class Strategist. Create a detailed Production Blueprint for: '{f_topic}'.\n"
                                   f"PLATFORM: {f_platform}\nSTRATEGY: {f_framework}\nTREND SYNC: {f_trend}\nVIGOR: {f_vigor}")
                         
+                        # Assuming groq_c is defined globally with your Groq Key
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "system", "content": "You are the Neural Forge."},
@@ -1277,22 +1278,21 @@ elif page == "🧠 Neural Forge":
                 
                 for i, style in enumerate(styles):
                     with v_cols[i]:
-                        # A. Hard-Sanitize input for the URL
                         u_seed = random.randint(1000, 9999)
                         clean_topic = "".join(filter(str.isalnum, f_topic)) 
-                        
-                        # B. Forge the secure URL
                         img_url = f"https://pollinations.ai/p/{style}-{clean_topic}?width=600&height=400&seed={u_seed}&nologo=true"
                         
-                        # C. SERVER-SIDE FETCH (Bypasses local ISP blocks)
-                        try:
-                            response = requests.get(img_url, timeout=15)
-                            if response.status_code == 200:
-                                st.image(response.content, caption=f"Style: {style}", use_column_width=True)
-                            else:
-                                st.warning("Forge Busy. Retry in 3s.")
-                        except:
-                            st.error("Connection Jitter.")
+                        # --- THE ULTIMATE BYPASS ---
+                        # We use a raw HTML component. This makes the browser load it as a standard 
+                        # web element, bypassing Streamlit's internal connection checks.
+                        html_code = f"""
+                        <div style="border-radius: 10px; overflow: hidden; border: 1px solid #333;">
+                            <img src="{img_url}" style="width: 100%; display: block;" 
+                                 onerror="this.onerror=null;this.src='https://via.placeholder.com/600x400?text=Uplink+Retry...';" />
+                        </div>
+                        """
+                        st.components.v1.html(html_code, height=220)
+                        st.caption(f"Style: {style}")
 
         with t_col3:
             if st.button("🧠 RETENTION SCAN", use_container_width=True):
@@ -1966,6 +1966,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
