@@ -1191,43 +1191,51 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (CLIENT-SIDE RENDER BUILD) ---
+# --- MODULE 7: THE NEURAL FORGE (DEFINITIVE SERVER-SIDE MASTER) ---
 elif page == "🧠 Neural Forge":
-    import random, urllib.parse
+    import random, urllib.parse, requests, base64
 
+    # 1. ACCESS CONTROL
     if not is_admin and not is_paid:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
+        st.warning("PROTOCOL RESTRICTED: Pro License Required.")
         st.stop()
 
     st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
     
+    # 2. INPUT CONFIGURATION
     with st.container(border=True):
         col_a, col_b = st.columns([1, 1], gap="medium")
         with col_a:
             st.subheader("🧬 Core Configuration")
             f_face = st.file_uploader("Upload Identity Reference", type=['png', 'jpg', 'jpeg'])
-            f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts"], key="forge_plat")
+            f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"], key="forge_plat")
             f_topic = st.text_input("Core Concept", placeholder="The Dark Truth of Productivity", key="forge_top")
-            f_trend = st.radio("Current Trend Sync", ["None", "Viral Audio", "Educational Breakdown"], horizontal=True)
+            f_trend = st.radio("Current Trend Sync", ["None", "Viral Audio", "Niche Commentary", "Educational Breakdown"], horizontal=True)
 
         with col_b:
             st.subheader("📡 Style & Vigor")
-            f_colors = st.multiselect("Brand DNA Colors", ["Neon Green", "Cyber Blue", "Matte Black"], default=["Neon Green", "Matte Black"])
-            f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey"])
+            f_colors = st.multiselect("Brand DNA Colors", ["Neon Green", "Cyber Blue", "Matte Black", "Gold", "Crimson"], default=["Neon Green", "Matte Black"])
+            f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock", "The 'Mistake' Hook"])
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
 
         if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
             if f_topic:
                 with st.spinner("🌑 ARCHITECTING PRODUCTION BLUEPRINT..."):
                     try:
-                        prompt = f"Strategy for: '{f_topic}'. Platform: {f_platform}. Vigor: {f_vigor}."
+                        # 70B LLAMA INTELLIGENCE
+                        prompt = f"Act as a World-Class Strategist. Create a detailed Production Blueprint for: '{f_topic}'. Platform: {f_platform}. Strategy: {f_framework}. Vigor: {f_vigor}."
                         res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                         st.session_state.pro_forge_txt = res.choices[0].message.content
+                        st.session_state.forge_images = [] # Reset images for new topic
                         st.rerun()
-                    except Exception as e: st.error(f"UPLINK ERROR: {str(e)}")
+                    except Exception as e:
+                        st.error(f"UPLINK ERROR: {str(e)}")
 
+    # 3. OUTPUT & INTELLIGENCE TOOLS
     if st.session_state.get('pro_forge_txt'):
         st.divider()
+        st.markdown("### 💎 THE PRODUCTION BLUEPRINT")
         st.info(st.session_state.pro_forge_txt)
         
         st.divider()
@@ -1236,40 +1244,41 @@ elif page == "🧠 Neural Forge":
         
         with t_col1:
             if st.button("🚀 SCORE VIRALITY", use_container_width=True):
-                v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Score this: {st.session_state.pro_forge_txt[:500]}"}])
-                st.info(v_res.choices[0].message.content)
+                with st.spinner("Auditing..."):
+                    v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Score 1-100 and give 3 optimizations: {st.session_state.pro_forge_txt[:800]}"}])
+                    st.info(v_res.choices[0].message.content)
                         
         with t_col2:
             st.markdown("#### 🎭 THUMBNAIL FORGE")
             if st.button("✨ GENERATE 3X ASSETS", use_container_width=True):
                 styles = ["Cinematic", "Cyberpunk", "Minimalist"]
+                st.session_state.forge_images = []
+                
                 for style in styles:
                     u_seed = random.randint(1000, 9999)
-                    query = urllib.parse.quote(f"{style} thumbnail {f_topic} colors {' '.join(f_colors)} 8k")
+                    query = urllib.parse.quote(f"{style} thumbnail {f_topic} colors {' '.join(f_colors)}")
+                    img_url = f"https://pollinations.ai/p/{query}?seed={u_seed}&width=1280&height=720&nologo=true"
                     
-                    # THE FINAL BYPASS: We use a raw HTML img tag with a 'referrerpolicy' 
-                    # This prevents the browser from telling Pollinations where the request came from.
-                    img_url = f"https://pollinations.ai/p/{query}?seed={u_seed}&width=1280&height=720&model=flux&nologo=true"
-                    
-                    st.markdown(f"""
-                    <div style="background-color: #111; padding: 12px; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px; text-align: center;">
-                        <p style="color: #00ff41; font-size: 0.8rem; margin-bottom: 8px;"><b>{style.upper()} CONCEPT</b></p>
-                        <img src="{img_url}" referrerpolicy="no-referrer" style="width: 100%; border-radius: 8px; border: 1px solid #444;">
-                        <div style="margin-top: 10px;">
-                            <a href="{img_url}" target="_blank" style="text-decoration: none;">
-                                <button style="background: transparent; color: #00ff41; border: 1px solid #00ff41; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">
-                                    📥 DOWNLOAD HIGH-RES
-                                </button>
-                            </a>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    try:
+                        # BACKEND FETCH: Bypasses browser firewall blocks
+                        resp = requests.get(img_url, timeout=30)
+                        if resp.status_code == 200:
+                            b64 = base64.b64encode(resp.content).decode()
+                            st.session_state.forge_images.append({"style": style, "data": b64})
+                        else: st.error(f"API Reject: {resp.status_code}")
+                    except: st.error("Server Timeout")
+            
+            # DISPLAY INJECTED IMAGES
+            if st.session_state.get('forge_images'):
+                for img in st.session_state.forge_images:
+                    st.markdown(f"**{img['style'].upper()}**")
+                    st.markdown(f'<img src="data:image/png;base64,{img["data"]}" style="width:100%; border-radius:10px; border:2px solid #00ff41; margin-bottom:15px;">', unsafe_allow_html=True)
 
         with t_col3:
             if st.button("🧠 RETENTION SCAN", use_container_width=True):
-                r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Scan: {st.session_state.pro_forge_txt[:500]}"}])
-                st.warning(r_res.choices[0].message.content)
-
+                with st.spinner("Scanning..."):
+                    r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Identify drop-off zones: {st.session_state.pro_forge_txt[:800]}"}])
+                    st.warning(r_res.choices[0].message.content)
 
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
@@ -1934,6 +1943,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
