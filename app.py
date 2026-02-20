@@ -23,48 +23,77 @@ from streamlit_lottie import st_lottie # You'll need: pip install streamlit-lott
 import requests
 
 def ignition_sequence():
-    # Only run the intro if it hasn't played this session
     if 'ignition_complete' not in st.session_state:
         placeholder = st.empty()
         
         with placeholder.container():
-            # CSS for the "Logo Pop" and Background
             st.markdown("""
                 <style>
-                .stApp { background-color: #000000; }
-                @keyframes logo-pop {
-                    0% { transform: scale(0); opacity: 0; }
-                    80% { transform: scale(1.2); opacity: 1; }
-                    100% { transform: scale(1); opacity: 1; }
+                /* 1. DARK OVERLAY */
+                .ignition-wrapper {
+                    position: fixed;
+                    top: 0; left: 0; width: 100vw; height: 100vh;
+                    background: #000;
+                    display: flex; flex-direction: column;
+                    align-items: center; justify-content: center;
+                    z-index: 9999;
                 }
-                .void-logo {
-                    text-align: center;
+
+                /* 2. THE ROTATING ENGINE CIRCLE */
+                .engine-core {
+                    width: 150px; height: 150px;
+                    border: 3px solid transparent;
+                    border-top: 3px solid #00ff41;
+                    border-radius: 50%;
+                    animation: spin 1.5s linear infinite;
+                    position: relative;
+                }
+                .engine-core::after {
+                    content: '';
+                    position: absolute;
+                    top: 15px; left: 15px; right: 15px; bottom: 15px;
+                    border: 2px solid transparent;
+                    border-bottom: 2px solid #00d4ff;
+                    border-radius: 50%;
+                    animation: spin 1s linear reverse infinite;
+                }
+
+                /* 3. THE LOGO POP */
+                .void-text {
+                    margin-top: 20px;
                     color: #00ff41;
                     font-family: 'Courier New', monospace;
-                    font-size: 50px;
+                    font-size: 40px;
                     font-weight: bold;
-                    animation: logo-pop 1s ease-out;
-                    text-shadow: 0 0 20px #00ff41;
+                    letter-spacing: 10px;
+                    opacity: 0;
+                    animation: logo-reveal 2s forwards;
+                    animation-delay: 1s;
+                    text-shadow: 0 0 15px rgba(0, 255, 65, 0.7);
+                }
+
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+
+                @keyframes logo-reveal {
+                    0% { transform: scale(0.8); opacity: 0; filter: blur(10px); }
+                    100% { transform: scale(1); opacity: 1; filter: blur(0); }
                 }
                 </style>
-            """, unsafe_allow_html=True)
 
-            # 1. The Fireworks/Drops Convergence
-            # You can find a "converge" lottie on LottieFiles
-            lottie_url = "https://assets5.lottiefiles.com/packages/lf20_hyper_loop.json" 
-            st_lottie(lottie_url, height=400, key="ignition")
+                <div class="ignition-wrapper">
+                    <div class="engine-core"></div>
+                    <div class="void-text">VOID-OS</div>
+                </div>
+            """, unsafe_allow_html=True)
             
-            time.sleep(2) # Duration of the "Engine Start"
-            
-            # 2. The Logo Pop
-            st.markdown("<div class='void-logo'>VOID-OS</div>", unsafe_allow_html=True)
-            time.sleep(1.5)
+            # Duration of the sequence
+            time.sleep(3.5)
             
         placeholder.empty()
         st.session_state.ignition_complete = True
-
-# Start the sequence
-ignition_sequence()
 
 # --- INITIALIZE STATE (Place this near the top of your script) ---
 if "current_page" not in st.session_state:
@@ -2075,6 +2104,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
