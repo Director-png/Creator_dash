@@ -726,22 +726,18 @@ with st.sidebar:
         # --- ENHANCED IDENTITY CORE ---
         profile_img = st.session_state.get('vault_anchor')
         
-        # FIX: Image rendering logic
-        # If profile_img is a URL/String, it works. If it's a BytesIO object, we use st.image.
+        # IMAGE LOGIC: Handles URLs or local placeholders safely
         if profile_img is None:
             img_html = "<div style='width: 55px; height: 55px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px;'>DNA</div>"
         else:
-            # We use a trick: If it's a string (URL), we use HTML. If not, we'll let Streamlit handle it.
             if isinstance(profile_img, str):
                 img_html = f"<img src='{profile_img}' style='width: 55px; height: 55px; border-radius: 50%; border: 2px solid #00ff41; object-fit: cover;'>"
             else:
-                img_html = "🧬" # Placeholder for complex objects to prevent crash
+                img_html = "<div style='font-size: 30px;'>🧬</div>"
 
         st.markdown(f"""
             <div style='background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px; display: flex; align-items: center; gap: 15px;'>
-                <div>
-                    {img_html}
-                </div>
+                <div>{img_html}</div>
                 <div style='flex-grow: 1;'>
                     <p style='margin: 0; color: #888; font-size: 9px; letter-spacing: 2px;'>OPERATOR IDENTIFIED</p>
                     <h3 style='color: #00ff41; margin: 0; font-family: "Courier New", Courier, monospace; font-size: 18px;'>{st.session_state.get('user_name', 'DIRECTOR').upper()}</h3>
@@ -766,7 +762,7 @@ with st.sidebar:
         else:
             options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
 
-        # NAVIGATION SELECTION
+        # --- NAVIGATION SELECTION (CRITICAL FIX FOR LINE 850) ---
         if 'current_page' not in st.session_state:
             st.session_state.current_page = options[0]
 
@@ -775,8 +771,9 @@ with st.sidebar:
         except ValueError:
             default_index = 0
 
-        nav_selection = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
-        st.session_state.current_page = nav_selection
+        # We define 'page' here so the rest of your app.py can see it
+        page = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
+        st.session_state.current_page = page
 
         # --- 🤖 INTEGRATED VOID MANAGER ---
         st.divider()
@@ -817,34 +814,29 @@ with st.sidebar:
                         
                         resp_container.markdown(full_resp)
                         st.session_state.manager_chat.append({"role": "assistant", "content": full_resp})
-                    
                     except Exception as e:
                         st.error(f"Uplink Error: {str(e)}")
 
-        # --- 🛠️ GLOBAL ACTIONS & SYSTEM CONTROLS ---
+        # --- 🛠️ GLOBAL ACTIONS ---
         st.divider()
         
-        # 1. Feedback Button (Linked to your app.py logic)
+        # Feedback Integration (Points to your existing function/page)
         if st.button("💬 SYSTEM FEEDBACK", use_container_width=True):
-            st.session_state.current_page = "⚙️ Settings" # Redirecting to settings for feedback
+            st.session_state.current_page = "⚙️ Settings"
             st.rerun()
 
-        # 2. Re-calibrate (Cache clear)
         if st.button("🔄 RE-CALIBRATE", use_container_width=True):
             st.cache_data.clear()
             st.rerun()
 
-        # 3. Logout (Full session wipe)
         if st.button("🚪 TERMINATE SESSION", use_container_width=True):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
 
-        # Footer Version Tag
-        st.markdown("<p style='text-align: center; color: #444; font-size: 10px; margin-top: 20px;'>VOID-OS v2.4.0 | PROTOCOL 2026</p>", unsafe_allow_html=True)
-
     except Exception as sidebar_err:
         st.error(f"System Error: {sidebar_err}")
+        page = options[0] # Emergency fallback so line 850 doesn't crash
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
 if page == "🏠 Dashboard":
@@ -2030,6 +2022,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
