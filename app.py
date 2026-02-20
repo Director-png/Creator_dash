@@ -1191,13 +1191,10 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (FINAL STABLE BUILD) ---
+# --- MODULE 7: THE NEURAL FORGE (RE-INTEGRATED & STABILIZED) ---
 elif page == "🧠 Neural Forge":
-    import time
-    import requests
-    import random
+    import time, requests, random
 
-    # 1. ACCESS CONTROL
     if not is_paid and not is_admin:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
         st.warning("PROTOCOL RESTRICTED: Pro License Required.")
@@ -1205,31 +1202,38 @@ elif page == "🧠 Neural Forge":
 
     st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
     
-    # 2. INPUT CONFIGURATION
     with st.container(border=True):
         col_a, col_b = st.columns([1, 1], gap="medium")
         
         with col_a:
-            st.subheader("🧬 Identity & Core")
-            # This prepares for the future Facial Consistency logic
+            st.subheader("🧬 Core Configuration")
             f_face = st.file_uploader("Upload Identity Reference", type=['png', 'jpg', 'jpeg'])
-            f_topic = st.text_input("Core Concept", placeholder="e.g., Why AI will replace devs", key="forge_top")
-            f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels"], key="forge_plat")
+            forge_mode = st.radio("Forge Strategy", ["Cold Start", "Competitor Shadow (🔒)"], horizontal=True)
+            f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"], key="forge_plat")
+            f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of Productivity", key="forge_top")
             
+            # RE-INTEGRATED: TREND SYNC FRAMEWORKS
+            f_trend = st.radio("Current Trend Sync", ["None", "Viral Audio", "Niche Commentary", "POV/Relatable", "Educational Breakdown"], horizontal=True)
+
         with col_b:
             st.subheader("📡 Style & Vigor")
             f_colors = st.multiselect("Brand DNA Colors", ["Neon Green", "Cyber Blue", "Matte Black", "Gold", "Crimson"], default=["Neon Green", "Matte Black"])
-            f_framework = st.selectbox("Retention Framework", ["Controversy Start", "Hero's Journey", "Statistical Shock", "The 'Mistake' Hook"])
+            f_framework = st.selectbox("Retention Framework", [
+                "The Controversy Start (High Vigor)", 
+                "The Hero's Journey (Storytelling)", 
+                "Statistical Shock (Educational)",
+                "The 'Mistake' Hook (Click-through Focus)",
+                "Day in the Life (Relatability)",
+                "The Deep-Dive (Authority)"
+            ])
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
 
-        # PRIMARY SCRIPT EXECUTION
         if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
             if f_topic:
                 with st.spinner("🌑 ARCHITECTING PRODUCTION BLUEPRINT..."):
                     try:
                         prompt = (f"Act as a World-Class Strategist. Create a Production Blueprint for: '{f_topic}'. "
-                                  f"Platform: {f_platform}. Strategy: {f_framework}. Vigor: {f_vigor}.")
-                        # Assuming groq_c is defined in your global scope
+                                  f"Platform: {f_platform}. Strategy: {f_framework}. Trend Sync: {f_trend}. Vigor: {f_vigor}.")
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "system", "content": "You are the Neural Forge."},
@@ -1240,7 +1244,6 @@ elif page == "🧠 Neural Forge":
                     except Exception as e:
                         st.error(f"UPLINK ERROR: {str(e)}")
 
-    # 3. OUTPUT & VISUAL FORGE
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 THE PRODUCTION BLUEPRINT")
@@ -1250,35 +1253,44 @@ elif page == "🧠 Neural Forge":
         st.subheader("🧪 Intelligence Tools")
         t_col1, t_col2, t_col3 = st.columns(3)
         
+        with t_col1:
+            # BUTTON 1: VIRALITY SCORE
+            if st.button("🚀 SCORE VIRALITY", use_container_width=True):
+                with st.spinner("Analyzing..."):
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": f"Score this script 1-10: {st.session_state.pro_forge_txt[:500]}"}]
+                    )
+                    st.info(res.choices[0].message.content)
+                        
         with t_col2:
+            # BUTTON 2: 3X THUMBNAILS (FIXED IMAGE LOGIC)
             if st.button("🎭 GENERATE 3X THUMBNAILS", use_container_width=True):
                 st.markdown("#### 🖼️ Visual Asset Options")
-                
-                # STABLE IMAGE LOGIC
                 styles = ["Cinematic", "Cyberpunk", "Minimalist"]
                 v_cols = st.columns(3)
-                
                 for i, style in enumerate(styles):
                     with v_cols[i]:
-                        # A. Create a unique seed to bypass cache crashes
-                        u_seed = int(time.time()) + i 
+                        u_seed = random.randint(1000, 9999)
+                        # HARD-SANITIZATION: Remove anything that isn't a letter or number
+                        clean_topic = "".join(filter(str.isalnum, f_topic)) 
+                        img_prompt = f"YouTube-Thumbnail-{style}-{clean_topic}"
+                        img_url = f"https://pollinations.ai/p/{img_prompt}?width=600&height=400&seed={u_seed}&nologo=true"
                         
-                        # B. Clean the topic to prevent URL breakage
-                        safe_topic = f_topic.replace(" ", "%20").replace("'", "").replace('"', "")
-                        color_str = "-".join(f_colors).replace(" ", "")
-                        
-                        # C. Build the prompt
-                        img_prompt = f"Professional-YouTube-Thumbnail-{style}-{safe_topic}-colors-{color_str}"
-                        
-                        # D. Stable URL with double-encoding prevention
-                        img_url = f"https://pollinations.ai/p/{img_prompt}?width=1280&height=720&seed={u_seed}&nologo=true"
-                        
-                        # E. Render with error handling
-                        try:
-                            st.image(img_url, caption=f"Style: {style}", use_column_width=True)
-                            st.caption(f"ID: VF-{u_seed}")
-                        except:
-                            st.warning("Visual Link Unstable.")
+                        # Use markdown to bypass Streamlit's internal image handling if it's failing
+                        st.markdown(f"![Concept {i+1}]({img_url})")
+                        st.caption(f"Style: {style}")
+
+        with t_col3:
+            # BUTTON 3: RETENTION SCAN
+            if st.button("🧠 RETENTION SCAN", use_container_width=True):
+                with st.spinner("Scanning..."):
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": f"Find the drop-off point: {st.session_state.pro_forge_txt}"}]
+                    )
+                    st.warning(res.choices[0].message.content)
+
 
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
@@ -1943,6 +1955,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
