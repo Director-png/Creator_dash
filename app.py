@@ -1192,33 +1192,37 @@ elif page == "🏗️ Script Architect":
                     st.info("Awaiting Tactical Input to manifest formation.")
 
 
-# --- MODULE 7: THE NEURAL FORGE (UNBLOCKABLE ASSETS & 70B LOGIC) ---
+# --- MODULE 7: THE NEURAL FORGE (THE ARCHITECT EDITION) ---
 elif page == "🧠 Neural Forge":
-    import random, urllib.parse, requests
+    import random
 
     if not is_admin and not is_paid:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
+        st.warning("DIRECTOR LEVEL ACCESS REQUIRED")
         st.stop()
 
-    st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // THE ARCHITECT</h1>", unsafe_allow_html=True)
     
     with st.container(border=True):
         col_a, col_b = st.columns([1, 1], gap="medium")
         with col_a:
             st.subheader("🧬 Production Core")
-            f_topic = st.text_input("Core Concept", placeholder="The Dark Truth of AI", key="forge_top")
-            f_platform = st.selectbox("Platform", ["YouTube", "Shorts", "TikTok"], key="forge_plat")
+            f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of Productivity", key="forge_top")
+            f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "Shorts", "TikTok"], key="forge_plat")
 
         with col_b:
             st.subheader("📡 Style & Vigor")
-            f_colors = st.multiselect("Brand DNA", ["Neon Green", "Cyber Blue", "Matte Black"], default=["Neon Green"])
+            f_colors = st.multiselect("Brand DNA", ["Neon Green", "Cyber Blue", "Matte Black", "Gold"], default=["Neon Green"])
             f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
 
-        if st.button("🔥 EXECUTE NEURAL SYNTHESIS", use_container_width=True):
+        if st.button("🔥 GENERATE PRODUCTION BLUEPRINT", use_container_width=True):
             if f_topic:
-                with st.spinner("🌑 ARCHITECTING MASTER BLUEPRINT..."):
-                    # 1. BRAIN: GROQ 70B (WORKING)
-                    prompt = f"Detailed viral strategy for: '{f_topic}'. Platform: {f_platform}. Vigor: {f_vigor}."
+                with st.spinner("🌑 ARCHITECTING MASTER STRATEGY..."):
+                    # 70B Llama Logic: Generating Script + Psychological Prompt Engineering
+                    prompt = (f"Act as a World-Class Content Strategist. Create a detailed Production Blueprint for: '{f_topic}'. "
+                              f"1. A high-retention script outline. "
+                              f"2. Three distinct Thumbnail 'Prompt Engineering' strings for high-end AI generators. "
+                              f"3. A breakdown of why these prompts will trigger a click.")
                     res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}])
                     st.session_state.pro_forge_txt = res.choices[0].message.content
                     st.rerun()
@@ -1229,35 +1233,24 @@ elif page == "🧠 Neural Forge":
         st.info(st.session_state.pro_forge_txt)
         
         st.divider()
-        st.subheader("🧪 Intelligence & Assets")
-        t_col1, t_col2, t_col3 = st.columns([1, 1.5, 1])
+        st.subheader("🧪 Intelligence Tools")
+        t_col1, t_col2 = st.columns(2)
         
         with t_col1:
             if st.button("🚀 SCORE VIRALITY", use_container_width=True):
-                v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Score 1-100: {st.session_state.pro_forge_txt[:600]}"}])
-                st.success(v_res.choices[0].message.content)
+                v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Score this script 1-100 and give 3 optimizations: {st.session_state.pro_forge_txt[:800]}"}])
+                st.success(f"**VIRALITY SCORE:** \n\n {v_res.choices[0].message.content}")
                         
         with t_col2:
-            st.markdown("#### 🎭 VISUAL CONCEPTS")
-            if st.button("⚡ FETCH UNBLOCKABLE ASSETS", use_container_width=True):
-                # Using Wikimedia/Placeholders - highest chance of bypassing library blocks
-                keywords = f_topic.split()[:2]
-                search = "+".join(keywords)
-                
-                styles = ["Cinematic", "Cyberpunk", "Minimalist"]
-                for style in styles:
-                    # We use a combined URL that looks like a standard search result
-                    placeholder_url = f"https://loremflickr.com/800/450/{search},{style.lower()}/all"
-                    
-                    with st.expander(f"✨ {style.upper()} VIBE", expanded=True):
-                        st.image(placeholder_url, caption=f"Visual Mood: {style}")
-                        st.caption("Using Lo-Fi Placeholder to bypass network restrictions.")
-
-        with t_col3:
             if st.button("🧠 RETENTION SCAN", use_container_width=True):
-                r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Scan for drop-offs: {st.session_state.pro_forge_txt[:600]}"}])
-                st.warning(r_res.choices[0].message.content)
+                r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Where will users drop off in this script?: {st.session_state.pro_forge_txt[:800]}"}])
+                st.warning(f"**RETENTION ANALYSIS:** \n\n {r_res.choices[0].message.content}")
 
+        # THUMBNAIL PROMPT VAULT
+        st.divider()
+        st.subheader("🎭 THUMBNAIL PROMPT VAULT")
+        st.write("Copy these prompts into your preferred generator (Midjourney/Flux) for high-conversion assets.")
+        st.code(f"A {f_topic} thumbnail design, {', '.join(f_colors)} color palette, cinematic lighting, 8k resolution, extreme detail, psychological hook: curiosity.")
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -1921,6 +1914,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
