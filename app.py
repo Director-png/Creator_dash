@@ -1020,7 +1020,6 @@ elif page == "🌐 Global Pulse":
         st.subheader("📊 TOP 10 PERFORMANCE VECTORS")
         display_df = df_pulse.copy()
         
-        # Mapping to your specific columns
         vel_col = 'growth' if 'growth' in display_df.columns else display_df.columns[2]
         name_col = 'niche name' if 'niche name' in display_df.columns else display_df.columns[0]
 
@@ -1038,37 +1037,47 @@ elif page == "🌐 Global Pulse":
             hide_index=True, use_container_width=True, disabled=True
         )
 
+        # --- 🆕 INTEGRATED VIRAL RADAR (THE NEURAL SCAN) ---
+        st.divider()
+        st.subheader("🛰️ VIRAL RADAR // NEURAL SCAN")
+        target_topic = search_query if search_query else (display_df[name_col].iloc[0] if not display_df.empty else "Global Trends")
+        
+        if st.button(f"🚀 SCAN VIRAL CLUSTERS FOR: {target_topic.upper()}", use_container_width=True):
+            with st.spinner("📡 SCANNING NEURAL DATASTREAMS..."):
+                pulse_prompt = (
+                    f"Act as a Viral Trend Analyst. Based on the '{target_topic}' niche, "
+                    f"identify 3 high-velocity 'Trend Clusters' currently exploding. "
+                    f"For each: 1. A catchy title, 2. The 'Secret Hook', and 3. A Virality Heatmap score (1-100)."
+                )
+                pulse_res = groq_c.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=[{"role": "user", "content": pulse_prompt}]
+                )
+                st.session_state.radar_intel = pulse_res.choices[0].message.content
+        
+        if st.session_state.get('radar_intel'):
+            with st.container(border=True):
+                st.markdown(st.session_state.radar_intel)
+                st.caption("🎯 **Strategic Note:** Copy these hooks into the **🧠 Neural Forge** for elite script generation.")
+
         st.divider()
 
-        # --- 4. LIVE WORLD INTELLIGENCE (The Multi-News Feed) ---
+        # --- 4. LIVE WORLD INTELLIGENCE ---
         st.subheader("📰 LIVE WORLD INTELLIGENCE")
-        
-        # Use Search or the Top Niche from your sheet
         news_topic = search_query if search_query else (display_df[name_col].iloc[0] if not display_df.empty else "Technology")
-        
-        # We increase pageSize to 10 to ensure we have plenty of options
         articles = fetch_live_news(news_topic, NEWS_API_KEY)
 
         if articles:
-            # We loop through all articles found
-            for art in articles[:8]: # Display top 8 relevant results
+            for art in articles[:8]:
                 with st.container(border=True):
                     c_img, c_txt = st.columns([1, 2])
-                    
                     with c_img:
-                        # FALLBACK: If the news article has no image, use a high-tech placeholder
-                        img_url = art.get('urlToImage')
-                        if not img_url:
-                            img_url = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400"
+                        img_url = art.get('urlToImage') or "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400"
                         st.image(img_url, use_container_width=True)
-                        
                     with c_txt:
                         st.markdown(f"<h4 style='color: #00ff41; margin:0;'>{art['title']}</h4>", unsafe_allow_html=True)
-                        # Clean up description
-                        desc = art.get('description') or "Detailed intel for this vector is encrypted. Click below for full access."
+                        desc = art.get('description') or "Detailed intel for this vector is encrypted."
                         st.write(f"{desc[:200]}...")
-                        
-                        # THE PORTAL
                         st.markdown(f"🔗 [READ FULL REPORT]({art['url']})")
                         st.caption(f"Source: {art['source']['name']} | {art['publishedAt'][:10]}")
         else:
@@ -1076,6 +1085,7 @@ elif page == "🌐 Global Pulse":
             
     else:
         st.error("📡 NEURAL LINK FAILURE: The CSV is unreachable.")
+
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
@@ -1934,6 +1944,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
