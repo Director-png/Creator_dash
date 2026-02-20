@@ -1191,10 +1191,11 @@ elif page == "🏗️ Script Architect":
                 else:
                     st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (IFRAME OVERRIDE BUILD) ---
+# --- MODULE 7: THE NEURAL FORGE (BASE64 GHOST INJECT) ---
 elif page == "🧠 Neural Forge":
-    import random, urllib.parse
+    import random, urllib.parse, requests, base64
 
+    # 1. ACCESS CONTROL
     if not is_admin and not is_paid:
         st.markdown("<h1 style='color: #666;'>🧠 NEURAL FORGE</h1>", unsafe_allow_html=True)
         st.warning("PROTOCOL RESTRICTED: Pro License Required.")
@@ -1202,6 +1203,7 @@ elif page == "🧠 Neural Forge":
 
     st.markdown("<h1 style='color: #00ff41;'>🧠 NEURAL FORGE // ELITE</h1>", unsafe_allow_html=True)
     
+    # 2. INPUT CONFIGURATION
     with st.container(border=True):
         col_a, col_b = st.columns([1, 1], gap="medium")
         
@@ -1241,6 +1243,7 @@ elif page == "🧠 Neural Forge":
                     except Exception as e:
                         st.error(f"UPLINK ERROR: {str(e)}")
 
+    # 3. OUTPUT & INTELLIGENCE TOOLS
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 THE PRODUCTION BLUEPRINT")
@@ -1261,25 +1264,24 @@ elif page == "🧠 Neural Forge":
                         
         with t_col2:
             st.markdown("#### 🎭 THUMBNAIL FORGE")
-            styles = ["Cinematic", "Cyberpunk", "Minimalist"]
-            for style in styles:
-                u_seed = random.randint(1000, 9999)
-                query = urllib.parse.quote(f"{style} YouTube thumbnail {f_topic} colors {' '.join(f_colors)}")
-                # WE SWITCH BACK TO THE MOST STABLE URL
-                final_url = f"https://pollinations.ai/p/{query}?width=1280&height=720&seed={u_seed}&model=flux"
-                
-                # THE IFRAME BYPASS: We show the link AND an embedded window
-                st.markdown(f"""
-                <div style="background-color: #111; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 15px; text-align: center;">
-                    <p style="color: #00ff41; font-size: 0.7rem; margin-bottom: 5px;">{style.upper()}</p>
-                    <a href="{final_url}" target="_blank" style="text-decoration: none;">
-                        <button style="background-color: #00ff41; color: black; border: none; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 10px;">
-                            🚀 FORCE OPEN NEW TAB
-                        </button>
-                    </a>
-                    <iframe src="{final_url}" width="100%" height="200px" style="border: 1px solid #00ff41; border-radius: 5px; background: #000;"></iframe>
-                </div>
-                """, unsafe_allow_html=True)
+            if st.button("✨ GENERATE 3X ASSETS", use_container_width=True):
+                styles = ["Cinematic", "Cyberpunk", "Minimalist"]
+                for style in styles:
+                    u_seed = random.randint(1000, 9999)
+                    query = urllib.parse.quote(f"{style} YouTube thumbnail {f_topic} colors {' '.join(f_colors)}")
+                    img_url = f"https://pollinations.ai/p/{query}?width=1280&height=720&seed={u_seed}&model=flux"
+                    
+                    try:
+                        # THE BYPASS: The server fetches the image, not the browser
+                        response = requests.get(img_url, timeout=20)
+                        if response.status_code == 200:
+                            b64 = base64.b64encode(response.content).decode()
+                            st.markdown(f"**{style.upper()} CONCEPT**")
+                            st.markdown(f'<img src="data:image/png;base64,{b64}" width="100%" style="border-radius:10px; border: 2px solid #00ff41; margin-bottom: 20px;">', unsafe_allow_html=True)
+                        else:
+                            st.error(f"Forge Error: {response.status_code}")
+                    except:
+                        st.error("Uplink Timed Out. Try again.")
 
         with t_col3:
             if st.button("🧠 RETENTION SCAN", use_container_width=True):
@@ -1953,6 +1955,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
