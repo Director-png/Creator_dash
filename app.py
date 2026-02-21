@@ -116,22 +116,24 @@ if 'current_subs' not in st.session_state:
 
 # --- ANIMATION UTILITY ---
 def sync_history_from_cloud():
+    """Fetches scripts using the new 8-column architecture."""
     try:
         # Pull fresh data
         df = conn.read(worksheet="Scripts", ttl=0)
         
+        # Ensure we are only looking at the current user's data
         user_email = st.session_state.get('user_email', 'N/A')
         
-        # Filter by Email column to ensure privacy
-        if not df.empty and 'Email' in df.columns:
-            filtered_df = df[df['Email'] == user_email]
-            st.session_state.script_history = filtered_df.to_dict('records')
+        if not df.empty:
+            # Filtering and mapping to session_state
+            # Columns: Timestamp, User Name, Email, Platform, Topic, Generated, Script, Visual Dna, Status
+            user_df = df[df['Email'] == user_email]
+            st.session_state.script_history = user_df.to_dict('records')
             return True
         return False
     except Exception as e:
-        st.error(f"📡 VAULT SYNC ERROR: {str(e)}")
+        st.error(f"📡 VAULT RETRIEVAL ERROR: {e}")
         return False
-
 def fetch_vault_data(sheet_name):
     """Fetches any specific sheet from your empire's vault."""
     SHEET_IDS = {
@@ -2283,6 +2285,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
