@@ -111,6 +111,25 @@ if 'current_subs' not in st.session_state:
 
 
 # --- ANIMATION UTILITY ---
+def sync_history_from_cloud():
+    """Fetches all scripts from the GSheet 'Scripts' tab and loads them into session state."""
+    try:
+        # Fetch all records from the 'Scripts' worksheet
+        records = conn.get_all_records(worksheet="Scripts")
+        # Format them to match your archive_entry structure
+        st.session_state.script_history = [
+            {
+                "timestamp": r.get('Timestamp', ''),
+                "platform": r.get('Platform', ''),
+                "topic": r.get('Topic', ''),
+                "script": r.get('Script', ''),
+                "assigned_to": r.get('User', 'Unknown'),
+                "status": r.get('Status', 'pending')
+            } for r in records
+        ]
+    except Exception as e:
+        st.error(f"DATABASE DESYNC: Could not pull history. {e}")
+
 def fetch_vault_data(sheet_name):
     """Fetches any specific sheet from your empire's vault."""
     SHEET_IDS = {
@@ -1356,8 +1375,13 @@ elif page == "🧠 Neural Forge":
         st.error("🚨 CLEARANCE REQUIRED: Enter your Elite Cipher in the terminal.")
         st.stop()
 
-    # Initialize State Keys if missing
-    if 'script_history' not in st.session_state: st.session_state.script_history = []
+    # --- CLOUD SYNC INITIALIZER ---
+    # This runs once per session or if the history is wiped to restore data from GSheets
+    if 'history_synced' not in st.session_state or not st.session_state.script_history:
+        with st.spinner("📡 Synchronizing with Global Vault..."):
+            if sync_history_from_cloud():
+                st.session_state.history_synced = True
+
     if 'daily_usage' not in st.session_state: st.session_state.daily_usage = 0
     if 'last_reset' not in st.session_state: st.session_state.last_reset = datetime.date.today()
     if 'max_limit' not in st.session_state:
@@ -1431,7 +1455,7 @@ elif page == "🧠 Neural Forge":
                         # --- DATA HARDENING: UPLINK TO VAULT & GSHEET ---
                         now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
                         
-                        # 1. Local Session Update
+                        # 1. Update Local Session History Immediately
                         archive_entry = {
                             "timestamp": now_ts,
                             "platform": f_platform,
@@ -1455,6 +1479,8 @@ elif page == "🧠 Neural Forge":
                             ]
                             conn.append_row(new_row, worksheet="Scripts")
                             st.toast("⚡ ARCHIVE SYNCHRONIZED TO CLOUD")
+                            # Refresh history from cloud to ensure total consistency
+                            sync_history_from_cloud()
                         except Exception as e:
                             st.error(f"GSHEET SYNC FAILED: {e}")
 
@@ -2255,6 +2281,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
