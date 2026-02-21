@@ -1256,50 +1256,95 @@ elif page == "⚔️ Trend Duel":
     else:
         st.error("📡 NEURAL LINK FAILURE: The function 'fetch_live_market_data' returned an empty set.")
 
+# --- MODULE 6: SCRIPT ARCHITECT ---
 elif page == "🏗️ Script Architect":
-        st.markdown("<h1 style='color: #00ff41;'>⚔️ SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
-        
-        # 1. USAGE LIMITS (Basic Only)
-        if not is_paid and not is_admin:
-            if 'daily_script_count' not in st.session_state: st.session_state.daily_script_count = 0
-            if st.session_state.daily_script_count >= 3:
-                st.error("🚨 DAILY UPLINK LIMIT REACHED")
-                st.stop()
-            st.caption(f"🛰️ BASIC NODE: {3 - st.session_state.daily_script_count} scripts remaining.")
+    st.markdown("<h1 style='color: #00ff41;'>⚔️ SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+    
+    # Ensure history list exists in session state
+    if 'script_history' not in st.session_state: st.session_state.script_history = []
+    
+    # 🕵️ Persona Checks for Limits
+    is_admin = st.session_state.get('user_role') == "admin"
+    user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
+    is_paid = user_status in ['pro', 'paid']
 
-        # 2. THE FORMATION ENGINE
-        with st.container(border=True):
-            c1, c2 = st.columns([1, 1.5], gap="large")
-            with c1:
-                st.subheader("Architectural Input")
-                platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
-                topic = st.text_input("Core Topic", placeholder="e.g., The reality of building a SaaS")
-                tone = st.select_slider("Vigor", ["Professional", "Aggressive", "Elite"])
-                
-                if st.button("🏗️ ARCHITECT FULL SCRIPT", use_container_width=True):
-                    if topic:
-                        with st.spinner("🛰️ ARCHITECTING FORMATION..."):
-                            if not is_paid and not is_admin: st.session_state.daily_script_count += 1
-                            # Restoration of the high-quality formation prompt
-                            formation_prompt = (
-                                f"Act as a master content strategist. Create a high-retention {platform} script about {topic}. "
-                                f"Tone: {tone}. Formation: Start with a 'Pattern Interrupt' hook, move into 'The Agitation', "
-                                f"provide 'The Insight', and end with a 'Call to Value'. Use timestamps and clear visual cues."
-                            )
-                            res = groq_c.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": formation_prompt}])
-                            st.session_state.current_architect_txt = res.choices[0].message.content
-                            st.rerun()
+    # 1. USAGE LIMITS (Basic Only)
+    if not is_paid and not is_admin:
+        if 'daily_script_count' not in st.session_state: st.session_state.daily_script_count = 0
+        if st.session_state.daily_script_count >= 3:
+            st.error("🚨 DAILY UPLINK LIMIT REACHED")
+            st.stop()
+        st.caption(f"🛰️ BASIC NODE: {3 - st.session_state.daily_script_count} scripts remaining.")
 
-            with c2:
-                if st.session_state.get('current_architect_txt'):
-                    st.subheader("💎 SCRIPT BLUEPRINT")
-                    st.session_state.current_architect_txt = st.text_area("Live Editor", value=st.session_state.current_architect_txt, height=400)
-                    st.warning("⚠️ Optimization & Trend Mapping is restricted to PRO Nodes.")
-                    if st.button("🧠 UPGRADE TO NEURAL FORGE"):
-                        st.session_state.page = "🧠 Neural Forge"
+    # 2. THE FORMATION ENGINE
+    with st.container(border=True):
+        c1, c2 = st.columns([1, 1.5], gap="large")
+        with c1:
+            st.subheader("Architectural Input")
+            platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
+            topic = st.text_input("Core Topic", placeholder="e.g., The reality of building a SaaS")
+            tone = st.select_slider("Vigor", ["Professional", "Aggressive", "Elite"])
+            
+            if st.button("🏗️ ARCHITECT FULL SCRIPT", use_container_width=True):
+                if topic:
+                    with st.spinner("🛰️ ARCHITECTING FORMATION..."):
+                        if not is_paid and not is_admin: 
+                            st.session_state.daily_script_count += 1
+                        
+                        formation_prompt = (
+                            f"Act as a master content strategist. Create a high-retention {platform} script about {topic}. "
+                            f"Tone: {tone}. Formation: Start with a 'Pattern Interrupt' hook, move into 'The Agitation', "
+                            f"provide 'The Insight', and end with a 'Call to Value'. Use timestamps and clear visual cues."
+                        )
+                        
+                        # Generate Script
+                        res = groq_c.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": formation_prompt}])
+                        generated_script = res.choices[0].message.content
+                        st.session_state.current_architect_txt = generated_script
+                        
+                        # --- DATA HARDENING: UPLINK TO VAULT & GSHEET ---
+                        import datetime
+                        now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+                        
+                        # 1. Update Local Session History
+                        archive_entry = {
+                            "timestamp": now_ts,
+                            "platform": platform,
+                            "topic": topic,
+                            "script": generated_script,
+                            "assigned_to": st.session_state.get('user_name', 'Operator'),
+                            "status": "pending"
+                        }
+                        st.session_state.script_history.append(archive_entry)
+
+                        # 2. Update Global GSheet Database
+                        try:
+                            # Headers: Timestamp, Platform, Topic, Script, User, Status
+                            new_row = [
+                                now_ts, 
+                                platform, 
+                                topic, 
+                                generated_script, 
+                                st.session_state.get('user_email', 'N/A'), 
+                                "pending"
+                            ]
+                            conn.append_row(new_row, worksheet="Scripts")
+                            st.toast("⚡ ARCHIVE SYNCHRONIZED TO CLOUD")
+                        except Exception as e:
+                            st.error(f"GSHEET SYNC FAILED: {e}")
+
                         st.rerun()
-                else:
-                    st.info("Awaiting Tactical Input to manifest formation.")
+
+        with c2:
+            if st.session_state.get('current_architect_txt'):
+                st.subheader("💎 SCRIPT BLUEPRINT")
+                st.session_state.current_architect_txt = st.text_area("Live Editor", value=st.session_state.current_architect_txt, height=400)
+                st.warning("⚠️ Optimization & Trend Mapping is restricted to PRO Nodes.")
+                if st.button("🧠 UPGRADE TO NEURAL FORGE"):
+                    st.session_state.page = "🧠 Neural Forge"
+                    st.rerun()
+            else:
+                st.info("Awaiting Tactical Input to manifest formation.")
 
 # --- MODULE 7: THE NEURAL FORGE (ELITE SCRIPT & MULTI-COLOR ARCHITECT) ---
 elif page == "🧠 Neural Forge":
@@ -1311,6 +1356,8 @@ elif page == "🧠 Neural Forge":
         st.error("🚨 CLEARANCE REQUIRED: Enter your Elite Cipher in the terminal.")
         st.stop()
 
+    # Initialize State Keys if missing
+    if 'script_history' not in st.session_state: st.session_state.script_history = []
     if 'daily_usage' not in st.session_state: st.session_state.daily_usage = 0
     if 'last_reset' not in st.session_state: st.session_state.last_reset = datetime.date.today()
     if 'max_limit' not in st.session_state:
@@ -1377,9 +1424,43 @@ elif page == "🧠 Neural Forge":
                             messages=[{"role": "user", "content": system_instruction}]
                         )
                         
-                        st.session_state.pro_forge_txt = res.choices[0].message.content
+                        generated_output = res.choices[0].message.content
+                        st.session_state.pro_forge_txt = generated_output
                         st.session_state.daily_usage += 1
+                        
+                        # --- DATA HARDENING: UPLINK TO VAULT & GSHEET ---
+                        now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+                        
+                        # 1. Local Session Update
+                        archive_entry = {
+                            "timestamp": now_ts,
+                            "platform": f_platform,
+                            "topic": f_topic,
+                            "script": generated_output,
+                            "assigned_to": st.session_state.get('user_name', 'Operator'),
+                            "status": "pending"
+                        }
+                        st.session_state.script_history.append(archive_entry)
+
+                        # 2. Cloud GSheet Update
+                        try:
+                            # Headers: Timestamp, Platform, Topic, Script, User, Status
+                            new_row = [
+                                now_ts, 
+                                f_platform, 
+                                f_topic, 
+                                generated_output, 
+                                st.session_state.get('user_email', 'N/A'), 
+                                "pending"
+                            ]
+                            conn.append_row(new_row, worksheet="Scripts")
+                            st.toast("⚡ ARCHIVE SYNCHRONIZED TO CLOUD")
+                        except Exception as e:
+                            st.error(f"GSHEET SYNC FAILED: {e}")
+
+                        # Trigger Refresh to show data
                         st.rerun()
+
                     except Exception as e:
                         st.error(f"UPLINK ERROR: {str(e)}")
 
@@ -1393,7 +1474,6 @@ elif page == "🧠 Neural Forge":
         st.success("✅ Blueprints ready. Would you like to render the thumbnail assets now?")
         if st.button("🪄 INITIATE DIRECT IMAGE SYNTHESIS", use_container_width=True):
             st.toast("Transmitting Prompt Data to Nano Banana Engine...")
-            # This triggers the automatic AI response to generate images for you in chat.
         
         # INTELLIGENCE TOOLS
         st.divider()
@@ -2175,6 +2255,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
