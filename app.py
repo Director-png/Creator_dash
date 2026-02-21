@@ -196,27 +196,32 @@ def save_script_to_vault(title, content):
     except:
         st.error("Uplink failed.")
 
+import pandas as pd
+
 def sync_history_from_cloud():
+    """Pulls the 8-column data from the Public CSV link."""
     try:
-        # Pull fresh data
-        df = conn.read(worksheet="Scripts", ttl=0)
+        # Your Public CSV Link (Ensure this is updated to your actual link)
+        csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
         
-        # Clean column names to remove hidden spaces/newlines
+        # Read the data
+        df = pd.read_csv(csv_url)
+        
+        # Standardize column names (removes hidden spaces)
         df.columns = [c.strip() for c in df.columns]
         
         user_email = st.session_state.get('user_email', 'N/A')
         
-        if not df.empty and 'Email' in df.columns:
-            # Filtering for current user
+        if not df.empty:
+            # Filter for the current logged-in user
             user_df = df[df['Email'] == user_email]
+            # Save to session state for the History Tab to read
             st.session_state.script_history = user_df.to_dict('records')
             return True
         return False
     except Exception as e:
-        # This will print the exact reason Google rejected the request
-        st.error(f"📡 VAULT RETRIEVAL ERROR: {e}")
+        st.error(f"🛰️ VAULT READ ERROR: {e}")
         return False
-
     
 def ask_void_agent(user_query, context_data):
     # This is where the magic happens
@@ -1376,6 +1381,7 @@ elif page == "🏗️ Script Architect":
 elif page == "🧠 Neural Forge":
     import random
     import datetime
+    import requests  # Crucial for the Web App Bypass
 
     # 1. ACCESS & CREDIT CONTROL (Sync Protocol)
     if not st.session_state.get('logged_in'):
@@ -1383,7 +1389,6 @@ elif page == "🧠 Neural Forge":
         st.stop()
 
     # --- CLOUD SYNC INITIALIZER ---
-    # Restores data from GSheets if session memory is empty
     if 'history_synced' not in st.session_state or not st.session_state.get('script_history'):
         with st.spinner("📡 Synchronizing with Global Vault..."):
             if sync_history_from_cloud():
@@ -1459,43 +1464,41 @@ elif page == "🧠 Neural Forge":
                         st.session_state.pro_forge_txt = generated_output
                         st.session_state.daily_usage += 1
                         
-                        # --- DATA HARDENING: UPLINK TO VAULT & GSHEET (8-COLUMN SYNC) ---
+                        # --- WEB-APP UPLINK (8-COLUMN SYNC) ---
                         now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
                         u_name = st.session_state.get('user_name', 'Operator')
                         u_email = st.session_state.get('user_email', 'N/A')
                         
-                        # Row matches exactly: Timestamp, User Name, Email, Platform, Topic, Generated Script, Visual Dna, Status
-                        new_row = [
-                            str(now_ts),            # 1
-                            str(u_name),            # 2
-                            str(u_email),           # 3
-                            str(f_platform),        # 4
-                            str(f_topic),           # 5
-                            str(generated_output),  # 6
-                            f"Palette: {color_string} | Lighting: {f_lighting}", # 7
-                            "pending"               # 8
-                        ]
+                        # Prepare JSON payload for Apps Script
+                        payload = {
+                            "category": "SAVE_SCRIPT",
+                            "timestamp": str(now_ts),
+                            "userName": str(u_name),
+                            "email": str(u_email),
+                            "platform": str(f_platform),
+                            "topic": str(f_topic),
+                            "script": str(generated_output),
+                            "visualDna": f"Palette: {color_string} | Lighting: {f_lighting}",
+                            "status": "pending"
+                        }
                         
                         # 1. Update Local Session History for immediate UI feedback
                         if 'script_history' not in st.session_state: st.session_state.script_history = []
-                        st.session_state.script_history.append({
-                            "Timestamp": new_row[0],
-                            "User Name": new_row[1],
-                            "Email": new_row[2],
-                            "Platform": new_row[3],
-                            "Topic": new_row[4],
-                            "Generated Script": new_row[5],
-                            "Visual Dna": new_row[6],
-                            "Status": new_row[7]
-                        })
+                        st.session_state.script_history.append(payload)
 
-                        # 2. Cloud GSheet Update
+                        # 2. Transmit via Web App Bridge (NO GOOGLE CLOUD NEEDED)
                         try:
-                            conn.append_row(new_row, worksheet="Scripts")
-                            st.toast("⚡ ARCHIVE SYNCHRONIZED TO CLOUD")
-                            sync_history_from_cloud() # Deep sync
+                            # REPLACE THIS WITH YOUR DEPLOYMENT URL
+                            WEBAPP_URL = "https://script.google.com/macros/s/YOUR_APPS_SCRIPT_URL/exec"
+                            response = requests.post(WEBAPP_URL, json=payload)
+                            
+                            if "SUCCESS" in response.text:
+                                st.toast("⚡ ARCHIVE SYNCHRONIZED VIA WEB-APP")
+                                sync_history_from_cloud() 
+                            else:
+                                st.error(f"📡 WEB-APP REJECTED UPLINK: {response.text}")
                         except Exception as e:
-                            st.error(f"GSHEET SYNC FAILED: {e}")
+                            st.error(f"GSHEET BRIDGE FAILED: {e}")
 
                         st.rerun()
 
@@ -1802,78 +1805,106 @@ elif page == "🛰️ Lead Source":
 elif page == "📜 History":
     st.markdown("<h1 style='color: #00ff41;'>📜 ARCHIVE VAULT</h1>", unsafe_allow_html=True)
     
-    # 🕵️ Search Filter (High-Vigor Utility)
-    search_query = st.text_input("🔍 Search Vault by Topic or Client...", placeholder="Enter keyword...")
+    # 🕵️ Search Filter
+    search_query = st.text_input("🔍 Search Vault by Topic, Platform, or Script...", placeholder="Enter keyword...")
+
+    # Ensure histories exist in session state to avoid errors
+    if 'script_history' not in st.session_state: st.session_state.script_history = []
+    if 'pitch_history' not in st.session_state: st.session_state.pitch_history = []
 
     if not st.session_state.script_history and not st.session_state.pitch_history:
-        st.info("Vault is empty. Generate scripts in the Architect or Pitcher modules.")
+        st.info("Vault is empty. Generate scripts in the Neural Forge to populate the archive.")
     else:
         t1, t2 = st.tabs(["💎 SCRIPT ARCHIVE", "💼 PITCH LOGS"])
         
         with t1:
-            # Filtering logic
-            scripts = [s for s in st.session_state.script_history if search_query.lower() in s['topic'].lower() or search_query.lower() in s['platform'].lower()]
+            # Filtering logic - Updated for the 8-column key names
+            # We check 'topic', 'platform', and 'Generated Script'
+            scripts = [
+                s for s in st.session_state.script_history 
+                if search_query.lower() in str(s.get('Topic', '')).lower() or 
+                   search_query.lower() in str(s.get('Platform', '')).lower() or
+                   search_query.lower() in str(s.get('Generated Script', s.get('script', ''))).lower()
+            ]
             
             if not scripts:
                 st.warning("No scripts matching that query.")
             
             for i, s in enumerate(reversed(scripts)):
+                # Get values safely using .get() to support both old and new data formats
+                s_topic = s.get('Topic', s.get('topic', 'Untitled'))
+                s_platform = s.get('Platform', s.get('platform', 'Unknown'))
+                s_content = s.get('Generated Script', s.get('script', 'No Content'))
+                s_dna = s.get('Visual Dna', 'No DNA data')
+                s_status = s.get('Status', s.get('status', 'pending'))
+                s_user = s.get('User Name', s.get('assigned_to', 'Operator'))
+                s_time = s.get('Timestamp', s.get('timestamp', 'N/A'))
+
                 # Visual Status Tag
-                status_tag = "✅ [FILMED]" if s.get('status') == "filmed" else "⏳ [PENDING]"
-                header_color = "#00ff41" if s.get('status') == "filmed" else "#888"
+                status_tag = "✅ [FILMED]" if s_status == "filmed" else "⏳ [PENDING]"
                 
-                with st.expander(f"{status_tag} {s['platform']} | {s['topic'].upper()}"):
+                with st.expander(f"{status_tag} {s_platform} | {s_topic.upper()}"):
                     col_a, col_b = st.columns([3, 1])
+                    
                     with col_a:
-                        st.markdown(s['script'])
+                        st.markdown("### 📝 Script")
+                        st.info(s_content)
+                        st.divider()
+                        st.markdown("### 🧬 Visual DNA")
+                        st.code(s_dna, language="markdown")
+                        
                     with col_b:
-                        st.caption(f"👤 Assigned: {s['assigned_to']}")
-                        st.caption(f"📅 Date: {s.get('timestamp', 'N/A')}")
+                        st.write("📊 **Metadata**")
+                        st.caption(f"👤 User: {s_user}")
+                        st.caption(f"📅 Date: {s_time}")
                         
                         # Interactive Status Toggle
-                        if s.get('status') != "filmed":
+                        if s_status != "filmed":
                             if st.button("🚀 MARK FILMED", key=f"film_{i}"):
-                                s['status'] = "filmed"
-                                st.toast("Script status updated in Vault.")
+                                # Update locally
+                                s['Status'] = "filmed"
+                                # Note: To update GSheet status, you'd need a "UPDATE" branch in Apps Script
+                                st.toast("Status updated locally.")
                                 st.rerun()
                         
                         st.download_button(
                             label="📥 DOWNLOAD", 
-                            data=s['script'], 
-                            file_name=f"{s['topic']}_script.txt",
-                            key=f"dl_{i}"
+                            data=s_content, 
+                            file_name=f"{s_topic}_script.txt",
+                            key=f"dl_{i}",
+                            use_container_width=True
                         )
 
         with t2:
-            # Filtering logic for pitches
-            pitches = [p for p in st.session_state.pitch_history if search_query.lower() in p['client'].lower()]
+            # Logic for pitches remains the same
+            pitches = [p for p in st.session_state.pitch_history if search_query.lower() in p.get('client', '').lower()]
             
             if not pitches:
                 st.warning("No pitches matching that query.")
 
             for i, p in enumerate(reversed(pitches)):
-                with st.container(border=True): # Added border for better separation
+                with st.container(border=True):
                     col_p1, col_p2 = st.columns([4, 1])
                     with col_p1:
-                        st.markdown(f"### 🎯 Target: {p['client']}")
-                        st.info(p['pitch'])
+                        st.markdown(f"### 🎯 Target: {p.get('client', 'Unknown')}")
+                        st.info(p.get('pitch', 'No content'))
                     with col_p2:
                         st.write("📈 **Status**")
                         st.success("Sent")
                         st.caption(f"🕒 {p.get('timestamp', 'N/A')}")
                     
-                    # Copy to Clipboard shortcut (visual representation)
                     if st.button(f"📋 Copy Pitch {i}", key=f"copy_{i}"):
                         st.toast("Pitch text copied to local memory.")
 
-    # 🔄 GLOBAL SYNC (The "Generational Wealth" logic)
+    # 🔄 GLOBAL SYNC (Manual Refresh)
     st.divider()
-    if st.button("🛰️ SYNC VAULT TO GLOBAL CLOUD", use_container_width=True):
-        with st.spinner("Pushing local data to GSheets..."):
-            # This is where we would trigger the GSheet append_row logic for all new items
-            time.sleep(1.5)
-            st.success("Global Vault Synced. Your data is now secure in the cloud.")
-
+    if st.button("🛰️ FORCE REFRESH FROM GLOBAL CLOUD", use_container_width=True):
+        with st.spinner("Pulling latest data from GSheets..."):
+            if sync_history_from_cloud():
+                st.success("Vault Synchronized.")
+                st.rerun()
+            else:
+                st.error("Sync failed. Check your CSV Public Link.")
 
 # --- MODULE 11: ADMIN CONSOLE (OPTION C) ---
 elif page == "🛡️ Admin Console":
@@ -2288,6 +2319,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
