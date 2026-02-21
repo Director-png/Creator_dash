@@ -1561,6 +1561,7 @@ elif page == "🧪 Creator Lab":
             with res_col2:
                 st.markdown(f"<h2 style='color: #00ff41;'>₹ {total_inr:,.2f}</h2>", unsafe_allow_html=True)
 
+        # --- GENERATION LOGIC ---
         if st.button("🧬 GENERATE PROFIT BLUEPRINT", use_container_width=True):
             with st.spinner("Calculating Strategic Trajectory..."):
                 try:
@@ -1587,11 +1588,19 @@ elif page == "🧪 Creator Lab":
                         messages=[{"role": "user", "content": roi_prompt}],
                         temperature=0.5
                     )
-                    st.markdown("---")
-                    st.markdown(f"### 📑 {header_label} STRATEGY REPORT")
-                    st.write(res.choices[0].message.content)
+                    # Save result to session state to prevent disappearance
+                    st.session_state.roi_report = res.choices[0].message.content
                 except Exception as e:
                     st.error(f"Uplink Error: {str(e)}")
+
+        # --- PERSISTENT DISPLAY ---
+        if 'roi_report' in st.session_state:
+            st.markdown("---")
+            st.markdown(f"### 📑 {header_label} STRATEGY REPORT")
+            st.info(st.session_state.roi_report)
+            if st.button("Clear Report"):
+                del st.session_state.roi_report
+                st.rerun()
 
     # --- THE BASIC LAB (HOOK & RETENTION) ---
     else:
@@ -1615,7 +1624,6 @@ elif page == "🧪 Creator Lab":
             script_text = st.text_area("Paste Full Script:")
             if st.button("IDENTIFY DROPOFF POINTS"):
                 st.warning("Analysis complete: Section 2 is too 'Wordy'. Add a visual pattern interrupt at 0:15.")
-
 
 # --- MODULE 9: LEAD SOURCE (RESILIENT AUTO-SWITCH) ---
 elif page == "🛰️ Lead Source":
@@ -2120,6 +2128,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
