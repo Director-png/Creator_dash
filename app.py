@@ -199,30 +199,28 @@ def save_script_to_vault(title, content):
 import pandas as pd
 
 def sync_history_from_cloud():
-    """Pulls the 8-column data from the Public CSV link."""
     try:
-        # Your Public CSV Link (Ensure this is updated to your actual link)
-        csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
+        # PASTE YOUR NEW CSV LINK HERE
+        CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQTrDvNWe810s55puzBodFKvfUbfMV_l-QoQIfbdPxeQknClGGCQT33UQ471NyGTw4aHLrDTw/pub?gid=1490190727&single=true&output=csv"
         
-        # Read the data
-        df = pd.read_csv(csv_url)
-        
-        # Standardize column names (removes hidden spaces)
+        # Pull data and strip spaces from headers
+        df = pd.read_csv(CSV_URL)
         df.columns = [c.strip() for c in df.columns]
         
         user_email = st.session_state.get('user_email', 'N/A')
         
         if not df.empty:
-            # Filter for the current logged-in user
-            user_df = df[df['Email'] == user_email]
-            # Save to session state for the History Tab to read
-            st.session_state.script_history = user_df.to_dict('records')
-            return True
+            # Check if 'Email' column exists before filtering
+            if 'Email' in df.columns:
+                user_df = df[df['Email'] == user_email]
+                # Convert to records so the History Tab can loop through them
+                st.session_state.script_history = user_df.to_dict('records')
+                return True
         return False
     except Exception as e:
-        st.error(f"🛰️ VAULT READ ERROR: {e}")
+        st.error(f"🛰️ HISTORY READ ERROR: {e}")
         return False
-    
+
 def ask_void_agent(user_query, context_data):
     # This is where the magic happens
     prompt = f"""
@@ -2319,6 +2317,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
