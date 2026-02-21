@@ -1511,7 +1511,6 @@ elif page == "💼 Client Pitcher":
         else:
             st.info("Awaiting Target Data. Use 'Lead Source' to beam a target or enter details.")
 
-
 # --- MODULE 8: CREATOR LAB & LEAD SOURCE ---
 elif page == "🧪 Creator Lab":
     # 🕵️ Check Persona and Status
@@ -1563,8 +1562,36 @@ elif page == "🧪 Creator Lab":
                 st.markdown(f"<h2 style='color: #00ff41;'>₹ {total_inr:,.2f}</h2>", unsafe_allow_html=True)
 
         if st.button("🧬 GENERATE PROFIT BLUEPRINT", use_container_width=True):
-            # Existing logic remains untouched
-            st.info(f"Generating {header_label} Blueprint...")
+            with st.spinner("Calculating Strategic Trajectory..."):
+                try:
+                    roi_prompt = f"""
+                    System: You are VOID-OS, a strategic financial AI for elite creators.
+                    User Data:
+                    - Niche: {selected_niche}
+                    - Weekly Views: {views}
+                    - Product Price: ${product_price}
+                    - Conversion Rate: {conv_rate}%
+                    - Ad Revenue (USD): ${ad_rev_usd}
+                    - Sales Revenue (USD): ${sales_rev_usd}
+                    - Total Weekly (INR): ₹{total_inr:,.2f}
+
+                    Task: Provide a 3-point 'Profit Blueprint' that is easy to understand.
+                    1. Revenue Breakdown (Simple terms)
+                    2. Scaling Advice (How to double these numbers)
+                    3. High-Vigor Warning (Potential risks in this niche)
+                    Keep it punchy, professional, and tactical. Use bolding for key terms.
+                    """
+                    
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile", 
+                        messages=[{"role": "user", "content": roi_prompt}],
+                        temperature=0.5
+                    )
+                    st.markdown("---")
+                    st.markdown(f"### 📑 {header_label} STRATEGY REPORT")
+                    st.write(res.choices[0].message.content)
+                except Exception as e:
+                    st.error(f"Uplink Error: {str(e)}")
 
     # --- THE BASIC LAB (HOOK & RETENTION) ---
     else:
@@ -1579,7 +1606,6 @@ elif page == "🧪 Creator Lab":
             if st.button("ANALYZE HOOK"):
                 with st.spinner("Neural Processing..."):
                     hook_prompt = f"Analyze this hook for viral potential: {user_hook}. Rate it 1-10 and suggest a 'High-Vigor' rewrite."
-                    # Using existing groq_c defined in your app.py
                     res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": hook_prompt}])
                     st.success(res.choices[0].message.content)
 
@@ -1589,6 +1615,7 @@ elif page == "🧪 Creator Lab":
             script_text = st.text_area("Paste Full Script:")
             if st.button("IDENTIFY DROPOFF POINTS"):
                 st.warning("Analysis complete: Section 2 is too 'Wordy'. Add a visual pattern interrupt at 0:15.")
+
 
 # --- MODULE 9: LEAD SOURCE (RESILIENT AUTO-SWITCH) ---
 elif page == "🛰️ Lead Source":
@@ -2093,6 +2120,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
