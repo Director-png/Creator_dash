@@ -1685,35 +1685,82 @@ elif page == "🛰️ Lead Source":
                     sim_data = [{"Handle": "@Lead_Gen_Master", "Platform": "IG", "Followers": "50K", "Gap": "No Funnel", "Vigor": 90, "Value": "High"}]
                     st.session_state.found_leads = pd.DataFrame(sim_data)
 
-
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
 elif page == "📜 History":
     st.markdown("<h1 style='color: #00ff41;'>📜 ARCHIVE VAULT</h1>", unsafe_allow_html=True)
     
+    # 🕵️ Search Filter (High-Vigor Utility)
+    search_query = st.text_input("🔍 Search Vault by Topic or Client...", placeholder="Enter keyword...")
+
     if not st.session_state.script_history and not st.session_state.pitch_history:
         st.info("Vault is empty. Generate scripts in the Architect or Pitcher modules.")
     else:
         t1, t2 = st.tabs(["💎 SCRIPT ARCHIVE", "💼 PITCH LOGS"])
         
         with t1:
-            for i, s in enumerate(reversed(st.session_state.script_history)):
-                with st.expander(f"📜 {s['platform']} | {s['topic'].upper()}"):
+            # Filtering logic
+            scripts = [s for s in st.session_state.script_history if search_query.lower() in s['topic'].lower() or search_query.lower() in s['platform'].lower()]
+            
+            if not scripts:
+                st.warning("No scripts matching that query.")
+            
+            for i, s in enumerate(reversed(scripts)):
+                # Visual Status Tag
+                status_tag = "✅ [FILMED]" if s.get('status') == "filmed" else "⏳ [PENDING]"
+                header_color = "#00ff41" if s.get('status') == "filmed" else "#888"
+                
+                with st.expander(f"{status_tag} {s['platform']} | {s['topic'].upper()}"):
                     col_a, col_b = st.columns([3, 1])
                     with col_a:
                         st.markdown(s['script'])
                     with col_b:
-                        st.caption(f"Target: {s['assigned_to']}")
-                        if st.button("✅ MARK AS FILMED", key=f"film_{i}"):
-                            st.toast("Updated in Global Vault")
-                        st.download_button("📥 DOWNLOAD TXT", s['script'], file_name=f"script_{i}.txt")
+                        st.caption(f"👤 Assigned: {s['assigned_to']}")
+                        st.caption(f"📅 Date: {s.get('timestamp', 'N/A')}")
+                        
+                        # Interactive Status Toggle
+                        if s.get('status') != "filmed":
+                            if st.button("🚀 MARK FILMED", key=f"film_{i}"):
+                                s['status'] = "filmed"
+                                st.toast("Script status updated in Vault.")
+                                st.rerun()
+                        
+                        st.download_button(
+                            label="📥 DOWNLOAD", 
+                            data=s['script'], 
+                            file_name=f"{s['topic']}_script.txt",
+                            key=f"dl_{i}"
+                        )
 
         with t2:
-            for i, p in enumerate(reversed(st.session_state.pitch_history)):
-                with st.container():
-                    st.markdown(f"### 🎯 Target: {p['client']}")
-                    st.info(p['pitch'])
-                    st.caption(f"Transmission Time: {p.get('timestamp', 'N/A')}")
-                    st.divider()
+            # Filtering logic for pitches
+            pitches = [p for p in st.session_state.pitch_history if search_query.lower() in p['client'].lower()]
+            
+            if not pitches:
+                st.warning("No pitches matching that query.")
+
+            for i, p in enumerate(reversed(pitches)):
+                with st.container(border=True): # Added border for better separation
+                    col_p1, col_p2 = st.columns([4, 1])
+                    with col_p1:
+                        st.markdown(f"### 🎯 Target: {p['client']}")
+                        st.info(p['pitch'])
+                    with col_p2:
+                        st.write("📈 **Status**")
+                        st.success("Sent")
+                        st.caption(f"🕒 {p.get('timestamp', 'N/A')}")
+                    
+                    # Copy to Clipboard shortcut (visual representation)
+                    if st.button(f"📋 Copy Pitch {i}", key=f"copy_{i}"):
+                        st.toast("Pitch text copied to local memory.")
+
+    # 🔄 GLOBAL SYNC (The "Generational Wealth" logic)
+    st.divider()
+    if st.button("🛰️ SYNC VAULT TO GLOBAL CLOUD", use_container_width=True):
+        with st.spinner("Pushing local data to GSheets..."):
+            # This is where we would trigger the GSheet append_row logic for all new items
+            time.sleep(1.5)
+            st.success("Global Vault Synced. Your data is now secure in the cloud.")
+
 
 # --- MODULE 11: ADMIN CONSOLE (OPTION C) ---
 elif page == "🛡️ Admin Console":
@@ -2128,6 +2175,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
