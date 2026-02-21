@@ -116,24 +116,23 @@ if 'current_subs' not in st.session_state:
 
 # --- ANIMATION UTILITY ---
 def sync_history_from_cloud():
-    """Fetches scripts using the new 8-column architecture."""
     try:
-        # Pull fresh data
+        # Pull data from the 'Scripts' tab
         df = conn.read(worksheet="Scripts", ttl=0)
         
-        # Ensure we are only looking at the current user's data
         user_email = st.session_state.get('user_email', 'N/A')
         
         if not df.empty:
-            # Filtering and mapping to session_state
-            # Columns: Timestamp, User Name, Email, Platform, Topic, Generated, Script, Visual Dna, Status
+            # Filter rows where the 'Email' column matches the current user
             user_df = df[df['Email'] == user_email]
+            # Convert to list of dictionaries for the History page
             st.session_state.script_history = user_df.to_dict('records')
             return True
         return False
     except Exception as e:
         st.error(f"📡 VAULT RETRIEVAL ERROR: {e}")
         return False
+
 def fetch_vault_data(sheet_name):
     """Fetches any specific sheet from your empire's vault."""
     SHEET_IDS = {
@@ -1380,8 +1379,8 @@ elif page == "🧠 Neural Forge":
         st.stop()
 
     # --- CLOUD SYNC INITIALIZER ---
-    # This runs once per session or if the history is wiped to restore data from GSheets
-    if 'history_synced' not in st.session_state or not st.session_state.script_history:
+    # Restores data from GSheets if session memory is empty
+    if 'history_synced' not in st.session_state or not st.session_state.get('script_history'):
         with st.spinner("📡 Synchronizing with Global Vault..."):
             if sync_history_from_cloud():
                 st.session_state.history_synced = True
@@ -1456,54 +1455,54 @@ elif page == "🧠 Neural Forge":
                         st.session_state.pro_forge_txt = generated_output
                         st.session_state.daily_usage += 1
                         
-                        # --- DATA HARDENING: UPLINK TO VAULT & GSHEET ---
+                        # --- DATA HARDENING: UPLINK TO VAULT & GSHEET (8-COLUMN SYNC) ---
                         now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+                        u_name = st.session_state.get('user_name', 'Operator')
+                        u_email = st.session_state.get('user_email', 'N/A')
                         
-                        # 1. Update Local Session History Immediately
-                        archive_entry = {
-                            "timestamp": now_ts,
-                            "platform": f_platform,
-                            "topic": f_topic,
-                            "script": generated_output,
-                            "assigned_to": st.session_state.get('user_name', 'Operator'),
-                            "status": "pending"
-                        }
-                        st.session_state.script_history.append(archive_entry)
+                        # Row matches exactly: Timestamp, User Name, Email, Platform, Topic, Generated Script, Visual Dna, Status
+                        new_row = [
+                            str(now_ts),            # 1
+                            str(u_name),            # 2
+                            str(u_email),           # 3
+                            str(f_platform),        # 4
+                            str(f_topic),           # 5
+                            str(generated_output),  # 6
+                            f"Palette: {color_string} | Lighting: {f_lighting}", # 7
+                            "pending"               # 8
+                        ]
+                        
+                        # 1. Update Local Session History for immediate UI feedback
+                        if 'script_history' not in st.session_state: st.session_state.script_history = []
+                        st.session_state.script_history.append({
+                            "Timestamp": new_row[0],
+                            "User Name": new_row[1],
+                            "Email": new_row[2],
+                            "Platform": new_row[3],
+                            "Topic": new_row[4],
+                            "Generated Script": new_row[5],
+                            "Visual Dna": new_row[6],
+                            "Status": new_row[7]
+                        })
 
                         # 2. Cloud GSheet Update
                         try:
-                            # Headers: Timestamp, Platform, Topic, Script, User, Status
-                            new_row = [
-                                now_ts, 
-                                f_platform, 
-                                f_topic, 
-                                generated_output, 
-                                st.session_state.get('user_email', 'N/A'), 
-                                "pending"
-                            ]
                             conn.append_row(new_row, worksheet="Scripts")
                             st.toast("⚡ ARCHIVE SYNCHRONIZED TO CLOUD")
-                            # Refresh history from cloud to ensure total consistency
-                            sync_history_from_cloud()
+                            sync_history_from_cloud() # Deep sync
                         except Exception as e:
                             st.error(f"GSHEET SYNC FAILED: {e}")
 
-                        # Trigger Refresh to show data
                         st.rerun()
 
                     except Exception as e:
                         st.error(f"UPLINK ERROR: {str(e)}")
 
-    # 3. THE REVEAL & DIRECT SYNTHESIS
+    # 3. THE REVEAL
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 PRODUCTION BLUEPRINT")
         st.info(st.session_state.pro_forge_txt)
-        
-        # AUTOMATED RENDERING BRIDGE
-        st.success("✅ Blueprints ready. Would you like to render the thumbnail assets now?")
-        if st.button("🪄 INITIATE DIRECT IMAGE SYNTHESIS", use_container_width=True):
-            st.toast("Transmitting Prompt Data to Nano Banana Engine...")
         
         # INTELLIGENCE TOOLS
         st.divider()
@@ -2285,6 +2284,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
