@@ -21,7 +21,11 @@ import streamlit as st
 import time
 from streamlit_lottie import st_lottie # You'll need: pip install streamlit-lottie
 import requests
+import streamlit as st
+from streamlit_gsheets import GSheetsConnection
 
+# This defines 'conn' so the rest of the app can see it
+conn = st.connection("gsheets", type=GSheetsConnection)
 def ignition_sequence():
     if 'ignition_complete' not in st.session_state:
         # Create a placeholder that disappears once done
@@ -112,23 +116,29 @@ if 'current_subs' not in st.session_state:
 
 # --- ANIMATION UTILITY ---
 def sync_history_from_cloud():
-    """Fetches all scripts from the GSheet 'Scripts' tab and loads them into session state."""
+    """Fetches scripts using the GSheet connection."""
     try:
-        # Fetch all records from the 'Scripts' worksheet
-        records = conn.get_all_records(worksheet="Scripts")
-        # Format them to match your archive_entry structure
+        # We use the internal 'conn' we defined above
+        # The 'Scripts' worksheet must exist in your GSheet
+        records = conn.read(worksheet="Scripts", ttl=0)
+        
+        user_email = st.session_state.get('user_email', 'N/A')
+        
+        # Filtering data for the current user
         st.session_state.script_history = [
             {
-                "timestamp": r.get('Timestamp', ''),
-                "platform": r.get('Platform', ''),
-                "topic": r.get('Topic', ''),
-                "script": r.get('Script', ''),
-                "assigned_to": r.get('User', 'Unknown'),
-                "status": r.get('Status', 'pending')
-            } for r in records
+                "timestamp": row['Timestamp'],
+                "platform": row['Platform'],
+                "topic": row['Topic'],
+                "script": row['Script'],
+                "assigned_to": row['User'],
+                "status": row['Status']
+            } for index, row in records.iterrows() if row['User'] == user_email
         ]
+        return True
     except Exception as e:
-        st.error(f"DATABASE DESYNC: Could not pull history. {e}")
+        st.error(f"DATABASE DESYNC: {e}")
+        return False
 
 def fetch_vault_data(sheet_name):
     """Fetches any specific sheet from your empire's vault."""
@@ -2281,6 +2291,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
