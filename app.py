@@ -116,28 +116,20 @@ if 'current_subs' not in st.session_state:
 
 # --- ANIMATION UTILITY ---
 def sync_history_from_cloud():
-    """Fetches scripts using the GSheet connection."""
     try:
-        # We use the internal 'conn' we defined above
-        # The 'Scripts' worksheet must exist in your GSheet
-        records = conn.read(worksheet="Scripts", ttl=0)
+        # Pull fresh data
+        df = conn.read(worksheet="Scripts", ttl=0)
         
         user_email = st.session_state.get('user_email', 'N/A')
         
-        # Filtering data for the current user
-        st.session_state.script_history = [
-            {
-                "timestamp": row['Timestamp'],
-                "platform": row['Platform'],
-                "topic": row['Topic'],
-                "script": row['Script'],
-                "assigned_to": row['User'],
-                "status": row['Status']
-            } for index, row in records.iterrows() if row['User'] == user_email
-        ]
-        return True
+        # Filter by Email column to ensure privacy
+        if not df.empty and 'Email' in df.columns:
+            filtered_df = df[df['Email'] == user_email]
+            st.session_state.script_history = filtered_df.to_dict('records')
+            return True
+        return False
     except Exception as e:
-        st.error(f"DATABASE DESYNC: {e}")
+        st.error(f"📡 VAULT SYNC ERROR: {str(e)}")
         return False
 
 def fetch_vault_data(sheet_name):
@@ -2291,6 +2283,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
