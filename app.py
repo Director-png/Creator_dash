@@ -115,24 +115,6 @@ if 'current_subs' not in st.session_state:
 
 
 # --- ANIMATION UTILITY ---
-def sync_history_from_cloud():
-    try:
-        # Pull data from the 'Scripts' tab
-        df = conn.read(worksheet="Scripts", ttl=0)
-        
-        user_email = st.session_state.get('user_email', 'N/A')
-        
-        if not df.empty:
-            # Filter rows where the 'Email' column matches the current user
-            user_df = df[df['Email'] == user_email]
-            # Convert to list of dictionaries for the History page
-            st.session_state.script_history = user_df.to_dict('records')
-            return True
-        return False
-    except Exception as e:
-        st.error(f"📡 VAULT RETRIEVAL ERROR: {e}")
-        return False
-
 def fetch_vault_data(sheet_name):
     """Fetches any specific sheet from your empire's vault."""
     SHEET_IDS = {
@@ -214,6 +196,28 @@ def save_script_to_vault(title, content):
     except:
         st.error("Uplink failed.")
 
+def sync_history_from_cloud():
+    try:
+        # Pull fresh data
+        df = conn.read(worksheet="Scripts", ttl=0)
+        
+        # Clean column names to remove hidden spaces/newlines
+        df.columns = [c.strip() for c in df.columns]
+        
+        user_email = st.session_state.get('user_email', 'N/A')
+        
+        if not df.empty and 'Email' in df.columns:
+            # Filtering for current user
+            user_df = df[df['Email'] == user_email]
+            st.session_state.script_history = user_df.to_dict('records')
+            return True
+        return False
+    except Exception as e:
+        # This will print the exact reason Google rejected the request
+        st.error(f"📡 VAULT RETRIEVAL ERROR: {e}")
+        return False
+
+    
 def ask_void_agent(user_query, context_data):
     # This is where the magic happens
     prompt = f"""
@@ -2284,6 +2288,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
