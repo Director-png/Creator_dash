@@ -1489,7 +1489,7 @@ elif page == "🧠 Neural Forge":
                         # 2. Transmit via Web App Bridge (NO GOOGLE CLOUD NEEDED)
                         try:
                             # REPLACE THIS WITH YOUR DEPLOYMENT URL
-                            WEBAPP_URL = "https://script.google.com/macros/s/YOUR_APPS_SCRIPT_URL/exec"
+                            WEBAPP_URL = "https://script.google.com/macros/s/AKfycby38DOr6SA2x_r-oS1gHudA39Gucb2BioMpVbfe6i288uOiBZnuv421vVlHv3O8J_KY/exec"
                             response = requests.post(WEBAPP_URL, json=payload)
                             
                             if "SUCCESS" in response.text:
