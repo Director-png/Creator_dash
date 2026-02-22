@@ -671,6 +671,9 @@ if st.sidebar.checkbox("🔍 Debug Node Mapping"):
 # FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
 
 # --- GATEKEEPER START ---
+import requests
+import datetime
+
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 if 'otp_sent' not in st.session_state:
@@ -684,7 +687,6 @@ if 'user_status' not in st.session_state:
 ELITE_CIPHERS = {
     "VOID-V1-X7R2-DELTA": "Elite Pioneer 1",
     "VOID-V1-K9P4-OMEGA": "Elite Pioneer 2",
-    # ... add others as needed
 }
 
 if not st.session_state.logged_in:
@@ -703,6 +705,7 @@ if not st.session_state.logged_in:
                 st.session_state.update({"logged_in": True, "user_name": "Master Director", "user_role": "admin", "user_status": "Pro", "user_email": "admin"})
                 st.rerun()
             elif not users.empty:
+                # Assuming Column 0 is Email, Column 2 is Password
                 match = users[(users.iloc[:, 0].astype(str).str.lower() == email_in) & (users.iloc[:, 2].astype(str) == pw_in)]
                 if not match.empty:
                     raw_status = str(match.iloc[0, 4]).strip().capitalize()
@@ -733,22 +736,29 @@ if not st.session_state.logged_in:
             st.markdown("### PHASE 1: DATA CAPTURE")
             c1, c2 = st.columns(2)
             with c1:
-                n = st.text_input("FULL NAME", key="reg_name")
-                e = st.text_input("EMAIL", key="reg_email")
-                mob = st.text_input("MOBILE", key="reg_mob")
+                n = st.text_input("FULL NAME", key="reg_name_input")
+                e = st.text_input("EMAIL", key="reg_email_input")
+                mob = st.text_input("MOBILE", key="reg_mob_input")
             with c2:
-                p = st.text_input("PASSKEY", type="password", key="reg_pass")
-                sa = st.text_input("SECURITY KEY (DOB/ANSWER)", key="reg_sa")
-                ni = st.text_input("NICHE", key="reg_niche")
+                p = st.text_input("PASSKEY", type="password", key="reg_pass_input")
+                sa = st.text_input("SECURITY KEY (DOB/ANSWER)", key="reg_sa_input")
+                ni = st.text_input("NICHE", key="reg_niche_input")
 
             channel = st.radio("SELECT UPLINK CHANNEL", ["Email", "WhatsApp"], horizontal=True, key="reg_channel")
 
             if st.button("⚔️ GENERATE SECURE OTP", use_container_width=True):
                 if n and e and mob and sa and ni and p:
                     with st.status("Transmitting Initialization Signal...") as status:
+                        # CRITICAL: Lock data into session state before rerun
+                        st.session_state.temp_reg_data = {
+                            "name": n, "email": e.strip().lower(), "mobile": mob,
+                            "pass": p, "sa": sa, "niche": ni
+                        }
+                        
                         payload = {"category": "SEND_OTP", "email": e.strip().lower(), "channel": channel}
                         try:
                             response = requests.post(NEW_URL, json=payload, timeout=15)
+                            # Check for a 6-digit response (The OTP itself)
                             if response.status_code == 200 and len(response.text.strip()) == 6:
                                 st.session_state.generated_otp = response.text.strip()
                                 st.session_state.otp_sent = True
@@ -762,35 +772,43 @@ if not st.session_state.logged_in:
         
         else:
             st.markdown(f"### PHASE 2: VERIFY UPLINK")
+            st.info(f"Verification code sent to {st.session_state.temp_reg_data['email']}")
             user_otp = st.text_input("ENTER 6-DIGIT CODE", placeholder="000000")
             
             if st.button("🔓 FINALIZE INITIALIZATION", use_container_width=True):
                 if user_otp == st.session_state.generated_otp:
+                    # Retrieve data from temp storage
+                    d = st.session_state.temp_reg_data
                     final_payload = {
                         "category": "REGISTRATION",
-                        "name": st.session_state.reg_name,
-                        "email": st.session_state.reg_email.lower().strip(),
-                        "password": st.session_state.reg_pass,
-                        "mobile": st.session_state.reg_mob,
-                        "answer": st.session_state.reg_sa,
-                        "niche": st.session_state.reg_niche,
+                        "name": d["name"],
+                        "email": d["email"],
+                        "password": d["pass"],
+                        "mobile": d["mobile"],
+                        "answer": d["sa"],
+                        "niche": d["niche"],
                         "role": "user",
                         "status": "Free"
                     }
-                    r = requests.post(NEW_URL, json=final_payload, timeout=20)
-                    if "SUCCESS" in r.text:
-                        st.success("✅ IDENTITY SECURED. WELCOME TO THE VOID.")
-                        st.balloons()
-                        st.session_state.otp_sent = False 
-                    else: st.error(f"VAULT REJECTION: {r.text}")
-                else: st.error("INTEGRITY BREACH: INVALID CODE.")
+                    try:
+                        r = requests.post(NEW_URL, json=final_payload, timeout=20)
+                        if "SUCCESS" in r.text:
+                            st.success("✅ IDENTITY SECURED. WELCOME TO THE VOID.")
+                            st.balloons()
+                            # Clean up
+                            st.session_state.otp_sent = False 
+                            st.session_state.generated_otp = None
+                            del st.session_state.temp_reg_data
+                        else: st.error(f"VAULT REJECTION: {r.text}")
+                    except Exception as e: st.error(f"SYSTEM TIMEOUT: {e}")
+                else: 
+                    st.error("INTEGRITY BREACH: INVALID CODE.")
             
             if st.button("Back to Phase 1"):
                 st.session_state.otp_sent = False
                 st.rerun()
 
     with t3:
-        # THE ELITE ACCESS KEY PORTAL
         st.markdown("### 🛰️ ELITE UPLINK")
         cipher_in = st.text_input("ENTER ELITE ACCESS CIPHER", type="password")
         if st.button("⚡ EXECUTE PRO BYPASS", use_container_width=True):
@@ -2317,6 +2335,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
