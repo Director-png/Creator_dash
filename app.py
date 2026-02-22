@@ -1030,7 +1030,7 @@ elif page == "📡 My Growth Hub":
             st.markdown("### 🛰️ PRO-SYNC TERMINAL")
             st.caption("Real-time API Uplink: Active")
             
-            target_url = st.text_input("🔗 Target Profile/Channel URL", placeholder="YouTube or Instagram Link")
+            target_url = st.text_input("🔗 Target Profile URL", placeholder="YouTube or Instagram Link")
             
             if st.button("🔄 INITIATE LIVE SYNC", use_container_width=True):
                 if target_url:
@@ -1038,29 +1038,29 @@ elif page == "📡 My Growth Hub":
                         subs, views = get_live_stats(target_url)
                         
                         if subs:
-                            # --- LOGICAL CALIBRATION START ---
+                            # LOGIC: First-time sync stabilization
                             if 'start_count' not in st.session_state:
-                                # First time ever: set start count to 98% of current to simulate realistic history
-                                st.session_state.start_count = int(subs * 0.98) 
-                                st.session_state.days_passed = 7 # Assume 7 days of data for logical velocity
-                                st.session_state.sync_time = datetime.datetime.now()
+                                # Assume 2% growth over a 7-day period to ground the velocity math
+                                st.session_state.start_count = int(subs * 0.98)
+                                st.session_state.days_passed = 7
+                                st.session_state.last_sync_date = datetime.date.today()
                             
-                            # If it's a repeat sync on the same day, don't let days_passed stay at 0
-                            if 'sync_time' in st.session_state:
-                                hours_since = (datetime.datetime.now() - st.session_state.sync_time).total_seconds() / 3600
-                                if hours_since > 24:
-                                    st.session_state.days_passed += (hours_since / 24)
-                            
+                            # Increment days if a day has actually passed since last sync
+                            if 'last_sync_date' in st.session_state:
+                                delta = (datetime.date.today() - st.session_state.last_sync_date).days
+                                if delta > 0:
+                                    st.session_state.days_passed += delta
+                                    st.session_state.last_sync_date = datetime.date.today()
+
                             st.session_state.current_count = subs
                             st.session_state.total_views = views
                             st.success(f"Sync Successful: {subs:,} Followers detected.")
                         else:
-                            # RECTIFIED FALLBACK: No more +2 logic. 
-                            # We use the existing state if available, or stay at 0.
+                            # Graceful Warning
                             if 'current_count' in st.session_state:
-                                st.warning("Uplink unstable. Using cached telemetry.")
+                                st.warning("Uplink unstable. Maintaining current telemetry records.")
                             else:
-                                st.error("Uplink failed. Ensure the URL is public and correctly formatted.")
+                                st.error("Access Denied. Check URL privacy settings or platform status.")
         else:
             st.markdown("### 📉 MANUAL TRACKER (BASIC)")
             st.info("Upgrade to PRO to unlock Automated Live Sync.")
@@ -1071,7 +1071,7 @@ elif page == "📡 My Growth Hub":
             with col_b2:
                 st.session_state.current_count = st.number_input("Current Followers", value=1200)
 
-    # 2. THE ANALYTICS VISUALIZER (Logic-Corrected)
+    # 2. THE ANALYTICS VISUALIZER (Logic Corrected)
     if 'current_count' in st.session_state:
         st.divider()
         
@@ -1079,40 +1079,35 @@ elif page == "📡 My Growth Hub":
         current = st.session_state.current_count
         days = st.session_state.get('days_passed', 1)
         
-        # Calculate Real Growth
         growth_diff = current - start
-        # Limit daily_avg to something believable for first-day syncs (max 5% growth per day cap)
-        raw_daily_avg = growth_diff / days if days > 0 else 0
-        daily_avg = min(raw_daily_avg, current * 0.05) if raw_daily_avg > 0 else raw_daily_avg
+        # Calculate daily average
+        daily_avg = growth_diff / days if days > 0 else 0
         
-        # --- PREDICTION LOGIC & WARNINGS ---
-        if daily_avg < 0:
-            st.error(f"⚠️ **DECAY WARNING**: Channel is losing {abs(int(daily_avg))} users/day.")
-        elif daily_avg > 0:
-            st.success(f"🔥 **GROWTH ACTIVE**: Velocity is +{int(daily_avg)} users/day.")
-        else:
-            st.info("⚖️ **STABLE**: No significant growth or decay detected.")
+        # --- BELIEVABLE PREDICTION FILTER ---
+        # Caps growth at 5% daily to keep projections within human reality
+        logical_daily = min(daily_avg, current * 0.05) if daily_avg > 0 else daily_avg
         
-        # 30-Day Projection (Conservative 70% momentum)
-        projection_conservative = current + (daily_avg * 30 * 0.7)
+        if logical_daily < 0:
+            st.error(f"⚠️ **DECAY WARNING**: Account is losing {abs(int(logical_daily))} users/day.")
+        elif logical_daily > 0:
+            st.success(f"🔥 **GROWTH ACTIVE**: Velocity is +{int(logical_daily)} users/day.")
+        
+        projection_30d = current + (logical_daily * 30 * 0.75) # 75% Conservative Factor
         
         # Metric Row
         m1, m2, m3 = st.columns(3)
         m1.metric("LIVE FOLLOWERS", f"{current:,}", f"{growth_diff:+}")
-        m2.metric("DAILY VELOCITY", f"{int(daily_avg):+}/day")
-        m3.metric("30D FORECAST", f"{int(projection_conservative):,}")
+        m2.metric("DAILY VELOCITY", f"{int(logical_daily):+}/day")
+        m3.metric("30D FORECAST", f"{int(projection_30d):,}")
 
         with st.expander("📊 PROJECTION SCENARIOS"):
             c1, c2 = st.columns(2)
             with c1:
                 st.write("**🛡️ Conservative (70%)**")
-                st.subheader(f"{int(projection_conservative):,}")
-                st.caption("Includes organic churn & algorithm fatigue.")
+                st.subheader(f"{int(current + (logical_daily * 30 * 0.7)):,}")
             with c2:
-                st.write("**🔥 Viral (100%)**")
-                viral = current + (daily_avg * 30)
-                st.subheader(f"{int(viral):,}")
-                st.caption("Assumes peak engagement is maintained.")
+                st.write("**🚀 Target (100%)**")
+                st.subheader(f"{int(current + (logical_daily * 30)):,}")
 
     # 3. TASK FORGE
     st.divider()
@@ -2337,6 +2332,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
