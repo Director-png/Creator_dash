@@ -357,22 +357,31 @@ if 'user_profiles' not in st.session_state:
 def get_live_stats(url):
     if not url: return None, None
     
+    # Identify if it's Instagram to apply specialized headers
+    is_instagram = "instagram.com" in url.lower()
+    
     ydl_opts = {
         'quiet': True,
         'no_warnings': True,
         'skip_download': True,
         'extract_flat': True,
-        # STEALTH MODE: Mimics a real browser more effectively
-        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Sec-Fetch-Mode': 'navigate',
+        }
     }
-    
+
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
+            # Instagram uses 'follower_count', YouTube uses 'subscriber_count'
             subs = info.get('follower_count') or info.get('subscriber_count')
-            views = info.get('view_count') or 0
+            views = info.get('view_count', 0)
             return subs, views
     except Exception as e:
+        # If it's Instagram and it failed, it's likely a login/proxy block
         return None, None
 
 def display_feedback_tab():
@@ -2328,6 +2337,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
