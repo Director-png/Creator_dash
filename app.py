@@ -354,38 +354,26 @@ if 'user_profiles' not in st.session_state:
         "goals": {"followers": 0, "current": 0}
     }
 
-import yt_dlp
-import datetime
-
 def get_live_stats(url):
-    """
-    High-stability interceptor for Social Media Metadata.
-    """
-    if not url:
-        return None, None
-        
+    if not url: return None, None
+    
     ydl_opts = {
         'quiet': True,
         'no_warnings': True,
         'skip_download': True,
         'extract_flat': True,
+        # STEALTH MODE: Mimics a real browser more effectively
+        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     }
     
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # This works for YouTube, Instagram, and TikTok
             info = ydl.extract_info(url, download=False)
-            
-            # Extract metrics
             subs = info.get('follower_count') or info.get('subscriber_count')
             views = info.get('view_count') or 0
-            
             return subs, views
     except Exception as e:
-        # Silent log for debugging
-        print(f"Scraper Blocked: {e}")
         return None, None
-
 
 def display_feedback_tab():
     st.header("🧠 Neural Feedback Loop")
@@ -2321,6 +2309,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
