@@ -599,36 +599,66 @@ def get_neural_styles():
     <style>
     /* High-Performance Fluid UI */
     .main { background: radial-gradient(circle at top, #0a0a0a 0%, #000000 100%); color: #e0e0e0; }
-
-    /* The Neural Gradient Text - Use inside a <span> */
-    .neural-gradient {
-        background: linear-gradient(90deg, #00d4ff, #00ff41);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 800;
-        display: inline-block;
-    }
-
-    /* Buttons with Cyan-to-Green Gradient */
-    .stButton>button {
-        background-image: linear-gradient(90deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 65, 0.1)) !important;
-        color: #00d4ff !important;
-        border: 1px solid rgba(0, 212, 255, 0.4) !important;
-        border-radius: 8px;
-        transition: 0.3s all ease;
-    }
-
-    .stButton>button:hover {
-        background-image: linear-gradient(90deg, rgba(0, 212, 255, 0.2), rgba(0, 255, 65, 0.2)) !important;
-        border: 1px solid #00ff41 !important;
-        color: #00ff41 !important;
-        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2);
-    }
-
-    /* Keep Sidebar clean */
+    
+    /* Sleek Sidebar */
     [data-testid="stSidebar"] { 
         background-color: #000000;
         border-right: 1px solid rgba(0, 212, 255, 0.1); 
+    }
+
+    /* Modern Typography - RECTIFIED */
+    /* We apply the gradient to a specific class instead of the whole tag */
+    .neural-text { 
+        font-family: 'Inter', sans-serif; 
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: -1px;
+        background: linear-gradient(90deg, #00d4ff, #00ff41);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Target Headers to ensure they don't force transparent on emojis */
+    h1, h2, h3 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: white; /* Fallback for emojis */
+    }
+
+    /* Refined Button Design (Glassmorphism) */
+    .stButton>button {
+        background: rgba(255, 255, 255, 0.03) !important;
+        color: #00d4ff !important; 
+        border: 1px solid rgba(0, 212, 255, 0.3) !important; 
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+        transition: 0.2s all ease-in-out;
+        height: 45px;
+    }
+    
+    .stButton>button:hover {
+        border: 1px solid #00ff41 !important;
+        color: #00ff41 !important;
+        background: rgba(0, 255, 65, 0.05) !important;
+        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2);
+    }
+
+    /* Input Fields */
+    .stTextInput>div>div>input {
+        border-radius: 8px !important;
+        background-color: #0f0f0f !important;
+        border: 1px solid #333 !important;
+        color: #e0e0e0 !important;
+    }
+
+    /* Metric Styling */
+    [data-testid="stMetricValue"] { color: #00ff41 !important; font-family: monospace; }
+    [data-testid="stMetric"] {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 12px;
+        padding: 20px !important;
     }
     </style>
     """
@@ -2290,6 +2320,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
