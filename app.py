@@ -240,8 +240,11 @@ def load_user_db():
     try:
         sync_url = f"{USER_DB_URL}&cache_bus={time.time()}"
         df = pd.read_csv(sync_url)
-        # Force all headers to lowercase and strip spaces
-        df.columns = [str(c).strip().lower() for c in df.columns]
+        
+        # CLEANING: Remove hidden spaces but KEEP the casing (Upper/Lower)
+        # This makes 'Email ' become 'Email'
+        df.columns = [str(c).strip() for c in df.columns]
+        
         return df
     except Exception as e:
         st.error(f"Database Uplink Error: {e}")
@@ -2327,6 +2330,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
