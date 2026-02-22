@@ -606,9 +606,8 @@ def get_neural_styles():
         border-right: 1px solid rgba(0, 212, 255, 0.1); 
     }
 
-    /* Modern Typography - RECTIFIED */
-    /* We apply the gradient to a specific class instead of the whole tag */
-    .neural-text { 
+    /* Modern Typography - EXACTLY AS YOU HAD IT */
+    h1, h2, h3 { 
         font-family: 'Inter', sans-serif; 
         font-weight: 800;
         text-transform: uppercase;
@@ -618,19 +617,16 @@ def get_neural_styles():
         -webkit-text-fill-color: transparent;
     }
 
-    /* Target Headers to ensure they don't force transparent on emojis */
-    h1, h2, h3 {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: white; /* Fallback for emojis */
+    /* THE EMOJI FIX: Prevents the gradient from painting over emojis */
+    h1::first-letter, h2::first-letter, h3::first-letter {
+        -webkit-text-fill-color: initial !important;
     }
 
     /* Refined Button Design (Glassmorphism) */
     .stButton>button {
-        background: rgba(255, 255, 255, 0.03) !important;
-        color: #00d4ff !important; 
-        border: 1px solid rgba(0, 212, 255, 0.3) !important; 
+        background: rgba(255, 255, 255, 0.03);
+        color: #00d4ff; 
+        border: 1px solid rgba(0, 212, 255, 0.3); 
         border-radius: 8px;
         backdrop-filter: blur(10px);
         transition: 0.2s all ease-in-out;
@@ -638,23 +634,22 @@ def get_neural_styles():
     }
     
     .stButton>button:hover {
-        border: 1px solid #00ff41 !important;
-        color: #00ff41 !important;
-        background: rgba(0, 255, 65, 0.05) !important;
+        border: 1px solid #00ff41;
+        color: #00ff41;
+        background: rgba(0, 255, 65, 0.05);
         box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2);
     }
 
-    /* Input Fields */
+    /* Input Fields - Clean & Sharp */
     .stTextInput>div>div>input {
         border-radius: 8px !important;
         background-color: #0f0f0f !important;
         border: 1px solid #333 !important;
-        color: #e0e0e0 !important;
     }
 
-    /* Metric Styling */
+    /* Cards/Metric Styling */
     [data-testid="stMetricValue"] { color: #00ff41 !important; font-family: monospace; }
-    [data-testid="stMetric"] {
+    .stMetric {
         background: rgba(255,255,255,0.02);
         border: 1px solid rgba(255,255,255,0.05);
         border-radius: 12px;
@@ -662,6 +657,8 @@ def get_neural_styles():
     }
     </style>
     """
+
+st.markdown(get_neural_styles(), unsafe_allow_html=True)
 
 # --- EMERGENCY DIAGNOSTIC ---
 if st.sidebar.checkbox("🔍 Debug Node Mapping"):
@@ -2320,6 +2317,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
