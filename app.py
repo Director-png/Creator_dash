@@ -667,7 +667,7 @@ if st.sidebar.checkbox("🔍 Debug Node Mapping"):
     else:
         st.error("Sheet is empty or URL is invalid.")
 # --- CONFIGURATION (Ensure these are defined) ---
-# NEW_URL = "https://script.google.com/macros/s/AKfycbw8HjjiXJe53CVd4_qU6c4RIjfkMEBJxXZUBVwJdGJCiytgGBgKjMSfGc2tPeckNRih/exec"
+# NEW_URL = "https://script.google.com/macros/s/AKfycbzBLwNA-37KxZ5mDyHp1DMNw23n8xyfBVaVbmg_zRs-oQAZGue6Zuxo44UwztuBvFIC/exec"
 # FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
 
 # --- GATEKEEPER START ---
@@ -2327,6 +2327,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
