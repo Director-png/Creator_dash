@@ -597,17 +597,15 @@ if 'first_load' not in st.session_state:
 def get_neural_styles():
     return """
     <style>
-    /* High-Performance Fluid UI */
     .main { background: radial-gradient(circle at top, #0a0a0a 0%, #000000 100%); color: #e0e0e0; }
     
-    /* Sleek Sidebar */
     [data-testid="stSidebar"] { 
         background-color: #000000;
         border-right: 1px solid rgba(0, 212, 255, 0.1); 
     }
 
-    /* Modern Typography - YOUR ORIGINAL LOGIC */
-    h1, h2, h3 { 
+    /* THE TEXT GRADIENT LOGIC (Isolated) */
+    .neural-gradient { 
         font-family: 'Inter', sans-serif; 
         font-weight: 800;
         text-transform: uppercase;
@@ -615,43 +613,31 @@ def get_neural_styles():
         background: linear-gradient(90deg, #00d4ff, #00ff41);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        
-        /* NEW EMOJI PROTECTION LINE */
-        text-shadow: 0 0 0 white; /* This forces emojis to render their own color layers */
+        display: inline-block;
     }
 
-    /* Target standard emoji ranges to reset their fill */
-    /* This allows the emoji to "break through" the gradient mask */
-    h1, h2, h3 {
-        color: white !important; /* Standardizes the base for emojis */
-    }
-
-    /* Refined Button Design (Original Glassmorphism) */
+    /* Original Button Design (RESTORING COLORS) */
     .stButton>button {
-        background: rgba(255, 255, 255, 0.03);
-        color: #00d4ff; 
-        border: 1px solid rgba(0, 212, 255, 0.3); 
+        background: rgba(255, 255, 255, 0.03) !important;
+        color: #00d4ff !important; 
+        border: 1px solid rgba(0, 212, 255, 0.3) !important; 
         border-radius: 8px;
         backdrop-filter: blur(10px);
         transition: 0.2s all ease-in-out;
-        height: 45px;
     }
     
     .stButton>button:hover {
-        border: 1px solid #00ff41;
-        color: #00ff41;
-        background: rgba(0, 255, 65, 0.05);
-        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2);
+        border: 1px solid #00ff41 !important;
+        color: #00ff41 !important;
+        background: rgba(0, 255, 65, 0.05) !important;
     }
 
-    /* Input Fields */
     .stTextInput>div>div>input {
         border-radius: 8px !important;
         background-color: #0f0f0f !important;
         border: 1px solid #333 !important;
     }
 
-    /* Metric Styling */
     [data-testid="stMetricValue"] { color: #00ff41 !important; font-family: monospace; }
     .stMetric {
         background: rgba(255,255,255,0.02);
@@ -2319,6 +2305,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
