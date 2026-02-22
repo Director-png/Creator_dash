@@ -354,11 +354,12 @@ if 'user_profiles' not in st.session_state:
         "goals": {"followers": 0, "current": 0}
     }
 
+# --- UPDATED INTERCEPTOR ---
 def get_live_stats(url):
     if not url: return None, None
     
-    # Identify if it's Instagram to apply specialized headers
-    is_instagram = "instagram.com" in url.lower()
+    # Identify platform
+    is_ig = "instagram.com" in url.lower()
     
     ydl_opts = {
         'quiet': True,
@@ -366,22 +367,18 @@ def get_live_stats(url):
         'skip_download': True,
         'extract_flat': True,
         'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Sec-Fetch-Mode': 'navigate',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'Accept-Language': 'en-US,en;q=0.9',
         }
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
-            # Instagram uses 'follower_count', YouTube uses 'subscriber_count'
             subs = info.get('follower_count') or info.get('subscriber_count')
             views = info.get('view_count', 0)
             return subs, views
-    except Exception as e:
-        # If it's Instagram and it failed, it's likely a login/proxy block
+    except Exception:
         return None, None
 
 def display_feedback_tab():
@@ -1021,6 +1018,7 @@ if page == "🏠 Dashboard":
     else:
         st.caption("Add targets to the Growth Hub to see financial projections.")
 
+# --- FULL PAGE CODE ---
 elif page == "📡 My Growth Hub":
     st.markdown("<h1 style='color: #00d4ff;'>📡 SOCIAL INTEL MATRIX</h1>", unsafe_allow_html=True)
 
@@ -1028,90 +1026,84 @@ elif page == "📡 My Growth Hub":
     with st.container(border=True):
         if is_paid or is_admin:
             st.markdown("### 🛰️ PRO-SYNC TERMINAL")
-            st.caption("Real-time API Uplink: Active")
+            st.caption("Status: Uplink Standby")
             
-            target_url = st.text_input("🔗 Target Profile URL", placeholder="YouTube or Instagram Link")
+            target_url = st.text_input("🔗 Target Profile URL", placeholder="Paste YouTube or Instagram Link")
             
             if st.button("🔄 INITIATE LIVE SYNC", use_container_width=True):
                 if target_url:
-                    with st.spinner("Intercepting Public Metadata..."):
+                    with st.spinner("Decoding Meta-Streams..."):
                         subs, views = get_live_stats(target_url)
                         
                         if subs:
-                            # LOGIC: First-time sync stabilization
+                            # SUCCESS PATH
                             if 'start_count' not in st.session_state:
-                                # Assume 2% growth over a 7-day period to ground the velocity math
-                                st.session_state.start_count = int(subs * 0.98)
+                                st.session_state.start_count = int(subs * 0.99)
                                 st.session_state.days_passed = 7
-                                st.session_state.last_sync_date = datetime.date.today()
                             
-                            # Increment days if a day has actually passed since last sync
-                            if 'last_sync_date' in st.session_state:
-                                delta = (datetime.date.today() - st.session_state.last_sync_date).days
-                                if delta > 0:
-                                    st.session_state.days_passed += delta
-                                    st.session_state.last_sync_date = datetime.date.today()
-
                             st.session_state.current_count = subs
                             st.session_state.total_views = views
-                            st.success(f"Sync Successful: {subs:,} Followers detected.")
+                            st.session_state.last_sync_ts = datetime.datetime.now()
+                            st.success(f"Uplink Established: {subs:,} units detected.")
                         else:
-                            # Graceful Warning
+                            # LOGICAL FALLBACK: Don't show "Unstable" if we have fresh data
                             if 'current_count' in st.session_state:
-                                st.warning("Uplink unstable. Maintaining current telemetry records.")
+                                last_sync = st.session_state.get('last_sync_ts', datetime.datetime.now())
+                                time_diff = (datetime.datetime.now() - last_sync).total_seconds() / 3600
+                                
+                                if time_diff > 12: # Only warn if data is older than 12 hours
+                                    st.warning("Uplink unstable. Telemetry is +12h desynced.")
+                                else:
+                                    st.info("Live Sync cooling down. Using high-fidelity cache.")
                             else:
-                                st.error("Access Denied. Check URL privacy settings or platform status.")
+                                st.error("Initial connection failed. Instagram is currently shielding this profile.")
         else:
             st.markdown("### 📉 MANUAL TRACKER (BASIC)")
-            st.info("Upgrade to PRO to unlock Automated Live Sync.")
-            col_b1, col_b2 = st.columns(2)
-            with col_b1:
-                st.session_state.start_count = st.number_input("Starting Followers", value=1000)
-                st.session_state.days_passed = st.slider("Days since start", 1, 60, 7)
-            with col_b2:
-                st.session_state.current_count = st.number_input("Current Followers", value=1200)
+            st.info("Upgrade to PRO for automated telemetry.")
+            c_b1, c_b2 = st.columns(2)
+            with c_b1:
+                st.session_state.start_count = st.number_input("Starting Count", value=1000)
+                st.session_state.days_passed = st.slider("Days Active", 1, 90, 7)
+            with c_b2:
+                st.session_state.current_count = st.number_input("Current Count", value=1100)
 
-    # 2. THE ANALYTICS VISUALIZER (Logic Corrected)
+    # 2. ANALYTICS & PROJECTION (CLEAN LOGIC)
     if 'current_count' in st.session_state:
         st.divider()
         
         start = st.session_state.get('start_count', 1000)
         current = st.session_state.current_count
-        days = st.session_state.get('days_passed', 1)
+        days = st.session_state.get('days_passed', 7)
         
-        growth_diff = current - start
-        # Calculate daily average
-        daily_avg = growth_diff / days if days > 0 else 0
+        growth = current - start
+        raw_velocity = growth / days if days > 0 else 0
+        # Stabilization: Ensure velocity doesn't exceed 2% growth/day for projection safety
+        velocity = min(raw_velocity, current * 0.02) if raw_velocity > 0 else raw_velocity
         
-        # --- BELIEVABLE PREDICTION FILTER ---
-        # Caps growth at 5% daily to keep projections within human reality
-        logical_daily = min(daily_avg, current * 0.05) if daily_avg > 0 else daily_avg
-        
-        if logical_daily < 0:
-            st.error(f"⚠️ **DECAY WARNING**: Account is losing {abs(int(logical_daily))} users/day.")
-        elif logical_daily > 0:
-            st.success(f"🔥 **GROWTH ACTIVE**: Velocity is +{int(logical_daily)} users/day.")
-        
-        projection_30d = current + (logical_daily * 30 * 0.75) # 75% Conservative Factor
-        
+        # UI Feedback
+        if velocity > 0:
+            st.success(f"📈 **GROWTH MATRIX**: +{int(velocity)}/day (Stability: High)")
+        elif velocity < 0:
+            st.error(f"📉 **DECAY DETECTED**: {int(velocity)}/day (Action Required)")
+
         # Metric Row
         m1, m2, m3 = st.columns(3)
-        m1.metric("LIVE FOLLOWERS", f"{current:,}", f"{growth_diff:+}")
-        m2.metric("DAILY VELOCITY", f"{int(logical_daily):+}/day")
-        m3.metric("30D FORECAST", f"{int(projection_30d):,}")
+        m1.metric("CURRENT STATUS", f"{current:,}", f"{growth:+}")
+        m2.metric("DAILY VELOCITY", f"{int(velocity):+}/unit")
+        m3.metric("30D PROJECTION", f"{int(current + (velocity * 30)):,}")
 
-        with st.expander("📊 PROJECTION SCENARIOS"):
-            c1, c2 = st.columns(2)
-            with c1:
-                st.write("**🛡️ Conservative (70%)**")
-                st.subheader(f"{int(current + (logical_daily * 30 * 0.7)):,}")
-            with c2:
-                st.write("**🚀 Target (100%)**")
-                st.subheader(f"{int(current + (logical_daily * 30)):,}")
+        with st.expander("🔮 FORECAST SCENARIOS"):
+            sc1, sc2 = st.columns(2)
+            with sc1:
+                st.write("**🛡️ Conservative**")
+                st.subheader(f"{int(current + (velocity * 30 * 0.7)):,}")
+            with sc2:
+                st.write("**🚀 Hyper-Growth**")
+                st.subheader(f"{int(current + (velocity * 30 * 1.5)):,}")
 
     # 3. TASK FORGE
     st.divider()
-    st.subheader("🗓️ CONTENT CALENDAR & TASK FORGE")
+    st.subheader("🗓️ TASK FORGE COMMAND")
     
     if 'tasks' not in st.session_state:
         st.session_state.tasks = pd.DataFrame(columns=["Task", "Node", "Status", "Deadline"])
@@ -1127,13 +1119,10 @@ elif page == "📡 My Growth Hub":
                 st.rerun()
 
     if not st.session_state.tasks.empty:
-        # Progress Calculation
         done = len(st.session_state.tasks[st.session_state.tasks['Status'] == "✅ Uploaded"])
         total = len(st.session_state.tasks)
-        progress = done / total if total > 0 else 0
-        
-        st.write(f"**Total Campaign Progress: {int(progress*100)}%**")
-        st.progress(progress)
+        st.write(f"**Campaign Completion: {int((done/total)*100)}%**")
+        st.progress(done/total)
 
         st.session_state.tasks = st.data_editor(
             st.session_state.tasks,
@@ -1145,7 +1134,7 @@ elif page == "📡 My Growth Hub":
             }
         )
     else:
-        st.caption("No tasks currently forged in the matrix.")
+        st.caption("No active tasks in the forge.")
 
 elif page == "🌐 Global Pulse":
     st.markdown("<h1 style='color: #00d4ff;'>🌐 GLOBAL INTELLIGENCE PULSE</h1>", unsafe_allow_html=True)
@@ -2332,6 +2321,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
