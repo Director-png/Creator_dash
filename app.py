@@ -991,7 +991,7 @@ if page == "🏠 Dashboard":
         st.caption("Add targets to the Growth Hub to see financial projections.")
 
 elif page == "📡 My Growth Hub":
-    st.markdown("<h1 style='color: #00d4ff;'>📡 SOCIAL INTEL MATRIX</h1>", unsafe_allow_html=True)
+    neural_title("<h1 style='color: #00d4ff;'>📡 SOCIAL INTEL MATRIX</h1>", unsafe_allow_html=True)
 
     # 1. THE DATA ACQUISITION LAYER
     with st.container(border=True):
@@ -2285,6 +2285,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
