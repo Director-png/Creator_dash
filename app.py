@@ -606,15 +606,22 @@ def get_neural_styles():
         border-right: 1px solid rgba(0, 212, 255, 0.1); 
     }
 
-    /* Modern Typography */
-    h1, h2, h3 { 
+    /* Modern Typography - Emoji Protected */
+    .neural-header {
         font-family: 'Inter', sans-serif; 
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: -1px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .neural-gradient {
         background: linear-gradient(90deg, #00d4ff, #00ff41);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        display: inline-block;
     }
 
     /* Refined Button Design (Glassmorphism) */
@@ -640,20 +647,19 @@ def get_neural_styles():
         border-radius: 8px !important;
         background-color: #0f0f0f !important;
         border: 1px solid #333 !important;
+        color: #e0e0e0 !important;
     }
 
     /* Cards/Metric Styling */
     [data-testid="stMetricValue"] { color: #00ff41 !important; font-family: monospace; }
-    .stMetric {
+    [data-testid="stMetric"] {
         background: rgba(255,255,255,0.02);
         border: 1px solid rgba(255,255,255,0.05);
         border-radius: 12px;
-        padding: 20px !important;
+        padding: 15px !important;
     }
     </style>
     """
-
-st.markdown(get_neural_styles(), unsafe_allow_html=True)
 
 
 # --- EMERGENCY DIAGNOSTIC ---
@@ -2313,6 +2319,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
