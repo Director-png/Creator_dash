@@ -599,52 +599,32 @@ def get_neural_styles():
     <style>
     .main { background: radial-gradient(circle at top, #0a0a0a 0%, #000000 100%); color: #e0e0e0; }
     
-    [data-testid="stSidebar"] { 
-        background-color: #000000;
-        border-right: 1px solid rgba(0, 212, 255, 0.1); 
-    }
-
-    /* THE TEXT GRADIENT LOGIC (Isolated) */
-    .neural-gradient { 
-        font-family: 'Inter', sans-serif; 
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: -1px;
-        background: linear-gradient(90deg, #00d4ff, #00ff41);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        display: inline-block;
-    }
-
-    /* Original Button Design (RESTORING COLORS) */
+    /* Buttons: Cyan Text, Green Hover (Back to Original) */
     .stButton>button {
         background: rgba(255, 255, 255, 0.03) !important;
         color: #00d4ff !important; 
         border: 1px solid rgba(0, 212, 255, 0.3) !important; 
         border-radius: 8px;
-        backdrop-filter: blur(10px);
         transition: 0.2s all ease-in-out;
     }
-    
     .stButton>button:hover {
         border: 1px solid #00ff41 !important;
         color: #00ff41 !important;
         background: rgba(0, 255, 65, 0.05) !important;
     }
 
-    .stTextInput>div>div>input {
-        border-radius: 8px !important;
-        background-color: #0f0f0f !important;
-        border: 1px solid #333 !important;
+    /* The Gradient Text Class */
+    .neural-gradient-text {
+        background: linear-gradient(90deg, #00d4ff, #00ff41);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-family: 'Inter', sans-serif;
+        font-weight: 800;
+        text-transform: uppercase;
     }
 
-    [data-testid="stMetricValue"] { color: #00ff41 !important; font-family: monospace; }
-    .stMetric {
-        background: rgba(255,255,255,0.02);
-        border: 1px solid rgba(255,255,255,0.05);
-        border-radius: 12px;
-        padding: 20px !important;
-    }
+    /* Metric Fix */
+    [data-testid="stMetricValue"] { color: #00ff41 !important; }
     </style>
     """
 
@@ -2305,6 +2285,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
