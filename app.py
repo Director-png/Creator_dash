@@ -599,68 +599,39 @@ def get_neural_styles():
     <style>
     /* High-Performance Fluid UI */
     .main { background: radial-gradient(circle at top, #0a0a0a 0%, #000000 100%); color: #e0e0e0; }
-    
-    /* Sleek Sidebar */
-    [data-testid="stSidebar"] { 
-        background-color: #000000;
-        border-right: 1px solid rgba(0, 212, 255, 0.1); 
-    }
 
-    /* Modern Typography - Emoji Protected */
-    .neural-header {
-        font-family: 'Inter', sans-serif; 
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: -1px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
+    /* The Neural Gradient Text - Use inside a <span> */
     .neural-gradient {
         background: linear-gradient(90deg, #00d4ff, #00ff41);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        font-weight: 800;
         display: inline-block;
     }
 
-    /* Refined Button Design (Glassmorphism) */
+    /* Buttons with Cyan-to-Green Gradient */
     .stButton>button {
-        background: rgba(255, 255, 255, 0.03);
-        color: #00d4ff; 
-        border: 1px solid rgba(0, 212, 255, 0.3); 
+        background-image: linear-gradient(90deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 65, 0.1)) !important;
+        color: #00d4ff !important;
+        border: 1px solid rgba(0, 212, 255, 0.4) !important;
         border-radius: 8px;
-        backdrop-filter: blur(10px);
-        transition: 0.2s all ease-in-out;
-        height: 45px;
+        transition: 0.3s all ease;
     }
-    
+
     .stButton>button:hover {
-        border: 1px solid #00ff41;
-        color: #00ff41;
-        background: rgba(0, 255, 65, 0.05);
+        background-image: linear-gradient(90deg, rgba(0, 212, 255, 0.2), rgba(0, 255, 65, 0.2)) !important;
+        border: 1px solid #00ff41 !important;
+        color: #00ff41 !important;
         box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2);
     }
 
-    /* Input Fields - Clean & Sharp */
-    .stTextInput>div>div>input {
-        border-radius: 8px !important;
-        background-color: #0f0f0f !important;
-        border: 1px solid #333 !important;
-        color: #e0e0e0 !important;
-    }
-
-    /* Cards/Metric Styling */
-    [data-testid="stMetricValue"] { color: #00ff41 !important; font-family: monospace; }
-    [data-testid="stMetric"] {
-        background: rgba(255,255,255,0.02);
-        border: 1px solid rgba(255,255,255,0.05);
-        border-radius: 12px;
-        padding: 15px !important;
+    /* Keep Sidebar clean */
+    [data-testid="stSidebar"] { 
+        background-color: #000000;
+        border-right: 1px solid rgba(0, 212, 255, 0.1); 
     }
     </style>
     """
-
 
 # --- EMERGENCY DIAGNOSTIC ---
 if st.sidebar.checkbox("🔍 Debug Node Mapping"):
@@ -2319,6 +2290,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
