@@ -606,7 +606,7 @@ def get_neural_styles():
         border-right: 1px solid rgba(0, 212, 255, 0.1); 
     }
 
-    /* Modern Typography - EXACTLY AS YOU HAD IT */
+    /* Modern Typography - YOUR ORIGINAL LOGIC */
     h1, h2, h3 { 
         font-family: 'Inter', sans-serif; 
         font-weight: 800;
@@ -615,14 +615,18 @@ def get_neural_styles():
         background: linear-gradient(90deg, #00d4ff, #00ff41);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        
+        /* NEW EMOJI PROTECTION LINE */
+        text-shadow: 0 0 0 white; /* This forces emojis to render their own color layers */
     }
 
-    /* THE EMOJI FIX: Prevents the gradient from painting over emojis */
-    h1::first-letter, h2::first-letter, h3::first-letter {
-        -webkit-text-fill-color: initial !important;
+    /* Target standard emoji ranges to reset their fill */
+    /* This allows the emoji to "break through" the gradient mask */
+    h1, h2, h3 {
+        color: white !important; /* Standardizes the base for emojis */
     }
 
-    /* Refined Button Design (Glassmorphism) */
+    /* Refined Button Design (Original Glassmorphism) */
     .stButton>button {
         background: rgba(255, 255, 255, 0.03);
         color: #00d4ff; 
@@ -640,14 +644,14 @@ def get_neural_styles():
         box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2);
     }
 
-    /* Input Fields - Clean & Sharp */
+    /* Input Fields */
     .stTextInput>div>div>input {
         border-radius: 8px !important;
         background-color: #0f0f0f !important;
         border: 1px solid #333 !important;
     }
 
-    /* Cards/Metric Styling */
+    /* Metric Styling */
     [data-testid="stMetricValue"] { color: #00ff41 !important; font-family: monospace; }
     .stMetric {
         background: rgba(255,255,255,0.02);
@@ -657,8 +661,6 @@ def get_neural_styles():
     }
     </style>
     """
-
-st.markdown(get_neural_styles(), unsafe_allow_html=True)
 
 # --- EMERGENCY DIAGNOSTIC ---
 if st.sidebar.checkbox("🔍 Debug Node Mapping"):
@@ -2317,6 +2319,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
