@@ -1018,7 +1018,6 @@ if page == "🏠 Dashboard":
     else:
         st.caption("Add targets to the Growth Hub to see financial projections.")
 
-# --- FULL PAGE CODE ---
 elif page == "📡 My Growth Hub":
     st.markdown("<h1 style='color: #00d4ff;'>📡 SOCIAL INTEL MATRIX</h1>", unsafe_allow_html=True)
 
@@ -1028,35 +1027,30 @@ elif page == "📡 My Growth Hub":
             st.markdown("### 🛰️ PRO-SYNC TERMINAL")
             st.caption("Status: Uplink Standby")
             
-            target_url = st.text_input("🔗 Target Profile URL", placeholder="Paste YouTube or Instagram Link")
+            target_url = st.text_input("🔗 Target Profile URL", placeholder="Paste YouTube link here...")
             
             if st.button("🔄 INITIATE LIVE SYNC", use_container_width=True):
                 if target_url:
-                    with st.spinner("Decoding Meta-Streams..."):
-                        subs, views = get_live_stats(target_url)
-                        
-                        if subs:
-                            # SUCCESS PATH
-                            if 'start_count' not in st.session_state:
-                                st.session_state.start_count = int(subs * 0.99)
-                                st.session_state.days_passed = 7
+                    # CHECK FOR INSTAGRAM
+                    if "instagram.com" in target_url.lower():
+                        st.info("🛰️ **SYSTEM NOTICE**: Instagram Live-Sync is undergoing a security handshake upgrade. This node will be active in the **v2.0 Update**.")
+                        st.warning("Please use the **Manual Tracker** below for Instagram for now.")
+                    else:
+                        with st.spinner("Decoding Meta-Streams..."):
+                            subs, views = get_live_stats(target_url)
                             
-                            st.session_state.current_count = subs
-                            st.session_state.total_views = views
-                            st.session_state.last_sync_ts = datetime.datetime.now()
-                            st.success(f"Uplink Established: {subs:,} units detected.")
-                        else:
-                            # LOGICAL FALLBACK: Don't show "Unstable" if we have fresh data
-                            if 'current_count' in st.session_state:
-                                last_sync = st.session_state.get('last_sync_ts', datetime.datetime.now())
-                                time_diff = (datetime.datetime.now() - last_sync).total_seconds() / 3600
+                            if subs:
+                                # SUCCESS PATH (YouTube)
+                                if 'start_count' not in st.session_state:
+                                    st.session_state.start_count = int(subs * 0.99)
+                                    st.session_state.days_passed = 7
                                 
-                                if time_diff > 12: # Only warn if data is older than 12 hours
-                                    st.warning("Uplink unstable. Telemetry is +12h desynced.")
-                                else:
-                                    st.info("Live Sync cooling down. Using high-fidelity cache.")
+                                st.session_state.current_count = subs
+                                st.session_state.total_views = views
+                                st.session_state.last_sync_ts = datetime.datetime.now()
+                                st.success(f"Uplink Established: {subs:,} subscribers detected.")
                             else:
-                                st.error("Initial connection failed. Instagram is currently shielding this profile.")
+                                st.error("Initial connection failed. Link might be private or invalid.")
         else:
             st.markdown("### 📉 MANUAL TRACKER (BASIC)")
             st.info("Upgrade to PRO for automated telemetry.")
@@ -1067,7 +1061,7 @@ elif page == "📡 My Growth Hub":
             with c_b2:
                 st.session_state.current_count = st.number_input("Current Count", value=1100)
 
-    # 2. ANALYTICS & PROJECTION (CLEAN LOGIC)
+    # 2. ANALYTICS & PROJECTION
     if 'current_count' in st.session_state:
         st.divider()
         
@@ -1077,7 +1071,7 @@ elif page == "📡 My Growth Hub":
         
         growth = current - start
         raw_velocity = growth / days if days > 0 else 0
-        # Stabilization: Ensure velocity doesn't exceed 2% growth/day for projection safety
+        # Stabilization: 2% daily cap for realistic projections
         velocity = min(raw_velocity, current * 0.02) if raw_velocity > 0 else raw_velocity
         
         # UI Feedback
@@ -1133,8 +1127,6 @@ elif page == "📡 My Growth Hub":
                 "Node": st.column_config.SelectboxColumn("Node", options=["YouTube", "Instagram", "X", "TikTok"], required=True)
             }
         )
-    else:
-        st.caption("No active tasks in the forge.")
 
 elif page == "🌐 Global Pulse":
     st.markdown("<h1 style='color: #00d4ff;'>🌐 GLOBAL INTELLIGENCE PULSE</h1>", unsafe_allow_html=True)
@@ -2321,6 +2313,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
