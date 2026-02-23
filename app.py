@@ -171,6 +171,14 @@ NEW_URL = "https://script.google.com/macros/s/AKfycbzBLwNA-37KxZ5mDyHp1DMNw23n8x
 NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68"
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
 
+def draw_title(emoji, text):
+    st.markdown(f"""
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+            <span style="font-size: 2rem;">{emoji}</span>
+            <span class="neural-gradient-text" style="font-size: 2rem;">{text}</span>
+        </div>
+    """, unsafe_allow_html=True)
+
 def typewriter_effect(text):
     container = st.empty()
     full_text = ""
@@ -637,13 +645,6 @@ def get_neural_styles():
     }
     </style>
     """
-def draw_title(emoji, text):
-    st.markdown(f"""
-        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-            <span style="font-size: 2rem;">{emoji}</span>
-            <span class="neural-gradient-text" style="font-size: 2rem;">{text}</span>
-        </div>
-    """, unsafe_allow_html=True)
 
 # --- EMERGENCY DIAGNOSTIC ---
 if st.sidebar.checkbox("🔍 Debug Node Mapping"):
@@ -2302,6 +2303,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
