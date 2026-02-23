@@ -815,7 +815,6 @@ with st.sidebar:
         # --- ENHANCED IDENTITY CORE ---
         profile_img = st.session_state.get('vault_anchor')
         
-        # IMAGE LOGIC: Handles URLs or local placeholders safely
         if profile_img is None:
             img_html = "<div style='width: 55px; height: 55px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px;'>DNA</div>"
         else:
@@ -851,7 +850,7 @@ with st.sidebar:
         else:
             options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
 
-        # --- NAVIGATION SELECTION (CRITICAL FIX FOR LINE 850) ---
+        # --- NAVIGATION SELECTION ---
         if 'current_page' not in st.session_state:
             st.session_state.current_page = options[0]
 
@@ -860,7 +859,6 @@ with st.sidebar:
         except ValueError:
             default_index = 0
 
-        # We define 'page' here so the rest of your app.py can see it
         page = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = page
 
@@ -868,50 +866,60 @@ with st.sidebar:
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
+        # Wrapped in a container to ensure input stays at bottom of the expander
         with st.expander("📡 NEURAL UPLINK", expanded=False):
+            chat_container = st.container()
             if "manager_chat" not in st.session_state:
                 st.session_state.manager_chat = []
 
-            for msg in st.session_state.manager_chat:
-                with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
-                    st.markdown(msg["content"])
+            # Display messages in the container
+            with chat_container:
+                for msg in st.session_state.manager_chat:
+                    with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
+                        st.markdown(msg["content"])
 
+            # Chat input automatically sticks to the bottom of its parent container
             agent_input = st.chat_input("Command VOID-OS...")
             
             if agent_input:
                 st.session_state.manager_chat.append({"role": "user", "content": agent_input})
-                with st.chat_message("user", avatar="👤"):
-                    st.markdown(agent_input)
+                with chat_container:
+                    with st.chat_message("user", avatar="👤"):
+                        st.markdown(agent_input)
                 
-                with st.chat_message("assistant", avatar="🌌"):
-                    resp_container = st.empty()
-                    full_resp = ""
-                    try:
-                        stream = client.chat.completions.create(
-                            model=MODEL_ID,
-                            messages=[
-                                {"role": "system", "content": "You are VOID-OS. Witty, elite, and strategic. Be concise."},
-                                {"role": "user", "content": agent_input}
-                            ],
-                            stream=True,
-                            temperature=0.6
-                        )
-                        for chunk in stream:
-                            if chunk.choices[0].delta.content:
-                                full_resp += chunk.choices[0].delta.content
-                                resp_container.markdown(full_resp + "▌")
-                        
-                        resp_container.markdown(full_resp)
-                        st.session_state.manager_chat.append({"role": "assistant", "content": full_resp})
-                    except Exception as e:
-                        st.error(f"Uplink Error: {str(e)}")
+                with chat_container:
+                    with st.chat_message("assistant", avatar="🌌"):
+                        resp_container = st.empty()
+                        full_resp = ""
+                        try:
+                            stream = client.chat.completions.create(
+                                model=MODEL_ID,
+                                messages=[
+                                    {"role": "system", "content": "You are VOID-OS. Witty, elite, and strategic. Be concise."},
+                                    {"role": "user", "content": agent_input}
+                                ],
+                                stream=True,
+                                temperature=0.6
+                            )
+                            for chunk in stream:
+                                if chunk.choices[0].delta.content:
+                                    full_resp += chunk.choices[0].delta.content
+                                    resp_container.markdown(full_resp + "▌")
+                            
+                            resp_container.markdown(full_resp)
+                            st.session_state.manager_chat.append({"role": "assistant", "content": full_resp})
+                        except Exception as e:
+                            st.error(f"Uplink Error: {str(e)}")
 
         # --- 🛠️ GLOBAL ACTIONS ---
         st.divider()
         
-        # Feedback Integration (Points to your existing function/page)
+        # 1. FEEDBACK TOGGLE LOGIC
+        if 'show_feedback_node' not in st.session_state:
+            st.session_state.show_feedback_node = False
+
         if st.button("💬 SYSTEM FEEDBACK", use_container_width=True):
-            st.session_state.current_page = "⚙️ Settings"
+            st.session_state.show_feedback_node = True
             st.rerun()
 
         if st.button("🔄 RE-CALIBRATE", use_container_width=True):
@@ -925,7 +933,8 @@ with st.sidebar:
 
     except Exception as sidebar_err:
         st.error(f"System Error: {sidebar_err}")
-        page = options[0] # Emergency fallback so line 850 doesn't crash
+        page = options[0]
+
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
 if page == "🏠 Dashboard":
@@ -2299,6 +2308,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
