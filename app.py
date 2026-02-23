@@ -718,7 +718,7 @@ if not st.session_state.logged_in:
                 new_p = st.text_input("NEW PASSKEY", type="password", key="rec_new_pw")
                 if st.button("OVERRIDE VIA SECURITY"):
                     # Fixed action name to match common Google Script standard: 'RESET_PASSWORD'
-                    payload = {"email": r_email, "action": "RESET_PASSWORD", "answer": s_ans, "new_password": new_p}
+                    payload = {"email": r_email, "action": "SECURE_RESET", "answer": s_ans, "message": new_p}
                     try:
                         res = requests.post(NEW_URL, json=payload, timeout=15)
                         if "SUCCESS" in res.text: st.success("IDENTITY VERIFIED. PASSKEY UPDATED.")
@@ -747,7 +747,7 @@ if not st.session_state.logged_in:
                     if st.button("🔓 OVERRIDE SECURITY WALL"):
                         if rec_otp_in == st.session_state.generated_otp:
                             # Finalizing the reset
-                            payload = {"email": r_email, "action": "RESET_PASSWORD", "new_password": new_p_otp, "bypass": "true"}
+                            payload = {"email": r_email, "action": "SECURE_RESET", "message": new_p_otp, "bypass": "true"}
                             try:
                                 res = requests.post(NEW_URL, json=payload, timeout=15)
                                 if "SUCCESS" in res.text:
@@ -2325,6 +2325,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
