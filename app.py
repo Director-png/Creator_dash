@@ -597,23 +597,26 @@ if 'first_load' not in st.session_state:
 def get_neural_styles():
     return """
     <style>
+    /* 1. FLUID UI BACKGROUND */
     .main { background: radial-gradient(circle at top, #0a0a0a 0%, #000000 100%); color: #e0e0e0; }
     
-    /* Buttons: Cyan Text, Green Hover (Back to Original) */
+    /* 2. ORIGINAL BUTTONS (Restored Cyan/Green) */
     .stButton>button {
         background: rgba(255, 255, 255, 0.03) !important;
         color: #00d4ff !important; 
         border: 1px solid rgba(0, 212, 255, 0.3) !important; 
         border-radius: 8px;
+        backdrop-filter: blur(10px);
         transition: 0.2s all ease-in-out;
     }
     .stButton>button:hover {
         border: 1px solid #00ff41 !important;
         color: #00ff41 !important;
         background: rgba(0, 255, 65, 0.05) !important;
+        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2);
     }
 
-    /* The Gradient Text Class */
+    /* 3. THE TEXT GRADIENT CLASS (No global h1, h2 tags) */
     .neural-gradient-text {
         background: linear-gradient(90deg, #00d4ff, #00ff41);
         -webkit-background-clip: text;
@@ -621,12 +624,26 @@ def get_neural_styles():
         font-family: 'Inter', sans-serif;
         font-weight: 800;
         text-transform: uppercase;
+        display: inline-block;
     }
 
-    /* Metric Fix */
-    [data-testid="stMetricValue"] { color: #00ff41 !important; }
+    /* 4. METRIC & INPUT FIXES */
+    [data-testid="stMetricValue"] { color: #00ff41 !important; font-family: monospace; }
+    .stTextInput>div>div>input {
+        border-radius: 8px !important;
+        background-color: #0f0f0f !important;
+        border: 1px solid #333 !important;
+        color: white !important;
+    }
     </style>
     """
+def draw_title(emoji, text):
+    st.markdown(f"""
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+            <span style="font-size: 2rem;">{emoji}</span>
+            <span class="neural-gradient-text" style="font-size: 2rem;">{text}</span>
+        </div>
+    """, unsafe_allow_html=True)
 
 # --- EMERGENCY DIAGNOSTIC ---
 if st.sidebar.checkbox("🔍 Debug Node Mapping"):
@@ -916,8 +933,8 @@ with st.sidebar:
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
 if page == "🏠 Dashboard":
     # 🚨 COMPLIANCE HEADER (Minimalist)
-    st.markdown("<p style='font-size: 10px; color: #444; letter-spacing: 1px;'>VOID OS // B2B OUTREACH SAAS // KERNEL V.1.0.4</p>", unsafe_allow_html=True)
-    st.markdown("<h1 style='color: #00ff41;'>🛰️ COMMAND CENTER</h1>", unsafe_allow_html=True)
+    draw_title("<p style='font-size: 10px; color: #444; letter-spacing: 1px;'>VOID OS // B2B OUTREACH SAAS // KERNEL V.1.0.4</p>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00ff41;'>🛰️ COMMAND CENTER</h1>", unsafe_allow_html=True)
     
     # 1. THE AGGREGATED INTELLIGENCE ROW (KPIs)
     # We pull data from across the app states
@@ -991,7 +1008,7 @@ if page == "🏠 Dashboard":
         st.caption("Add targets to the Growth Hub to see financial projections.")
 
 elif page == "📡 My Growth Hub":
-    neural_title("<h1 style='color: #00d4ff;'>📡 SOCIAL INTEL MATRIX</h1>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00d4ff;'>📡 SOCIAL INTEL MATRIX</h1>", unsafe_allow_html=True)
 
     # 1. THE DATA ACQUISITION LAYER
     with st.container(border=True):
@@ -1101,7 +1118,7 @@ elif page == "📡 My Growth Hub":
         )
 
 elif page == "🌐 Global Pulse":
-    st.markdown("<h1 style='color: #00d4ff;'>🌐 GLOBAL INTELLIGENCE PULSE</h1>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00d4ff;'>🌐 GLOBAL INTELLIGENCE PULSE</h1>", unsafe_allow_html=True)
     
     # 🔑 CONFIGURATION
     NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" 
@@ -1186,7 +1203,7 @@ elif page == "🌐 Global Pulse":
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
-    st.markdown("<h1 style='color: #00d4ff;'>⚔️ TREND DUEL: MARKET AUDIT</h1>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00d4ff;'>⚔️ TREND DUEL: MARKET AUDIT</h1>", unsafe_allow_html=True)
     
     # 1. TRIGGER DATA UPLINK (Using the renamed function)
     pulse_df = fetch_live_market_data()
@@ -1255,7 +1272,7 @@ elif page == "⚔️ Trend Duel":
 
 # --- MODULE 6: SCRIPT ARCHITECT ---
 elif page == "🏗️ Script Architect":
-    st.markdown("<h1 style='color: #00ff41;'>⚔️ SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00ff41;'>⚔️ SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
     
     # Ensure history list exists in session state
     if 'script_history' not in st.session_state: st.session_state.script_history = []
@@ -1367,7 +1384,7 @@ elif page == "🧠 Neural Forge":
     
     remaining_credits = st.session_state.max_limit - st.session_state.daily_usage
 
-    st.markdown("<h1 style='color: #00ff41; letter-spacing: 2px;'>🧠 NEURAL FORGE // MASTER ARCHITECT</h1>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00ff41; letter-spacing: 2px;'>🧠 NEURAL FORGE // MASTER ARCHITECT</h1>", unsafe_allow_html=True)
     st.sidebar.markdown(f"### ⚡ NEURAL CREDITS\n**{remaining_credits} / {st.session_state.max_limit}**")
     
     if 'vault_anchor' not in st.session_state or st.session_state.vault_anchor is None:
@@ -1500,7 +1517,7 @@ elif page == "🧠 Neural Forge":
 
 # --- MODULE : THE IDENTITY VAULT (CORE DNA) ---
 elif page == "🏛️ Identity Vault":
-    st.markdown("<h1 style='color: #00ff41;'>🏛️ IDENTITY VAULT // CORE DNA</h1>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00ff41;'>🏛️ IDENTITY VAULT // CORE DNA</h1>", unsafe_allow_html=True)
     
     # Protocol 2026-02-06: Initialize Vault if empty
     if 'vault_anchor' not in st.session_state:
@@ -1547,7 +1564,7 @@ if st.session_state.get('vault_anchor'):
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
-    st.markdown("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH ENGINE</h1>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH ENGINE</h1>", unsafe_allow_html=True)
     
     # 🧬 NEURAL BRIDGE: Extract data from session state
     active_target = st.session_state.get('active_pitch_target', {})
@@ -1605,7 +1622,7 @@ elif page == "🧪 Creator Lab":
         header_color = "#00d4ff" if is_admin else "#00ff41"
         header_label = "ADMIN" if is_admin else "PRO"
         
-        st.markdown(f"<h1 style='color: {header_color};'>🧪 ROI ENGINE v2.0 ({header_label})</h1>", unsafe_allow_html=True)
+        draw_title(f"<h1 style='color: {header_color};'>🧪 ROI ENGINE v2.0 ({header_label})</h1>", unsafe_allow_html=True)
         st.info("🛰️ Strategic Profit Projection: Analyze the fiscal weight of your content.")
         
         niche_data = {
@@ -1686,7 +1703,7 @@ elif page == "🧪 Creator Lab":
 
     # --- THE BASIC LAB (HOOK & RETENTION) ---
     else:
-        st.markdown("<h1 style='color: #888;'>🧪 CREATOR LAB (BASIC)</h1>", unsafe_allow_html=True)
+        draw_title("<h1 style='color: #888;'>🧪 CREATOR LAB (BASIC)</h1>", unsafe_allow_html=True)
         st.info("📡 Content Optimization: Refine your hooks and retention strategy.")
 
         tab_hook, tab_retention = st.tabs(["🔥 Hook Analyzer", "🧠 Cognitive Load"])
@@ -1709,7 +1726,7 @@ elif page == "🧪 Creator Lab":
 
 # --- MODULE 9: LEAD SOURCE (RESILIENT AUTO-SWITCH) ---
 elif page == "🛰️ Lead Source":
-    st.markdown("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
     
     niche_target = st.text_input("Target Keyword", placeholder="e.g. Real Estate, Fitness Coach")
     
@@ -1769,7 +1786,7 @@ elif page == "🛰️ Lead Source":
 
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
 elif page == "📜 History":
-    st.markdown("<h1 style='color: #00ff41;'>📜 ARCHIVE VAULT</h1>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00ff41;'>📜 ARCHIVE VAULT</h1>", unsafe_allow_html=True)
     
     # 🕵️ Search Filter
     search_query = st.text_input("🔍 Search Vault by Topic, Platform, or Script...", placeholder="Enter keyword...")
@@ -1874,7 +1891,7 @@ elif page == "📜 History":
 
 # --- MODULE 11: ADMIN CONSOLE (OPTION C) ---
 elif page == "🛡️ Admin Console":
-    st.markdown("<h1 style='color: #00ff41;'>🛡️ SYSTEM ADMINISTRATION</h1>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00ff41;'>🛡️ SYSTEM ADMINISTRATION</h1>", unsafe_allow_html=True)
     
     # 1. Password Protection
     auth = st.text_input("Enter Level 5 Authorization Code", type="password")
@@ -1982,7 +1999,7 @@ elif page == "⚖️ Legal Archive":
     u_role = str(st.session_state.get('role', '')).upper()
     is_authorized = ("ADMIN" in u_name or "DIRECTOR" in u_name or "ADMIN" in u_role)
 
-    st.markdown("<h1 style='color: #00ff41;'>⚖️ LEGAL DEFENSE VAULT</h1>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00ff41;'>⚖️ LEGAL DEFENSE VAULT</h1>", unsafe_allow_html=True)
     
     # --- 🛰️ SYSTEM UPDATE NOTICE ---
     st.warning("📡 **SYSTEM OPTIMIZATION IN PROGRESS:** We are fine-tuning our AI Law-Cores to make sure your contracts are 100% bulletproof. These advanced tools will unlock in the next update.")
@@ -2064,7 +2081,7 @@ elif page == "⚖️ Legal Archive":
 
 # --- MODULE 10: 💎 VOID PRO LICENSE UPLINK ---
 elif page == "💎 Upgrade to Pro":
-        st.markdown("<h1 style='color: #00ff41;'>💎 VOID OS // LICENSE UPLINK</h1>", unsafe_allow_html=True)
+        draw_title("<h1 style='color: #00ff41;'>💎 VOID OS // LICENSE UPLINK</h1>", unsafe_allow_html=True)
         
         # 1. VALUE PROPOSITION
         with st.container(border=True):
@@ -2135,7 +2152,7 @@ elif page == "🛰️ Media Uplink":
     import yt_dlp
     import os
 
-    st.markdown("<h1 style='color: #00ff41;'>🛰️ MEDIA UPLINK // THE BRIDGE</h1>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00ff41;'>🛰️ MEDIA UPLINK // THE BRIDGE</h1>", unsafe_allow_html=True)
     st.info("Direct server-side downloading is throttled. Switching to 'Bridge Mode' for 100% reliability.")
 
     # Detect Shards
@@ -2178,7 +2195,7 @@ elif page == "🛰️ Media Uplink":
                 st.warning("Director, please provide a URL.")
 
 elif page == "⚙️ Settings":
-    st.markdown("<h1 style='color: #00ff41;'>⚙️ SYSTEM SETTINGS</h1>", unsafe_allow_html=True)
+    draw_title("<h1 style='color: #00ff41;'>⚙️ SYSTEM SETTINGS</h1>", unsafe_allow_html=True)
     st.markdown("---")
 
     # 1. PROFILE INTELLIGENCE
@@ -2285,6 +2302,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
