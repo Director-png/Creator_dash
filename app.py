@@ -23,6 +23,8 @@ from streamlit_lottie import st_lottie # You'll need: pip install streamlit-lott
 import requests
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
+import base64
+from io import BytesIO
 
 # This defines 'conn' so the rest of the app can see it
 conn = st.connection("gsheets", type=GSheetsConnection)
@@ -846,29 +848,32 @@ if 'page' not in st.session_state:
     st.session_state.page = "🏠 Dashboard"
 
 # --- 2. SIDEBAR ARCHITECTURE ---
+
+
 # --- 2. SIDEBAR ARCHITECTURE ---
 with st.sidebar:
     try:
         # --- ENHANCED IDENTITY CORE ---
         profile_img = st.session_state.get('vault_anchor')
         
-        # We generate the specific HTML for the circle content here
-        if profile_img and isinstance(profile_img, str):
-            # Show the actual purged identity image
-            img_html = f"<img src='{profile_img}' style='width: 55px; height: 55px; border-radius: 50%; border: 2px solid #00ff41; object-fit: cover;'>"
-        else:
-            # Default DNA state
-            img_html = "<div style='width: 55px; height: 55px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px; font-weight: bold;'>DNA</div>"
+        # Helper to force image into HTML string
+        def get_img_tag(img_data):
+            if img_data and isinstance(img_data, str):
+                # If it's a URL or path, we force it into a style-locked tag
+                return f'<img src="{img_data}" style="width: 55px; height: 55px; border-radius: 50%; border: 2px solid #00ff41; object-fit: cover; display: block;">'
+            return '<div style="width: 55px; height: 55px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px; font-weight: bold;">DNA</div>'
 
-        # This block renders the image AND the name in one single flexbox container
+        img_html_component = get_img_tag(profile_img)
+
+        # We use a single ST.MARKDOWN call for the entire header to prevent "Jumping"
         st.markdown(f"""
-            <div style='background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px; display: flex; align-items: center; gap: 15px;'>
-                <div style='flex-shrink: 0;'>
-                    {img_html}
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
+                <div style="flex-shrink: 0; width: 55px; height: 55px;">
+                    {img_html_component}
                 </div>
-                <div style='flex-grow: 1;'>
-                    <p style='margin: 0; color: #888; font-size: 9px; letter-spacing: 2px;'>OPERATOR IDENTIFIED</p>
-                    <h3 style='color: #00ff41; margin: 0; font-family: "Courier New", Courier, monospace; font-size: 18px;'>{st.session_state.get('user_name', 'DIRECTOR').upper()}</h3>
+                <div style="flex-grow: 1;">
+                    <p style="margin: 0; color: #888; font-size: 9px; letter-spacing: 2px; line-height: 1;">OPERATOR IDENTIFIED</p>
+                    <h3 style="color: #00ff41; margin: 0; font-family: 'Courier New', Courier, monospace; font-size: 18px; line-height: 1.2;">{st.session_state.get('user_name', 'DIRECTOR').upper()}</h3>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -929,7 +934,6 @@ with st.sidebar:
                         resp_container = st.empty()
                         full_resp = ""
                         try:
-                            # Using groq_c as per your previous setup
                             stream = groq_c.chat.completions.create(
                                 model="llama-3.3-70b-versatile",
                                 messages=[
@@ -2324,6 +2328,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
