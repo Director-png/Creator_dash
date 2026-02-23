@@ -850,7 +850,6 @@ with st.sidebar:
         else:
             options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
 
-        # --- NAVIGATION SELECTION ---
         if 'current_page' not in st.session_state:
             st.session_state.current_page = options[0]
 
@@ -862,44 +861,45 @@ with st.sidebar:
         page = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = page
 
-        # --- 🤖 INTEGRATED VOID MANAGER ---
+        # --- 🤖 REPAIRED VOID MANAGER (GROQ VERSION) ---
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
-        # Wrapped in a container to ensure input stays at bottom of the expander
         with st.expander("📡 NEURAL UPLINK", expanded=False):
-            chat_container = st.container()
+            # Container for messages keeps them above the input
+            chat_msg_container = st.container()
+            
             if "manager_chat" not in st.session_state:
                 st.session_state.manager_chat = []
 
-            # Display messages in the container
-            with chat_container:
+            with chat_msg_container:
                 for msg in st.session_state.manager_chat:
                     with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
                         st.markdown(msg["content"])
 
-            # Chat input automatically sticks to the bottom of its parent container
+            # Input stays at bottom
             agent_input = st.chat_input("Command VOID-OS...")
             
             if agent_input:
                 st.session_state.manager_chat.append({"role": "user", "content": agent_input})
-                with chat_container:
+                with chat_msg_container:
                     with st.chat_message("user", avatar="👤"):
                         st.markdown(agent_input)
                 
-                with chat_container:
+                with chat_msg_container:
                     with st.chat_message("assistant", avatar="🌌"):
                         resp_container = st.empty()
                         full_resp = ""
                         try:
+                            # GROQ UPLINK: Ensuring we use the correct Groq client/key
+                            # Note: Ensure 'client' is initialized as Groq(api_key=st.secrets["GROQ_API_KEY"])
                             stream = client.chat.completions.create(
-                                model=MODEL_ID,
+                                model=MODEL_ID, # e.g., "llama-3.3-70b-versatile"
                                 messages=[
                                     {"role": "system", "content": "You are VOID-OS. Witty, elite, and strategic. Be concise."},
                                     {"role": "user", "content": agent_input}
                                 ],
-                                stream=True,
-                                temperature=0.6
+                                stream=True
                             )
                             for chunk in stream:
                                 if chunk.choices[0].delta.content:
@@ -914,7 +914,7 @@ with st.sidebar:
         # --- 🛠️ GLOBAL ACTIONS ---
         st.divider()
         
-        # 1. FEEDBACK TOGGLE LOGIC
+        # State toggle for Feedback Node
         if 'show_feedback_node' not in st.session_state:
             st.session_state.show_feedback_node = False
 
@@ -934,6 +934,7 @@ with st.sidebar:
     except Exception as sidebar_err:
         st.error(f"System Error: {sidebar_err}")
         page = options[0]
+
 # --- FEEDBACK OVERLAY (Triggers when sidebar button is clicked) ---
 if st.session_state.get('show_feedback_node', False):
     st.markdown("---")
@@ -2325,6 +2326,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
