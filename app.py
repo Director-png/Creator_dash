@@ -852,22 +852,20 @@ with st.sidebar:
         # --- ENHANCED IDENTITY CORE ---
         profile_img = st.session_state.get('vault_anchor')
         
-        # Logic: Determine what goes inside the small ID circle
-        if profile_img is None:
-            # Default state: DNA text
-            img_content = "<div style='width: 55px; height: 55px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px;'>DNA</div>"
+        # We generate the specific HTML for the circle content here
+        if profile_img and isinstance(profile_img, str):
+            # Show the actual purged identity image
+            img_html = f"<img src='{profile_img}' style='width: 55px; height: 55px; border-radius: 50%; border: 2px solid #00ff41; object-fit: cover;'>"
         else:
-            if isinstance(profile_img, str):
-                # Purged Identity state: Show the actual image
-                img_content = f"<img src='{profile_img}' style='width: 55px; height: 55px; border-radius: 50%; border: 2px solid #00ff41; object-fit: cover;'>"
-            else:
-                # Fallback state: Helix emoji
-                img_content = "<div style='width: 55px; height: 55px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; font-size: 25px;'>🧬</div>"
+            # Default DNA state
+            img_html = "<div style='width: 55px; height: 55px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px; font-weight: bold;'>DNA</div>"
 
-        # The Identity Box (Displays the image/DNA adjacent to the name)
+        # This block renders the image AND the name in one single flexbox container
         st.markdown(f"""
             <div style='background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 15px; border: 1px solid rgba(0, 255, 65, 0.2); margin-bottom: 20px; display: flex; align-items: center; gap: 15px;'>
-                <div>{img_content}</div>
+                <div style='flex-shrink: 0;'>
+                    {img_html}
+                </div>
                 <div style='flex-grow: 1;'>
                     <p style='margin: 0; color: #888; font-size: 9px; letter-spacing: 2px;'>OPERATOR IDENTIFIED</p>
                     <h3 style='color: #00ff41; margin: 0; font-family: "Courier New", Courier, monospace; font-size: 18px;'>{st.session_state.get('user_name', 'DIRECTOR').upper()}</h3>
@@ -931,6 +929,7 @@ with st.sidebar:
                         resp_container = st.empty()
                         full_resp = ""
                         try:
+                            # Using groq_c as per your previous setup
                             stream = groq_c.chat.completions.create(
                                 model="llama-3.3-70b-versatile",
                                 messages=[
@@ -970,7 +969,6 @@ with st.sidebar:
 
     except Exception as sidebar_err:
         st.error(f"System Error: {sidebar_err}")
-        page = options[0]
 
 # --- FEEDBACK OVERLAY (Triggers when sidebar button is clicked) ---
 if st.session_state.get('show_feedback_node', False):
@@ -2326,6 +2324,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
