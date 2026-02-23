@@ -2104,73 +2104,36 @@ elif page == "⚖️ Legal Archive":
         st.write("- Is there a limit on how many 'Revisions' the brand can ask for?")
 
 # --- MODULE 10: 💎 VOID PRO LICENSE UPLINK ---
-elif page == "💎 Upgrade to Pro":
-        draw_title("💎",  "VOID OS // LICENSE UPLINK")
-        
-        # 1. VALUE PROPOSITION
-        with st.container(border=True):
-            st.markdown("### ⚡ NEURAL FORGE: PRO ACCESS")
-            c1, c2 = st.columns(2)
-            with c1:
-                st.write("🔓 **Unlimited Neural Pitching**")
-                st.write("🔓 **Full Legal Archive Access**")
-            with c2:
-                st.write("🔓 **Deep Lead Scanners**")
-                st.write("🔓 **Priority Support Node**")
-            st.markdown("---")
-            st.markdown("**Price:** ~~₹1,499~~ | <span style='color: #00ff41; font-size: 20px;'>**₹499 (Launch Offer)**</span>", unsafe_allow_html=True)
+# --- THE BETA ACCESS PORTAL (Replacing Upgrade Page) ---
+draw_title("💎", "ELITE BETA ACCESS")
 
-        # 2. LEGAL GATE
-        st.subheader("⚖️ Protocol Agreement")
-        with st.expander("Review Terms & Refund Policy"):
-            st.write("- **Non-Refundable:** Digital licenses grant instant asset access.")
-            st.write("- **Manual Sync:** UPI verification takes 1-2 hours.")
-            st.write("- **Email Match:** Ensure registered email matches payment sync.")
-        
-        agreed = st.checkbox("I verify the Terms of VOID OS", key="force_agree_check")
-        st.divider()
+st.markdown("""
+<div style='background: rgba(0, 212, 255, 0.05); padding: 25px; border-radius: 15px; border: 1px solid #00d4ff; margin-bottom: 25px;'>
+    <h3 style='color: #00d4ff; margin-top: 0;'>TRUST > TRANSACTION</h3>
+    <p style='color: #ccc; font-size: 1.1rem;'>
+        We aren't looking for customers yet; we are looking for <b>Partners in Innovation</b>. 
+        VOID-OS is currently in <b>Strict Calibration Mode</b>.
+    </p>
+    <hr style='border: 0.5px solid rgba(0, 212, 255, 0.2);'>
+    <p style='color: #888;'>
+        The 'Pay' gate is intentionally locked. Use the system, break it, and provide your feedback. 
+        If after 7 days you feel the Matrix has added 10x value to your workflow, we will discuss 
+        opening full Elite Clearance.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
-        if agreed:
-            st.markdown("### 🛰️ SELECT PAYMENT GATEWAY")
-            col_gate1, col_gate2 = st.columns(2)
+# THE PROGRESS TRACKER
+st.write("### ⏳ YOUR TESTER MATURITY")
+days_active = 1 # We can automate this later with a timestamp
+progress = days_active / 7
+st.progress(progress)
+st.caption(f"Day {days_active} of 7: System is monitoring your engagement metrics.")
 
-            with col_gate1:
-                with st.container(border=True):
-                    st.markdown("#### 🇮🇳 NEURAL UPI")
-                    vpa_id = "anuj05758@okicici" 
-                    upi_url = f"upi://pay?pa={vpa_id}&pn=VOID_OS&am=499&cu=INR&tn=VOID_OS_PRO"
-                    qr_api = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={upi_url}"
-                    st.image(qr_api, use_container_width=True)
-                    st.link_button("📲 OPEN UPI APP", upi_url, use_container_width=True)
-
-            with col_gate2:
-                with st.container(border=True):
-                    st.markdown("#### 💳 CARD / RAZORPAY")
-                    st.button("🔒 ENCRYPTED", disabled=True, use_container_width=True)
-                    st.warning("OFFLINE: Available in V2.0 Update.")
-
-            st.divider()
-
-            # 3. MANUAL SYNC FORM
-            st.markdown("### 🧬 MANUAL DATA SYNC")
-            with st.container(border=True):
-                sync_email = st.text_input("REGISTERED EMAIL", placeholder="e.g., director@voidos.com")
-                utr_num = st.text_input("12-DIGIT UTR / TRANSACTION ID", placeholder="e.g., 4029XXXXXXXX")
-                
-                if st.button("SYNC WITH VOID OS", use_container_width=True):
-                    if "@" in sync_email and len(utr_num) >= 10:
-                        # 📡 UPLINK LOGIC
-                        pay_form_url = "https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse"
-                        payload = {"entry.123": sync_email, "entry.456": utr_num} # Update with IDs
-                        try:
-                            requests.post(pay_form_url, data=payload)
-                            st.success("🛰️ UPLINK SUCCESSFUL: Verification in progress.")
-                            st.balloons()
-                        except:
-                            st.error("Uplink Failure. Contact Support.")
-                    else:
-                        st.error("Invalid Input Details.")
-
+# THE CTA
+if st.button("💬 I HAVE FEEDBACK NOW", use_container_width=True):
+    st.session_state.show_feedback_node = True
+    st.rerun()
 # --- MODULE 8: MEDIA UPLINK (THE DIRECTOR'S BRIDGE) ---
 elif page == "🛰️ Media Uplink":
     import yt_dlp
@@ -2326,6 +2289,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
