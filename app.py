@@ -893,8 +893,8 @@ with st.sidebar:
                         try:
                             # GROQ UPLINK: Ensuring we use the correct Groq client/key
                             # Note: Ensure 'client' is initialized as Groq(api_key=st.secrets["GROQ_API_KEY"])
-                            stream = client.chat.completions.create(
-                                model=MODEL_ID, # e.g., "llama-3.3-70b-versatile"
+                            stream = groq_c.chat.completions.create(
+                                model="llama-3.3-70b-versatile", # e.g., "llama-3.3-70b-versatile"
                                 messages=[
                                     {"role": "system", "content": "You are VOID-OS. Witty, elite, and strategic. Be concise."},
                                     {"role": "user", "content": agent_input}
@@ -2326,6 +2326,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
