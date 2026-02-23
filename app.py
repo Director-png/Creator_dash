@@ -658,12 +658,15 @@ if st.sidebar.checkbox("🔍 Debug Node Mapping"):
 import requests
 import datetime
 import pandas as pd
+import streamlit as st
 
 # 1. SESSION STATE INITIALIZATION
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 if 'otp_sent' not in st.session_state:
     st.session_state.otp_sent = False
+if 'rec_otp_sent' not in st.session_state: # New state for recovery flow
+    st.session_state.rec_otp_sent = False
 if 'generated_otp' not in st.session_state:
     st.session_state.generated_otp = None
 if 'user_status' not in st.session_state:
@@ -687,12 +690,11 @@ if not st.session_state.logged_in:
         pw_in = st.text_input("PASSKEY", type="password", key="gate_login_pw")
         
         if st.button("INITIATE UPLINK", use_container_width=True):
-            users = load_user_db() # Should return the dataframe from your User_DB CSV
+            users = load_user_db() 
             if email_in == "admin" and pw_in == "1234":
                 st.session_state.update({"logged_in": True, "user_name": "Master Director", "user_role": "admin", "user_status": "Pro", "user_email": "admin"})
                 st.rerun()
             elif not users.empty:
-                # Column index: 0=Email, 2=Password, 1=Name, 4=Status
                 match = users[(users['Email'].astype(str).str.lower() == email_in) & (users['Password'].astype(str) == pw_in)]
                 if not match.empty:
                     st.session_state.update({
@@ -705,6 +707,7 @@ if not st.session_state.logged_in:
                 else:
                     st.error("INTEGRITY BREACH: INVALID CREDENTIALS.")
 
+        # --- RECOVERY PROTOCOL FIX ---
         with st.expander("RECOVERY PROTOCOL (Lost Passkey)"):
             st.info("Verify identity via Security Answer or OTP")
             rec_mode = st.radio("Recovery Mode", ["Security Question", "OTP Verification"])
@@ -714,18 +717,53 @@ if not st.session_state.logged_in:
                 s_ans = st.text_input("SECURITY KEY (DOB / PRESET)", key="rec_ans")
                 new_p = st.text_input("NEW PASSKEY", type="password", key="rec_new_pw")
                 if st.button("OVERRIDE VIA SECURITY"):
-                    payload = {"email": r_email, "action": "SECURE_RESET", "answer": s_ans, "message": new_p}
+                    # Fixed action name to match common Google Script standard: 'RESET_PASSWORD'
+                    payload = {"email": r_email, "action": "RESET_PASSWORD", "answer": s_ans, "new_password": new_p}
                     try:
                         res = requests.post(NEW_URL, json=payload, timeout=15)
                         if "SUCCESS" in res.text: st.success("IDENTITY VERIFIED. PASSKEY UPDATED.")
                         else: st.error(f"UPLINK DENIED: {res.text}")
                     except Exception as e: st.error(f"CRASH: {e}")
+            
             else:
-                if st.button("SEND RECOVERY OTP"):
-                    requests.post(NEW_URL, json={"category": "SEND_OTP", "email": r_email})
-                    st.toast("OTP Dispatched to Email.")
+                # OTP RECOVERY FLOW FIX
+                if not st.session_state.rec_otp_sent:
+                    if st.button("SEND RECOVERY OTP"):
+                        try:
+                            response = requests.post(NEW_URL, json={"category": "SEND_OTP", "email": r_email}, timeout=15)
+                            if response.status_code == 200 and len(response.text.strip()) == 6:
+                                st.session_state.generated_otp = response.text.strip()
+                                st.session_state.rec_otp_sent = True
+                                st.toast("OTP Dispatched to Email.")
+                                st.rerun()
+                            else: st.error(f"Failed to send OTP: {response.text}")
+                        except Exception as e: st.error(f"Connection Error: {e}")
+                else:
+                    # The "Missing Tab" for OTP Input
+                    st.success(f"Security Code sent to {r_email}")
+                    rec_otp_in = st.text_input("ENTER 6-DIGIT CODE", key="rec_otp_input")
+                    new_p_otp = st.text_input("NEW PASSKEY", type="password", key="rec_new_pw_otp")
+                    
+                    if st.button("🔓 OVERRIDE SECURITY WALL"):
+                        if rec_otp_in == st.session_state.generated_otp:
+                            # Finalizing the reset
+                            payload = {"email": r_email, "action": "RESET_PASSWORD", "new_password": new_p_otp, "bypass": "true"}
+                            try:
+                                res = requests.post(NEW_URL, json=payload, timeout=15)
+                                if "SUCCESS" in res.text:
+                                    st.success("VAULT UPDATED. YOU MAY NOW LOGIN.")
+                                    st.session_state.rec_otp_sent = False
+                                    st.session_state.generated_otp = None
+                                else: st.error(f"REJECTION: {res.text}")
+                            except Exception as e: st.error(f"Error: {e}")
+                        else:
+                            st.error("INVALID CODE. UPLINK BLOCKED.")
+                    
+                    if st.button("Resend Code"):
+                        st.session_state.rec_otp_sent = False
+                        st.rerun()
 
-    # --- TAB 2: REGISTRATION (PHASED) ---
+    # --- TAB 2: REGISTRATION ---
     with t2:
         if not st.session_state.otp_sent:
             st.markdown("### PHASE 1: DATA CAPTURE")
@@ -741,7 +779,6 @@ if not st.session_state.logged_in:
 
             if st.button("⚔️ GENERATE SECURE OTP", use_container_width=True):
                 if n and e and mob and sa and ni and p:
-                    # Lock data in session state so it doesn't disappear on rerun
                     st.session_state.temp_reg_data = {
                         "Email": e.strip().lower(), "Name": n, "Password": p,
                         "Role": "user", "Status": "Free", "Niche": ni,
@@ -767,7 +804,6 @@ if not st.session_state.logged_in:
             
             if st.button("🔓 FINALIZE INITIALIZATION", use_container_width=True):
                 if user_otp == st.session_state.generated_otp:
-                    # Map exactly to your GSheet Column order
                     final_payload = {
                         "category": "REGISTRATION",
                         "data": st.session_state.temp_reg_data 
@@ -776,7 +812,7 @@ if not st.session_state.logged_in:
                         r = requests.post(NEW_URL, json=final_payload, timeout=20)
                         if "SUCCESS" in r.text:
                             st.success("✅ IDENTITY SECURED. YOU MAY NOW LOGIN.")
-                            st.balloons()
+                            st.fireworks()
                             st.session_state.otp_sent = False 
                             st.session_state.generated_otp = None
                         else: st.error(f"VAULT REJECTION: {r.text}")
@@ -787,7 +823,7 @@ if not st.session_state.logged_in:
                 st.session_state.otp_sent = False
                 st.rerun()
 
-    # --- TAB 3: ELITE BYPASS (TESTING ONLY) ---
+    # --- TAB 3: ELITE BYPASS ---
     with t3:
         st.markdown("### 🛰️ ELITE UPLINK (TEST PHASE)")
         cipher_in = st.text_input("ENTER ELITE ACCESS CIPHER", type="password")
@@ -2289,6 +2325,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
