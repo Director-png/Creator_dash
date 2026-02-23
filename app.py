@@ -179,6 +179,48 @@ def draw_title(emoji, text):
         </div>
     """, unsafe_allow_html=True)
 
+def apply_war_room_css():
+    st.markdown("""
+    <style>
+    /* 1. BACKGROUND & TEXT */
+    .stApp { 
+        background: radial-gradient(circle at top, #0a0a0a 0%, #000000 100%) !important; 
+    }
+    
+    /* 2. BUTTONS (Restoring the Cyan/Green Glow) */
+    div.stButton > button {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #00d4ff !important; 
+        border: 1px solid rgba(0, 212, 255, 0.4) !important; 
+        border-radius: 10px !important;
+        padding: 10px 24px !important;
+        font-weight: 700 !important;
+        transition: 0.3s all ease !important;
+    }
+    
+    div.stButton > button:hover {
+        border: 1px solid #00ff41 !important;
+        color: #00ff41 !important;
+        background: rgba(0, 255, 65, 0.1) !important;
+        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.2) !important;
+        transform: translateY(-2px);
+    }
+
+    /* 3. THE GRADIENT TEXT (Properly Clipped) */
+    .neural-gradient-text {
+        background: linear-gradient(90deg, #00d4ff 0%, #00ff41 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        font-weight: 800 !important;
+        display: inline-block !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# CALL THIS AT THE VERY TOP OF YOUR APP
+apply_war_room_css()
+
 def typewriter_effect(text):
     container = st.empty()
     full_text = ""
@@ -599,52 +641,6 @@ if 'first_load' not in st.session_state:
         time.sleep(3.0) 
     st.session_state.first_load = True
     st.rerun()
-
-# --- SPEED OPTIMIZATION ---
-@st.cache_resource
-def get_neural_styles():
-    return """
-    <style>
-    /* 1. FLUID UI BACKGROUND */
-    .main { background: radial-gradient(circle at top, #0a0a0a 0%, #000000 100%); color: #e0e0e0; }
-    
-    /* 2. ORIGINAL BUTTONS (Restored Cyan/Green) */
-    .stButton>button {
-        background: rgba(255, 255, 255, 0.03) !important;
-        color: #00d4ff !important; 
-        border: 1px solid rgba(0, 212, 255, 0.3) !important; 
-        border-radius: 8px;
-        backdrop-filter: blur(10px);
-        transition: 0.2s all ease-in-out;
-    }
-    .stButton>button:hover {
-        border: 1px solid #00ff41 !important;
-        color: #00ff41 !important;
-        background: rgba(0, 255, 65, 0.05) !important;
-        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2);
-    }
-
-    /* 3. THE TEXT GRADIENT CLASS (No global h1, h2 tags) */
-    .neural-gradient-text {
-        background: linear-gradient(90deg, #00d4ff, #00ff41);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-family: 'Inter', sans-serif;
-        font-weight: 800;
-        text-transform: uppercase;
-        display: inline-block;
-    }
-
-    /* 4. METRIC & INPUT FIXES */
-    [data-testid="stMetricValue"] { color: #00ff41 !important; font-family: monospace; }
-    .stTextInput>div>div>input {
-        border-radius: 8px !important;
-        background-color: #0f0f0f !important;
-        border: 1px solid #333 !important;
-        color: white !important;
-    }
-    </style>
-    """
 
 # --- EMERGENCY DIAGNOSTIC ---
 if st.sidebar.checkbox("🔍 Debug Node Mapping"):
@@ -2303,6 +2299,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
