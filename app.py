@@ -2146,36 +2146,38 @@ elif page == "⚖️ Legal Archive":
         st.write("- Is there a limit on how many 'Revisions' the brand can ask for?")
 
 # --- MODULE 10: 💎 VOID PRO LICENSE UPLINK ---
-# --- THE BETA ACCESS PORTAL (Replacing Upgrade Page) ---
-draw_title("💎", "ELITE BETA ACCESS")
+# --- MODULE: THE BETA ACCESS PORTAL ---
+elif page == "💎 Upgrade to Pro":
+    draw_title("💎", "ELITE BETA ACCESS")
 
-st.markdown("""
-<div style='background: rgba(0, 212, 255, 0.05); padding: 25px; border-radius: 15px; border: 1px solid #00d4ff; margin-bottom: 25px;'>
-    <h3 style='color: #00d4ff; margin-top: 0;'>TRUST > TRANSACTION</h3>
-    <p style='color: #ccc; font-size: 1.1rem;'>
-        We aren't looking for customers yet; we are looking for <b>Partners in Innovation</b>. 
-        VOID-OS is currently in <b>Strict Calibration Mode</b>.
-    </p>
-    <hr style='border: 0.5px solid rgba(0, 212, 255, 0.2);'>
-    <p style='color: #888;'>
-        The 'Pay' gate is intentionally locked. Use the system, break it, and provide your feedback. 
-        If after 7 days you feel the Matrix has added 10x value to your workflow, we will discuss 
-        opening full Elite Clearance.
-    </p>
-</div>
-""", unsafe_allow_html=True)
+    st.markdown("""
+    <div style='background: rgba(0, 212, 255, 0.05); padding: 25px; border-radius: 15px; border: 1px solid #00d4ff; margin-bottom: 25px;'>
+        <h3 style='color: #00d4ff; margin-top: 0;'>TRUST > TRANSACTION</h3>
+        <p style='color: #ccc; font-size: 1.1rem;'>
+            We aren't looking for customers yet; we are looking for <b>Partners in Innovation</b>. 
+            VOID-OS is currently in <b>Strict Calibration Mode</b>.
+        </p>
+        <hr style='border: 0.5px solid rgba(0, 212, 255, 0.2);'>
+        <p style='color: #888;'>
+            The 'Pay' gate is intentionally locked. Use the system, break it, and provide your feedback. 
+            If after 7 days you feel the Matrix has added 10x value to your workflow, we will discuss 
+            opening full Elite Clearance.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
-# THE PROGRESS TRACKER
-st.write("### ⏳ YOUR TESTER MATURITY")
-days_active = 1 # We can automate this later with a timestamp
-progress = days_active / 7
-st.progress(progress)
-st.caption(f"Day {days_active} of 7: System is monitoring your engagement metrics.")
+    # THE PROGRESS TRACKER
+    st.write("### ⏳ YOUR TESTER MATURITY")
+    days_active = 1 # Consider connecting this to st.session_state.get('user_time') later
+    progress = min(days_active / 7, 1.0)
+    st.progress(progress)
+    st.caption(f"Day {days_active} of 7: System is monitoring your engagement metrics.")
 
-# THE CTA
-if st.button("💬 I HAVE FEEDBACK NOW", use_container_width=True):
-    st.session_state.show_feedback_node = True
-    st.rerun()
+    # THE CTA
+    if st.button("💬 I HAVE FEEDBACK NOW", use_container_width=True):
+        st.session_state.show_feedback_node = True
+        st.rerun()
+
 # --- MODULE 8: MEDIA UPLINK (THE DIRECTOR'S BRIDGE) ---
 elif page == "🛰️ Media Uplink":
     import yt_dlp
@@ -2331,6 +2333,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
