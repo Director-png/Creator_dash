@@ -852,35 +852,42 @@ if 'page' not in st.session_state:
 with st.sidebar:
     try:
         # --- ENHANCED IDENTITY CORE ---
+        # Note: vault_anchor now contains raw bytes from st.file_uploader
         profile_img = st.session_state.get('vault_anchor')
         
-        # Create two columns inside the sidebar for the Identity Box
-        # ratio 1:3 (Small circle : Large Name area)
-        col_img, col_name = st.columns([1, 3])
+        # We create a container to keep the ID box strictly at the top
+        identity_container = st.container()
+        
+        with identity_container:
+            col_img, col_name = st.columns([1, 3])
+            
+            with col_img:
+                if profile_img is not None:
+                    # Using native st.image for stability with bytes
+                    st.image(profile_img, use_container_width=True)
+                else:
+                    # Default DNA state if no image uploaded
+                    st.markdown("<div style='width: 50px; height: 50px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px; font-weight: bold; margin-top:5px;'>DNA</div>", unsafe_allow_html=True)
 
-        with col_img:
-            if profile_img and isinstance(profile_img, str):
-                # We use st.image here because it's native and won't jump to the bottom
-                st.image(profile_img, width=55) 
-                # Note: To make this a circle, we add a tiny CSS patch below
-            else:
-                st.markdown("<div style='width: 55px; height: 55px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px; font-weight: bold;'>DNA</div>", unsafe_allow_html=True)
+            with col_name:
+                st.markdown(f"""
+                    <div style='margin-top: 5px;'>
+                        <p style='margin: 0; color: #888; font-size: 9px; letter-spacing: 2px;'>OPERATOR IDENTIFIED</p>
+                        <h3 style='color: #00ff41; margin: 0; font-family: "Courier New", Courier, monospace; font-size: 16px;'>{st.session_state.get('user_name', 'DIRECTOR').upper()}</h3>
+                    </div>
+                """, unsafe_allow_html=True)
 
-        with col_name:
-            st.markdown(f"""
-                <div style='margin-top: 5px;'>
-                    <p style='margin: 0; color: #888; font-size: 9px; letter-spacing: 2px;'>OPERATOR IDENTIFIED</p>
-                    <h3 style='color: #00ff41; margin: 0; font-family: "Courier New", Courier, monospace; font-size: 16px;'>{st.session_state.get('user_name', 'DIRECTOR').upper()}</h3>
-                </div>
-            """, unsafe_allow_html=True)
-
-        # CSS PATCH TO FORCE THE IMAGE INTO A CIRCLE
+        # CSS PATCH: Forces all sidebar images (including the st.image above) 
+        # to be circular and prevents them from expanding weirdly.
         st.markdown("""
             <style>
-                [data-testid="stSidebar"] img {
-                    border-radius: 50%;
-                    border: 2px solid #00ff41;
+                [data-testid="stSidebar"] [data-testid="stImage"] img {
+                    border-radius: 50% !important;
+                    border: 2px solid #00ff41 !important;
+                    aspect-ratio: 1 / 1;
                     object-fit: cover;
+                    width: 55px !important;
+                    height: 55px !important;
                 }
             </style>
         """, unsafe_allow_html=True)
@@ -915,13 +922,12 @@ with st.sidebar:
         page = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = page
 
-        # --- 🤖 REPAIRED VOID MANAGER (GROQ VERSION) ---
+        # --- 🤖 VOID MANAGER (GROQ VERSION) ---
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
         with st.expander("📡 NEURAL UPLINK", expanded=False):
             chat_msg_container = st.container()
-            
             if "manager_chat" not in st.session_state:
                 st.session_state.manager_chat = []
 
@@ -963,10 +969,6 @@ with st.sidebar:
 
         # --- 🛠️ GLOBAL ACTIONS ---
         st.divider()
-        
-        if 'show_feedback_node' not in st.session_state:
-            st.session_state.show_feedback_node = False
-
         if st.button("💬 SYSTEM FEEDBACK", use_container_width=True):
             st.session_state.show_feedback_node = True
             st.rerun()
@@ -982,7 +984,6 @@ with st.sidebar:
 
     except Exception as sidebar_err:
         st.error(f"System Error: {sidebar_err}")
-
 
 # --- FEEDBACK OVERLAY (Triggers when sidebar button is clicked) ---
 if st.session_state.get('show_feedback_node', False):
@@ -1626,14 +1627,6 @@ elif page == "🏛️ Identity Vault":
                 st.rerun()
     else:
         st.info("The Vault is currently empty. Neural Forge will default to generic subjects.")
-
-# --- SIDEBAR LIVE PREVIEW LOGIC ---
-# (Place this outside the 'if page' blocks so it shows up everywhere)
-if st.session_state.get('vault_anchor'):
-    st.sidebar.divider()
-    st.sidebar.markdown("<p style='text-align: center; color: #00ff41; font-size: 0.8em;'>ACTIVE IDENTITY DNA</p>", unsafe_allow_html=True)
-    st.sidebar.image(st.session_state.vault_anchor, use_container_width=True)
-    st.sidebar.caption("Protocol 2026-02-06: LOCKED")
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -2338,6 +2331,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
