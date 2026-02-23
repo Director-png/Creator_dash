@@ -945,7 +945,7 @@ if st.session_state.get('show_feedback_node', False):
         st.info("To maintain data integrity, we use an encrypted Google Form for reviews.")
         st.write("Your feedback will be logged in the Master CSV for the Founder's Review Call.")
         # Replace this link with your actual Form URL (the one for users to fill, not edit)
-        st.link_button("🚀 OPEN FEEDBACK FORM", "https://docs.google.com/forms/d/e/1Rc_8mM2Z_HJd7pAF_2ld37n2bB12VBOaT0KhGWYmej4/viewform", use_container_width=True)
+        st.link_button("🚀 OPEN FEEDBACK FORM", "https://docs.google.com/forms/d/e/1FAIpQLSfeDAY3gnWYlpH90EaJirxUc8d4obYUgiX72WJIah7Cya1VNQ/viewform?usp=header", use_container_width=True)
     
     with col_fb2:
         if st.button("❌ CLOSE NODE", use_container_width=True):
@@ -2325,6 +2325,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
