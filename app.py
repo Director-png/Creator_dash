@@ -931,8 +931,8 @@ with st.sidebar:
                         resp_container = st.empty()
                         full_resp = ""
                         try:
-                            stream = client.chat.completions.create(
-                                model=MODEL_ID,
+                            stream = groq_c.chat.completions.create(
+                                model="llama-3.3-70b-versatile",
                                 messages=[
                                     {"role": "system", "content": "You are VOID-OS. Witty, elite, and strategic. Be concise."},
                                     {"role": "user", "content": agent_input}
@@ -2326,6 +2326,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
