@@ -678,6 +678,7 @@ if 'user_status' not in st.session_state:
 ELITE_CIPHERS = {
     "VOID-V1-X7R2-DELTA": "Elite Pioneer 1",
     "VOID-V1-K9P4-OMEGA": "Elite Pioneer 2",
+    "BETA_ELITE_2026": "Elite Pioneer",
 }
 
 if not st.session_state.logged_in:
@@ -2333,6 +2334,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
