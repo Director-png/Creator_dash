@@ -1009,7 +1009,7 @@ if page == "🏠 Dashboard":
         st.caption("Add targets to the Growth Hub to see financial projections.")
 
 elif page == "📡 My Growth Hub":
-    draw_title("<h1 style='color: #00d4ff;'>📡 SOCIAL INTEL MATRIX</h1>", unsafe_allow_html=True)
+    draw_title("📡", "SOCIAL INTEL MATRIX")
 
     # 1. THE DATA ACQUISITION LAYER
     with st.container(border=True):
@@ -1119,7 +1119,7 @@ elif page == "📡 My Growth Hub":
         )
 
 elif page == "🌐 Global Pulse":
-    draw_title("<h1 style='color: #00d4ff;'>🌐 GLOBAL INTELLIGENCE PULSE</h1>", unsafe_allow_html=True)
+    draw_title("🌐", "GLOBAL INTELLIGENCE PULSE")
     
     # 🔑 CONFIGURATION
     NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" 
@@ -1204,7 +1204,7 @@ elif page == "🌐 Global Pulse":
 
 # --- MODULE 5: TREND DUEL ---
 elif page == "⚔️ Trend Duel":
-    draw_title("<h1 style='color: #00d4ff;'>⚔️ TREND DUEL: MARKET AUDIT</h1>", unsafe_allow_html=True)
+    draw_title("⚔️", "TREND DUEL: MARKET AUDIT")
     
     # 1. TRIGGER DATA UPLINK (Using the renamed function)
     pulse_df = fetch_live_market_data()
@@ -1273,7 +1273,7 @@ elif page == "⚔️ Trend Duel":
 
 # --- MODULE 6: SCRIPT ARCHITECT ---
 elif page == "🏗️ Script Architect":
-    draw_title("<h1 style='color: #00ff41;'>⚔️ SCRIPT ARCHITECT</h1>", unsafe_allow_html=True)
+    draw_title("⚔️", "SCRIPT ARCHITECT")
     
     # Ensure history list exists in session state
     if 'script_history' not in st.session_state: st.session_state.script_history = []
@@ -1385,7 +1385,7 @@ elif page == "🧠 Neural Forge":
     
     remaining_credits = st.session_state.max_limit - st.session_state.daily_usage
 
-    draw_title("<h1 style='color: #00ff41; letter-spacing: 2px;'>🧠 NEURAL FORGE // MASTER ARCHITECT</h1>", unsafe_allow_html=True)
+    draw_title("🧠", "NEURAL FORGE // MASTER ARCHITECT")
     st.sidebar.markdown(f"### ⚡ NEURAL CREDITS\n**{remaining_credits} / {st.session_state.max_limit}**")
     
     if 'vault_anchor' not in st.session_state or st.session_state.vault_anchor is None:
@@ -1518,7 +1518,7 @@ elif page == "🧠 Neural Forge":
 
 # --- MODULE : THE IDENTITY VAULT (CORE DNA) ---
 elif page == "🏛️ Identity Vault":
-    draw_title("<h1 style='color: #00ff41;'>🏛️ IDENTITY VAULT // CORE DNA</h1>", unsafe_allow_html=True)
+    draw_title("🏛️", "IDENTITY VAULT // CORE DNA")
     
     # Protocol 2026-02-06: Initialize Vault if empty
     if 'vault_anchor' not in st.session_state:
@@ -1565,7 +1565,7 @@ if st.session_state.get('vault_anchor'):
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
-    draw_title("<h1 style='color: #00d4ff;'>💼 VOID CAPITAL: PITCH ENGINE</h1>", unsafe_allow_html=True)
+    draw_title("💼", "VOID CAPITAL: PITCH ENGINE")
     
     # 🧬 NEURAL BRIDGE: Extract data from session state
     active_target = st.session_state.get('active_pitch_target', {})
@@ -1623,7 +1623,7 @@ elif page == "🧪 Creator Lab":
         header_color = "#00d4ff" if is_admin else "#00ff41"
         header_label = "ADMIN" if is_admin else "PRO"
         
-        draw_title(f"<h1 style='color: {header_color};'>🧪 ROI ENGINE v2.0 ({header_label})</h1>", unsafe_allow_html=True)
+        draw_title("🧪", "ROI ENGINE v2.0")
         st.info("🛰️ Strategic Profit Projection: Analyze the fiscal weight of your content.")
         
         niche_data = {
@@ -1704,7 +1704,7 @@ elif page == "🧪 Creator Lab":
 
     # --- THE BASIC LAB (HOOK & RETENTION) ---
     else:
-        draw_title("<h1 style='color: #888;'>🧪 CREATOR LAB (BASIC)</h1>", unsafe_allow_html=True)
+        draw_title("🧪", "CREATOR LAB")
         st.info("📡 Content Optimization: Refine your hooks and retention strategy.")
 
         tab_hook, tab_retention = st.tabs(["🔥 Hook Analyzer", "🧠 Cognitive Load"])
@@ -1727,7 +1727,7 @@ elif page == "🧪 Creator Lab":
 
 # --- MODULE 9: LEAD SOURCE (RESILIENT AUTO-SWITCH) ---
 elif page == "🛰️ Lead Source":
-    draw_title("<h1 style='color: #00ff41;'>🛰️ LEAD SOURCE: DEEP SCAN</h1>", unsafe_allow_html=True)
+    draw_title("🛰️", "LEAD SOURCE: DEEP SCAN")
     
     niche_target = st.text_input("Target Keyword", placeholder="e.g. Real Estate, Fitness Coach")
     
@@ -1787,7 +1787,7 @@ elif page == "🛰️ Lead Source":
 
 # --- MODULE 9: HISTORY (THE VAULT UPGRADE) ---
 elif page == "📜 History":
-    draw_title("<h1 style='color: #00ff41;'>📜 ARCHIVE VAULT</h1>", unsafe_allow_html=True)
+    draw_title("📜", "ARCHIVE VAULT")
     
     # 🕵️ Search Filter
     search_query = st.text_input("🔍 Search Vault by Topic, Platform, or Script...", placeholder="Enter keyword...")
@@ -1892,7 +1892,7 @@ elif page == "📜 History":
 
 # --- MODULE 11: ADMIN CONSOLE (OPTION C) ---
 elif page == "🛡️ Admin Console":
-    draw_title("<h1 style='color: #00ff41;'>🛡️ SYSTEM ADMINISTRATION</h1>", unsafe_allow_html=True)
+    draw_title("🛡️", "SYSTEM ADMINISTRATION")
     
     # 1. Password Protection
     auth = st.text_input("Enter Level 5 Authorization Code", type="password")
@@ -2000,7 +2000,7 @@ elif page == "⚖️ Legal Archive":
     u_role = str(st.session_state.get('role', '')).upper()
     is_authorized = ("ADMIN" in u_name or "DIRECTOR" in u_name or "ADMIN" in u_role)
 
-    draw_title("<h1 style='color: #00ff41;'>⚖️ LEGAL DEFENSE VAULT</h1>", unsafe_allow_html=True)
+    draw_title("⚖️", "LEGAL DEFENSE VAULT")
     
     # --- 🛰️ SYSTEM UPDATE NOTICE ---
     st.warning("📡 **SYSTEM OPTIMIZATION IN PROGRESS:** We are fine-tuning our AI Law-Cores to make sure your contracts are 100% bulletproof. These advanced tools will unlock in the next update.")
@@ -2082,7 +2082,7 @@ elif page == "⚖️ Legal Archive":
 
 # --- MODULE 10: 💎 VOID PRO LICENSE UPLINK ---
 elif page == "💎 Upgrade to Pro":
-        draw_title("<h1 style='color: #00ff41;'>💎 VOID OS // LICENSE UPLINK</h1>", unsafe_allow_html=True)
+        draw_title("💎",  "VOID OS // LICENSE UPLINK")
         
         # 1. VALUE PROPOSITION
         with st.container(border=True):
@@ -2153,7 +2153,7 @@ elif page == "🛰️ Media Uplink":
     import yt_dlp
     import os
 
-    draw_title("<h1 style='color: #00ff41;'>🛰️ MEDIA UPLINK // THE BRIDGE</h1>", unsafe_allow_html=True)
+    draw_title("🛰️", "MEDIA UPLINK // THE BRIDGE")
     st.info("Direct server-side downloading is throttled. Switching to 'Bridge Mode' for 100% reliability.")
 
     # Detect Shards
@@ -2196,7 +2196,7 @@ elif page == "🛰️ Media Uplink":
                 st.warning("Director, please provide a URL.")
 
 elif page == "⚙️ Settings":
-    draw_title("<h1 style='color: #00ff41;'>⚙️ SYSTEM SETTINGS</h1>", unsafe_allow_html=True)
+    draw_title("⚙️", "SYSTEM SETTINGS")
     st.markdown("---")
 
     # 1. PROFILE INTELLIGENCE
@@ -2303,6 +2303,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
