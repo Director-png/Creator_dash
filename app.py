@@ -1689,45 +1689,59 @@ elif page == "🔒 Identity Vault":
 
     # --- 1. VISUAL DNA (IMAGE ANCHOR) ---
     with st.expander("👤 VISUAL DNA (STRICT FACIAL CONSISTENCY)", expanded=True):
-        uploaded_face = st.file_uploader("Upload Master Reference Image", type=['jpg', 'png', 'jpeg'])
-        if uploaded_face:
-            st.session_state.vault_anchor = uploaded_face
-            st.success("✅ VISUAL DNA ANCHORED: 2026-02-06 Protocol Active.")
-            st.image(uploaded_face, width=150, caption="Master Reference")
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            uploaded_face = st.file_uploader("Upload Master Reference Image", type=['jpg', 'png', 'jpeg'], key="vault_uploader")
+            if uploaded_face:
+                st.session_state.vault_anchor = uploaded_face
+                st.success("✅ VISUAL DNA ANCHORED")
+        
+        with col2:
+            if st.session_state.get('vault_anchor'):
+                st.image(st.session_state.vault_anchor, width=120, use_container_width=False)
+                if st.button("🗑️ PURGE VISUAL DNA", use_container_width=True):
+                    st.session_state.vault_anchor = None
+                    st.rerun()
 
     # --- 2. LINGUISTIC DNA (VOICE ANCHOR) ---
     with st.expander("🎙️ LINGUISTIC DNA (VOICE CLONE)", expanded=True):
         st.markdown("##### ElevenLabs Integration")
         
-        # This is where you paste your Voice ID
-        prev_id = st.session_state.get('linguistic_dna_id', "")
+        # Voice ID Input
         v_id = st.text_input(
             "Enter ElevenLabs Voice ID", 
-            value=prev_id,
+            value=st.session_state.get('linguistic_dna_id', ""),
             placeholder="e.g., pNInz6obpgDQGcFmaJgB",
-            help="Copy this from your ElevenLabs Voice Lab. This ID will be used in the Neural Forge for all Director-tier audio."
+            help="Copy this from ElevenLabs. It links the Neural Forge to your specific voice."
         )
         
-        # Save to session state immediately
-        if v_id != prev_id:
-            st.session_state.linguistic_dna_id = v_id
-            st.toast("⚡ LINGUISTIC DNA UPDATED")
-
-        # Linguistic Tone Description
-        st.session_state.linguistic_dna = st.text_area(
-            "Tone/Style Description", 
+        # Tone Description
+        v_tone = st.text_area(
+            "Linguistic Tone/Style Description", 
             value=st.session_state.get('linguistic_dna', ""),
-            placeholder="e.g., Aggressive, high-authority, rhythmic, deep raspy tone..."
+            placeholder="e.g., Authoritative, rhythmic, cinematic noir..."
         )
 
-    # --- 3. THE IDENTITY STATUS ---
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("🛰️ SYNC LINGUISTIC DNA", use_container_width=True):
+                st.session_state.linguistic_dna_id = v_id
+                st.session_state.linguistic_dna = v_tone
+                st.toast("⚡ DNA SEQUENCED TO FORGE")
+        
+        with c2:
+            if st.button("🗑️ PURGE VOICE ID", use_container_width=True):
+                st.session_state.linguistic_dna_id = ""
+                st.session_state.linguistic_dna = ""
+                st.rerun()
+
+    # --- 3. SYSTEM SYNC CHECK ---
     st.divider()
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.session_state.get('vault_anchor') and st.session_state.get('linguistic_dna_id'):
-            st.success("🛰️ IDENTITY FULLY SYNCHRONIZED")
-        else:
-            st.warning("📡 IDENTITY INCOMPLETE")
+    if st.session_state.get('vault_anchor') and st.session_state.get('linguistic_dna_id'):
+        st.success("🛰️ IDENTITY FULLY SYNCHRONIZED: Protocol 2026-02-06 Active.")
+    else:
+        st.warning("📡 IDENTITY INCOMPLETE: Sidebar DNA will remain in standby.")
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -2559,6 +2573,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
