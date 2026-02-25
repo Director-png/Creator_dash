@@ -864,33 +864,27 @@ if 'page' not in st.session_state:
 with st.sidebar:
     try:
         # --- ENHANCED IDENTITY CORE ---
-        # Note: vault_anchor now contains raw bytes from st.file_uploader
         profile_img = st.session_state.get('vault_anchor')
-        
-        # We create a container to keep the ID box strictly at the top
         identity_container = st.container()
         
         with identity_container:
             col_img, col_name = st.columns([1, 3])
-            
             with col_img:
                 if profile_img is not None:
-                    # Using native st.image for stability with bytes
                     st.image(profile_img, use_container_width=True)
                 else:
-                    # Default DNA state if no image uploaded
                     st.markdown("<div style='width: 50px; height: 50px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px; font-weight: bold; margin-top:5px;'>DNA</div>", unsafe_allow_html=True)
 
             with col_name:
+                # Dynamically show Tier title next to Name
+                current_tier = st.session_state.get('user_status', 'Free')
                 st.markdown(f"""
                     <div style='margin-top: 5px;'>
-                        <p style='margin: 0; color: #888; font-size: 9px; letter-spacing: 2px;'>OPERATOR IDENTIFIED</p>
+                        <p style='margin: 0; color: #888; font-size: 9px; letter-spacing: 2px;'>{current_tier.upper()} IDENTIFIED</p>
                         <h3 style='color: #00ff41; margin: 0; font-family: "Courier New", Courier, monospace; font-size: 16px;'>{st.session_state.get('user_name', 'DIRECTOR').upper()}</h3>
                     </div>
                 """, unsafe_allow_html=True)
 
-        # CSS PATCH: Forces all sidebar images (including the st.image above) 
-        # to be circular and prevents them from expanding weirdly.
         st.markdown("""
             <style>
                 [data-testid="stSidebar"] [data-testid="stImage"] img {
@@ -906,24 +900,35 @@ with st.sidebar:
         
         st.divider()
 
-        # --- CLEARANCE LOGIC ---
-        user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
-        user_role = str(st.session_state.get('user_role', 'user')).strip().lower()
-
-        if user_role == "admin" or user_status in ['pro', 'paid']:
-            st.markdown("<div style='background-color: #00ff41; color: #000; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>💎 ELITE CLEARANCE</div>", unsafe_allow_html=True)
+        # --- CLEARANCE VISUALS ---
+        # Pro -> Operative | Elite -> Director | Core -> Agency
+        u_status = st.session_state.get('user_status', 'Free')
+        
+        if u_status == "Agency":
+            st.markdown("<div style='background-color: #ff00ff; color: #fff; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>💠 AGENCY CORE ACCESS</div>", unsafe_allow_html=True)
+        elif u_status == "Director":
+            st.markdown("<div style='background-color: #00d4ff; color: #000; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>💎 DIRECTOR CLEARANCE</div>", unsafe_allow_html=True)
+        elif u_status == "Operative":
+            st.markdown("<div style='background-color: #00ff41; color: #000; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>⚔️ OPERATIVE STATUS</div>", unsafe_allow_html=True)
         else:
             st.markdown("<div style='background-color: #333; color: #888; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>📡 BASIC ACCESS</div>", unsafe_allow_html=True)
 
         # --- DYNAMIC MENU MAPPING ---
-        if user_role == "admin":
-            options = ["🏠 Dashboard", "🏛️ Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "⚖️ Legal Archive", "💼 Client Pitcher", "📜 History", "⚙️ Settings"]
-        elif user_status in ['pro', 'paid']:
+        # We define exactly what each tier sees
+        if u_status == "Agency":
+            options = ["🏠 Dashboard", "🏛️ Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Agency Suite", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+        elif u_status == "Director":
+            options = ["🏠 Dashboard", "🏛️ Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "🛰️ Media Uplink", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+        elif u_status == "Operative":
             options = ["📡 My Growth Hub", "🏛️ Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
         else:
             options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
 
         if 'current_page' not in st.session_state:
+            st.session_state.current_page = options[0]
+
+        # Safety check: if current page is not in the allowed list (after a status change), reset to dashboard
+        if st.session_state.current_page not in options:
             st.session_state.current_page = options[0]
 
         try:
@@ -934,7 +939,7 @@ with st.sidebar:
         page = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = page
 
-        # --- 🤖 VOID MANAGER (GROQ VERSION) ---
+        # --- 🤖 VOID MANAGER ---
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
@@ -2345,6 +2350,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
