@@ -1465,33 +1465,43 @@ elif page == "🧠 Neural Forge":
     # --- CLOUD SYNC INITIALIZER ---
     if 'history_synced' not in st.session_state or not st.session_state.get('script_history'):
         with st.spinner("📡 Synchronizing with Global Vault..."):
-            if sync_history_from_cloud():
+            # Note: Ensure this function is defined in your main app logic
+            if 'sync_history_from_cloud' in globals():
+                sync_history_from_cloud()
                 st.session_state.history_synced = True
 
     if 'daily_usage' not in st.session_state: st.session_state.daily_usage = 0
     if 'last_reset' not in st.session_state: st.session_state.last_reset = datetime.date.today()
+    
+    # Credit Limit Logic based on Tier
     if 'max_limit' not in st.session_state:
-        st.session_state.max_limit = 15 if st.session_state.get('user_status') == "Pro" else 5
+        status = st.session_state.get('user_status', 'Free')
+        if status == "Agency": st.session_state.max_limit = 50
+        elif status == "Director": st.session_state.max_limit = 25
+        elif status == "Operative": st.session_state.max_limit = 15
+        else: st.session_state.max_limit = 5
     
     remaining_credits = st.session_state.max_limit - st.session_state.daily_usage
 
     draw_title("🧠", "NEURAL FORGE // MASTER ARCHITECT")
     st.sidebar.markdown(f"### ⚡ NEURAL CREDITS\n**{remaining_credits} / {st.session_state.max_limit}**")
     
-    # --- IDENTITY VAULT READ: Check for DNA Anchors ---
+    # --- IDENTITY VAULT INTEGRATION: READ DNA ---
     vault_status = "EMPTY"
     voice_dna = st.session_state.get('linguistic_dna', "")
     
+    # Visual DNA Check
     if 'vault_anchor' not in st.session_state or st.session_state.vault_anchor is None:
         st.warning("⚠️ VISUAL VAULT EMPTY: Upload your face in the Vault to enable Strict Facial Consistency.")
     else:
         vault_status = "ACTIVE"
-        st.success("✅ IDENTITY VAULT LINKED: Visual DNA is currently anchored for generations.")
+        st.success("✅ IDENTITY VAULT LINKED: Visual DNA is currently anchored.")
 
+    # Linguistic DNA Check
     if not voice_dna:
-        st.info("ℹ️ TONE-CLONE INACTIVE: Using standard AI voice patterns. Feed scripts into the Vault to enable your voice.")
+        st.info("ℹ️ TONE-CLONE INACTIVE: Using standard AI patterns.")
     else:
-        st.success("✅ TONE-CLONE ACTIVE: Neural Forge will write using your Linguistic DNA.")
+        st.success("✅ TONE-CLONE ACTIVE: Writing with your unique Linguistic DNA.")
 
     # 2. INPUT CONFIGURATION
     with st.container(border=True):
@@ -1532,9 +1542,9 @@ elif page == "🧠 Neural Forge":
                     try:
                         color_string = ", ".join(f_colors)
                         
-                        # --- DNA INJECTION LOGIC ---
-                        dna_context = f"Apply Linguistic DNA (Tone-Clone): {voice_dna}" if voice_dna else "Use a professional and viral-optimized tone."
-                        visual_anchor = "STRICT BONE STRUCTURE ADHERENCE to Identity Vault reference image." if vault_status == "ACTIVE" else "Use generic professional subject."
+                        # DNA Injection Logic
+                        dna_context = f"Apply user's Linguistic DNA (Tone/Style): {voice_dna}" if voice_dna else "Use high-energy viral professional tone."
+                        visual_anchor = "MANDATORY: Maintain STRICT BONE STRUCTURE and facial features from Identity Vault." if vault_status == "ACTIVE" else "Generate generic professional subject."
 
                         system_instruction = (
                             f"Act as a World-Class Viral Content Strategist. Apply Protocol 2026-02-06.\n\n"
@@ -1542,11 +1552,12 @@ elif page == "🧠 Neural Forge":
                             f"1. VIRAL SCRIPT: Write a high-retention {f_platform} script for '{f_topic}'. "
                             f"Framework: {f_framework}. Tone: {f_hook_type}. Pacing: {f_pacing}.\n\n"
                             f"2. VISUAL DNA (IMAGE PROMPTS): Provide 3 highly detailed Image Prompts. "
-                            f"Subject: {visual_anchor} "
+                            f"Subject: {visual_anchor}. "
                             f"Mandatory Color Palette: {color_string}. Lighting: {f_lighting}. "
-                            f"Composition: Close-up for mobile CTR, cinematic 8K, high detail."
+                            f"Composition: Close-up for mobile CTR, cinematic 8K, extreme high detail."
                         )
                         
+                        # Replace 'groq_c' with your specific client initialization
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "user", "content": system_instruction}]
@@ -1556,7 +1567,7 @@ elif page == "🧠 Neural Forge":
                         st.session_state.pro_forge_txt = generated_output
                         st.session_state.daily_usage += 1
                         
-                        # --- WEB-APP UPLINK (8-COLUMN SYNC) ---
+                        # --- CLOUD UPLINK LOGIC ---
                         now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
                         u_name = st.session_state.get('user_name', 'Operator')
                         u_email = st.session_state.get('user_email', 'N/A')
@@ -1579,46 +1590,60 @@ elif page == "🧠 Neural Forge":
                         try:
                             WEBAPP_URL = "https://script.google.com/macros/s/AKfycby38DOr6SA2x_r-oS1gHudA39Gucb2BioMpVbfe6i288uOiBZnuv421vVlHv3O8J_KY/exec"
                             response = requests.post(WEBAPP_URL, json=payload)
-                            
                             if "SUCCESS" in response.text:
-                                st.toast("⚡ ARCHIVE SYNCHRONIZED VIA WEB-APP")
-                                sync_history_from_cloud() 
+                                st.toast("⚡ ARCHIVE SYNCHRONIZED")
                             else:
-                                st.error(f"📡 WEB-APP REJECTED UPLINK: {response.text}")
+                                st.error(f"📡 UPLINK FAILED: {response.text}")
                         except Exception as e:
-                            st.error(f"GSHEET BRIDGE FAILED: {e}")
+                            st.error(f"GSHEET BRIDGE ERROR: {e}")
 
                         st.rerun()
 
                     except Exception as e:
                         st.error(f"UPLINK ERROR: {str(e)}")
 
-    # 3. THE REVEAL
+    # 3. THE REVEAL & INTELLIGENCE SUITE
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 PRODUCTION BLUEPRINT")
         st.info(st.session_state.pro_forge_txt)
         
-        # INTELLIGENCE TOOLS
+        # --- CALIBRATED INTELLIGENCE SUITE ---
         st.divider()
-        st.subheader("🧪 Intelligence Tools")
+        st.subheader("🧪 VOID Intelligence Audit")
         t_col1, t_col2 = st.columns(2)
         
         with t_col1:
-            if st.button("🚀 SCORE VIRALITY", use_container_width=True):
-                v_res = groq_c.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
-                    messages=[{"role": "user", "content": f"Audit this script for CTR and Virality: {st.session_state.pro_forge_txt[:1000]}"}]
-                )
-                st.info(v_res.choices[0].message.content)
+            if st.button("🚀 SCORE VIRALITY & CTR", use_container_width=True):
+                with st.spinner("Calculating Viral Probability..."):
+                    v_prompt = (
+                        f"Perform a VIRALITY AUDIT on this script: {st.session_state.pro_forge_txt[:1500]}\n"
+                        f"1. Assign a CTR Score (0-100).\n"
+                        f"2. Analyze 'The Hook' for {f_platform}.\n"
+                        f"3. Identify the 'Viral Pivot' moment.\n"
+                        f"Format as a 2026 Performance Report."
+                    )
+                    v_res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": v_prompt}]
+                    )
+                    st.info(v_res.choices[0].message.content)
                         
         with t_col2:
-            if st.button("🧠 RETENTION SCAN", use_container_width=True):
-                r_res = groq_c.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
-                    messages=[{"role": "user", "content": f"Scan for audience drop-off points: {st.session_state.pro_forge_txt[:1000]}"}]
-                )
-                st.warning(r_res.choices[0].message.content)
+            if st.button("🧠 NEURAL RETENTION MAP", use_container_width=True):
+                with st.spinner("Scanning for Attention Leaks..."):
+                    r_prompt = (
+                        f"Perform a RETENTION SCAN on this script: {st.session_state.pro_forge_txt[:1500]}\n"
+                        f"1. Identify the 'Attention Peak'.\n"
+                        f"2. Pinpoint the 'Leak Zone'.\n"
+                        f"3. Provide 3 specific edits for {f_pacing} pacing.\n"
+                        f"Format as a Strategic Briefing."
+                    )
+                    r_res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": r_prompt}]
+                    )
+                    st.warning(r_res.choices[0].message.content)
 
 # --- MODULE : THE IDENTITY VAULT (MASTER ARCHITECTURE) ---
 elif page == "🏛️ Identity Vault":
@@ -2400,6 +2425,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
