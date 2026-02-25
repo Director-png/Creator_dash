@@ -2324,7 +2324,7 @@ def show_upgrade_authority():
             st.markdown(f"### Total Investment: **₹{amt}**")
             
             # --- THE HARD-LOCKED UPI LOGIC ---
-            upi_id = "yourname@upi" # <--- REPLACE WITH YOUR ACTUAL UPI ID
+            upi_id = "anuj05758@okicici" # <--- REPLACE WITH YOUR ACTUAL UPI ID
             payee_name = "VOID_EMPIRE"
             transaction_note = f"ACTIVATION_{tier_tag}_{st.session_state.get('user_email', 'USER')}"
             
@@ -2550,6 +2550,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
