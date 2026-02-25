@@ -922,7 +922,7 @@ with st.sidebar:
         elif u_status == "Operative":
             options = ["📡 My Growth Hub", "🏛️ Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
         else:
-            options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "💎 Upgrade to Pro", "⚙️ Settings"]
+            options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
 
         if 'current_page' not in st.session_state:
             st.session_state.current_page = options[0]
@@ -2274,37 +2274,89 @@ elif page == "⚖️ Legal Archive":
         st.write("- Is there a limit on how many 'Revisions' the brand can ask for?")
 
 # --- MODULE 10: 💎 VOID PRO LICENSE UPLINK ---
-# --- MODULE: THE BETA ACCESS PORTAL ---
-elif page == "💎 Upgrade to Pro":
-    draw_title("💎", "ELITE BETA ACCESS")
+# --- MODULE 12: ACCESS UPLINK (REFINED REVENUE BRIDGE) ---
+elif page == "⚡ Upgrade Authority":
+    draw_title("⚡", "ACCESS UPLINK // TIER ACTIVATION")
 
-    st.markdown("""
-    <div style='background: rgba(0, 212, 255, 0.05); padding: 25px; border-radius: 15px; border: 1px solid #00d4ff; margin-bottom: 25px;'>
-        <h3 style='color: #00d4ff; margin-top: 0;'>TRUST > TRANSACTION</h3>
-        <p style='color: #ccc; font-size: 1.1rem;'>
-            We aren't looking for customers yet; we are looking for <b>Partners in Innovation</b>. 
-            VOID-OS is currently in <b>Strict Calibration Mode</b>.
-        </p>
-        <hr style='border: 0.5px solid rgba(0, 212, 255, 0.2);'>
-        <p style='color: #888;'>
-            The 'Pay' gate is intentionally locked. Use the system, break it, and provide your feedback. 
-            If after 7 days you feel the Matrix has added 10x value to your workflow, we will discuss 
-            opening full Elite Clearance.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    # 1. THE POWER MATRIX (Lean Version)
+    st.subheader("📊 Feature Authority Matrix")
+    
+    # Strictly for current launch tiers
+    comparison_data = {
+        "Feature": [
+            "Neural Forge Access", 
+            "Identity Vault (Visual)", 
+            "Linguistic DNA (Tone-Clone)", 
+            "Vapi Voice Integration", 
+            "Intelligence Audit Suite", 
+            "Daily Processing Limit",
+            "Support Priority"
+        ],
+        "Operative (₹3,999)": ["✅", "✅", "❌", "❌", "Standard", "15 Credits", "Standard"],
+        "Director (₹7,999)": ["✅ Unlimited", "✅", "✅", "✅", "Elite (CoT)", "50 Credits", "Sovereign"],
+        "Agency (Coming Soon)": ["🚀", "🚀", "🚀", "🚀", "🚀", "🚀", "🚀"]
+    }
+    st.table(comparison_data)
 
-    # THE PROGRESS TRACKER
-    st.write("### ⏳ YOUR TESTER MATURITY")
-    days_active = 1 # Consider connecting this to st.session_state.get('user_time') later
-    progress = min(days_active / 7, 1.0)
-    st.progress(progress)
-    st.caption(f"Day {days_active} of 7: System is monitoring your engagement metrics.")
+    # 2. DYNAMIC PAYMENT SECTION
+    st.divider()
+    col_pay1, col_pay2 = st.columns([1, 1], gap="large")
 
-    # THE CTA
-    if st.button("💬 I HAVE FEEDBACK NOW", use_container_width=True):
-        st.session_state.show_feedback_node = True
-        st.rerun()
+    with col_pay1:
+        st.subheader("💳 Select Your Path")
+        tier_choice = st.radio("Choose your level of authority:", ["Operative Tier", "Director Tier", "Agency (Waitlist)"])
+        
+        amt = 3999 if "Operative" in tier_choice else 7999 if "Director" in tier_choice else 0
+        tier_tag = tier_choice.split()[0].upper()
+
+        if amt > 0:
+            st.markdown(f"### Total Investment: **₹{amt}**")
+            upi_id = "anuj05758@okicici" # <--- REPLACE WITH YOUR ACTUAL UPI ID
+            note = f"VOID_{tier_tag}_UPLINK".replace(" ", "%20")
+            upi_url = f"upi://pay?pa={upi_id}&pn=VOID_EMPIRE&am={amt}&cu=INR&tn={note}"
+            
+            st.info("Scan the QR or click the button to pay instantly via any UPI app.")
+            st.link_button(f"🚀 Open UPI App (₹{amt})", upi_url, use_container_width=True)
+        else:
+            st.warning("Agency status is currently by invitation. Join the waitlist for the next drop.")
+
+    with col_pay2:
+        if amt > 0:
+            qr_api = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={upi_url}"
+            st.image(qr_api, caption=f"Dynamic QR Code for {tier_tag} Tier")
+        else:
+            st.text_input("Enter Email for Agency Waitlist")
+            st.button("Request Invitation")
+
+    # 3. VERIFICATION (The "Ping" to Director)
+    st.divider()
+    with st.container(border=True):
+        st.subheader("🛡️ Request Manual Activation")
+        st.write("Logged in as: **" + st.session_state.get('user_email', 'Unidentified') + "**")
+        st.write("Once payment is complete, submit your UTR. I will authorize your account in the system.")
+        
+        with st.form("payment_verify_final"):
+            u_mail = st.text_input("Confirm Registered Email", value=st.session_state.get('user_email', ""))
+            u_utr = st.text_input("UTR / Transaction ID")
+            u_tier = st.selectbox("Tier Purchased", ["Operative", "Director"])
+            
+            if st.form_submit_button("PING DIRECTOR FOR ACCESS"):
+                if u_mail and u_utr:
+                    f_payload = {
+                        "email": u_mail.lower().strip(), 
+                        "message": f"UTR: {u_utr} | Tier: {u_tier}", 
+                        "category": "PAYMENT_PENDING"
+                    }
+                    try:
+                        # Existing Feedback/Payment App Script URL
+                        FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
+                        requests.post(FEEDBACK_API_URL, json=f_payload, timeout=10)
+                        st.success("✅ UPLINK REQUEST SENT: Access will be granted following verification.")
+                        st.balloons()
+                    except:
+                        st.error("Uplink failed. Please contact the Director via private channel.")
+                else:
+                    st.warning("Both Email and UTR are required for verification.")
 
 # --- MODULE 8: MEDIA UPLINK (THE DIRECTOR'S BRIDGE) ---
 elif page == "🛰️ Media Uplink":
@@ -2461,6 +2513,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
