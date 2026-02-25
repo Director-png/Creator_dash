@@ -1478,8 +1478,20 @@ elif page == "🧠 Neural Forge":
     draw_title("🧠", "NEURAL FORGE // MASTER ARCHITECT")
     st.sidebar.markdown(f"### ⚡ NEURAL CREDITS\n**{remaining_credits} / {st.session_state.max_limit}**")
     
+    # --- IDENTITY VAULT READ: Check for DNA Anchors ---
+    vault_status = "EMPTY"
+    voice_dna = st.session_state.get('linguistic_dna', "")
+    
     if 'vault_anchor' not in st.session_state or st.session_state.vault_anchor is None:
-        st.warning("⚠️ IDENTITY VAULT EMPTY: Upload your face in the Vault to enable Strict Facial Consistency.")
+        st.warning("⚠️ VISUAL VAULT EMPTY: Upload your face in the Vault to enable Strict Facial Consistency.")
+    else:
+        vault_status = "ACTIVE"
+        st.success("✅ IDENTITY VAULT LINKED: Visual DNA is currently anchored for generations.")
+
+    if not voice_dna:
+        st.info("ℹ️ TONE-CLONE INACTIVE: Using standard AI voice patterns. Feed scripts into the Vault to enable your voice.")
+    else:
+        st.success("✅ TONE-CLONE ACTIVE: Neural Forge will write using your Linguistic DNA.")
 
     # 2. INPUT CONFIGURATION
     with st.container(border=True):
@@ -1519,12 +1531,18 @@ elif page == "🧠 Neural Forge":
                 with st.spinner("🌑 ARCHITECTING SCRIPT & VISUAL DNA..."):
                     try:
                         color_string = ", ".join(f_colors)
+                        
+                        # --- DNA INJECTION LOGIC ---
+                        dna_context = f"Apply Linguistic DNA (Tone-Clone): {voice_dna}" if voice_dna else "Use a professional and viral-optimized tone."
+                        visual_anchor = "STRICT BONE STRUCTURE ADHERENCE to Identity Vault reference image." if vault_status == "ACTIVE" else "Use generic professional subject."
+
                         system_instruction = (
                             f"Act as a World-Class Viral Content Strategist. Apply Protocol 2026-02-06.\n\n"
+                            f"USER IDENTITY DNA: {dna_context}\n\n"
                             f"1. VIRAL SCRIPT: Write a high-retention {f_platform} script for '{f_topic}'. "
                             f"Framework: {f_framework}. Tone: {f_hook_type}. Pacing: {f_pacing}.\n\n"
                             f"2. VISUAL DNA (IMAGE PROMPTS): Provide 3 highly detailed Image Prompts. "
-                            f"Subject: Locked to Identity Vault reference. Features: Strict bone structure adherence. "
+                            f"Subject: {visual_anchor} "
                             f"Mandatory Color Palette: {color_string}. Lighting: {f_lighting}. "
                             f"Composition: Close-up for mobile CTR, cinematic 8K, high detail."
                         )
@@ -1543,7 +1561,6 @@ elif page == "🧠 Neural Forge":
                         u_name = st.session_state.get('user_name', 'Operator')
                         u_email = st.session_state.get('user_email', 'N/A')
                         
-                        # Prepare JSON payload for Apps Script
                         payload = {
                             "category": "SAVE_SCRIPT",
                             "timestamp": str(now_ts),
@@ -1556,13 +1573,10 @@ elif page == "🧠 Neural Forge":
                             "status": "pending"
                         }
                         
-                        # 1. Update Local Session History for immediate UI feedback
                         if 'script_history' not in st.session_state: st.session_state.script_history = []
                         st.session_state.script_history.append(payload)
 
-                        # 2. Transmit via Web App Bridge (NO GOOGLE CLOUD NEEDED)
                         try:
-                            # REPLACE THIS WITH YOUR DEPLOYMENT URL
                             WEBAPP_URL = "https://script.google.com/macros/s/AKfycby38DOr6SA2x_r-oS1gHudA39Gucb2BioMpVbfe6i288uOiBZnuv421vVlHv3O8J_KY/exec"
                             response = requests.post(WEBAPP_URL, json=payload)
                             
@@ -1606,44 +1620,80 @@ elif page == "🧠 Neural Forge":
                 )
                 st.warning(r_res.choices[0].message.content)
 
-# --- MODULE : THE IDENTITY VAULT (CORE DNA) ---
+# --- MODULE : THE IDENTITY VAULT (MASTER ARCHITECTURE) ---
 elif page == "🏛️ Identity Vault":
-    draw_title("🏛️", "IDENTITY VAULT // CORE DNA")
+    draw_title("🏛️", "IDENTITY VAULT // THE VOID CORE")
     
-    # Protocol 2026-02-06: Initialize Vault if empty
-    if 'vault_anchor' not in st.session_state:
-        st.session_state.vault_anchor = None
+    # Initialize session states for the three pillars of Identity
+    if 'vault_anchor' not in st.session_state: st.session_state.vault_anchor = None
+    if 'linguistic_dna' not in st.session_state: st.session_state.linguistic_dna = ""
+    if 'travel_dna' not in st.session_state: st.session_state.travel_dna = {}
 
-    # --- VAULT INTERFACE ---
-    with st.container(border=True):
-        st.subheader("🔑 Establish Identity Anchor")
-        st.write("Upload a high-quality, front-facing reference photo. The system will lock these facial features for all subsequent generations.")
-        
-        anchor_file = st.file_uploader("Drop Master Reference Image...", type=['png', 'jpg', 'jpeg'], key="vault_upload")
-        
-        if anchor_file:
-            # We store the raw bytes to display it in the sidebar later
-            st.session_state.vault_anchor = anchor_file.getvalue()
-            st.success("✅ IDENTITY SECURED: Facial structure mapped to Protocol 2026-02-06.")
+    # --- TABS FOR DIFFERENT EMPIRES ---
+    tab1, tab2, tab3 = st.tabs(["👤 Visual DNA", "🧬 Linguistic Tone", "🌍 Expansion DNA"])
 
-    # --- VAULT STATUS ---
-    if st.session_state.vault_anchor:
-        col1, col2 = st.columns([1, 2])
-        with col1:
-            st.image(st.session_state.vault_anchor, caption="Active Anchor", use_container_width=True)
-        with col2:
-            st.markdown("""
-            ### 🛠️ Vault Specifications
-            - **Consistency Mode:** STRICT (High Fidelity)
-            - **Feature Mapping:** 128-Point Facial Mesh
-            - **Bypass Protection:** ACTIVE
-            - **Targeting:** Neural Forge Integration Enabled
-            """)
-            if st.button("🗑️ PURGE IDENTITY"):
-                st.session_state.vault_anchor = None
-                st.rerun()
-    else:
-        st.info("The Vault is currently empty. Neural Forge will default to generic subjects.")
+    # --- PILLAR 1: VISUAL DNA (For Neural Forge) ---
+    with tab1:
+        with st.container(border=True):
+            st.subheader("🔑 Establish Identity Anchor")
+            st.write("Upload your front-facing reference photo. This locks your features for all future VOID generations.")
+            
+            anchor_file = st.file_uploader("Drop Master Reference Image...", type=['png', 'jpg', 'jpeg'], key="vault_upload")
+            
+            if anchor_file:
+                st.session_state.vault_anchor = anchor_file.getvalue()
+                st.success("✅ IDENTITY SECURED: Facial structure mapped.")
+
+            if st.session_state.vault_anchor:
+                col1, col2 = st.columns([1, 2])
+                with col1:
+                    st.image(st.session_state.vault_anchor, caption="Active Anchor", use_container_width=True)
+                with col2:
+                    st.markdown("""
+                    - **Consistency Mode:** STRICT (High Fidelity)
+                    - **Targeting:** Neural Forge & Media Uplink Enabled
+                    """)
+                    if st.button("🗑️ PURGE VISUAL IDENTITY"):
+                        st.session_state.vault_anchor = None
+                        st.rerun()
+
+    # --- PILLAR 2: LINGUISTIC DNA (For Tone-Clone / Neural Forge) ---
+    with tab2:
+        st.subheader("🧬 Tone-Clone Lab")
+        st.write("Feed the OS your writing style. This data allows the Neural Forge to ghostwrite exactly like you.")
+        
+        script_samples = st.text_area("Paste 3-5 examples of your best scripts or posts here:", height=200, placeholder="Paste your raw scripts...")
+        
+        if st.button("🧬 Analyze & Extract Fingerprint"):
+            if script_samples:
+                with st.spinner("Decoding Linguistic DNA..."):
+                    # This is where we call Gemini/Groq to analyze the text
+                    # We store the resulting style profile
+                    st.session_state.linguistic_dna = script_samples # Logic to be replaced with AI analysis
+                    st.success("✅ TONE-CLONE ACTIVE: Neural Forge now writes in your voice.")
+            else:
+                st.error("Please provide samples to analyze.")
+
+    # --- PILLAR 3: EXPANSION DNA (Future Travels & Real Estate) ---
+    with tab3:
+        st.subheader("🚀 Future Empire Prefs")
+        st.write("This data will feed into **VOID-Travels** and **VOID-Solutions**.")
+        
+        col_t1, col_t2 = st.columns(2)
+        with col_t1:
+            st.markdown("#### ✈️ Travel Blueprint")
+            t_pref = st.multiselect("Destinations of Interest", ["Europe", "Japan", "USA", "Middle East", "Southeast Asia"])
+            t_style = st.select_slider("Travel Style", options=["Budget", "Operative (Mid)", "Director (Luxury)", "Elite (Zero-Touch)"])
+            
+        with col_t2:
+            st.markdown("#### 🏠 Real Estate ROI")
+            re_budget = st.text_input("Target Investment Budget (INR/USD)")
+            re_risk = st.select_slider("Risk Appetite", options=["Low (Rental)", "Medium (Appreciation)", "High (Flipping)"])
+        
+        if st.button("💾 Save Expansion DNA"):
+            st.session_state.travel_dna = {"dest": t_pref, "style": t_style, "budget": re_budget, "risk": re_risk}
+            st.balloons()
+            st.success("Empire data synced. Ready for global deployment.")
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -2350,6 +2400,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
