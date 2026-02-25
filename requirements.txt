@@ -12,6 +12,7 @@ youtube-transcript-api==0.6.2
 yt-dlp
 st-gsheets-connection
 vapi-python
+python-dotenv
 
 
 
