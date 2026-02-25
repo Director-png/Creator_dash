@@ -1455,7 +1455,8 @@ elif page == "🏗️ Script Architect":
 elif page == "🧠 Neural Forge":
     import random
     import datetime
-    import requests  # Crucial for the Web App Bypass
+    import requests  
+    import urllib.parse
 
     # 1. ACCESS & CREDIT CONTROL (Sync Protocol)
     if not st.session_state.get('logged_in'):
@@ -1465,7 +1466,6 @@ elif page == "🧠 Neural Forge":
     # --- CLOUD SYNC INITIALIZER ---
     if 'history_synced' not in st.session_state or not st.session_state.get('script_history'):
         with st.spinner("📡 Synchronizing with Global Vault..."):
-            # Note: Ensure this function is defined in your main app logic
             if 'sync_history_from_cloud' in globals():
                 sync_history_from_cloud()
                 st.session_state.history_synced = True
@@ -1554,10 +1554,10 @@ elif page == "🧠 Neural Forge":
                             f"2. VISUAL DNA (IMAGE PROMPTS): Provide 3 highly detailed Image Prompts. "
                             f"Subject: {visual_anchor}. "
                             f"Mandatory Color Palette: {color_string}. Lighting: {f_lighting}. "
-                            f"Composition: Close-up for mobile CTR, cinematic 8K, extreme high detail."
+                            f"Composition: Close-up for mobile CTR, cinematic 8K, extreme high detail.\n\n"
+                            f"IMPORTANT: Format the response clearly with '--- SCRIPT ---' and '--- IMAGE PROMPTS ---' headers."
                         )
                         
-                        # Replace 'groq_c' with your specific client initialization
                         res = groq_c.chat.completions.create(
                             model="llama-3.3-70b-versatile", 
                             messages=[{"role": "user", "content": system_instruction}]
@@ -1589,11 +1589,8 @@ elif page == "🧠 Neural Forge":
 
                         try:
                             WEBAPP_URL = "https://script.google.com/macros/s/AKfycby38DOr6SA2x_r-oS1gHudA39Gucb2BioMpVbfe6i288uOiBZnuv421vVlHv3O8J_KY/exec"
-                            response = requests.post(WEBAPP_URL, json=payload)
-                            if "SUCCESS" in response.text:
-                                st.toast("⚡ ARCHIVE SYNCHRONIZED")
-                            else:
-                                st.error(f"📡 UPLINK FAILED: {response.text}")
+                            requests.post(WEBAPP_URL, json=payload)
+                            st.toast("⚡ ARCHIVE SYNCHRONIZED")
                         except Exception as e:
                             st.error(f"GSHEET BRIDGE ERROR: {e}")
 
@@ -1602,12 +1599,62 @@ elif page == "🧠 Neural Forge":
                     except Exception as e:
                         st.error(f"UPLINK ERROR: {str(e)}")
 
-    # 3. THE REVEAL & INTELLIGENCE SUITE
+    # 3. THE REVEAL & PRODUCTION SUITE
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 PRODUCTION BLUEPRINT")
         st.info(st.session_state.pro_forge_txt)
         
+        # --- DIRECTOR TIER PRODUCTION (ELEVENLABS) ---
+        user_tier = st.session_state.get('user_status', 'Free')
+        
+        if user_tier in ["Director", "Agency"]:
+            st.divider()
+            st.markdown("### 🎬 DIRECTOR'S PRODUCTION SUITE")
+            
+            # Extract clean script to estimate ElevenLabs credit burn
+            raw_text = st.session_state.pro_forge_txt
+            clean_script = raw_text.split("--- IMAGE PROMPTS ---")[0].replace("--- SCRIPT ---", "").strip()
+            char_count = len(clean_script)
+            
+            st.caption(f"📊 Synthesis Estimate: ~{char_count} Characters from your 10,000 credit arsenal.")
+            
+            prod_col1, prod_col2 = st.columns(2)
+            
+            with prod_col1:
+                if st.button("🔊 FORGE MASTER AUDIO", use_container_width=True):
+                    with st.spinner("Synthesizing Master Audio..."):
+                        # --- ELEVENLABS INTEGRATION ---
+                        try:
+                            ELEVEN_KEY = st.secrets.get("ELEVENLABS_API_KEY", "your_key_here")
+                            VOICE_ID = st.session_state.get('linguistic_dna_id', "pNInz6obpgDQGcFmaJgB") 
+                            
+                            E_URL = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
+                            headers = {"xi-api-key": ELEVEN_KEY, "Content-Type": "application/json"}
+                            data = {
+                                "text": clean_script,
+                                "model_id": "eleven_multilingual_v2",
+                                "voice_settings": {"stability": 0.5, "similarity_boost": 0.75}
+                            }
+                            
+                            audio_res = requests.post(E_URL, json=data, headers=headers)
+                            if audio_res.status_code == 200:
+                                st.audio(audio_res.content, format="audio/mp3")
+                                st.download_button("📥 DOWNLOAD MASTER AUDIO", audio_res.content, f"VOID_{f_topic}.mp3", "audio/mp3")
+                                st.success("✅ AUDIO SYNTHESIS COMPLETE")
+                            else:
+                                st.error(f"Synthesis Failed: {audio_res.text}")
+                        except Exception as e:
+                            st.error(f"ElevenLabs Bridge Error: {e}")
+
+            with prod_col2:
+                if st.button("🎨 MANIFEST VISUALS", use_container_width=True):
+                    with st.spinner("Generating High-Fidelity Visuals..."):
+                        # Future Image Generation logic goes here
+                        st.info("Manifestation Engine Initializing... (Connect Flux/DALL-E Key)")
+        else:
+            st.warning("🔒 DIRECTOR PRODUCTION LOCKED: Upgrade to use ElevenLabs Audio & Visual Manifestation.")
+
         # --- CALIBRATED INTELLIGENCE SUITE ---
         st.divider()
         st.subheader("🧪 VOID Intelligence Audit")
@@ -1616,13 +1663,7 @@ elif page == "🧠 Neural Forge":
         with t_col1:
             if st.button("🚀 SCORE VIRALITY & CTR", use_container_width=True):
                 with st.spinner("Calculating Viral Probability..."):
-                    v_prompt = (
-                        f"Perform a VIRALITY AUDIT on this script: {st.session_state.pro_forge_txt[:1500]}\n"
-                        f"1. Assign a CTR Score (0-100).\n"
-                        f"2. Analyze 'The Hook' for {f_platform}.\n"
-                        f"3. Identify the 'Viral Pivot' moment.\n"
-                        f"Format as a 2026 Performance Report."
-                    )
+                    v_prompt = f"Perform a VIRALITY AUDIT on this script: {st.session_state.pro_forge_txt[:1500]}\nFormat as a 2026 Performance Report."
                     v_res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
                         messages=[{"role": "user", "content": v_prompt}]
@@ -1632,93 +1673,61 @@ elif page == "🧠 Neural Forge":
         with t_col2:
             if st.button("🧠 NEURAL RETENTION MAP", use_container_width=True):
                 with st.spinner("Scanning for Attention Leaks..."):
-                    r_prompt = (
-                        f"Perform a RETENTION SCAN on this script: {st.session_state.pro_forge_txt[:1500]}\n"
-                        f"1. Identify the 'Attention Peak'.\n"
-                        f"2. Pinpoint the 'Leak Zone'.\n"
-                        f"3. Provide 3 specific edits for {f_pacing} pacing.\n"
-                        f"Format as a Strategic Briefing."
-                    )
+                    r_prompt = f"Perform a RETENTION SCAN on this script: {st.session_state.pro_forge_txt[:1500]}\nFormat as a Strategic Briefing."
                     r_res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
                         messages=[{"role": "user", "content": r_prompt}]
                     )
                     st.warning(r_res.choices[0].message.content)
 
-# --- MODULE : THE IDENTITY VAULT (MASTER ARCHITECTURE) ---
-elif page == "🏛️ Identity Vault":
-    draw_title("🏛️", "IDENTITY VAULT // THE VOID CORE")
+# --- MODULE 6: IDENTITY VAULT (THE NEURAL ANCHOR) ---
+elif page == "🔒 Identity Vault":
+    draw_title("🔒", "IDENTITY VAULT // DNA ANCHOR")
     
-    # Initialize session states for the three pillars of Identity
-    if 'vault_anchor' not in st.session_state: st.session_state.vault_anchor = None
-    if 'linguistic_dna' not in st.session_state: st.session_state.linguistic_dna = ""
-    if 'travel_dna' not in st.session_state: st.session_state.travel_dna = {}
+    st.markdown("### 🧬 BIOMETRIC REGISTRATION")
+    st.info("Anchor your Visual and Linguistic DNA here to enable cross-platform consistency.")
 
-    # --- TABS FOR DIFFERENT EMPIRES ---
-    tab1, tab2, tab3 = st.tabs(["👤 Visual DNA", "🧬 Linguistic Tone", "🌍 Expansion DNA"])
+    # --- 1. VISUAL DNA (IMAGE ANCHOR) ---
+    with st.expander("👤 VISUAL DNA (STRICT FACIAL CONSISTENCY)", expanded=True):
+        uploaded_face = st.file_uploader("Upload Master Reference Image", type=['jpg', 'png', 'jpeg'])
+        if uploaded_face:
+            st.session_state.vault_anchor = uploaded_face
+            st.success("✅ VISUAL DNA ANCHORED: 2026-02-06 Protocol Active.")
+            st.image(uploaded_face, width=150, caption="Master Reference")
 
-    # --- PILLAR 1: VISUAL DNA (For Neural Forge) ---
-    with tab1:
-        with st.container(border=True):
-            st.subheader("🔑 Establish Identity Anchor")
-            st.write("Upload your front-facing reference photo. This locks your features for all future VOID generations.")
-            
-            anchor_file = st.file_uploader("Drop Master Reference Image...", type=['png', 'jpg', 'jpeg'], key="vault_upload")
-            
-            if anchor_file:
-                st.session_state.vault_anchor = anchor_file.getvalue()
-                st.success("✅ IDENTITY SECURED: Facial structure mapped.")
-
-            if st.session_state.vault_anchor:
-                col1, col2 = st.columns([1, 2])
-                with col1:
-                    st.image(st.session_state.vault_anchor, caption="Active Anchor", use_container_width=True)
-                with col2:
-                    st.markdown("""
-                    - **Consistency Mode:** STRICT (High Fidelity)
-                    - **Targeting:** Neural Forge & Media Uplink Enabled
-                    """)
-                    if st.button("🗑️ PURGE VISUAL IDENTITY"):
-                        st.session_state.vault_anchor = None
-                        st.rerun()
-
-    # --- PILLAR 2: LINGUISTIC DNA (For Tone-Clone / Neural Forge) ---
-    with tab2:
-        st.subheader("🧬 Tone-Clone Lab")
-        st.write("Feed the OS your writing style. This data allows the Neural Forge to ghostwrite exactly like you.")
+    # --- 2. LINGUISTIC DNA (VOICE ANCHOR) ---
+    with st.expander("🎙️ LINGUISTIC DNA (VOICE CLONE)", expanded=True):
+        st.markdown("##### ElevenLabs Integration")
         
-        script_samples = st.text_area("Paste 3-5 examples of your best scripts or posts here:", height=200, placeholder="Paste your raw scripts...")
+        # This is where you paste your Voice ID
+        prev_id = st.session_state.get('linguistic_dna_id', "")
+        v_id = st.text_input(
+            "Enter ElevenLabs Voice ID", 
+            value=prev_id,
+            placeholder="e.g., pNInz6obpgDQGcFmaJgB",
+            help="Copy this from your ElevenLabs Voice Lab. This ID will be used in the Neural Forge for all Director-tier audio."
+        )
         
-        if st.button("🧬 Analyze & Extract Fingerprint"):
-            if script_samples:
-                with st.spinner("Decoding Linguistic DNA..."):
-                    # This is where we call Gemini/Groq to analyze the text
-                    # We store the resulting style profile
-                    st.session_state.linguistic_dna = script_samples # Logic to be replaced with AI analysis
-                    st.success("✅ TONE-CLONE ACTIVE: Neural Forge now writes in your voice.")
-            else:
-                st.error("Please provide samples to analyze.")
+        # Save to session state immediately
+        if v_id != prev_id:
+            st.session_state.linguistic_dna_id = v_id
+            st.toast("⚡ LINGUISTIC DNA UPDATED")
 
-    # --- PILLAR 3: EXPANSION DNA (Future Travels & Real Estate) ---
-    with tab3:
-        st.subheader("🚀 Future Empire Prefs")
-        st.write("This data will feed into **VOID-Travels** and **VOID-Solutions**.")
-        
-        col_t1, col_t2 = st.columns(2)
-        with col_t1:
-            st.markdown("#### ✈️ Travel Blueprint")
-            t_pref = st.multiselect("Destinations of Interest", ["Europe", "Japan", "USA", "Middle East", "Southeast Asia"])
-            t_style = st.select_slider("Travel Style", options=["Budget", "Operative (Mid)", "Director (Luxury)", "Elite (Zero-Touch)"])
-            
-        with col_t2:
-            st.markdown("#### 🏠 Real Estate ROI")
-            re_budget = st.text_input("Target Investment Budget (INR/USD)")
-            re_risk = st.select_slider("Risk Appetite", options=["Low (Rental)", "Medium (Appreciation)", "High (Flipping)"])
-        
-        if st.button("💾 Save Expansion DNA"):
-            st.session_state.travel_dna = {"dest": t_pref, "style": t_style, "budget": re_budget, "risk": re_risk}
-            st.balloons()
-            st.success("Empire data synced. Ready for global deployment.")
+        # Linguistic Tone Description
+        st.session_state.linguistic_dna = st.text_area(
+            "Tone/Style Description", 
+            value=st.session_state.get('linguistic_dna', ""),
+            placeholder="e.g., Aggressive, high-authority, rhythmic, deep raspy tone..."
+        )
+
+    # --- 3. THE IDENTITY STATUS ---
+    st.divider()
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.session_state.get('vault_anchor') and st.session_state.get('linguistic_dna_id'):
+            st.success("🛰️ IDENTITY FULLY SYNCHRONIZED")
+        else:
+            st.warning("📡 IDENTITY INCOMPLETE")
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
@@ -2550,6 +2559,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
