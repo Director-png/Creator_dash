@@ -2350,7 +2350,7 @@ def show_upgrade_authority():
             # We add &chld=H for high error correction (easier to scan)
             qr_api_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={urllib.parse.quote(upi_url)}&chld=H"
             
-            st.markdown(f"<div style='text-align: center;'><img src='{qr_api_url}' width='250'></div>", unsafe_allow_value=True)
+            st.markdown(f"<div style='text-align: center;'><img src='{qr_api_url}' width='250'></div>", unsafe_allow_html=True)
             st.caption(f"Secure Dynamic QR: {tier_tag} Level")
         else:
             st.text_input("Enter Email for Agency Waitlist")
@@ -2550,6 +2550,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
