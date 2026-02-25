@@ -287,19 +287,27 @@ def ask_void_agent(user_query, context_data):
     response = call_gemini_api(prompt) 
     return response
 
+# --- ENHANCED DATA LOADER (CACHE BYPASS) ---
 @st.cache_data(ttl=0)
 def load_user_db():
     try:
-        sync_url = f"{USER_DB_URL}&cache_bus={time.time()}"
+        # 1. THE CACHE BUSTER: Ensures we bypass both Streamlit and Google's internal cache
+        seed = random.randint(1000, 9999)
+        sync_url = f"{USER_DB_URL}&cache_bust={time.time()}&seed={seed}"
+        
         df = pd.read_csv(sync_url)
         
-        # CLEANING: Remove hidden spaces but KEEP the casing (Upper/Lower)
-        # This makes 'Email ' become 'Email'
+        # 2. CLEANING: Remove hidden spaces but KEEP the casing
         df.columns = [str(c).strip() for c in df.columns]
         
+        # 3. VALUE SANITIZATION: Critical for Tier Matching
+        if 'Status' in df.columns:
+            # This makes "Pro " become "Pro" so the mapping works perfectly
+            df['Status'] = df['Status'].astype(str).str.strip()
+            
         return df
     except Exception as e:
-        st.error(f"Database Uplink Error: {e}")
+        st.error(f"🛰️ DATABASE UPLINK ERROR: {e}")
         return pd.DataFrame()
 
 def load_history_db():
@@ -657,11 +665,6 @@ if st.sidebar.checkbox("🔍 Debug Node Mapping"):
 # FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
 
 # --- GATEKEEPER START ---
-import requests
-import datetime
-import pandas as pd
-import streamlit as st
-
 # 1. SESSION STATE INITIALIZATION
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
@@ -690,18 +693,6 @@ ELITE_CIPHERS = {
     "BETA_ELITE_2026": "Elite Pioneer",
 }
 
-# --- ENHANCED DATA LOADER (CACHE BYPASS) ---
-def load_user_db_fresh():
-    try:
-        # We add a timestamp to the URL to force Google to give us the LATEST sheet data
-        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        df = pd.read_csv(f"{USER_DB_URL}&cache_bust={timestamp}")
-        df.columns = [str(c).strip() for c in df.columns]
-        return df
-    except Exception as e:
-        st.error(f"DATABASE OFFLINE: {e}")
-        return pd.DataFrame()
-
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align: center; color: #00d4ff; letter-spacing: 5px;'>VOID OS</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #888; font-size: 0.8em;'>INTELLIGENCE ACCESS PROTOCOL v4.0</p>", unsafe_allow_html=True)
@@ -714,7 +705,7 @@ if not st.session_state.logged_in:
         pw_in = st.text_input("PASSKEY", type="password", key="gate_login_pw")
         
         if st.button("INITIATE UPLINK", use_container_width=True):
-            users = load_user_db_fresh() # Force fresh load
+            users = load_user_db() 
             if email_in == "admin" and pw_in == "1234":
                 st.session_state.update({
                     "logged_in": True, 
@@ -725,11 +716,10 @@ if not st.session_state.logged_in:
                 })
                 st.rerun()
             elif not users.empty:
-                # Case-insensitive match for Email
                 match = users[(users['Email'].astype(str).str.lower() == email_in) & (users['Password'].astype(str) == pw_in)]
                 if not match.empty:
-                    # Clean the status string from the sheet
-                    raw_status = str(match.iloc[0]['Status']).strip().title() # e.g., "Pro " -> "Pro"
+                    # Retrieve the cleaned status from the load function
+                    raw_status = match.iloc[0]['Status']
                     resolved_status = TIER_MAP.get(raw_status, "Free")
                     
                     st.session_state.update({
@@ -827,7 +817,6 @@ if not st.session_state.logged_in:
                             else: st.error(f"Transmission Failed: {response.text}")
                         except Exception as ex: st.error(f"Connection Blocked: {ex}")
                 else: st.warning("DIRECTOR: ALL FIELDS ARE MANDATORY.")
-        
         else:
             st.markdown(f"### PHASE 2: VERIFY UPLINK")
             st.info(f"Verification code sent to {st.session_state.temp_reg_data['Email']}")
@@ -835,10 +824,7 @@ if not st.session_state.logged_in:
             
             if st.button("🔓 FINALIZE INITIALIZATION", use_container_width=True):
                 if user_otp == st.session_state.generated_otp:
-                    final_payload = {
-                        "category": "REGISTRATION",
-                        "data": st.session_state.temp_reg_data 
-                    }
+                    final_payload = {"category": "REGISTRATION", "data": st.session_state.temp_reg_data}
                     try:
                         r = requests.post(NEW_URL, json=final_payload, timeout=20)
                         if "SUCCESS" in r.text:
@@ -854,7 +840,7 @@ if not st.session_state.logged_in:
                 st.session_state.otp_sent = False
                 st.rerun()
 
-    # --- TAB 3: ELITE UPLINK (PRO BYPASS) ---
+    # --- TAB 3: ELITE UPLINK (TEST PHASE) ---
     with t3:
         st.markdown("### 🛰️ ELITE UPLINK (TEST PHASE)")
         cipher_in = st.text_input("ENTER ELITE ACCESS CIPHER", type="password")
@@ -867,10 +853,7 @@ if not st.session_state.logged_in:
                 })
                 st.rerun()
             else: st.error("INVALID CIPHER.")
-
     st.stop()
-# --- MAIN APP UI BEGINS HERE (Only accessible if logged_in is True) ---
-import streamlit as st
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
@@ -2362,6 +2345,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
