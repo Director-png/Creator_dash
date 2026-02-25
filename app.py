@@ -667,14 +667,23 @@ if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 if 'otp_sent' not in st.session_state:
     st.session_state.otp_sent = False
-if 'rec_otp_sent' not in st.session_state: # New state for recovery flow
+if 'rec_otp_sent' not in st.session_state: 
     st.session_state.rec_otp_sent = False
 if 'generated_otp' not in st.session_state:
     st.session_state.generated_otp = None
 if 'user_status' not in st.session_state:
     st.session_state.user_status = "Free"
 
-# TEMPORARY TEST FEATURE
+# VOID TIER DEFINITIONS (2026 Strategy)
+# Pro -> Operative | Elite -> Director | Core -> Agency
+TIER_MAP = {
+    "Pro": "Operative",
+    "Elite": "Director",
+    "Core": "Agency",
+    "Free": "Free"
+}
+
+# ELITE BYPASS CODES
 ELITE_CIPHERS = {
     "VOID-V1-X7R2-DELTA": "Elite Pioneer 1",
     "VOID-V1-K9P4-OMEGA": "Elite Pioneer 2",
@@ -695,22 +704,32 @@ if not st.session_state.logged_in:
         if st.button("INITIATE UPLINK", use_container_width=True):
             users = load_user_db() 
             if email_in == "admin" and pw_in == "1234":
-                st.session_state.update({"logged_in": True, "user_name": "Master Director", "user_role": "admin", "user_status": "Pro", "user_email": "admin"})
+                st.session_state.update({
+                    "logged_in": True, 
+                    "user_name": "Master Director", 
+                    "user_role": "admin", 
+                    "user_status": "Core", # Admin gets full Agency Access
+                    "user_email": "admin"
+                })
                 st.rerun()
             elif not users.empty:
                 match = users[(users['Email'].astype(str).str.lower() == email_in) & (users['Password'].astype(str) == pw_in)]
                 if not match.empty:
+                    raw_status = str(match.iloc[0]['Status']).strip()
+                    # Mapping logic to resolve Tiers
+                    resolved_status = TIER_MAP.get(raw_status, "Free")
+                    
                     st.session_state.update({
                         "logged_in": True, 
                         "user_name": match.iloc[0]['Name'], 
                         "user_email": email_in, 
-                        "user_status": str(match.iloc[0]['Status']).strip()
+                        "user_status": resolved_status
                     })
                     st.rerun()
                 else:
                     st.error("INTEGRITY BREACH: INVALID CREDENTIALS.")
 
-        # --- RECOVERY PROTOCOL FIX ---
+        # --- RECOVERY PROTOCOL ---
         with st.expander("RECOVERY PROTOCOL (Lost Passkey)"):
             st.info("Verify identity via Security Answer or OTP")
             rec_mode = st.radio("Recovery Mode", ["Security Question", "OTP Verification"])
@@ -720,7 +739,6 @@ if not st.session_state.logged_in:
                 s_ans = st.text_input("SECURITY KEY (DOB / PRESET)", key="rec_ans")
                 new_p = st.text_input("NEW PASSKEY", type="password", key="rec_new_pw")
                 if st.button("OVERRIDE VIA SECURITY"):
-                    # Fixed action name to match common Google Script standard: 'RESET_PASSWORD'
                     payload = {"email": r_email, "action": "SECURE_RESET", "answer": s_ans, "message": new_p}
                     try:
                         res = requests.post(NEW_URL, json=payload, timeout=15)
@@ -729,7 +747,6 @@ if not st.session_state.logged_in:
                     except Exception as e: st.error(f"CRASH: {e}")
             
             else:
-                # OTP RECOVERY FLOW FIX
                 if not st.session_state.rec_otp_sent:
                     if st.button("SEND RECOVERY OTP"):
                         try:
@@ -742,14 +759,12 @@ if not st.session_state.logged_in:
                             else: st.error(f"Failed to send OTP: {response.text}")
                         except Exception as e: st.error(f"Connection Error: {e}")
                 else:
-                    # The "Missing Tab" for OTP Input
                     st.success(f"Security Code sent to {r_email}")
                     rec_otp_in = st.text_input("ENTER 6-DIGIT CODE", key="rec_otp_input")
                     new_p_otp = st.text_input("NEW PASSKEY", type="password", key="rec_new_pw_otp")
                     
                     if st.button("🔓 OVERRIDE SECURITY WALL"):
                         if rec_otp_in == st.session_state.generated_otp:
-                            # Finalizing the reset
                             payload = {"email": r_email, "action": "SECURE_RESET", "message": new_p_otp, "bypass": "true"}
                             try:
                                 res = requests.post(NEW_URL, json=payload, timeout=15)
@@ -815,7 +830,7 @@ if not st.session_state.logged_in:
                         r = requests.post(NEW_URL, json=final_payload, timeout=20)
                         if "SUCCESS" in r.text:
                             st.success("✅ IDENTITY SECURED. YOU MAY NOW LOGIN.")
-                            st.fireworks()
+                            st.balloons() # Swapped from fireworks as per your engine rename
                             st.session_state.otp_sent = False 
                             st.session_state.generated_otp = None
                         else: st.error(f"VAULT REJECTION: {r.text}")
@@ -834,7 +849,8 @@ if not st.session_state.logged_in:
             if cipher_in in ELITE_CIPHERS:
                 st.session_state.update({
                     "logged_in": True, "user_name": ELITE_CIPHERS[cipher_in],
-                    "user_status": "Pro", "user_email": "elite_test@void.os"
+                    "user_status": "Operative", # Mapping Pro Bypass to Operative
+                    "user_email": "elite_test@void.os"
                 })
                 st.rerun()
             else: st.error("INVALID CIPHER.")
@@ -2334,6 +2350,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
