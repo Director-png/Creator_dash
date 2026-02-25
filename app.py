@@ -674,7 +674,7 @@ if 'generated_otp' not in st.session_state:
 if 'user_status' not in st.session_state:
     st.session_state.user_status = "Free"
 
-# VOID TIER DEFINITIONS (2026 Strategy)
+# VOID TIER MAPPING (2026 INTERNAL PROTOCOL)
 # Pro -> Operative | Elite -> Director | Core -> Agency
 TIER_MAP = {
     "Pro": "Operative",
@@ -690,6 +690,18 @@ ELITE_CIPHERS = {
     "BETA_ELITE_2026": "Elite Pioneer",
 }
 
+# --- ENHANCED DATA LOADER (CACHE BYPASS) ---
+def load_user_db_fresh():
+    try:
+        # We add a timestamp to the URL to force Google to give us the LATEST sheet data
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        df = pd.read_csv(f"{USER_DB_URL}&cache_bust={timestamp}")
+        df.columns = [str(c).strip() for c in df.columns]
+        return df
+    except Exception as e:
+        st.error(f"DATABASE OFFLINE: {e}")
+        return pd.DataFrame()
+
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align: center; color: #00d4ff; letter-spacing: 5px;'>VOID OS</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #888; font-size: 0.8em;'>INTELLIGENCE ACCESS PROTOCOL v4.0</p>", unsafe_allow_html=True)
@@ -702,21 +714,22 @@ if not st.session_state.logged_in:
         pw_in = st.text_input("PASSKEY", type="password", key="gate_login_pw")
         
         if st.button("INITIATE UPLINK", use_container_width=True):
-            users = load_user_db() 
+            users = load_user_db_fresh() # Force fresh load
             if email_in == "admin" and pw_in == "1234":
                 st.session_state.update({
                     "logged_in": True, 
                     "user_name": "Master Director", 
                     "user_role": "admin", 
-                    "user_status": "Core", # Admin gets full Agency Access
+                    "user_status": "Agency", # Admin mapped to Core/Agency
                     "user_email": "admin"
                 })
                 st.rerun()
             elif not users.empty:
+                # Case-insensitive match for Email
                 match = users[(users['Email'].astype(str).str.lower() == email_in) & (users['Password'].astype(str) == pw_in)]
                 if not match.empty:
-                    raw_status = str(match.iloc[0]['Status']).strip()
-                    # Mapping logic to resolve Tiers
+                    # Clean the status string from the sheet
+                    raw_status = str(match.iloc[0]['Status']).strip().title() # e.g., "Pro " -> "Pro"
                     resolved_status = TIER_MAP.get(raw_status, "Free")
                     
                     st.session_state.update({
@@ -729,7 +742,7 @@ if not st.session_state.logged_in:
                 else:
                     st.error("INTEGRITY BREACH: INVALID CREDENTIALS.")
 
-        # --- RECOVERY PROTOCOL ---
+        # --- RECOVERY MODULE ---
         with st.expander("RECOVERY PROTOCOL (Lost Passkey)"):
             st.info("Verify identity via Security Answer or OTP")
             rec_mode = st.radio("Recovery Mode", ["Security Question", "OTP Verification"])
@@ -781,7 +794,7 @@ if not st.session_state.logged_in:
                         st.session_state.rec_otp_sent = False
                         st.rerun()
 
-    # --- TAB 2: REGISTRATION ---
+    # --- TAB 2: IDENTITY INITIALIZATION (REGISTRATION) ---
     with t2:
         if not st.session_state.otp_sent:
             st.markdown("### PHASE 1: DATA CAPTURE")
@@ -830,7 +843,7 @@ if not st.session_state.logged_in:
                         r = requests.post(NEW_URL, json=final_payload, timeout=20)
                         if "SUCCESS" in r.text:
                             st.success("✅ IDENTITY SECURED. YOU MAY NOW LOGIN.")
-                            st.balloons() # Swapped from fireworks as per your engine rename
+                            st.balloons() 
                             st.session_state.otp_sent = False 
                             st.session_state.generated_otp = None
                         else: st.error(f"VAULT REJECTION: {r.text}")
@@ -841,7 +854,7 @@ if not st.session_state.logged_in:
                 st.session_state.otp_sent = False
                 st.rerun()
 
-    # --- TAB 3: ELITE BYPASS ---
+    # --- TAB 3: ELITE UPLINK (PRO BYPASS) ---
     with t3:
         st.markdown("### 🛰️ ELITE UPLINK (TEST PHASE)")
         cipher_in = st.text_input("ENTER ELITE ACCESS CIPHER", type="password")
@@ -849,14 +862,13 @@ if not st.session_state.logged_in:
             if cipher_in in ELITE_CIPHERS:
                 st.session_state.update({
                     "logged_in": True, "user_name": ELITE_CIPHERS[cipher_in],
-                    "user_status": "Operative", # Mapping Pro Bypass to Operative
+                    "user_status": "Operative", # Pro Bypass = Operative Tier
                     "user_email": "elite_test@void.os"
                 })
                 st.rerun()
             else: st.error("INVALID CIPHER.")
 
     st.stop()
-
 # --- MAIN APP UI BEGINS HERE (Only accessible if logged_in is True) ---
 import streamlit as st
 
@@ -2350,6 +2362,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
