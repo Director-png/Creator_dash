@@ -2274,14 +2274,17 @@ elif page == "⚖️ Legal Archive":
         st.write("- Is there a limit on how many 'Revisions' the brand can ask for?")
 
 # --- MODULE 10: 💎 VOID PRO LICENSE UPLINK ---
-# --- MODULE 12: ACCESS UPLINK (REFINED REVENUE BRIDGE) ---
-elif page == "⚡ Upgrade Authority":
+import streamlit as st
+import requests
+import urllib.parse
+
+# --- MODULE 12: ACCESS UPLINK (THE REVENUE ENGINE) ---
+def show_upgrade_authority():
     draw_title("⚡", "ACCESS UPLINK // TIER ACTIVATION")
 
-    # 1. THE POWER MATRIX (Lean Version)
+    # 1. THE POWER MATRIX
     st.subheader("📊 Feature Authority Matrix")
     
-    # Strictly for current launch tiers
     comparison_data = {
         "Feature": [
             "Neural Forge Access", 
@@ -2306,57 +2309,91 @@ elif page == "⚡ Upgrade Authority":
         st.subheader("💳 Select Your Path")
         tier_choice = st.radio("Choose your level of authority:", ["Operative Tier", "Director Tier", "Agency (Waitlist)"])
         
-        amt = 3999 if "Operative" in tier_choice else 7999 if "Director" in tier_choice else 0
-        tier_tag = tier_choice.split()[0].upper()
+        # Fixed Pricing Logic
+        if "Operative" in tier_choice:
+            amt = "3999.00"
+            tier_tag = "OPERATIVE"
+        elif "Director" in tier_choice:
+            amt = "7999.00"
+            tier_tag = "DIRECTOR"
+        else:
+            amt = "0"
+            tier_tag = "AGENCY"
 
-        if amt > 0:
+        if amt != "0":
             st.markdown(f"### Total Investment: **₹{amt}**")
-            upi_id = "anuj05758@okicici" # <--- REPLACE WITH YOUR ACTUAL UPI ID
-            note = f"VOID_{tier_tag}_UPLINK".replace(" ", "%20")
-            upi_url = f"upi://pay?pa={upi_id}&pn=VOID_EMPIRE&am={amt}&cu=INR&tn={note}"
             
-            st.info("Scan the QR or click the button to pay instantly via any UPI app.")
-            st.link_button(f"🚀 Open UPI App (₹{amt})", upi_url, use_container_width=True)
+            # --- THE HARD-LOCKED UPI LOGIC ---
+            upi_id = "yourname@upi" # <--- REPLACE WITH YOUR ACTUAL UPI ID
+            payee_name = "VOID_EMPIRE"
+            transaction_note = f"ACTIVATION_{tier_tag}_{st.session_state.get('user_email', 'USER')}"
+            
+            # Constructing the NPCI Standard Deep Link
+            params = {
+                "pa": upi_id,
+                "pn": payee_name,
+                "am": amt,
+                "cu": "INR",
+                "tn": transaction_note
+            }
+            # urlencode ensures special characters in the note don't break the link
+            upi_url = f"upi://pay?{urllib.parse.urlencode(params)}"
+            
+            st.info("Scan the QR or click the button. The amount is pre-filled and locked for security.")
+            st.link_button(f"🚀 Pay ₹{amt} via UPI App", upi_url, use_container_width=True)
         else:
             st.warning("Agency status is currently by invitation. Join the waitlist for the next drop.")
 
     with col_pay2:
-        if amt > 0:
-            qr_api = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={upi_url}"
-            st.image(qr_api, caption=f"Dynamic QR Code for {tier_tag} Tier")
+        if amt != "0":
+            # Using a high-fidelity QR API to render the locked amount link
+            # We add &chld=H for high error correction (easier to scan)
+            qr_api_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={urllib.parse.quote(upi_url)}&chld=H"
+            
+            st.markdown(f"<div style='text-align: center;'><img src='{qr_api_url}' width='250'></div>", unsafe_allow_value=True)
+            st.caption(f"Secure Dynamic QR: {tier_tag} Level")
         else:
             st.text_input("Enter Email for Agency Waitlist")
             st.button("Request Invitation")
 
-    # 3. VERIFICATION (The "Ping" to Director)
+    # 3. VERIFICATION (The "Ping" to Admin Console)
     st.divider()
     with st.container(border=True):
-        st.subheader("🛡️ Request Manual Activation")
-        st.write("Logged in as: **" + st.session_state.get('user_email', 'Unidentified') + "**")
-        st.write("Once payment is complete, submit your UTR. I will authorize your account in the system.")
+        st.subheader("🛡️ Request Account Activation")
+        current_user = st.session_state.get('user_email', 'Unidentified')
+        st.write(f"Logged in as: **{current_user}**")
         
         with st.form("payment_verify_final"):
-            u_mail = st.text_input("Confirm Registered Email", value=st.session_state.get('user_email', ""))
-            u_utr = st.text_input("UTR / Transaction ID")
+            u_mail = st.text_input("Confirm Registered Email", value=current_user)
+            u_utr = st.text_input("UTR / Transaction ID (12 Digits)", help="Find this in your payment confirmation")
             u_tier = st.selectbox("Tier Purchased", ["Operative", "Director"])
             
-            if st.form_submit_button("PING DIRECTOR FOR ACCESS"):
+            if st.form_submit_button("SEND ACTIVATION REQUEST"):
                 if u_mail and u_utr:
+                    # Payload for your Google Sheet
                     f_payload = {
                         "email": u_mail.lower().strip(), 
                         "message": f"UTR: {u_utr} | Tier: {u_tier}", 
                         "category": "PAYMENT_PENDING"
                     }
                     try:
-                        # Existing Feedback/Payment App Script URL
+                        # Using your verified Feedback API
                         FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
-                        requests.post(FEEDBACK_API_URL, json=f_payload, timeout=10)
-                        st.success("✅ UPLINK REQUEST SENT: Access will be granted following verification.")
-                        st.balloons()
-                    except:
-                        st.error("Uplink failed. Please contact the Director via private channel.")
+                        response = requests.post(FEEDBACK_API_URL, json=f_payload, timeout=10)
+                        
+                        if response.status_code == 200:
+                            st.success("✅ UPLINK SUCCESSFUL: The Director has been notified. Access will unlock shortly.")
+                            st.balloons()
+                        else:
+                            st.error("Uplink delayed. Please screenshot your payment and send it to support.")
+                    except Exception as e:
+                        st.error(f"🚨 CRITICAL SYSTEM ERROR: {e}")
                 else:
-                    st.warning("Both Email and UTR are required for verification.")
+                    st.warning("Director needs both your Email and UTR to authorize the node.")
+
+# Call the function in your main app logic
+if page == "⚡ Upgrade Authority":
+    show_upgrade_authority()
 
 # --- MODULE 8: MEDIA UPLINK (THE DIRECTOR'S BRIDGE) ---
 elif page == "🛰️ Media Uplink":
@@ -2513,6 +2550,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
