@@ -232,6 +232,34 @@ def typewriter_effect(text):
         time.sleep(0.005) 
     container.markdown(full_text)
 
+import requests
+import streamlit as st
+
+def test_elevenlabs():
+    # 1. Pull from Secrets and Vault
+    api_key = st.secrets.get("ELEVENLABS_API_KEY")
+    voice_id = st.session_state.get('linguistic_dna_id')
+
+    if not api_key or not voice_id:
+        st.error("❌ CRITICAL ERROR: API Key or Voice ID missing from Vault/Secrets.")
+        return
+
+    # 2. Small 10-character test (Minimal credit burn)
+    url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+    headers = {"xi-api-key": api_key, "Content-Type": "application/json"}
+    data = {"text": "System Online.", "model_id": "eleven_monolingual_v1"}
+
+    response = requests.post(url, json=data, headers=headers)
+
+    if response.status_code == 200:
+        st.success("✅ BRIDGE STABLE: ElevenLabs is responding.")
+        st.audio(response.content, format='audio/mp3')
+    else:
+        st.error(f"❌ BRIDGE FAILED: {response.text}")
+
+if st.button("📡 RUN VOICE HEALTH CHECK"):
+    test_elevenlabs()
+
 def save_script_to_vault(title, content):
     # This function now has a safety check
     if not content:
@@ -2573,6 +2601,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
