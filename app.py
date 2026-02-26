@@ -1479,234 +1479,125 @@ elif page == "🏗️ Script Architect":
             else:
                 st.info("Awaiting Tactical Input to manifest formation.")
 
-# --- MODULE 7: THE NEURAL FORGE (ELITE SCRIPT & MULTI-COLOR ARCHITECT) ---
+# --- MODULE 7: THE NEURAL FORGE ---
 elif page == "🧠 Neural Forge":
     import random
     import datetime
     import requests  
-    import urllib.parse
+    import openai  # Ensure 'openai' is in your requirements.txt
 
-    # 1. ACCESS & CREDIT CONTROL (Sync Protocol)
+    # 1. ACCESS CONTROL
     if not st.session_state.get('logged_in'):
-        st.error("🚨 CLEARANCE REQUIRED: Enter your Elite Cipher in the terminal.")
+        st.error("🚨 CLEARANCE REQUIRED: Access Denied.")
         st.stop()
 
-    # --- CLOUD SYNC INITIALIZER ---
-    if 'history_synced' not in st.session_state or not st.session_state.get('script_history'):
-        with st.spinner("📡 Synchronizing with Global Vault..."):
-            if 'sync_history_from_cloud' in globals():
-                sync_history_from_cloud()
-                st.session_state.history_synced = True
-
+    # Credit & Tier Logic
+    user_status = st.session_state.get('user_status', 'Free')
     if 'daily_usage' not in st.session_state: st.session_state.daily_usage = 0
-    if 'last_reset' not in st.session_state: st.session_state.last_reset = datetime.date.today()
-    
-    # Credit Limit Logic based on Tier
     if 'max_limit' not in st.session_state:
-        status = st.session_state.get('user_status', 'Free')
-        if status == "Agency": st.session_state.max_limit = 50
-        elif status == "Director": st.session_state.max_limit = 25
-        elif status == "Operative": st.session_state.max_limit = 15
-        else: st.session_state.max_limit = 5
+        limits = {"Agency": 50, "Director": 25, "Operative": 15}
+        st.session_state.max_limit = limits.get(user_status, 5)
     
     remaining_credits = st.session_state.max_limit - st.session_state.daily_usage
 
     draw_title("🧠", "NEURAL FORGE // MASTER ARCHITECT")
-    st.sidebar.markdown(f"### ⚡ NEURAL CREDITS\n**{remaining_credits} / {st.session_state.max_limit}**")
-    
-    # --- IDENTITY VAULT INTEGRATION: READ DNA ---
-    vault_status = "EMPTY"
-    voice_dna = st.session_state.get('linguistic_dna', "")
-    
-    # Visual DNA Check
-    if 'vault_anchor' not in st.session_state or st.session_state.vault_anchor is None:
-        st.warning("⚠️ VISUAL VAULT EMPTY: Upload your face in the Vault to enable Strict Facial Consistency.")
-    else:
-        vault_status = "ACTIVE"
-        st.success("✅ IDENTITY VAULT LINKED: Visual DNA is currently anchored.")
 
-    # Linguistic DNA Check
-    if not voice_dna:
-        st.info("ℹ️ TONE-CLONE INACTIVE: Using standard AI patterns.")
-    else:
-        st.success("✅ TONE-CLONE ACTIVE: Writing with your unique Linguistic DNA.")
+    # --- DNA ANCHOR STATUS ---
+    v_id = st.session_state.get('linguistic_dna_id', "").strip()
+    v_tone = st.session_state.get('linguistic_dna', "")
+    vault_active = 'vault_anchor' in st.session_state and st.session_state.vault_anchor is not None
 
     # 2. INPUT CONFIGURATION
     with st.container(border=True):
-        col_a, col_b, col_c = st.columns([1, 1, 1], gap="small")
-        
+        col_a, col_b, col_c = st.columns(3, gap="small")
         with col_a:
             st.subheader("🧬 Production")
             f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"])
             f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of AI")
-            
-            color_options = [
-                "Cyberpunk Neon", "Midnight Teal", "Electric Orange", "Moody Noir", "Golden Hour", 
-                "Vintage Kodachrome", "Ethereal Dream", "Industrial Cold", "Deep Forest Green",
-                "Sunset Violet", "High-Contrast Monochrome", "Earth Tone Pastel", "Royal Gold",
-                "Crimson Threat", "Frozen Arctic", "Desert Sand", "Sepia Memory", 
-                "Ultraviolet", "Minimalist White", "Toxic Emerald"
-            ]
-            f_colors = st.multiselect("Cinematic Palette (Pick 1-3)", color_options, default=["Midnight Teal", "Electric Orange"])
-
+            f_colors = st.multiselect("Cinematic Palette", ["Cyberpunk Neon", "Midnight Teal", "Electric Orange", "Moody Noir", "Toxic Emerald"], default=["Midnight Teal", "Electric Orange"])
         with col_b:
             st.subheader("📡 Strategy")
-            f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock", "The 'Mistake' Hook"])
-            f_lighting = st.selectbox("Lighting Style", ["Dramatic Rim Light", "Soft Cinematic Glow", "Hard Shadows", "Bi-Color Split"])
-            f_vigor = st.select_slider("Neural Vigor", ["Standard", "High", "Extreme", "Elite"])
-
+            f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock"])
+            f_lighting = st.selectbox("Lighting Style", ["Dramatic Rim Light", "Soft Cinematic Glow", "Hard Shadows"])
         with col_c:
             st.subheader("🎬 Style")
-            f_hook_type = st.radio("Emotional Anchor", ["Curiosity", "Fear", "Authority", "Empowerment"])
+            f_hook_type = st.radio("Emotional Anchor", ["Curiosity", "Fear", "Authority"])
             f_pacing = st.select_slider("Script Pacing", ["Slow Burn", "Dynamic", "Rapid Fire"])
-            st.write("")
             execute = st.button("🔥 EXECUTE FULL SYNTHESIS", use_container_width=True)
 
-        if execute:
-            if remaining_credits <= 0:
-                st.error("🚨 NEURAL EXHAUSTION: Daily limit reached.")
-            elif f_topic and f_colors:
-                with st.spinner("🌑 ARCHITECTING SCRIPT & VISUAL DNA..."):
-                    try:
-                        color_string = ", ".join(f_colors)
-                        
-                        # DNA Injection Logic
-                        dna_context = f"Apply user's Linguistic DNA (Tone/Style): {voice_dna}" if voice_dna else "Use high-energy viral professional tone."
-                        visual_anchor = "MANDATORY: Maintain STRICT BONE STRUCTURE and facial features from Identity Vault." if vault_status == "ACTIVE" else "Generate generic professional subject."
+    # 3. CORE SYNTHESIS LOGIC (GROQ)
+    if execute:
+        if remaining_credits <= 0:
+            st.error("🚨 NEURAL EXHAUSTION: Daily limit reached.")
+        elif f_topic:
+            with st.spinner("🌑 ARCHITECTING..."):
+                try:
+                    dna_context = f"Tone: {v_tone}" if v_tone else "Viral professional."
+                    visual_anchor = "MANDATORY: Maintain facial features of reference subject." if vault_active else ""
+                    
+                    sys_msg = (
+                        f"Act as a Viral Strategist. 2026-02-06 Protocol.\n"
+                        f"SCRIPT: Write a {f_platform} script for '{f_topic}'. Framework: {f_framework}. {dna_context}\n"
+                        f"IMAGE PROMPTS: 3 Detailed prompts. Palette: {', '.join(f_colors)}. {visual_anchor}\n"
+                        f"FORMAT: Use headers --- SCRIPT --- and --- IMAGE PROMPTS ---"
+                    )
+                    
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": sys_msg}]
+                    )
+                    st.session_state.pro_forge_txt = res.choices[0].message.content
+                    st.session_state.daily_usage += 1
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Synthesis Error: {e}")
 
-                        system_instruction = (
-                            f"Act as a World-Class Viral Content Strategist. Apply Protocol 2026-02-06.\n\n"
-                            f"USER IDENTITY DNA: {dna_context}\n\n"
-                            f"1. VIRAL SCRIPT: Write a high-retention {f_platform} script for '{f_topic}'. "
-                            f"Framework: {f_framework}. Tone: {f_hook_type}. Pacing: {f_pacing}.\n\n"
-                            f"2. VISUAL DNA (IMAGE PROMPTS): Provide 3 highly detailed Image Prompts. "
-                            f"Subject: {visual_anchor}. "
-                            f"Mandatory Color Palette: {color_string}. Lighting: {f_lighting}. "
-                            f"Composition: Close-up for mobile CTR, cinematic 8K, extreme high detail.\n\n"
-                            f"IMPORTANT: Format the response clearly with '--- SCRIPT ---' and '--- IMAGE PROMPTS ---' headers."
-                        )
-                        
-                        res = groq_c.chat.completions.create(
-                            model="llama-3.3-70b-versatile", 
-                            messages=[{"role": "user", "content": system_instruction}]
-                        )
-                        
-                        generated_output = res.choices[0].message.content
-                        st.session_state.pro_forge_txt = generated_output
-                        st.session_state.daily_usage += 1
-                        
-                        # --- CLOUD UPLINK LOGIC ---
-                        now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-                        u_name = st.session_state.get('user_name', 'Operator')
-                        u_email = st.session_state.get('user_email', 'N/A')
-                        
-                        payload = {
-                            "category": "SAVE_SCRIPT",
-                            "timestamp": str(now_ts),
-                            "userName": str(u_name),
-                            "email": str(u_email),
-                            "platform": str(f_platform),
-                            "topic": str(f_topic),
-                            "script": str(generated_output),
-                            "visualDna": f"Palette: {color_string} | Lighting: {f_lighting}",
-                            "status": "pending"
-                        }
-                        
-                        if 'script_history' not in st.session_state: st.session_state.script_history = []
-                        st.session_state.script_history.append(payload)
-
-                        try:
-                            WEBAPP_URL = "https://script.google.com/macros/s/AKfycby38DOr6SA2x_r-oS1gHudA39Gucb2BioMpVbfe6i288uOiBZnuv421vVlHv3O8J_KY/exec"
-                            requests.post(WEBAPP_URL, json=payload)
-                            st.toast("⚡ ARCHIVE SYNCHRONIZED")
-                        except Exception as e:
-                            st.error(f"GSHEET BRIDGE ERROR: {e}")
-
-                        st.rerun()
-
-                    except Exception as e:
-                        st.error(f"UPLINK ERROR: {str(e)}")
-
-    # 3. THE REVEAL & PRODUCTION SUITE
+    # 4. PRODUCTION SUITE (TIER-LOCKED)
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 PRODUCTION BLUEPRINT")
         st.info(st.session_state.pro_forge_txt)
         
-        # --- DIRECTOR TIER PRODUCTION (ELEVENLABS) ---
-        user_tier = st.session_state.get('user_status', 'Free')
-        
-        if user_tier in ["Director", "Agency"]:
-            st.divider()
+        # --- TIER LOCK LOGIC ---
+        if user_status in ["Director", "Agency"]:
             st.markdown("### 🎬 DIRECTOR'S PRODUCTION SUITE")
-            
-            # Extract clean script to estimate ElevenLabs credit burn
-            raw_text = st.session_state.pro_forge_txt
-            clean_script = raw_text.split("--- IMAGE PROMPTS ---")[0].replace("--- SCRIPT ---", "").strip()
-            char_count = len(clean_script)
-            
-            st.caption(f"📊 Synthesis Estimate: ~{char_count} Characters from your 10,000 credit arsenal.")
-            
             prod_col1, prod_col2 = st.columns(2)
             
             with prod_col1:
                 if st.button("🔊 FORGE MASTER AUDIO", use_container_width=True):
-                    with st.spinner("Synthesizing Master Audio..."):
-                        # --- ELEVENLABS INTEGRATION ---
-                        try:
-                            ELEVEN_KEY = st.secrets.get("ELEVENLABS_API_KEY", "your_key_here")
-                            VOICE_ID = st.session_state.get('linguistic_dna_id', "n1PvBOwxb8X6m7tahp2h") 
+                    if not v_id:
+                        st.error("❌ IDENTITY VAULT EMPTY: Paste Voice ID first.")
+                    else:
+                        with st.spinner("Synthesizing..."):
+                            clean_text = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[0].replace("--- SCRIPT ---", "").strip()
+                            e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{v_id}"
+                            headers = {"xi-api-key": st.secrets["ELEVENLABS_API_KEY"], "Content-Type": "application/json"}
+                            data = {"text": clean_text, "model_id": "eleven_multilingual_v2"}
                             
-                            E_URL = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
-                            headers = {"xi-api-key": ELEVEN_KEY, "Content-Type": "application/json"}
-                            data = {
-                                "text": clean_script,
-                                "model_id": "eleven_multilingual_v2",
-                                "voice_settings": {"stability": 0.5, "similarity_boost": 0.75}
-                            }
-                            
-                            audio_res = requests.post(E_URL, json=data, headers=headers)
+                            audio_res = requests.post(e_url, json=data, headers=headers)
                             if audio_res.status_code == 200:
-                                st.audio(audio_res.content, format="audio/mp3")
-                                st.download_button("📥 DOWNLOAD MASTER AUDIO", audio_res.content, f"VOID_{f_topic}.mp3", "audio/mp3")
-                                st.success("✅ AUDIO SYNTHESIS COMPLETE")
+                                st.audio(audio_res.content)
+                                st.success("✅ AUDIO READY")
                             else:
-                                st.error(f"Synthesis Failed: {audio_res.text}")
-                        except Exception as e:
-                            st.error(f"ElevenLabs Bridge Error: {e}")
+                                st.error(f"ElevenLabs Error: {audio_res.text}")
 
             with prod_col2:
                 if st.button("🎨 MANIFEST VISUALS", use_container_width=True):
-                    with st.spinner("Generating High-Fidelity Visuals..."):
-                        # Future Image Generation logic goes here
-                        st.info("Manifestation Engine Initializing... (Connect Flux/DALL-E Key)")
+                    with st.spinner("Generating..."):
+                        try:
+                            client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+                            prompt_part = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[1].strip().split("\n")[0]
+                            
+                            # Enforcing Strict Facial Consistency instruction
+                            final_p = f"{prompt_part}. Photo-realistic, cinematic lighting, matching reference facial structure exactly."
+                            
+                            img_res = client.images.generate(model="dall-e-3", prompt=final_p, n=1, size="1024x1024")
+                            st.image(img_res.data[0].url, caption="✅ MANIFESTED")
+                        except Exception as e:
+                            st.error(f"Visual Error: {e}")
         else:
-            st.warning("🔒 DIRECTOR PRODUCTION LOCKED: Upgrade to use ElevenLabs Audio & Visual Manifestation.")
-
-        # --- CALIBRATED INTELLIGENCE SUITE ---
-        st.divider()
-        st.subheader("🧪 VOID Intelligence Audit")
-        t_col1, t_col2 = st.columns(2)
-        
-        with t_col1:
-            if st.button("🚀 SCORE VIRALITY & CTR", use_container_width=True):
-                with st.spinner("Calculating Viral Probability..."):
-                    v_prompt = f"Perform a VIRALITY AUDIT on this script: {st.session_state.pro_forge_txt[:1500]}\nFormat as a 2026 Performance Report."
-                    v_res = groq_c.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": v_prompt}]
-                    )
-                    st.info(v_res.choices[0].message.content)
-                        
-        with t_col2:
-            if st.button("🧠 NEURAL RETENTION MAP", use_container_width=True):
-                with st.spinner("Scanning for Attention Leaks..."):
-                    r_prompt = f"Perform a RETENTION SCAN on this script: {st.session_state.pro_forge_txt[:1500]}\nFormat as a Strategic Briefing."
-                    r_res = groq_c.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": r_prompt}]
-                    )
-                    st.warning(r_res.choices[0].message.content)
+            # LOCKED STATE FOR LOWER TIERS
+            st.warning(f"🔒 DIRECTOR PRODUCTION SUITE LOCKED. Your current status: **{user_status}**. Upgrade to unlock Audio & Visual Manifestation.")
 
 # --- MODULE 6: IDENTITY VAULT (THE NEURAL ANCHOR) ---
 elif page == "🔒 Identity Vault":
@@ -2601,6 +2492,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
