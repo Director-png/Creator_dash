@@ -1527,9 +1527,11 @@ elif page == "🧠 Neural Forge":
 
     # 3. CORE SYNTHESIS LOGIC (GROQ)
     if execute:
-        if remaining_credits <= 0:
+        if not f_topic:
+            st.warning("⚠️ Please enter a Core Concept first.")
+        elif remaining_credits <= 0:
             st.error("🚨 NEURAL EXHAUSTION: Daily limit reached.")
-        elif f_topic:
+        else:
             with st.spinner("🌑 ARCHITECTING..."):
                 try:
                     dna_context = f"Tone: {v_tone}" if v_tone else "Viral professional."
@@ -1546,9 +1548,10 @@ elif page == "🧠 Neural Forge":
                         model="llama-3.3-70b-versatile",
                         messages=[{"role": "user", "content": sys_msg}]
                     )
+                    # Update session state
                     st.session_state.pro_forge_txt = res.choices[0].message.content
                     st.session_state.daily_usage += 1
-                    st.rerun()
+                    # Note: Removed st.rerun() from here to allow the script to continue flow naturally
                 except Exception as e:
                     st.error(f"Synthesis Error: {e}")
 
@@ -1569,26 +1572,42 @@ elif page == "🧠 Neural Forge":
                         st.error("❌ IDENTITY VAULT EMPTY: Paste Voice ID first.")
                     else:
                         with st.spinner("Synthesizing..."):
-                            clean_text = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[0].replace("--- SCRIPT ---", "").strip()
-                            e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{v_id}"
-                            headers = {"xi-api-key": st.secrets["ELEVENLABS_API_KEY"], "Content-Type": "application/json"}
-                            data = {"text": clean_text, "model_id": "eleven_multilingual_v2"}
-                            
-                            audio_res = requests.post(e_url, json=data, headers=headers)
-                            if audio_res.status_code == 200:
-                                st.audio(audio_res.content)
-                                st.success("✅ AUDIO READY")
-                            else:
-                                st.error(f"ElevenLabs Error: {audio_res.text}")
+                            try:
+                                # Extract script text before the prompts
+                                script_only = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[0]
+                                clean_text = script_only.replace("--- SCRIPT ---", "").strip()
+                                
+                                e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{v_id}"
+                                headers = {
+                                    "xi-api-key": st.secrets["ELEVENLABS_API_KEY"], 
+                                    "Content-Type": "application/json"
+                                }
+                                payload = {
+                                    "text": clean_text, 
+                                    "model_id": "eleven_multilingual_v2"
+                                }
+                                
+                                audio_res = requests.post(e_url, json=payload, headers=headers)
+                                if audio_res.status_code == 200:
+                                    st.audio(audio_res.content)
+                                    st.success("✅ AUDIO READY")
+                                else:
+                                    st.error(f"ElevenLabs Error: {audio_res.text}")
+                            except Exception as e:
+                                st.error(f"Audio Engine Error: {e}")
 
             with prod_col2:
                 if st.button("🎨 MANIFEST VISUALS", use_container_width=True):
                     with st.spinner("Generating..."):
                         try:
                             client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-                            prompt_part = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[1].strip().split("\n")[0]
+                            # Safety split to get the first image prompt
+                            prompts_section = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")
+                            if len(prompts_section) > 1:
+                                prompt_part = prompts_section[1].strip().split("\n")[0]
+                            else:
+                                prompt_part = f"Cinematic shot of {f_topic}"
                             
-                            # Enforcing Strict Facial Consistency instruction
                             final_p = f"{prompt_part}. Photo-realistic, cinematic lighting, matching reference facial structure exactly."
                             
                             img_res = client.images.generate(model="dall-e-3", prompt=final_p, n=1, size="1024x1024")
@@ -1596,8 +1615,7 @@ elif page == "🧠 Neural Forge":
                         except Exception as e:
                             st.error(f"Visual Error: {e}")
         else:
-            # LOCKED STATE FOR LOWER TIERS
-            st.warning(f"🔒 DIRECTOR PRODUCTION SUITE LOCKED. Your current status: **{user_status}**. Upgrade to unlock Audio & Visual Manifestation.")
+            st.warning(f"🔒 DIRECTOR PRODUCTION SUITE LOCKED. Status: **{user_status}**. Upgrade to unlock Audio & Visuals.")
 
 # --- MODULE 6: IDENTITY VAULT (THE NEURAL ANCHOR) ---
 elif page == "🔒 Identity Vault":
@@ -2492,6 +2510,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
