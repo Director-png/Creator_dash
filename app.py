@@ -1484,14 +1484,13 @@ elif page == "🧠 Neural Forge":
     import random
     import datetime
     import requests  
-    import openai  # Ensure 'openai' is in your requirements.txt
+    import openai 
 
     # 1. ACCESS CONTROL
     if not st.session_state.get('logged_in'):
         st.error("🚨 CLEARANCE REQUIRED: Access Denied.")
         st.stop()
 
-    # Credit & Tier Logic
     user_status = st.session_state.get('user_status', 'Free')
     if 'daily_usage' not in st.session_state: st.session_state.daily_usage = 0
     if 'max_limit' not in st.session_state:
@@ -1499,10 +1498,9 @@ elif page == "🧠 Neural Forge":
         st.session_state.max_limit = limits.get(user_status, 5)
     
     remaining_credits = st.session_state.max_limit - st.session_state.daily_usage
-
     draw_title("🧠", "NEURAL FORGE // MASTER ARCHITECT")
 
-    # --- DNA ANCHOR STATUS ---
+    # DNA Variables
     v_id = st.session_state.get('linguistic_dna_id', "").strip()
     v_tone = st.session_state.get('linguistic_dna', "")
     vault_active = 'vault_anchor' in st.session_state and st.session_state.vault_anchor is not None
@@ -1525,10 +1523,10 @@ elif page == "🧠 Neural Forge":
             f_pacing = st.select_slider("Script Pacing", ["Slow Burn", "Dynamic", "Rapid Fire"])
             execute = st.button("🔥 EXECUTE FULL SYNTHESIS", use_container_width=True)
 
-    # 3. CORE SYNTHESIS LOGIC (GROQ)
+    # 3. CORE SYNTHESIS LOGIC
     if execute:
         if not f_topic:
-            st.warning("⚠️ Please enter a Core Concept first.")
+            st.warning("⚠️ Please enter a Core Concept.")
         elif remaining_credits <= 0:
             st.error("🚨 NEURAL EXHAUSTION: Daily limit reached.")
         else:
@@ -1548,20 +1546,18 @@ elif page == "🧠 Neural Forge":
                         model="llama-3.3-70b-versatile",
                         messages=[{"role": "user", "content": sys_msg}]
                     )
-                    # Update session state
                     st.session_state.pro_forge_txt = res.choices[0].message.content
                     st.session_state.daily_usage += 1
-                    # Note: Removed st.rerun() from here to allow the script to continue flow naturally
                 except Exception as e:
                     st.error(f"Synthesis Error: {e}")
 
-    # 4. PRODUCTION SUITE (TIER-LOCKED)
+    # 4. REVEAL & PRODUCTION SUITE
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 PRODUCTION BLUEPRINT")
         st.info(st.session_state.pro_forge_txt)
         
-        # --- TIER LOCK LOGIC ---
+        # --- DIRECTOR TOOLS ---
         if user_status in ["Director", "Agency"]:
             st.markdown("### 🎬 DIRECTOR'S PRODUCTION SUITE")
             prod_col1, prod_col2 = st.columns(2)
@@ -1569,53 +1565,56 @@ elif page == "🧠 Neural Forge":
             with prod_col1:
                 if st.button("🔊 FORGE MASTER AUDIO", use_container_width=True):
                     if not v_id:
-                        st.error("❌ IDENTITY VAULT EMPTY: Paste Voice ID first.")
+                        st.error("❌ No Voice ID in Vault.")
                     else:
                         with st.spinner("Synthesizing..."):
-                            try:
-                                # Extract script text before the prompts
-                                script_only = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[0]
-                                clean_text = script_only.replace("--- SCRIPT ---", "").strip()
-                                
-                                e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{v_id}"
-                                headers = {
-                                    "xi-api-key": st.secrets["ELEVENLABS_API_KEY"], 
-                                    "Content-Type": "application/json"
-                                }
-                                payload = {
-                                    "text": clean_text, 
-                                    "model_id": "eleven_multilingual_v2"
-                                }
-                                
-                                audio_res = requests.post(e_url, json=payload, headers=headers)
-                                if audio_res.status_code == 200:
-                                    st.audio(audio_res.content)
-                                    st.success("✅ AUDIO READY")
-                                else:
-                                    st.error(f"ElevenLabs Error: {audio_res.text}")
-                            except Exception as e:
-                                st.error(f"Audio Engine Error: {e}")
+                            script_only = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[0]
+                            clean_text = script_only.replace("--- SCRIPT ---", "").strip()
+                            e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{v_id}"
+                            headers = {"xi-api-key": st.secrets["ELEVENLABS_API_KEY"], "Content-Type": "application/json"}
+                            payload = {"text": clean_text, "model_id": "eleven_multilingual_v2"}
+                            
+                            audio_res = requests.post(e_url, json=payload, headers=headers)
+                            if audio_res.status_code == 200:
+                                st.audio(audio_res.content)
+                                st.success("✅ AUDIO READY")
+                            else:
+                                st.error(f"ElevenLabs Error: {audio_res.text}")
 
             with prod_col2:
                 if st.button("🎨 MANIFEST VISUALS", use_container_width=True):
                     with st.spinner("Generating..."):
                         try:
                             client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-                            # Safety split to get the first image prompt
-                            prompts_section = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")
-                            if len(prompts_section) > 1:
-                                prompt_part = prompts_section[1].strip().split("\n")[0]
-                            else:
-                                prompt_part = f"Cinematic shot of {f_topic}"
-                            
-                            final_p = f"{prompt_part}. Photo-realistic, cinematic lighting, matching reference facial structure exactly."
-                            
+                            prompt_part = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[1].strip().split("\n")[0]
+                            final_p = f"{prompt_part}. Photo-realistic, cinematic, matching reference facial structure."
                             img_res = client.images.generate(model="dall-e-3", prompt=final_p, n=1, size="1024x1024")
                             st.image(img_res.data[0].url, caption="✅ MANIFESTED")
                         except Exception as e:
                             st.error(f"Visual Error: {e}")
-        else:
-            st.warning(f"🔒 DIRECTOR PRODUCTION SUITE LOCKED. Status: **{user_status}**. Upgrade to unlock Audio & Visuals.")
+
+        # --- MISSING AUDIT BUTTONS ---
+        st.divider()
+        st.subheader("🧪 VOID Intelligence Audit")
+        t_col1, t_col2 = st.columns(2)
+        
+        with t_col1:
+            if st.button("🚀 SCORE VIRALITY & CTR", use_container_width=True):
+                with st.spinner("Calculating..."):
+                    v_res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": f"VIRALITY AUDIT: {st.session_state.pro_forge_txt[:1500]}"}]
+                    )
+                    st.info(v_res.choices[0].message.content)
+                        
+        with t_col2:
+            if st.button("🧠 NEURAL RETENTION MAP", use_container_width=True):
+                with st.spinner("Scanning..."):
+                    r_res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": f"RETENTION MAP: {st.session_state.pro_forge_txt[:1500]}"}]
+                    )
+                    st.warning(r_res.choices[0].message.content)
 
 # --- MODULE 6: IDENTITY VAULT (THE NEURAL ANCHOR) ---
 elif page == "🔒 Identity Vault":
@@ -2510,6 +2509,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
