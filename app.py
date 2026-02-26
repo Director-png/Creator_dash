@@ -1655,7 +1655,7 @@ elif page == "🧠 Neural Forge":
                         # --- ELEVENLABS INTEGRATION ---
                         try:
                             ELEVEN_KEY = st.secrets.get("ELEVENLABS_API_KEY", "your_key_here")
-                            VOICE_ID = st.session_state.get('linguistic_dna_id', "pNInz6obpgDQGcFmaJgB") 
+                            VOICE_ID = st.session_state.get('linguistic_dna_id', "n1PvBOwxb8X6m7tahp2h") 
                             
                             E_URL = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
                             headers = {"xi-api-key": ELEVEN_KEY, "Content-Type": "application/json"}
@@ -2601,6 +2601,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
