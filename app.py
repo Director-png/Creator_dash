@@ -1150,33 +1150,52 @@ elif page == "📡 My Growth Hub":
     with st.container(border=True):
         if is_paid or is_admin:
             st.markdown("### 🛰️ PRO-SYNC TERMINAL")
-            st.caption("Status: Uplink Standby")
+            st.caption("Status: Uplink Standby (Operative Clearance)")
             
             target_url = st.text_input("🔗 Target Profile URL", placeholder="Paste YouTube link here...")
             
-            if st.button("🔄 INITIATE LIVE SYNC", use_container_width=True):
-                if target_url:
-                    # CHECK FOR INSTAGRAM
-                    if "instagram.com" in target_url.lower():
-                        st.info("🛰️ **SYSTEM NOTICE**: Instagram Live-Sync is undergoing a security handshake upgrade. This node will be active in the **v2.0 Update**.")
-                        st.warning("Please use the **Manual Tracker** below for Instagram for now.")
-                    else:
-                        with st.spinner("Decoding Meta-Streams..."):
-                            subs, views = get_live_stats(target_url)
-                            
-                            if subs:
-                                # SUCCESS PATH (YouTube)
-                                if 'start_count' not in st.session_state:
-                                    st.session_state.start_count = int(subs * 0.99)
-                                    st.session_state.days_passed = 7
+            # Action Row for Pro Users
+            col_sync, col_manual = st.columns([2, 1])
+            
+            with col_sync:
+                if st.button("🔄 INITIATE LIVE SYNC", use_container_width=True):
+                    if target_url:
+                        # CHECK FOR INSTAGRAM
+                        if "instagram.com" in target_url.lower():
+                            st.info("🛰️ **SYSTEM NOTICE**: Instagram Live-Sync is undergoing a security handshake upgrade. This node active in v2.0.")
+                            st.warning("Please toggle 'Manual Override' to input Instagram stats.")
+                        else:
+                            with st.spinner("Decoding Meta-Streams..."):
+                                subs, views = get_live_stats(target_url)
                                 
-                                st.session_state.current_count = subs
-                                st.session_state.total_views = views
-                                st.session_state.last_sync_ts = datetime.datetime.now()
-                                st.success(f"Uplink Established: {subs:,} subscribers detected.")
-                            else:
-                                st.error("Initial connection failed. Link might be private or invalid.")
+                                if subs:
+                                    if 'start_count' not in st.session_state:
+                                        st.session_state.start_count = int(subs * 0.99)
+                                        st.session_state.days_passed = 7
+                                    
+                                    st.session_state.current_count = subs
+                                    st.session_state.total_views = views
+                                    st.session_state.last_sync_ts = datetime.datetime.now()
+                                    st.success(f"Uplink Established: {subs:,} subscribers detected.")
+                                else:
+                                    st.error("Connection failed. Link might be private or invalid.")
+
+            with col_manual:
+                # Allow Pro users to use manual if they want, but keep it hidden by default
+                show_override = st.toggle("Manual Override")
+
+            # Manual Input for Pro Users (Only shows if they toggle it)
+            if show_override:
+                st.divider()
+                c_p1, c_p2 = st.columns(2)
+                with c_p1:
+                    st.session_state.start_count = st.number_input("Starting Count", value=st.session_state.get('start_count', 1000), key="pro_start")
+                    st.session_state.days_passed = st.slider("Days Active", 1, 90, st.session_state.get('days_passed', 7), key="pro_days")
+                with c_p2:
+                    st.session_state.current_count = st.number_input("Current Count", value=st.session_state.get('current_count', 1100), key="pro_curr")
+
         else:
+            # BASIC TIER VIEW ONLY
             st.markdown("### 📉 MANUAL TRACKER (BASIC)")
             st.info("Upgrade to PRO for automated telemetry.")
             c_b1, c_b2 = st.columns(2)
@@ -1186,7 +1205,7 @@ elif page == "📡 My Growth Hub":
             with c_b2:
                 st.session_state.current_count = st.number_input("Current Count", value=1100)
 
-    # 2. ANALYTICS & PROJECTION
+    # 2. ANALYTICS & PROJECTION (Logic remains untouched)
     if 'current_count' in st.session_state:
         st.divider()
         
@@ -1196,16 +1215,13 @@ elif page == "📡 My Growth Hub":
         
         growth = current - start
         raw_velocity = growth / days if days > 0 else 0
-        # Stabilization: 2% daily cap for realistic projections
         velocity = min(raw_velocity, current * 0.02) if raw_velocity > 0 else raw_velocity
         
-        # UI Feedback
         if velocity > 0:
             st.success(f"📈 **GROWTH MATRIX**: +{int(velocity)}/day (Stability: High)")
         elif velocity < 0:
             st.error(f"📉 **DECAY DETECTED**: {int(velocity)}/day (Action Required)")
 
-        # Metric Row
         m1, m2, m3 = st.columns(3)
         m1.metric("CURRENT STATUS", f"{current:,}", f"{growth:+}")
         m2.metric("DAILY VELOCITY", f"{int(velocity):+}/unit")
@@ -1220,7 +1236,7 @@ elif page == "📡 My Growth Hub":
                 st.write("**🚀 Hyper-Growth**")
                 st.subheader(f"{int(current + (velocity * 30 * 1.5)):,}")
 
-    # 3. TASK FORGE
+    # 3. TASK FORGE (Logic remains untouched)
     st.divider()
     st.subheader("🗓️ TASK FORGE COMMAND")
     
@@ -2526,6 +2542,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
