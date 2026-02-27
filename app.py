@@ -1421,7 +1421,9 @@ elif page == "⚔️ Trend Duel":
 # --- MODULE 6: SCRIPT ARCHITECT ---
 elif page == "🏗️ Script Architect":
     draw_title("⚔️", "SCRIPT ARCHITECT")
-    
+    # 🛰️ PASTE YOUR GOOGLE DEPLOYMENT URL HERE
+    # It should look something like "https://script.google.com/macros/s/.../exec"
+    API_URL = "https://script.google.com/macros/s/AKfycby38DOr6SA2x_r-oS1gHudA39Gucb2BioMpVbfe6i288uOiBZnuv421vVlHv3O8J_KY/exec"
     # 1. INITIALIZE IDENTITY & COUNTERS
     if 'script_history' not in st.session_state: st.session_state.script_history = []
     
@@ -1526,7 +1528,7 @@ elif page == "🏗️ Script Architect":
                 st.warning("⚠️ Optimization & Trend Mapping is restricted to PRO Nodes.")
                 
                 if st.button("🧠 UPGRADE TO NEURAL FORGE", use_container_width=True):
-                    st.session_state.page = "💳 Identity Vault"
+                    st.session_state.page = "⚡ Upgrade Authority"
                     st.rerun()
             else:
                 st.info("Awaiting Tactical Input to manifest formation.")
@@ -2561,6 +2563,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
