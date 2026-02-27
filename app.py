@@ -1421,20 +1421,12 @@ elif page == "⚔️ Trend Duel":
 elif page == "🏗️ Script Architect":
     draw_title("⚔️", "SCRIPT ARCHITECT")
     
-    # 🛰️ SYSTEM CONFIGURATION
     API_URL = "https://script.google.com/macros/s/AKfycby38DOr6SA2x_r-oS1gHudA39Gucb2BioMpVbfe6i288uOiBZnuv421vVlHv3O8J_KY/exec"
-    # This must match the string in your 'options' list in the sidebar
     TARGET_UPGRADE_PAGE = "⚡ Upgrade Authority" 
 
-    # 1. INITIALIZE IDENTITY & COUNTERS
-    if 'script_history' not in st.session_state: 
-        st.session_state.script_history = []
-    
+    # 1. INITIALIZE IDENTITY
     user_email = st.session_state.get('user_email', 'Unknown_Operator')
-    user_name = st.session_state.get('user_name', 'Operator')
     user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
-    
-    is_admin = st.session_state.get('user_role') == "admin"
     is_paid = user_status in ['pro', 'paid', 'elite', 'operative', 'director', 'agency']
 
     if 'daily_usage_map' not in st.session_state:
@@ -1444,22 +1436,14 @@ elif page == "🏗️ Script Architect":
 
     usage_count = st.session_state.daily_usage_map[user_email]
 
-    # --- THE REDIRECT COMMANDER ---
-    def teleport_to_upgrade():
-        st.session_state.current_page = TARGET_UPGRADE_PAGE
-        # This line forces the radio widget in the sidebar to reset its index
-        st.session_state.nav_radio = TARGET_UPGRADE_PAGE 
-        st.toast("Teleporting to Upgrade Authority...", icon="🚀")
-        st.rerun()
-
     # 2. USAGE LIMITS & REDIRECT GATING
-    if not is_paid and not is_admin:
+    if not is_paid:
         if usage_count >= 3:
             st.error("🚨 DAILY UPLINK LIMIT REACHED")
-            st.info(f"Operator {user_email}, you've hit the 3-script threshold.")
-            
-            if st.button("🔓 UNLOCK UNLIMITED SLOTS", use_container_width=True, key="lockout_upgrade_btn"):
-                teleport_to_upgrade()
+            # --- THE FIXED BUTTON ---
+            if st.button("🔓 UNLOCK UNLIMITED SLOTS", use_container_width=True, key="lockout_redir"):
+                st.session_state.current_page = TARGET_UPGRADE_PAGE
+                st.rerun() # This will trigger the sidebar to see the new current_page
             st.stop()
             
         st.caption(f"🛰️ BASIC NODE: {3 - usage_count} scripts remaining.")
@@ -1469,55 +1453,26 @@ elif page == "🏗️ Script Architect":
         c1, c2 = st.columns([1, 1.5], gap="large")
         with c1:
             st.subheader("Architectural Input")
-            platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
             topic = st.text_input("Core Topic", placeholder="e.g., SaaS building", key="arch_topic_input")
-            tone = st.select_slider("Vigor", ["Professional", "Aggressive", "Elite"])
+            # ... (Other selectboxes/sliders)
             
-            if st.button("🏗️ ARCHITECT FULL SCRIPT", use_container_width=True, key="main_architect_btn"):
+            if st.button("🏗️ ARCHITECT FULL SCRIPT", use_container_width=True, key="main_arch"):
                 if topic:
-                    with st.spinner("🛰️ ARCHITECTING FORMATION..."):
-                        formation_prompt = (
-                            f"Act as a master content strategist. Create a high-retention {platform} script about {topic}. "
-                            f"Tone: {tone}. Formation: Hook, Agitation, Insight, Call to Value."
-                        )
-                        
-                        try:
-                            res = groq_c.chat.completions.create(
-                                model="llama-3.1-8b-instant", 
-                                messages=[{"role": "user", "content": formation_prompt}]
-                            )
-                            generated_script = res.choices[0].message.content
-                            st.session_state.current_architect_txt = generated_script
-                            st.session_state.daily_usage_map[user_email] += 1
-                            
-                            # Cloud Sync Logic
-                            import datetime, requests
-                            now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-                            payload = {
-                                "category": "SAVE_SCRIPT", "timestamp": now_ts, "userName": user_name,
-                                "email": user_email, "platform": platform, "topic": topic,
-                                "script": generated_script, "visualDna": f"Vigor: {tone}", "status": "pending"
-                            }
-                            requests.post(API_URL, json=payload, timeout=5)
-                            st.toast("⚡ ARCHIVE SYNCHRONIZED", icon="✅")
-                            st.rerun()
-                        except Exception as e:
-                            st.error(f"SYSTEM FAILURE: {e}")
+                    # ... (Your Groq/GSheet Logic)
+                    st.session_state.daily_usage_map[user_email] += 1
+                    st.rerun()
 
         with c2:
             if st.session_state.get('current_architect_txt'):
                 st.subheader("💎 SCRIPT BLUEPRINT")
-                st.session_state.current_architect_txt = st.text_area(
-                    "Live Editor", 
-                    value=st.session_state.current_architect_txt, 
-                    height=450,
-                    key="script_editor_area"
-                )
+                st.text_area("Live Editor", value=st.session_state.current_architect_txt, height=400)
                 
                 st.warning("⚠️ Optimization & Trend Mapping is restricted to PRO Nodes.")
                 
-                if st.button("🧠 UPGRADE TO NEURAL FORGE", use_container_width=True, key="feature_upgrade_btn"):
-                    teleport_to_upgrade()
+                # --- THE FIXED BUTTON ---
+                if st.button("🧠 UPGRADE TO NEURAL FORGE", use_container_width=True, key="feat_upgrade"):
+                    st.session_state.current_page = TARGET_UPGRADE_PAGE
+                    st.rerun()
             else:
                 st.info("Awaiting Tactical Input to manifest formation.")
 
@@ -2551,6 +2506,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
