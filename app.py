@@ -181,47 +181,67 @@ def draw_title(emoji, text):
         </div>
     """, unsafe_allow_html=True)
 
-def apply_war_room_css():
+import streamlit as st
+
+# --- VOID-OS GLOBAL STYLING ---
+def apply_void_theme():
     st.markdown("""
-    <style>
-    /* 1. BACKGROUND & TEXT */
-    .stApp { 
-        background: radial-gradient(circle at top, #0a0a0a 0%, #000000 100%) !important; 
-    }
-    
-    /* 2. BUTTONS (Restoring the Cyan/Green Glow) */
-    div.stButton > button {
-        background: rgba(255, 255, 255, 0.05) !important;
-        color: #00d4ff !important; 
-        border: 1px solid rgba(0, 212, 255, 0.4) !important; 
-        border-radius: 10px !important;
-        padding: 10px 24px !important;
-        font-weight: 700 !important;
-        transition: 0.3s all ease !important;
-    }
-    
-    div.stButton > button:hover {
-        border: 1px solid #00ff41 !important;
-        color: #00ff41 !important;
-        background: rgba(0, 255, 65, 0.1) !important;
-        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.2) !important;
-        transform: translateY(-2px);
-    }
+        <style>
+        /* Main Background and Text */
+        .stApp {
+            background-color: #000000;
+            color: #C0C0C0;
+        }
+        
+        /* Custom Font: Inter/Space Grotesk style */
+        html, body, [class*="css"]  {
+            font-family: 'Inter', sans-serif;
+        }
 
-    /* 3. THE GRADIENT TEXT (Properly Clipped) */
-    .neural-gradient-text {
-        background: linear-gradient(90deg, #00d4ff 0%, #00ff41 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        background-clip: text !important;
-        font-weight: 800 !important;
-        display: inline-block !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+        /* Sidebar Styling */
+        [data-testid="stSidebar"] {
+            background-color: #050505;
+            border-right: 1px solid #1A1A1A;
+        }
 
-# CALL THIS AT THE VERY TOP OF YOUR APP
-apply_war_room_css()
+        /* The "Phantom Silver" Buttons */
+        div.stButton > button {
+            background-color: transparent;
+            color: #C0C0C0;
+            border: 1px solid #C0C0C0;
+            border-radius: 0px;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 200;
+        }
+        
+        div.stButton > button:hover {
+            background-color: #C0C0C0;
+            color: #000000;
+            border: 1px solid #C0C0C0;
+            box-shadow: 0px 0px 15px #C0C0C0;
+        }
+
+        /* Status Boxes (Success/Warning) */
+        .stAlert {
+            background-color: #0A0A0A;
+            color: #C0C0C0;
+            border: 1px solid #1A1A1A;
+            border-radius: 0px;
+        }
+
+        /* The "Event Horizon" Divider */
+        hr {
+            border: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(192, 192, 192, 0.75), rgba(0, 0, 0, 0));
+        }
+        </style>
+    """, unsafe_allow_value=True)
+
+# Call the theme
+apply_void_theme()
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2509,6 +2529,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
