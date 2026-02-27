@@ -1158,78 +1158,66 @@ if page == "🏠 Dashboard":
 elif page == "📡 My Growth Hub":
     draw_title("📡", "SOCIAL INTEL MATRIX")
 
-    # --- RELIABLE STATUS CHECK ---
-    # We pull directly from the anchor we set at the top
-    is_op_user = st.session_state.get('is_paid', False) or st.session_state.get('is_admin', False)
+    # 1. PULL STATUS FROM OUR CONTROLLER
+    is_premium = st.session_state.get('user_tier') in ["Pro", "Elite"]
 
-    # 1. THE DATA ACQUISITION LAYER
+    # 2. THE DATA ACQUISITION LAYER
     with st.container(border=True):
-        if is_op_user:
-            # --- OPERATIVE / ADMIN TERMINAL ---
+        if is_premium:
+            # --- PRO/ELITE TERMINAL ---
             st.markdown("### 🛰️ PRO-SYNC TERMINAL")
-            st.caption("Status: Uplink Standby (Operative Clearance)")
+            st.caption(f"Status: Uplink Standby ({st.session_state.user_tier} Clearance)")
             
             target_url = st.text_input("🔗 Target Profile URL", 
                                      placeholder="Paste YouTube link here...", 
-                                     key="op_target_url_input")
+                                     key="pro_tier_url")
             
             col_sync, col_manual = st.columns([2, 1])
             
             with col_sync:
-                if st.button("🔄 INITIATE LIVE SYNC", use_container_width=True, key="op_sync_trigger"):
+                if st.button("🔄 INITIATE LIVE SYNC", use_container_width=True, key="pro_tier_sync"):
                     if target_url:
                         if "instagram.com" in target_url.lower():
-                            st.toast("Handshake Initiated...", icon="🛰️")
                             st.info("### 🌑 VOID v2.0: THE SHADOW UPDATE")
-                            st.markdown("""
-                            Instagram Live-Sync encryption bypass is scheduled for **v2.0**. 
-                            - **Real-time Story Analytics**
-                            - **Competitor DNA Extraction**
-                            - **Automated Lead Scraper**
-                            """)
-                            st.warning("Toggle **Manual Override** to input Instagram data for now.")
+                            st.warning("Instagram Sync coming in v2.0. Use **Manual Override**.")
                         else:
                             with st.spinner("Decoding Meta-Streams..."):
-                                # Ensure get_live_stats is defined in your script
                                 try:
                                     subs, views = get_live_stats(target_url) 
                                     if subs:
                                         st.session_state.current_count = subs
                                         st.session_state.total_views = views
                                         st.success(f"Uplink Established: {subs:,} detected.")
-                                    else:
-                                        st.error("Uplink Failed. Profile may be private.")
                                 except NameError:
-                                    st.error("Scraper Module not found. Check get_live_stats definition.")
+                                    st.error("Scraper Module Offline.")
 
             with col_manual:
-                show_pro_manual = st.toggle("Manual Override", key="op_manual_switch")
+                show_override = st.toggle("Manual Override", key="pro_tier_manual_toggle")
 
-            if show_pro_manual:
+            if show_override:
                 st.divider()
-                st.markdown("<p style='color:#00d4ff; font-size:0.8rem; letter-spacing:1px;'>PRO-MANUAL TELEMETRY</p>", unsafe_allow_html=True)
                 cp1, cp2 = st.columns(2)
                 with cp1:
-                    st.session_state.start_count = st.number_input("Starting Count", value=st.session_state.get('start_count', 1000), key="op_m_start_val")
-                    st.session_state.days_passed = st.slider("Days Active", 1, 90, st.session_state.get('days_passed', 7), key="op_m_days_val")
+                    st.session_state.start_count = st.number_input("Starting Count", value=st.session_state.get('start_count', 1000), key="op_m_start")
+                    st.session_state.days_passed = st.slider("Days Active", 1, 90, st.session_state.get('days_passed', 7), key="op_m_days")
                 with cp2:
-                    st.session_state.current_count = st.number_input("Current Count", value=st.session_state.get('current_count', 1100), key="op_m_curr_val")
+                    st.session_state.current_count = st.number_input("Current Count", value=st.session_state.get('current_count', 1100), key="op_m_curr")
 
         else:
-            # --- BASIC TIER TERMINAL ---
+            # --- FREE / BASIC TIER ---
             st.markdown("### 📉 MANUAL TRACKER (BASIC)")
-            st.info("Upgrade to **OPERATIVE TIER** to unlock automated YouTube telemetry.")
+            st.info("Upgrade to **PRO** or **ELITE** to unlock automated telemetry.")
+            
             cb1, cb2 = st.columns(2)
             with cb1:
-                st.session_state.start_count = st.number_input("Starting Count", value=1000, key="basic_start_input")
-                st.session_state.days_passed = st.slider("Days Active", 1, 90, 7, key="basic_days_slider")
+                st.session_state.start_count = st.number_input("Starting Count", value=1000, key="free_start")
+                st.session_state.days_passed = st.slider("Days Active", 1, 90, 7, key="free_days")
             with cb2:
-                st.session_state.current_count = st.number_input("Current Count", value=1100, key="basic_curr_input")
+                st.session_state.current_count = st.number_input("Current Count", value=1100, key="free_curr")
 
-    # 2. ANALYTICS & PROJECTION
+    # 3. ANALYTICS & PROJECTION (Logic remains the same)
     if 'current_count' in st.session_state:
         st.divider()
-        
         start = st.session_state.get('start_count', 1000)
         current = st.session_state.get('current_count', 1100)
         days = st.session_state.get('days_passed', 7)
@@ -1242,18 +1230,10 @@ elif page == "📡 My Growth Hub":
         m2.metric("DAILY VELOCITY", f"{int(velocity):+}/unit")
         m3.metric("30D PROJECTION", f"{int(current + (velocity * 30)):,}")
 
-        with st.expander("🔮 FORECAST SCENARIOS"):
-            sc1, sc2 = st.columns(2)
-            with sc1:
-                st.write("**🛡️ Conservative**")
-                st.subheader(f"{int(current + (velocity * 30 * 0.7)):,}")
-            with sc2:
-                st.write("**🚀 Hyper-Growth**")
-                st.subheader(f"{int(current + (velocity * 30 * 1.5)):,}")
-
-    # 3. TASK FORGE COMMAND
+    # 4. TASK FORGE (Unified for all tiers)
     st.divider()
     st.subheader("🗓️ TASK FORGE COMMAND")
+    # ... [Keep your existing Task Forge code here]
     
     if 'tasks' not in st.session_state:
         st.session_state.tasks = pd.DataFrame(columns=["Task", "Node", "Status", "Deadline"])
@@ -2558,6 +2538,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
