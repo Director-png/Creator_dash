@@ -183,28 +183,18 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
-# --- VOID-OS GLOBAL STYLING ---
 def apply_void_theme():
-    st.markdown("""
+    # We must use unsafe_allow_html=True (plural 'allow')
+    st.markdown(
+        """
         <style>
-        /* Main Background and Text */
+        /* Main Background */
         .stApp {
             background-color: #000000;
             color: #C0C0C0;
         }
-        
-        /* Custom Font: Inter/Space Grotesk style */
-        html, body, [class*="css"]  {
-            font-family: 'Inter', sans-serif;
-        }
 
-        /* Sidebar Styling */
-        [data-testid="stSidebar"] {
-            background-color: #050505;
-            border-right: 1px solid #1A1A1A;
-        }
-
-        /* The "Phantom Silver" Buttons */
+        /* The Phantom Silver Buttons */
         div.stButton > button {
             background-color: transparent;
             color: #C0C0C0;
@@ -213,35 +203,23 @@ def apply_void_theme():
             transition: 0.3s;
             text-transform: uppercase;
             letter-spacing: 2px;
-            font-weight: 200;
         }
         
         div.stButton > button:hover {
             background-color: #C0C0C0;
             color: #000000;
             border: 1px solid #C0C0C0;
-            box-shadow: 0px 0px 15px #C0C0C0;
         }
 
-        /* Status Boxes (Success/Warning) */
-        .stAlert {
-            background-color: #0A0A0A;
-            color: #C0C0C0;
-            border: 1px solid #1A1A1A;
-            border-radius: 0px;
-        }
-
-        /* The "Event Horizon" Divider */
-        hr {
-            border: 0;
-            height: 1px;
-            background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(192, 192, 192, 0.75), rgba(0, 0, 0, 0));
+        /* Sidebar Tweak */
+        [data-testid="stSidebar"] {
+            background-color: #050505;
+            border-right: 1px solid #1A1A1A;
         }
         </style>
-    """, unsafe_allow_value=True)
-
-# Call the theme
-apply_void_theme()
+        """, 
+        unsafe_allow_html=True
+    )
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2529,6 +2507,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
