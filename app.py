@@ -1422,27 +1422,39 @@ elif page == "⚔️ Trend Duel":
 elif page == "🏗️ Script Architect":
     draw_title("⚔️", "SCRIPT ARCHITECT")
     
-    # Ensure history list exists in session state
+    # 1. INITIALIZE IDENTITY & COUNTERS
     if 'script_history' not in st.session_state: st.session_state.script_history = []
     
-    # 🕵️ Persona Checks for Limits
-    is_admin = st.session_state.get('user_role') == "admin"
+    # Extracting Identity from session
+    user_email = st.session_state.get('user_email', 'Unknown_Operator')
+    user_name = st.session_state.get('user_name', 'Operator')
     user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
-    is_paid = user_status in ['pro', 'paid']
+    
+    is_admin = st.session_state.get('user_role') == "admin"
+    is_paid = user_status in ['pro', 'paid', 'elite']
 
-    # 1. USAGE LIMITS (Basic Only)
+    # 2. PERSISTENT LIMIT LOGIC
+    # Since we can't read the GSheet easily yet, we use a robust session counter
+    # In production, you would fetch this count from your database via a GET request
+    if 'daily_usage_map' not in st.session_state:
+        st.session_state.daily_usage_map = {}
+
+    if user_email not in st.session_state.daily_usage_map:
+        st.session_state.daily_usage_map[user_email] = 0
+
+    usage_count = st.session_state.daily_usage_map[user_email]
+
     if not is_paid and not is_admin:
-        if 'daily_script_count' not in st.session_state: st.session_state.daily_script_count = 0
-        if st.session_state.daily_script_count >= 3:
+        if usage_count >= 3:
             st.error("🚨 DAILY UPLINK LIMIT REACHED")
-            # Redirect button if limit reached
-            if st.button("🔓 UNLOCK UNLIMITED SLOTS"):
-                st.session_state.page = "💳 Identity Vault" # Adjust name to match your exact upgrade tab
+            st.info(f"Identity: {user_email} has reached the 3-script limit.")
+            if st.button("🔓 UNLOCK UNLIMITED SLOTS", use_container_width=True):
+                st.session_state.page = "💳 Identity Vault"
                 st.rerun()
             st.stop()
-        st.caption(f"🛰️ BASIC NODE: {3 - st.session_state.daily_script_count} scripts remaining.")
+        st.caption(f"🛰️ BASIC NODE: {3 - usage_count} scripts remaining.")
 
-    # 2. THE FORMATION ENGINE
+    # 3. THE FORMATION ENGINE
     with st.container(border=True):
         c1, c2 = st.columns([1, 1.5], gap="large")
         with c1:
@@ -1454,63 +1466,67 @@ elif page == "🏗️ Script Architect":
             if st.button("🏗️ ARCHITECT FULL SCRIPT", use_container_width=True):
                 if topic:
                     with st.spinner("🛰️ ARCHITECTING FORMATION..."):
-                        if not is_paid and not is_admin: 
-                            st.session_state.daily_script_count += 1
-                        
+                        # Define Prompt
                         formation_prompt = (
                             f"Act as a master content strategist. Create a high-retention {platform} script about {topic}. "
                             f"Tone: {tone}. Formation: Start with a 'Pattern Interrupt' hook, move into 'The Agitation', "
                             f"provide 'The Insight', and end with a 'Call to Value'. Use timestamps and clear visual cues."
                         )
                         
-                        # Generate Script
-                        res = groq_c.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "user", "content": formation_prompt}])
-                        generated_script = res.choices[0].message.content
-                        st.session_state.current_architect_txt = generated_script
-                        
-                        # --- DATA HARDENING: UPLINK TO VAULT & GSHEET ---
-                        import datetime
-                        now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-                        
-                        # 1. Update Local Session History
-                        archive_entry = {
-                            "timestamp": now_ts,
-                            "platform": platform,
-                            "topic": topic,
-                            "script": generated_script,
-                            "assigned_to": st.session_state.get('user_name', 'Operator'),
-                            "status": "pending"
-                        }
-                        st.session_state.script_history.append(archive_entry)
-
-                        # 2. Update Global GSheet Database
+                        # Execute Groq Call
                         try:
-                            # Headers: Timestamp, Platform, Topic, Script, User, Status
-                            new_row = [
-                                now_ts, 
-                                platform, 
-                                topic, 
-                                generated_script, 
-                                st.session_state.get('user_email', 'N/A'), 
-                                "pending"
-                            ]
-                            conn.append_row(new_row, worksheet="Scripts")
-                            st.toast("⚡ ARCHIVE SYNCHRONIZED TO CLOUD")
+                            res = groq_c.chat.completions.create(
+                                model="llama-3.1-8b-instant", 
+                                messages=[{"role": "user", "content": formation_prompt}]
+                            )
+                            generated_script = res.choices[0].message.content
+                            st.session_state.current_architect_txt = generated_script
+                            
+                            # Increment Pivot Counter
+                            st.session_state.daily_usage_map[user_email] += 1
+                            
+                            # Prepare Data for GSheet (Matching your 8-column Apps Script)
+                            import datetime
+                            now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+                            
+                            payload = {
+                                "category": "SAVE_SCRIPT",
+                                "timestamp": now_ts,
+                                "userName": user_name,
+                                "email": user_email,
+                                "platform": platform,
+                                "topic": topic,
+                                "script": generated_script,
+                                "visualDna": f"Tone: {tone}", # Filling the 7th column
+                                "status": "pending"
+                            }
+                            
+                            # Send to Apps Script
+                            # Assuming 'requests' is imported and 'API_URL' is your Apps Script link
+                            import requests
+                            response = requests.post(API_URL, json=payload)
+                            
+                            if response.status_code == 200:
+                                st.toast("⚡ ARCHIVE SYNCHRONIZED TO CLOUD")
+                            
+                            st.rerun()
+                            
                         except Exception as e:
-                            st.error(f"GSHEET SYNC FAILED: {e}")
-
-                        st.rerun()
+                            st.error(f"SYSTEM FAILURE: {e}")
 
         with c2:
             if st.session_state.get('current_architect_txt'):
                 st.subheader("💎 SCRIPT BLUEPRINT")
-                st.session_state.current_architect_txt = st.text_area("Live Editor", value=st.session_state.current_architect_txt, height=400)
+                st.session_state.current_architect_txt = st.text_area(
+                    "Live Editor", 
+                    value=st.session_state.current_architect_txt, 
+                    height=450
+                )
+                
                 st.warning("⚠️ Optimization & Trend Mapping is restricted to PRO Nodes.")
                 
-                # --- REDIRECT LOGIC ---
                 if st.button("🧠 UPGRADE TO NEURAL FORGE", use_container_width=True):
-                    # Change this string to the exact name of your Identity/Upgrade tab
-                    st.session_state.page = "💳 Identity Vault" 
+                    st.session_state.page = "💳 Identity Vault"
                     st.rerun()
             else:
                 st.info("Awaiting Tactical Input to manifest formation.")
@@ -2545,6 +2561,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
