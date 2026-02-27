@@ -1422,8 +1422,9 @@ elif page == "🏗️ Script Architect":
     draw_title("⚔️", "SCRIPT ARCHITECT")
     
     # 🛰️ SYSTEM CONFIGURATION
-    API_URL = "https://script.google.com/macros/s/AKfycby38DOr6SA2x_r-oS1gHudA39Gucb2BioMpVbfe6i288uOiBZnuv421vVlHv3O8J_KY/exec" # Ensure your Deployment URL is here
-    TARGET_UPGRADE_PAGE = "⚡ Upgrade Authority" # MUST MATCH SIDEBAR EXACTLY
+    API_URL = "https://script.google.com/macros/s/AKfycby38DOr6SA2x_r-oS1gHudA39Gucb2BioMpVbfe6i288uOiBZnuv421vVlHv3O8J_KY/exec"
+    # This must match the string in your 'options' list in the sidebar
+    TARGET_UPGRADE_PAGE = "⚡ Upgrade Authority" 
 
     # 1. INITIALIZE IDENTITY & COUNTERS
     if 'script_history' not in st.session_state: 
@@ -1434,9 +1435,8 @@ elif page == "🏗️ Script Architect":
     user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
     
     is_admin = st.session_state.get('user_role') == "admin"
-    is_paid = user_status in ['pro', 'paid', 'elite']
+    is_paid = user_status in ['pro', 'paid', 'elite', 'operative', 'director', 'agency']
 
-    # Initialize persistent usage map if not present
     if 'daily_usage_map' not in st.session_state:
         st.session_state.daily_usage_map = {}
     if user_email not in st.session_state.daily_usage_map:
@@ -1444,17 +1444,22 @@ elif page == "🏗️ Script Architect":
 
     usage_count = st.session_state.daily_usage_map[user_email]
 
+    # --- THE REDIRECT COMMANDER ---
+    def teleport_to_upgrade():
+        st.session_state.current_page = TARGET_UPGRADE_PAGE
+        # This line forces the radio widget in the sidebar to reset its index
+        st.session_state.nav_radio = TARGET_UPGRADE_PAGE 
+        st.toast("Teleporting to Upgrade Authority...", icon="🚀")
+        st.rerun()
+
     # 2. USAGE LIMITS & REDIRECT GATING
     if not is_paid and not is_admin:
         if usage_count >= 3:
             st.error("🚨 DAILY UPLINK LIMIT REACHED")
-            st.info(f"Identity: {user_email} has exhausted the 3-script allowance.")
+            st.info(f"Operator {user_email}, you've hit the 3-script threshold.")
             
-            # Gated Button 1: The Lockout Redirect
             if st.button("🔓 UNLOCK UNLIMITED SLOTS", use_container_width=True, key="lockout_upgrade_btn"):
-                st.session_state.current_page = "⚡ Upgrade Authority"
-                st.toast("Redirecting to Secure Payment...", icon="🛰️")
-                st.rerun()
+                teleport_to_upgrade()
             st.stop()
             
         st.caption(f"🛰️ BASIC NODE: {3 - usage_count} scripts remaining.")
@@ -1465,7 +1470,7 @@ elif page == "🏗️ Script Architect":
         with c1:
             st.subheader("Architectural Input")
             platform = st.selectbox("Platform", ["Instagram Reels", "YouTube Shorts", "TikTok", "YouTube Long-form"])
-            topic = st.text_input("Core Topic", placeholder="e.g., The reality of building a SaaS")
+            topic = st.text_input("Core Topic", placeholder="e.g., SaaS building", key="arch_topic_input")
             tone = st.select_slider("Vigor", ["Professional", "Aggressive", "Elite"])
             
             if st.button("🏗️ ARCHITECT FULL SCRIPT", use_container_width=True, key="main_architect_btn"):
@@ -1473,43 +1478,29 @@ elif page == "🏗️ Script Architect":
                     with st.spinner("🛰️ ARCHITECTING FORMATION..."):
                         formation_prompt = (
                             f"Act as a master content strategist. Create a high-retention {platform} script about {topic}. "
-                            f"Tone: {tone}. Start with a 'Pattern Interrupt' hook, move into 'The Agitation', "
-                            f"provide 'The Insight', and end with a 'Call to Value'."
+                            f"Tone: {tone}. Formation: Hook, Agitation, Insight, Call to Value."
                         )
                         
                         try:
-                            # Groq Generation
                             res = groq_c.chat.completions.create(
                                 model="llama-3.1-8b-instant", 
                                 messages=[{"role": "user", "content": formation_prompt}]
                             )
                             generated_script = res.choices[0].message.content
                             st.session_state.current_architect_txt = generated_script
-                            
-                            # Increment Usage Pivot
                             st.session_state.daily_usage_map[user_email] += 1
                             
-                            # Cloud Sync
-                            import datetime
-                            import requests
+                            # Cloud Sync Logic
+                            import datetime, requests
                             now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-                            
                             payload = {
-                                "category": "SAVE_SCRIPT",
-                                "timestamp": now_ts,
-                                "userName": user_name,
-                                "email": user_email,
-                                "platform": platform,
-                                "topic": topic,
-                                "script": generated_script,
-                                "visualDna": f"Vigor: {tone}",
-                                "status": "pending"
+                                "category": "SAVE_SCRIPT", "timestamp": now_ts, "userName": user_name,
+                                "email": user_email, "platform": platform, "topic": topic,
+                                "script": generated_script, "visualDna": f"Vigor: {tone}", "status": "pending"
                             }
-                            
                             requests.post(API_URL, json=payload, timeout=5)
                             st.toast("⚡ ARCHIVE SYNCHRONIZED", icon="✅")
                             st.rerun()
-                            
                         except Exception as e:
                             st.error(f"SYSTEM FAILURE: {e}")
 
@@ -1525,11 +1516,8 @@ elif page == "🏗️ Script Architect":
                 
                 st.warning("⚠️ Optimization & Trend Mapping is restricted to PRO Nodes.")
                 
-                # Gated Button 2: The Feature Upgrade Redirect
                 if st.button("🧠 UPGRADE TO NEURAL FORGE", use_container_width=True, key="feature_upgrade_btn"):
-                    st.session_state.current_page = "⚡ Upgrade Authority"
-                    st.toast("Accessing Identity Vault...", icon="🚀")
-                    st.rerun()
+                    teleport_to_upgrade()
             else:
                 st.info("Awaiting Tactical Input to manifest formation.")
 
@@ -2563,6 +2551,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
