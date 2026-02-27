@@ -160,21 +160,24 @@ if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 if 'last_topic' not in st.session_state: st.session_state.last_topic = "General AI Intelligence"
 if 'user_name' not in st.session_state: st.session_state.user_name = "Guest"
 if 'user_role' not in st.session_state: st.session_state.user_role = "user"
-# --- IDENTITY INITIALIZATION ---
-if 'is_admin' not in st.session_state:
-    st.session_state.is_admin = False # Default to False for safety
+import streamlit as st
 
-if 'is_paid' not in st.session_state:
-    st.session_state.is_paid = False # Default to False
+# --- 1. THE KILL-SWITCH (Put this at the VERY top) ---
+# Set this to False to see exactly what a Basic User sees.
+FOUNDER_MODE = False 
 
-# --- FOUNDER BYPASS (ONLY FOR YOUR TEST SESSIONS) ---
-# When you want to see the BASIC version to check the UI, set this to False.
-# When you want to work on the OPERATIVE version, set this to True.
-FOUNDER_MODE = True 
-
+# --- 2. IDENTITY ENFORCEMENT ---
 if FOUNDER_MODE:
-    st.session_state.is_admin = True
     st.session_state.is_paid = True
+    st.session_state.is_admin = True
+else:
+    # We explicitly force them to False to prevent "ghost" sessions
+    st.session_state.is_paid = False
+    st.session_state.is_admin = False
+
+# --- 3. PAGE LOGIC ---
+is_op = st.session_state.is_paid or st.session_state.is_admin
+
 # --- 🛰️ DATA INFRASTRUCTURE ---
 MARKET_PULSE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
 USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?gid=2093671902&single=true&output=csv&t=" + str(time.time())
@@ -2538,6 +2541,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
