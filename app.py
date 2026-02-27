@@ -1435,6 +1435,10 @@ elif page == "🏗️ Script Architect":
         if 'daily_script_count' not in st.session_state: st.session_state.daily_script_count = 0
         if st.session_state.daily_script_count >= 3:
             st.error("🚨 DAILY UPLINK LIMIT REACHED")
+            # Redirect button if limit reached
+            if st.button("🔓 UNLOCK UNLIMITED SLOTS"):
+                st.session_state.page = "💳 Identity Vault" # Adjust name to match your exact upgrade tab
+                st.rerun()
             st.stop()
         st.caption(f"🛰️ BASIC NODE: {3 - st.session_state.daily_script_count} scripts remaining.")
 
@@ -1502,8 +1506,11 @@ elif page == "🏗️ Script Architect":
                 st.subheader("💎 SCRIPT BLUEPRINT")
                 st.session_state.current_architect_txt = st.text_area("Live Editor", value=st.session_state.current_architect_txt, height=400)
                 st.warning("⚠️ Optimization & Trend Mapping is restricted to PRO Nodes.")
-                if st.button("🧠 UPGRADE TO NEURAL FORGE"):
-                    st.session_state.page = "🧠 Neural Forge"
+                
+                # --- REDIRECT LOGIC ---
+                if st.button("🧠 UPGRADE TO NEURAL FORGE", use_container_width=True):
+                    # Change this string to the exact name of your Identity/Upgrade tab
+                    st.session_state.page = "💳 Identity Vault" 
                     st.rerun()
             else:
                 st.info("Awaiting Tactical Input to manifest formation.")
@@ -2538,6 +2545,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
