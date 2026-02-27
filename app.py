@@ -1162,34 +1162,39 @@ if page == "🏠 Dashboard":
 elif page == "📡 My Growth Hub":
     draw_title("📡", "SOCIAL INTEL MATRIX")
 
-    # --- THE DOUBLE-GATE AUTH CHECK ---
-    # We pull the current status. If you are testing, ensure st.session_state.is_paid 
-    # is set to False at the top of your app to see the Basic version.
-    is_operative = st.session_state.get('is_paid', False) or st.session_state.get('is_admin', False)
+    # --- RELIABLE STATUS CHECK ---
+    # We pull directly from the anchor we set at the top
+    is_op_user = st.session_state.get('is_paid', False) or st.session_state.get('is_admin', False)
 
-    # 1. DATA ACQUISITION LAYER
+    # 1. THE DATA ACQUISITION LAYER
     with st.container(border=True):
-        if is_operative:
-            # --- OPERATIVE TERMINAL (PAID/ADMIN ONLY) ---
+        if is_op_user:
+            # --- OPERATIVE / ADMIN TERMINAL ---
             st.markdown("### 🛰️ PRO-SYNC TERMINAL")
             st.caption("Status: Uplink Standby (Operative Clearance)")
             
             target_url = st.text_input("🔗 Target Profile URL", 
                                      placeholder="Paste YouTube link here...", 
-                                     key="pro_url_input")
+                                     key="op_target_url_input")
             
-            c_sync, c_ovr = st.columns([2, 1])
+            col_sync, col_manual = st.columns([2, 1])
             
-            with c_sync:
-                if st.button("🔄 INITIATE LIVE SYNC", use_container_width=True, key="pro_sync_btn"):
+            with col_sync:
+                if st.button("🔄 INITIATE LIVE SYNC", use_container_width=True, key="op_sync_trigger"):
                     if target_url:
                         if "instagram.com" in target_url.lower():
                             st.toast("Handshake Initiated...", icon="🛰️")
                             st.info("### 🌑 VOID v2.0: THE SHADOW UPDATE")
-                            st.markdown("Instagram Sync active in v2.0. Use **Manual Override**.")
+                            st.markdown("""
+                            Instagram Live-Sync encryption bypass is scheduled for **v2.0**. 
+                            - **Real-time Story Analytics**
+                            - **Competitor DNA Extraction**
+                            - **Automated Lead Scraper**
+                            """)
+                            st.warning("Toggle **Manual Override** to input Instagram data for now.")
                         else:
                             with st.spinner("Decoding Meta-Streams..."):
-                                # Ensure get_live_stats() is defined in your helper functions
+                                # Ensure get_live_stats is defined in your script
                                 try:
                                     subs, views = get_live_stats(target_url) 
                                     if subs:
@@ -1197,40 +1202,38 @@ elif page == "📡 My Growth Hub":
                                         st.session_state.total_views = views
                                         st.success(f"Uplink Established: {subs:,} detected.")
                                     else:
-                                        st.error("Uplink failed. Private profile or invalid link.")
-                                except Exception as e:
-                                    st.error(f"Telemetry Error: {str(e)}")
+                                        st.error("Uplink Failed. Profile may be private.")
+                                except NameError:
+                                    st.error("Scraper Module not found. Check get_live_stats definition.")
 
-            with c_ovr:
-                show_pro_manual = st.toggle("Manual Override", key="pro_manual_toggle")
+            with col_manual:
+                show_pro_manual = st.toggle("Manual Override", key="op_manual_switch")
 
             if show_pro_manual:
                 st.divider()
+                st.markdown("<p style='color:#00d4ff; font-size:0.8rem; letter-spacing:1px;'>PRO-MANUAL TELEMETRY</p>", unsafe_allow_html=True)
                 cp1, cp2 = st.columns(2)
                 with cp1:
-                    st.session_state.start_count = st.number_input("Starting Count", value=st.session_state.get('start_count', 1000), key="op_num_start")
-                    st.session_state.days_passed = st.slider("Days Active", 1, 90, st.session_state.get('days_passed', 7), key="op_slider_days")
+                    st.session_state.start_count = st.number_input("Starting Count", value=st.session_state.get('start_count', 1000), key="op_m_start_val")
+                    st.session_state.days_passed = st.slider("Days Active", 1, 90, st.session_state.get('days_passed', 7), key="op_m_days_val")
                 with cp2:
-                    st.session_state.current_count = st.number_input("Current Count", value=st.session_state.get('current_count', 1100), key="op_num_curr")
+                    st.session_state.current_count = st.number_input("Current Count", value=st.session_state.get('current_count', 1100), key="op_m_curr_val")
 
         else:
-            # --- BASIC TIER VIEW (WHAT CUSTOMERS SEE) ---
+            # --- BASIC TIER TERMINAL ---
             st.markdown("### 📉 MANUAL TRACKER (BASIC)")
             st.info("Upgrade to **OPERATIVE TIER** to unlock automated YouTube telemetry.")
-            
             cb1, cb2 = st.columns(2)
             with cb1:
-                # We use specific keys 'b_...' to ensure no overlap with Pro variables
-                st.session_state.start_count = st.number_input("Starting Count", value=1000, key="b_num_start")
-                st.session_state.days_passed = st.slider("Days Active", 1, 90, 7, key="b_slider_days")
+                st.session_state.start_count = st.number_input("Starting Count", value=1000, key="basic_start_input")
+                st.session_state.days_passed = st.slider("Days Active", 1, 90, 7, key="basic_days_slider")
             with cb2:
-                st.session_state.current_count = st.number_input("Current Count", value=1100, key="b_num_curr")
+                st.session_state.current_count = st.number_input("Current Count", value=1100, key="basic_curr_input")
 
-    # 2. ANALYTICS & PROJECTION (Logic only runs if data exists)
+    # 2. ANALYTICS & PROJECTION
     if 'current_count' in st.session_state:
         st.divider()
         
-        # Get values with defaults to prevent Math errors
         start = st.session_state.get('start_count', 1000)
         current = st.session_state.get('current_count', 1100)
         days = st.session_state.get('days_passed', 7)
@@ -1238,28 +1241,33 @@ elif page == "📡 My Growth Hub":
         growth = current - start
         velocity = (growth / days) if days > 0 else 0
         
-        # UI Metrics
         m1, m2, m3 = st.columns(3)
         m1.metric("CURRENT STATUS", f"{current:,}", f"{growth:+}")
         m2.metric("DAILY VELOCITY", f"{int(velocity):+}/unit")
         m3.metric("30D PROJECTION", f"{int(current + (velocity * 30)):,}")
 
+        with st.expander("🔮 FORECAST SCENARIOS"):
+            sc1, sc2 = st.columns(2)
+            with sc1:
+                st.write("**🛡️ Conservative**")
+                st.subheader(f"{int(current + (velocity * 30 * 0.7)):,}")
+            with sc2:
+                st.write("**🚀 Hyper-Growth**")
+                st.subheader(f"{int(current + (velocity * 30 * 1.5)):,}")
+
     # 3. TASK FORGE COMMAND
     st.divider()
     st.subheader("🗓️ TASK FORGE COMMAND")
     
-    # Initialize Task DB if empty
     if 'tasks' not in st.session_state:
-        import pandas as pd
         st.session_state.tasks = pd.DataFrame(columns=["Task", "Node", "Status", "Deadline"])
 
     with st.expander("➕ FORGE NEW CONTENT TASK"):
-        with st.form("task_form_hub", clear_on_submit=True):
+        with st.form("task_form_hub_master", clear_on_submit=True):
             t_name = st.text_input("Task Description")
             t_plat = st.selectbox("Node", ["YouTube", "Instagram", "X", "TikTok"])
             t_date = st.date_input("Deadline")
             if st.form_submit_button("SYNC TO FORGE") and t_name:
-                import pandas as pd
                 new_task = pd.DataFrame([{"Task": t_name, "Node": t_plat, "Status": "⏳ Pending", "Deadline": t_date.strftime("%Y-%m-%d")}])
                 st.session_state.tasks = pd.concat([st.session_state.tasks, new_task], ignore_index=True)
                 st.rerun()
@@ -1274,7 +1282,7 @@ elif page == "📡 My Growth Hub":
             st.session_state.tasks,
             use_container_width=True,
             num_rows="dynamic",
-            key="task_editor_hub",
+            key="master_task_editor",
             column_config={
                 "Status": st.column_config.SelectboxColumn("Status", options=["⏳ Pending", "🎬 Filming", "✂️ Editing", "✅ Uploaded"], required=True),
                 "Node": st.column_config.SelectboxColumn("Node", options=["YouTube", "Instagram", "X", "TikTok"], required=True)
@@ -2554,6 +2562,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
