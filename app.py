@@ -1453,7 +1453,7 @@ elif page == "🏗️ Script Architect":
             
             # Gated Button 1: The Lockout Redirect
             if st.button("🔓 UNLOCK UNLIMITED SLOTS", use_container_width=True, key="lockout_upgrade_btn"):
-                st.session_state.page = TARGET_UPGRADE_PAGE
+                st.session_state.page = "⚡ Upgrade Authority"
                 st.toast("Redirecting to Secure Payment...", icon="🛰️")
                 st.rerun()
             st.stop()
@@ -1528,7 +1528,7 @@ elif page == "🏗️ Script Architect":
                 
                 # Gated Button 2: The Feature Upgrade Redirect
                 if st.button("🧠 UPGRADE TO NEURAL FORGE", use_container_width=True, key="feature_upgrade_btn"):
-                    st.session_state.page = TARGET_UPGRADE_PAGE
+                    st.session_state.page = "⚡ Upgrade Authority"
                     st.toast("Accessing Identity Vault...", icon="🚀")
                     st.rerun()
             else:
@@ -2564,6 +2564,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
