@@ -162,20 +162,16 @@ if 'user_name' not in st.session_state: st.session_state.user_name = "Guest"
 if 'user_role' not in st.session_state: st.session_state.user_role = "user"
 import streamlit as st
 
-# --- THE ABSOLUTE IDENTITY OVERRIDE ---
-# Setting this to True forces the entire app into "Operative Mode"
-# Setting this to False forces the entire app into "Basic Mode"
-IF_I_AM_TESTING_THE_APP = True 
+# --- LIVE STATUS CONTROLLER ---
+# Options: "Free", "Pro", or "Elite"
+# Change this to "Free" to see the Basic Tracker.
+USER_STATUS = "Pro" 
 
-if IF_I_AM_TESTING_THE_APP:
-    st.session_state.is_paid = True
-    st.session_state.is_admin = True
-else:
-    # This is what a normal customer sees
-    if 'is_paid' not in st.session_state:
-        st.session_state.is_paid = False
-    if 'is_admin' not in st.session_state:
-        st.session_state.is_admin = False
+if 'user_tier' not in st.session_state:
+    st.session_state.user_tier = USER_STATUS
+
+# Helper to determine if they get the Pro Terminal
+is_paid_tier = st.session_state.user_tier in ["Pro", "Elite"]
 
 # --- 🛰️ DATA INFRASTRUCTURE ---
 MARKET_PULSE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
@@ -2562,6 +2558,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
