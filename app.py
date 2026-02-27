@@ -162,21 +162,20 @@ if 'user_name' not in st.session_state: st.session_state.user_name = "Guest"
 if 'user_role' not in st.session_state: st.session_state.user_role = "user"
 import streamlit as st
 
-# --- 1. THE KILL-SWITCH (Put this at the VERY top) ---
-# Set this to False to see exactly what a Basic User sees.
-FOUNDER_MODE = False 
+# --- THE ABSOLUTE IDENTITY OVERRIDE ---
+# Setting this to True forces the entire app into "Operative Mode"
+# Setting this to False forces the entire app into "Basic Mode"
+IF_I_AM_TESTING_THE_APP = True 
 
-# --- 2. IDENTITY ENFORCEMENT ---
-if FOUNDER_MODE:
+if IF_I_AM_TESTING_THE_APP:
     st.session_state.is_paid = True
     st.session_state.is_admin = True
 else:
-    # We explicitly force them to False to prevent "ghost" sessions
-    st.session_state.is_paid = False
-    st.session_state.is_admin = False
-
-# --- 3. PAGE LOGIC ---
-is_op = st.session_state.is_paid or st.session_state.is_admin
+    # This is what a normal customer sees
+    if 'is_paid' not in st.session_state:
+        st.session_state.is_paid = False
+    if 'is_admin' not in st.session_state:
+        st.session_state.is_admin = False
 
 # --- 🛰️ DATA INFRASTRUCTURE ---
 MARKET_PULSE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
@@ -2555,6 +2554,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
