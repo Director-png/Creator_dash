@@ -1162,8 +1162,19 @@ elif page == "📡 My Growth Hub":
                     if target_url:
                         # CHECK FOR INSTAGRAM
                         if "instagram.com" in target_url.lower():
-                            st.info("🛰️ **SYSTEM NOTICE**: Instagram Live-Sync is undergoing a security handshake upgrade. This node active in v2.0.")
-                            st.warning("Please toggle 'Manual Override' to input Instagram stats.")
+                            st.toast("Handshake Initiated...", icon="🛰️")
+                            st.info("### 🌑 VOID v2.0: THE SHADOW UPDATE")
+                            st.markdown("""
+                            **Status:** *In Development* Instagram's 2026 API encryption is currently being bypassed for our **Direct-Uplink** protocol. 
+                            
+                            **What's coming in v2.0:**
+                            * 📊 **Real-time Story Analytics**
+                            * 🧬 **Competitor DNA Extraction**
+                            * ⚡ **Automated DM Lead Scraper**
+                            
+                            *Estimated Deployment: Late March 2026*
+                            """)
+                            st.warning("For now, please use the **Manual Override** toggle below for Instagram tracking.")
                         else:
                             with st.spinner("Decoding Meta-Streams..."):
                                 subs, views = get_live_stats(target_url)
@@ -1181,12 +1192,13 @@ elif page == "📡 My Growth Hub":
                                     st.error("Connection failed. Link might be private or invalid.")
 
             with col_manual:
-                # Allow Pro users to use manual if they want, but keep it hidden by default
-                show_override = st.toggle("Manual Override")
+                # Manual toggle to keep the UI clean for Pros
+                show_override = st.toggle("Manual Override", help="Enable this to manually track Instagram or TikTok stats.")
 
             # Manual Input for Pro Users (Only shows if they toggle it)
             if show_override:
                 st.divider()
+                st.markdown("<p style='color:#00d4ff; font-size:0.8rem; letter-spacing:1px;'>MANUAL TELEMETRY MODE</p>", unsafe_allow_html=True)
                 c_p1, c_p2 = st.columns(2)
                 with c_p1:
                     st.session_state.start_count = st.number_input("Starting Count", value=st.session_state.get('start_count', 1000), key="pro_start")
@@ -1197,7 +1209,7 @@ elif page == "📡 My Growth Hub":
         else:
             # BASIC TIER VIEW ONLY
             st.markdown("### 📉 MANUAL TRACKER (BASIC)")
-            st.info("Upgrade to PRO for automated telemetry.")
+            st.info("Upgrade to **OPERATIVE TIER** to unlock automated YouTube telemetry.")
             c_b1, c_b2 = st.columns(2)
             with c_b1:
                 st.session_state.start_count = st.number_input("Starting Count", value=1000)
@@ -1205,7 +1217,7 @@ elif page == "📡 My Growth Hub":
             with c_b2:
                 st.session_state.current_count = st.number_input("Current Count", value=1100)
 
-    # 2. ANALYTICS & PROJECTION (Logic remains untouched)
+    # 2. ANALYTICS & PROJECTION
     if 'current_count' in st.session_state:
         st.divider()
         
@@ -1236,7 +1248,7 @@ elif page == "📡 My Growth Hub":
                 st.write("**🚀 Hyper-Growth**")
                 st.subheader(f"{int(current + (velocity * 30 * 1.5)):,}")
 
-    # 3. TASK FORGE (Logic remains untouched)
+    # 3. TASK FORGE
     st.divider()
     st.subheader("🗓️ TASK FORGE COMMAND")
     
@@ -2542,6 +2554,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
