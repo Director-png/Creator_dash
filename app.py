@@ -160,6 +160,10 @@ if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 if 'last_topic' not in st.session_state: st.session_state.last_topic = "General AI Intelligence"
 if 'user_name' not in st.session_state: st.session_state.user_name = "Guest"
 if 'user_role' not in st.session_state: st.session_state.user_role = "user"
+if 'is_paid' not in st.session_state:
+    st.session_state.is_paid = True # Set to True for your personal testing
+if 'is_admin' not in st.session_state:
+    st.session_state.is_admin = True
 
 # --- 🛰️ DATA INFRASTRUCTURE ---
 MARKET_PULSE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
@@ -2550,6 +2554,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
