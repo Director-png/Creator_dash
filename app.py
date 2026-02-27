@@ -1069,7 +1069,7 @@ if st.session_state.get('show_feedback_node', False):
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
 if page == "🏠 Dashboard":
     # 🚨 COMPLIANCE HEADER (Minimalist)
-    draw_title("🌌", "VOID OS // B2B OUTREACH SAAS")
+    draw_title("🌌", "VOID OS || B2B OUTREACH SAAS")
     draw_title("🛰️", "COMMAND CENTER")
     
     # 1. THE AGGREGATED INTELLIGENCE ROW (KPIs)
@@ -1146,78 +1146,73 @@ if page == "🏠 Dashboard":
 elif page == "📡 My Growth Hub":
     draw_title("📡", "SOCIAL INTEL MATRIX")
 
+    # --- THE OPERATIVE HANDSHAKE ---
+    # We pull directly from session_state to ensure the UI doesn't "forget" your rank.
+    is_op = st.session_state.get('is_paid', False) or st.session_state.get('is_admin', False)
+
     # 1. THE DATA ACQUISITION LAYER
     with st.container(border=True):
-        if is_paid or is_admin:
+        if is_op:
+            # --- OPERATIVE / ADMIN TERMINAL ---
             st.markdown("### 🛰️ PRO-SYNC TERMINAL")
             st.caption("Status: Uplink Standby (Operative Clearance)")
             
-            target_url = st.text_input("🔗 Target Profile URL", placeholder="Paste YouTube link here...")
+            target_url = st.text_input("🔗 Target Profile URL", 
+                                     placeholder="Paste YouTube link here...", 
+                                     key="growth_url_pro")
             
-            # Action Row for Pro Users
             col_sync, col_manual = st.columns([2, 1])
             
             with col_sync:
                 if st.button("🔄 INITIATE LIVE SYNC", use_container_width=True):
                     if target_url:
-                        # CHECK FOR INSTAGRAM
                         if "instagram.com" in target_url.lower():
                             st.toast("Handshake Initiated...", icon="🛰️")
                             st.info("### 🌑 VOID v2.0: THE SHADOW UPDATE")
                             st.markdown("""
-                            **Status:** *In Development* Instagram's 2026 API encryption is currently being bypassed for our **Direct-Uplink** protocol. 
-                            
-                            **What's coming in v2.0:**
-                            * 📊 **Real-time Story Analytics**
-                            * 🧬 **Competitor DNA Extraction**
-                            * ⚡ **Automated DM Lead Scraper**
-                            
-                            *Estimated Deployment: Late March 2026*
+                            Instagram Live-Sync encryption bypass is scheduled for **v2.0**. 
+                            - Real-time Story Analytics
+                            - Competitor DNA Extraction
+                            - Automated Lead Scraper
                             """)
-                            st.warning("For now, please use the **Manual Override** toggle below for Instagram tracking.")
+                            st.warning("Toggle **Manual Override** to input Instagram data for now.")
                         else:
                             with st.spinner("Decoding Meta-Streams..."):
-                                subs, views = get_live_stats(target_url)
-                                
+                                # Assuming get_live_stats is your scraping function
+                                subs, views = get_live_stats(target_url) 
                                 if subs:
-                                    if 'start_count' not in st.session_state:
-                                        st.session_state.start_count = int(subs * 0.99)
-                                        st.session_state.days_passed = 7
-                                    
                                     st.session_state.current_count = subs
                                     st.session_state.total_views = views
-                                    st.session_state.last_sync_ts = datetime.datetime.now()
                                     st.success(f"Uplink Established: {subs:,} subscribers detected.")
                                 else:
-                                    st.error("Connection failed. Link might be private or invalid.")
+                                    st.error("Uplink Failed. Check URL permissions.")
 
             with col_manual:
-                # Manual toggle to keep the UI clean for Pros
-                show_override = st.toggle("Manual Override", help="Enable this to manually track Instagram or TikTok stats.")
+                # The bypass for non-supported platforms (IG/TikTok)
+                show_override = st.toggle("Manual Override", key="pro_manual_toggle")
 
-            # Manual Input for Pro Users (Only shows if they toggle it)
             if show_override:
                 st.divider()
-                st.markdown("<p style='color:#00d4ff; font-size:0.8rem; letter-spacing:1px;'>MANUAL TELEMETRY MODE</p>", unsafe_allow_html=True)
-                c_p1, c_p2 = st.columns(2)
-                with c_p1:
-                    st.session_state.start_count = st.number_input("Starting Count", value=st.session_state.get('start_count', 1000), key="pro_start")
-                    st.session_state.days_passed = st.slider("Days Active", 1, 90, st.session_state.get('days_passed', 7), key="pro_days")
-                with c_p2:
-                    st.session_state.current_count = st.number_input("Current Count", value=st.session_state.get('current_count', 1100), key="pro_curr")
+                st.markdown("<p style='color:#00d4ff; font-size:0.8rem;'>PRO-MANUAL TELEMETRY</p>", unsafe_allow_html=True)
+                cp1, cp2 = st.columns(2)
+                with cp1:
+                    st.session_state.start_count = st.number_input("Starting Count", value=st.session_state.get('start_count', 1000), key="m_start")
+                    st.session_state.days_passed = st.slider("Days Active", 1, 90, st.session_state.get('days_passed', 7), key="m_days")
+                with cp2:
+                    st.session_state.current_count = st.number_input("Current Count", value=st.session_state.get('current_count', 1100), key="m_curr")
 
         else:
-            # BASIC TIER VIEW ONLY
+            # --- BASIC TIER TERMINAL ---
             st.markdown("### 📉 MANUAL TRACKER (BASIC)")
             st.info("Upgrade to **OPERATIVE TIER** to unlock automated YouTube telemetry.")
-            c_b1, c_b2 = st.columns(2)
-            with c_b1:
-                st.session_state.start_count = st.number_input("Starting Count", value=1000)
-                st.session_state.days_passed = st.slider("Days Active", 1, 90, 7)
-            with c_b2:
-                st.session_state.current_count = st.number_input("Current Count", value=1100)
+            cb1, cb2 = st.columns(2)
+            with cb1:
+                st.session_state.start_count = st.number_input("Starting Count", value=1000, key="b_start")
+                st.session_state.days_passed = st.slider("Days Active", 1, 90, 7, key="b_days")
+            with cb2:
+                st.session_state.current_count = st.number_input("Current Count", value=1100, key="b_curr")
 
-    # 2. ANALYTICS & PROJECTION
+    # 2. ANALYTICS & PROJECTION (Unified Logic)
     if 'current_count' in st.session_state:
         st.divider()
         
@@ -1227,6 +1222,7 @@ elif page == "📡 My Growth Hub":
         
         growth = current - start
         raw_velocity = growth / days if days > 0 else 0
+        # Stabilization logic
         velocity = min(raw_velocity, current * 0.02) if raw_velocity > 0 else raw_velocity
         
         if velocity > 0:
@@ -1248,7 +1244,7 @@ elif page == "📡 My Growth Hub":
                 st.write("**🚀 Hyper-Growth**")
                 st.subheader(f"{int(current + (velocity * 30 * 1.5)):,}")
 
-    # 3. TASK FORGE
+    # 3. TASK FORGE COMMAND
     st.divider()
     st.subheader("🗓️ TASK FORGE COMMAND")
     
@@ -1543,7 +1539,7 @@ elif page == "🧠 Neural Forge":
         st.session_state.max_limit = limits.get(user_status, 5)
     
     remaining_credits = st.session_state.max_limit - st.session_state.daily_usage
-    draw_title("🧠", "NEURAL FORGE // MASTER ARCHITECT")
+    draw_title("🧠", "NEURAL FORGE || MASTER ARCHITECT")
 
     # DNA Variables
     v_id = st.session_state.get('linguistic_dna_id', "").strip()
@@ -2554,6 +2550,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
