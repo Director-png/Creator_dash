@@ -1421,13 +1421,15 @@ elif page == "⚔️ Trend Duel":
 # --- MODULE 6: SCRIPT ARCHITECT ---
 elif page == "🏗️ Script Architect":
     draw_title("⚔️", "SCRIPT ARCHITECT")
-    # 🛰️ PASTE YOUR GOOGLE DEPLOYMENT URL HERE
-    # It should look something like "https://script.google.com/macros/s/.../exec"
-    API_URL = "https://script.google.com/macros/s/AKfycby38DOr6SA2x_r-oS1gHudA39Gucb2BioMpVbfe6i288uOiBZnuv421vVlHv3O8J_KY/exec"
-    # 1. INITIALIZE IDENTITY & COUNTERS
-    if 'script_history' not in st.session_state: st.session_state.script_history = []
     
-    # Extracting Identity from session
+    # 🛰️ SYSTEM CONFIGURATION
+    API_URL = "https://script.google.com/macros/s/AKfycby38DOr6SA2x_r-oS1gHudA39Gucb2BioMpVbfe6i288uOiBZnuv421vVlHv3O8J_KY/exec" # Ensure your Deployment URL is here
+    TARGET_UPGRADE_PAGE = "⚡ Upgrade Authority" # MUST MATCH SIDEBAR EXACTLY
+
+    # 1. INITIALIZE IDENTITY & COUNTERS
+    if 'script_history' not in st.session_state: 
+        st.session_state.script_history = []
+    
     user_email = st.session_state.get('user_email', 'Unknown_Operator')
     user_name = st.session_state.get('user_name', 'Operator')
     user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
@@ -1435,25 +1437,27 @@ elif page == "🏗️ Script Architect":
     is_admin = st.session_state.get('user_role') == "admin"
     is_paid = user_status in ['pro', 'paid', 'elite']
 
-    # 2. PERSISTENT LIMIT LOGIC
-    # Since we can't read the GSheet easily yet, we use a robust session counter
-    # In production, you would fetch this count from your database via a GET request
+    # Initialize persistent usage map if not present
     if 'daily_usage_map' not in st.session_state:
         st.session_state.daily_usage_map = {}
-
     if user_email not in st.session_state.daily_usage_map:
         st.session_state.daily_usage_map[user_email] = 0
 
     usage_count = st.session_state.daily_usage_map[user_email]
 
+    # 2. USAGE LIMITS & REDIRECT GATING
     if not is_paid and not is_admin:
         if usage_count >= 3:
             st.error("🚨 DAILY UPLINK LIMIT REACHED")
-            st.info(f"Identity: {user_email} has reached the 3-script limit.")
-            if st.button("🔓 UNLOCK UNLIMITED SLOTS", use_container_width=True):
-                st.session_state.page = "💳 Identity Vault"
+            st.info(f"Identity: {user_email} has exhausted the 3-script allowance.")
+            
+            # Gated Button 1: The Lockout Redirect
+            if st.button("🔓 UNLOCK UNLIMITED SLOTS", use_container_width=True, key="lockout_upgrade_btn"):
+                st.session_state.page = TARGET_UPGRADE_PAGE
+                st.toast("Redirecting to Secure Payment...", icon="🛰️")
                 st.rerun()
             st.stop()
+            
         st.caption(f"🛰️ BASIC NODE: {3 - usage_count} scripts remaining.")
 
     # 3. THE FORMATION ENGINE
@@ -1465,18 +1469,17 @@ elif page == "🏗️ Script Architect":
             topic = st.text_input("Core Topic", placeholder="e.g., The reality of building a SaaS")
             tone = st.select_slider("Vigor", ["Professional", "Aggressive", "Elite"])
             
-            if st.button("🏗️ ARCHITECT FULL SCRIPT", use_container_width=True):
+            if st.button("🏗️ ARCHITECT FULL SCRIPT", use_container_width=True, key="main_architect_btn"):
                 if topic:
                     with st.spinner("🛰️ ARCHITECTING FORMATION..."):
-                        # Define Prompt
                         formation_prompt = (
                             f"Act as a master content strategist. Create a high-retention {platform} script about {topic}. "
-                            f"Tone: {tone}. Formation: Start with a 'Pattern Interrupt' hook, move into 'The Agitation', "
-                            f"provide 'The Insight', and end with a 'Call to Value'. Use timestamps and clear visual cues."
+                            f"Tone: {tone}. Start with a 'Pattern Interrupt' hook, move into 'The Agitation', "
+                            f"provide 'The Insight', and end with a 'Call to Value'."
                         )
                         
-                        # Execute Groq Call
                         try:
+                            # Groq Generation
                             res = groq_c.chat.completions.create(
                                 model="llama-3.1-8b-instant", 
                                 messages=[{"role": "user", "content": formation_prompt}]
@@ -1484,11 +1487,12 @@ elif page == "🏗️ Script Architect":
                             generated_script = res.choices[0].message.content
                             st.session_state.current_architect_txt = generated_script
                             
-                            # Increment Pivot Counter
+                            # Increment Usage Pivot
                             st.session_state.daily_usage_map[user_email] += 1
                             
-                            # Prepare Data for GSheet (Matching your 8-column Apps Script)
+                            # Cloud Sync
                             import datetime
+                            import requests
                             now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
                             
                             payload = {
@@ -1499,18 +1503,12 @@ elif page == "🏗️ Script Architect":
                                 "platform": platform,
                                 "topic": topic,
                                 "script": generated_script,
-                                "visualDna": f"Tone: {tone}", # Filling the 7th column
+                                "visualDna": f"Vigor: {tone}",
                                 "status": "pending"
                             }
                             
-                            # Send to Apps Script
-                            # Assuming 'requests' is imported and 'API_URL' is your Apps Script link
-                            import requests
-                            response = requests.post(API_URL, json=payload)
-                            
-                            if response.status_code == 200:
-                                st.toast("⚡ ARCHIVE SYNCHRONIZED TO CLOUD")
-                            
+                            requests.post(API_URL, json=payload, timeout=5)
+                            st.toast("⚡ ARCHIVE SYNCHRONIZED", icon="✅")
                             st.rerun()
                             
                         except Exception as e:
@@ -1522,13 +1520,16 @@ elif page == "🏗️ Script Architect":
                 st.session_state.current_architect_txt = st.text_area(
                     "Live Editor", 
                     value=st.session_state.current_architect_txt, 
-                    height=450
+                    height=450,
+                    key="script_editor_area"
                 )
                 
                 st.warning("⚠️ Optimization & Trend Mapping is restricted to PRO Nodes.")
                 
-                if st.button("🧠 UPGRADE TO NEURAL FORGE", use_container_width=True):
-                    st.session_state.page = "⚡ Upgrade Authority"
+                # Gated Button 2: The Feature Upgrade Redirect
+                if st.button("🧠 UPGRADE TO NEURAL FORGE", use_container_width=True, key="feature_upgrade_btn"):
+                    st.session_state.page = TARGET_UPGRADE_PAGE
+                    st.toast("Accessing Identity Vault...", icon="🚀")
                     st.rerun()
             else:
                 st.info("Awaiting Tactical Input to manifest formation.")
@@ -2563,6 +2564,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
