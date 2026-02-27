@@ -933,7 +933,6 @@ with st.sidebar:
                     st.markdown("<div style='width: 50px; height: 50px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px; font-weight: bold; margin-top:5px;'>DNA</div>", unsafe_allow_html=True)
 
             with col_name:
-                # Dynamically show Tier title next to Name
                 current_tier = st.session_state.get('user_status', 'Free')
                 st.markdown(f"""
                     <div style='margin-top: 5px;'>
@@ -958,7 +957,6 @@ with st.sidebar:
         st.divider()
 
         # --- CLEARANCE VISUALS ---
-        # Pro -> Operative | Elite -> Director | Core -> Agency
         u_status = st.session_state.get('user_status', 'Free')
         
         if u_status == "Agency":
@@ -971,7 +969,8 @@ with st.sidebar:
             st.markdown("<div style='background-color: #333; color: #888; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>📡 BASIC ACCESS</div>", unsafe_allow_html=True)
 
         # --- DYNAMIC MENU MAPPING ---
-        # We define exactly what each tier sees
+        # NOTE: "⚡ Upgrade Authority" is the target for Free users.
+        # "🔒 Identity Vault" is the target for Paid users.
         if u_status == "Agency":
             options = ["🏠 Dashboard", "🔒 Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Agency Suite", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
         elif u_status == "Director":
@@ -981,10 +980,11 @@ with st.sidebar:
         else:
             options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
 
+        # --- NAVIGATION SYNC LOGIC ---
         if 'current_page' not in st.session_state:
             st.session_state.current_page = options[0]
 
-        # Safety check: if current page is not in the allowed list (after a status change), reset to dashboard
+        # Reset to top of list if current page isn't available for new status
         if st.session_state.current_page not in options:
             st.session_state.current_page = options[0]
 
@@ -993,6 +993,7 @@ with st.sidebar:
         except ValueError:
             default_index = 0
 
+        # The Radio is now indexed to the session state for programmatic redirects
         page = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = page
 
@@ -1059,7 +1060,7 @@ with st.sidebar:
     except Exception as sidebar_err:
         st.error(f"System Error: {sidebar_err}")
 
-# --- FEEDBACK OVERLAY (Triggers when sidebar button is clicked) ---
+# --- FEEDBACK OVERLAY ---
 if st.session_state.get('show_feedback_node', False):
     st.markdown("---")
     draw_title("🛠️", "FEEDBACK NODE")
@@ -1068,8 +1069,6 @@ if st.session_state.get('show_feedback_node', False):
     
     with col_fb1:
         st.info("To maintain data integrity, we use an encrypted Google Form for reviews.")
-        st.write("Your feedback will be logged in the Master CSV for the Founder's Review Call.")
-        # Replace this link with your actual Form URL (the one for users to fill, not edit)
         st.link_button("🚀 OPEN FEEDBACK FORM", "https://docs.google.com/forms/d/e/1FAIpQLSfeDAY3gnWYlpH90EaJirxUc8d4obYUgiX72WJIah7Cya1VNQ/viewform?usp=header", use_container_width=True)
     
     with col_fb2:
@@ -2564,6 +2563,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
