@@ -26,6 +26,12 @@ from streamlit_gsheets import GSheetsConnection
 import base64
 from io import BytesIO
 
+# --- 1. GLOBAL UTILITIES (MUST BE AT THE TOP) ---
+def initiate_teleport(target_page):
+    st.session_state.current_page = target_page
+    # This syncs the radio widget state to prevent the "Ghost" error
+    st.session_state.nav_radio = target_page
+
 # This defines 'conn' so the rest of the app can see it
 conn = st.connection("gsheets", type=GSheetsConnection)
 def ignition_sequence():
@@ -2533,6 +2539,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
