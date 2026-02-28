@@ -115,6 +115,12 @@ else:
 if 'current_subs' not in st.session_state:
     st.session_state.current_subs = 0  # Or your starting number
 
+def force_redirect(target_page):
+    st.session_state.current_page = target_page
+    # We change the key of the radio to force it to re-render from scratch
+    if 'nav_reset_counter' not in st.session_state:
+        st.session_state.nav_reset_counter = 0
+    st.session_state.nav_reset_counter += 1
 
 # --- ANIMATION UTILITY ---
 def fetch_vault_data(sheet_name):
@@ -913,12 +919,6 @@ if not st.session_state.logged_in:
     st.stop()
 
 
-def initiate_teleport(target_page):
-    st.session_state.current_page = target_page
-    # This forces the radio widget to update its own internal state immediately
-    st.session_state.nav_radio = target_page
-
-
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
     st.session_state.page = "🏠 Dashboard"
@@ -1086,14 +1086,19 @@ if page == "🏗️ Script Architect":
     if not is_paid:
         if usage_count >= 3:
             st.error("🚨 DAILY UPLINK LIMIT REACHED")
-            if st.button("🔓 UNLOCK UNLIMITED SLOTS", use_container_width=True, key="lockout_redir"):
-                st.session_state.current_page = "⚡ Upgrade Authority"
-                st.rerun()
+            # Using callback to prevent redirect ghost
+            st.button(
+                "🔓 UNLOCK UNLIMITED SLOTS", 
+                use_container_width=True, 
+                key="lockout_redir",
+                on_click=initiate_teleport,
+                args=(TARGET_UPGRADE_PAGE,)
+            )
             st.stop()
             
         st.caption(f"🛰️ BASIC NODE: {3 - usage_count} scripts remaining.")
 
-    # 3. THE FORMATION ENGINE (RESTORED OUTLINE)
+    # 3. THE FORMATION ENGINE
     with st.container(border=True):
         c1, c2 = st.columns([1, 1.5], gap="large")
         with c1:
@@ -1119,10 +1124,8 @@ if page == "🏗️ Script Architect":
                             generated_script = res.choices[0].message.content
                             st.session_state.current_architect_txt = generated_script
                             
-                            # Usage Tracking
                             st.session_state.daily_usage_map[user_email] += 1
                             
-                            # Cloud Sync
                             import datetime, requests
                             now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
                             payload = {
@@ -1148,12 +1151,16 @@ if page == "🏗️ Script Architect":
                 
                 st.warning("⚠️ Optimization & Trend Mapping is restricted to PRO Nodes.")
                 
-                if st.button("🧠 UPGRADE TO NEURAL FORGE", use_container_width=True, key="feat_upgrade"):
-                    st.session_state.current_page = "⚡ Upgrade Authority"
-                    st.rerun()
+                # Using callback to prevent redirect ghost
+                st.button(
+                    "🧠 UPGRADE TO NEURAL FORGE", 
+                    use_container_width=True, 
+                    key="feat_upgrade",
+                    on_click=initiate_teleport,
+                    args=(TARGET_UPGRADE_PAGE,)
+                )
             else:
                 st.info("Awaiting Tactical Input to manifest formation.")
-
 
 # --- MODULE 1: DASHBOARD (KYC OPTIMIZED) ---
 elif page == "🏠 Dashboard":
@@ -2526,6 +2533,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
