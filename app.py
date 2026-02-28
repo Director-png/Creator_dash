@@ -747,7 +747,6 @@ if 'user_status' not in st.session_state:
     st.session_state.user_status = "Free"
 
 # VOID TIER MAPPING (2026 INTERNAL PROTOCOL)
-# Pro -> Operative | Elite -> Director | Core -> Agency
 TIER_MAP = {
     "Pro": "Operative",
     "Elite": "Director",
@@ -780,14 +779,13 @@ if not st.session_state.logged_in:
                     "logged_in": True, 
                     "user_name": "Master Director", 
                     "user_role": "admin", 
-                    "user_status": "Agency", # Admin mapped to Core/Agency
+                    "user_status": "Agency",
                     "user_email": "admin"
                 })
                 st.rerun()
             elif not users.empty:
                 match = users[(users['Email'].astype(str).str.lower() == email_in) & (users['Password'].astype(str) == pw_in)]
                 if not match.empty:
-                    # Retrieve the cleaned status from the load function
                     raw_status = match.iloc[0]['Status']
                     resolved_status = TIER_MAP.get(raw_status, "Free")
                     
@@ -801,7 +799,6 @@ if not st.session_state.logged_in:
                 else:
                     st.error("INTEGRITY BREACH: INVALID CREDENTIALS.")
 
-        # --- RECOVERY MODULE ---
         with st.expander("RECOVERY PROTOCOL (Lost Passkey)"):
             st.info("Verify identity via Security Answer or OTP")
             rec_mode = st.radio("Recovery Mode", ["Security Question", "OTP Verification"])
@@ -867,7 +864,18 @@ if not st.session_state.logged_in:
                 sa = st.text_input("SECURITY KEY (DOB/ANSWER)", key="reg_s")
                 ni = st.text_input("NICHE", key="reg_ni")
 
-            if st.button("⚔️ GENERATE SECURE OTP", use_container_width=True):
+            # --- ⚖️ LEGAL GATEKEEPER INTEGRATION ---
+            st.divider()
+            with st.expander("⚖️ VOID-OS DEPLOYMENT TERMS (REQUIRED)"):
+                st.markdown("""
+                1. **No-Refund Policy:** Due to immediate AI asset delivery, all paid tier upgrades are final and non-refundable.
+                2. **Usage Rights:** You own the scripts; we own the Neural Forge logic.
+                3. **Ethics:** No generation of hate speech or deceptive financial scams.
+                4. **Limits:** Basic Nodes are limited to 3 generations per day.
+                """)
+                legal_check = st.checkbox("I agree to the VOID-OS Deployment Protocols.", key="legal_agreement")
+
+            if st.button("⚔️ GENERATE SECURE OTP", use_container_width=True, disabled=not legal_check):
                 if n and e and mob and sa and ni and p:
                     st.session_state.temp_reg_data = {
                         "Email": e.strip().lower(), "Name": n, "Password": p,
@@ -886,6 +894,10 @@ if not st.session_state.logged_in:
                             else: st.error(f"Transmission Failed: {response.text}")
                         except Exception as ex: st.error(f"Connection Blocked: {ex}")
                 else: st.warning("DIRECTOR: ALL FIELDS ARE MANDATORY.")
+            
+            if not legal_check:
+                st.caption("⚠️ Acceptance of Terms is required to initialize uplink.")
+
         else:
             st.markdown(f"### PHASE 2: VERIFY UPLINK")
             st.info(f"Verification code sent to {st.session_state.temp_reg_data['Email']}")
@@ -917,13 +929,12 @@ if not st.session_state.logged_in:
             if cipher_in in ELITE_CIPHERS:
                 st.session_state.update({
                     "logged_in": True, "user_name": ELITE_CIPHERS[cipher_in],
-                    "user_status": "Operative", # Pro Bypass = Operative Tier
+                    "user_status": "Operative",
                     "user_email": "elite_test@void.os"
                 })
                 st.rerun()
             else: st.error("INVALID CIPHER.")
     st.stop()
-
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
@@ -2539,6 +2550,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
