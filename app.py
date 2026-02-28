@@ -25,6 +25,7 @@ import streamlit as st
 from streamlit_gsheets import GSheetsConnection
 import base64
 from io import BytesIO
+import urllib.parse
 
 # --- 1. GLOBAL UTILITIES (MUST BE AT THE TOP) ---
 def initiate_teleport(target_page):
@@ -2544,6 +2545,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
