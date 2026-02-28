@@ -696,7 +696,124 @@ def generate_visual(image_prompt):
     encoded_prompt = requests.utils.quote(image_prompt)
     # Pollinations.ai provides high-quality text-to-image for free
     return f"https://pollinations.ai/p/{encoded_prompt}?width=1280&height=720&seed={seed}&nologo=true"
+# This part goes at the TOP of your script where functions are defined
+def show_upgrade_authority():
+    draw_title("⚡", "ACCESS UPLINK // TIER ACTIVATION")
 
+    # Current Status Check
+    user_status = st.session_state.get('user_status', 'Free')
+    is_operative = user_status == "Operative"
+
+    # 1. THE POWER MATRIX
+    st.subheader("📊 Feature Authority Matrix")
+    
+    comparison_data = {
+        "Feature": ["Neural Forge Access", "Identity Vault", "Linguistic DNA", "Intelligence Audit", "Daily Limits", "Support"],
+        "Operative (₹1,999*)": ["✅", "✅", "❌", "Standard", "15 Credits", "Standard"],
+        "Director (₹4,999*)": ["✅ Unlimited", "✅", "✅", "Elite (CoT)", "50 Credits", "Sovereign"],
+    }
+    st.table(comparison_data)
+    st.caption("*Prices reflect 50% Early Bird Discount for the Elite 50.")
+
+    # 2. DYNAMIC PAYMENT SECTION
+    st.divider()
+    
+    # MISSION: Viral Bypass Logic
+    st.markdown("### 🎁 VIRAL CLEARANCE DISCOUNT")
+    with st.container(border=True):
+        st.write("Complete the mission to unlock an **ADDITIONAL 50% OFF** (₹999 Final Price for Operative).")
+        st.markdown("""
+        1. Follow our Official Account.
+        2. Like the latest Transmission (Video).
+        3. Share the Video with 5 Peers/Groups.
+        """)
+        viral_proof = st.file_uploader("Upload Screenshots of Proof (Follow + Shares)", accept_multiple_files=True)
+        has_viral_clearance = st.checkbox("I have uploaded the viral proof to claim my ₹999 / ₹3,000 upgrade rate.", value=False)
+
+    col_pay1, col_pay2 = st.columns([1, 1], gap="large")
+
+    with col_pay1:
+        st.subheader("💳 Select Your Path")
+        
+        # Disable Director choice for now to create urge
+        tier_choice = st.radio(
+            "Choose your level of authority:", 
+            ["Operative Tier", "Director Tier (🔒 Restricted)", "Agency (Waitlist)"],
+            help="Director Tier is currently under calibration."
+        )
+        
+        # --- PRICING ENGINE ---
+        op_price = 1999
+        dir_price = 4999
+        
+        if "Operative" in tier_choice:
+            if is_operative:
+                st.warning("⚡ STATUS: ALREADY OPERATIVE. SELECT DIRECTOR TO UPGRADE.")
+                final_amt = 0
+            else:
+                final_amt = 999 if has_viral_clearance else op_price
+                st.markdown(f"Price: ~~₹3,999~~ → **₹{final_amt}**")
+                st.caption("Includes Early Bird + Viral Discount" if has_viral_clearance else "Includes Early Bird Discount")
+            tier_tag = "OPERATIVE"
+
+        elif "Director" in tier_choice:
+            st.error("⚠️ DIRECTOR NODE CURRENTLY AT CAPACITY (1-WEEK LOCK)")
+            if is_operative:
+                final_amt = 3000 
+                st.info(f"UPGRADE DETECTED: Pay remaining ₹{final_amt} to bridge your clearance.")
+            else:
+                final_amt = 2499 if has_viral_clearance else dir_price
+                st.markdown(f"Price: ~~₹7,999~~ → **₹{final_amt}**")
+            tier_tag = "DIRECTOR"
+        else:
+            final_amt = 0
+            tier_tag = "AGENCY"
+
+        if final_amt > 0:
+            upi_id = "anuj05758@okicici"
+            payee_name = "VOID_EMPIRE"
+            transaction_note = f"ACT_{tier_tag}_{st.session_state.get('user_email', 'USER')}"
+            
+            params = {"pa": upi_id, "pn": payee_name, "am": str(final_amt), "cu": "INR", "tn": transaction_note}
+            upi_url = f"upi://pay?{urllib.parse.urlencode(params)}"
+            
+            st.link_button(f"🚀 Pay ₹{final_amt} via UPI", upi_url, use_container_width=True)
+        else:
+            st.info("Select a valid tier to generate payment link.")
+
+    with col_pay2:
+        if final_amt > 0:
+            qr_api_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={urllib.parse.quote(upi_url)}&chld=H"
+            st.markdown(f"<div style='text-align: center; background: white; padding:10px; border-radius:10px;'><img src='{qr_api_url}' width='230'></div>", unsafe_allow_html=True)
+            st.caption(f"Scan to Activate {tier_tag} Clearance")
+        else:
+            st.image("https://img.icons8.com/nolan/512/lock.png", width=200)
+
+    # 3. VERIFICATION
+    st.divider()
+    with st.container(border=True):
+        st.subheader("🛡️ Request Account Activation")
+        with st.form("payment_verify_final"):
+            u_mail = st.text_input("Confirm Registered Email", value=st.session_state.get('user_email', ''))
+            u_utr = st.text_input("UTR / Transaction ID (12 Digits)")
+            u_tier = st.selectbox("Tier Purchased", ["Operative", "Director Upgrade", "Director Full"])
+            
+            if st.form_submit_button("SEND ACTIVATION REQUEST"):
+                if u_mail and u_utr:
+                    f_payload = {
+                        "email": u_mail.lower().strip(), 
+                        "message": f"UTR: {u_utr} | Tier: {u_tier} | Viral: {has_viral_clearance}", 
+                        "category": "PAYMENT_PENDING"
+                    }
+                    try:
+                        FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
+                        requests.post(FEEDBACK_API_URL, json=f_payload, timeout=10)
+                        st.success("✅ UPLINK SUCCESSFUL: Manual verification in progress (2-4 hours).")
+                        st.balloons()
+                    except:
+                        st.error("Uplink Error. Contact Support.")
+                else:
+                    st.warning("Complete all fields and ensure proof is uploaded for Viral Discount.")
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -2273,128 +2390,10 @@ elif page == "⚖️ Legal Archive":
         st.write("- Do you keep the rights to your raw footage?")
         st.write("- Is there a limit on how many 'Revisions' the brand can ask for?")
 
-# --- MODULE 12: ACCESS UPLINK (THE REVENUE ENGINE) ---
-def show_upgrade_authority():
-    draw_title("⚡", "ACCESS UPLINK // TIER ACTIVATION")
+# --- MAIN APP ROUTING (This part goes further down in your code) ---
+if page == "⚡ Upgrade Authority":
+    show_upgrade_authority()
 
-    # Current Status Check
-    user_status = st.session_state.get('user_status', 'Free')
-    is_operative = user_status == "Operative"
-
-    # 1. THE POWER MATRIX
-    st.subheader("📊 Feature Authority Matrix")
-    
-    comparison_data = {
-        "Feature": ["Neural Forge Access", "Identity Vault", "Linguistic DNA", "Intelligence Audit", "Daily Limits", "Support"],
-        "Operative (₹1,999*)": ["✅", "✅", "❌", "Standard", "15 Credits", "Standard"],
-        "Director (₹4,999*)": ["✅ Unlimited", "✅", "✅", "Elite (CoT)", "50 Credits", "Sovereign"],
-    }
-    st.table(comparison_data)
-    st.caption("*Prices reflect 50% Early Bird Discount for the Elite 50.")
-
-    # 2. DYNAMIC PAYMENT SECTION
-    st.divider()
-    
-    # MISSION: Viral Bypass Logic
-    st.markdown("### 🎁 VIRAL CLEARANCE DISCOUNT")
-    with st.container(border=True):
-        st.write("Complete the mission to unlock an **ADDITIONAL 50% OFF** (₹999 Final Price for Operative).")
-        st.markdown("""
-        1. Follow our Official Account.
-        2. Like the latest Transmission (Video).
-        3. Share the Video with 5 Peers/Groups.
-        """)
-        viral_proof = st.file_uploader("Upload Screenshots of Proof (Follow + Shares)", accept_multiple_files=True)
-        has_viral_clearance = st.checkbox("I have uploaded the viral proof to claim my ₹999 / ₹3,000 upgrade rate.", value=False)
-
-    col_pay1, col_pay2 = st.columns([1, 1], gap="large")
-
-    with col_pay1:
-        st.subheader("💳 Select Your Path")
-        
-        # Disable Director choice for now to create urge
-        tier_choice = st.radio(
-            "Choose your level of authority:", 
-            ["Operative Tier", "Director Tier (🔒 Restricted)", "Agency (Waitlist)"],
-            help="Director Tier is currently under calibration."
-        )
-        
-        # --- PRICING ENGINE ---
-        # Base Discounted Prices (50% off real price)
-        op_price = 1999
-        dir_price = 4999
-        
-        if "Operative" in tier_choice:
-            if is_operative:
-                st.warning("⚡ STATUS: ALREADY OPERATIVE. SELECT DIRECTOR TO UPGRADE.")
-                final_amt = 0
-            else:
-                final_amt = 999 if has_viral_clearance else op_price
-                st.markdown(f"Price: ~~₹3,999~~ → **₹{final_amt}**")
-                st.caption("Includes Early Bird + Viral Discount" if has_viral_clearance else "Includes Early Bird Discount")
-            tier_tag = "OPERATIVE"
-
-        elif "Director" in tier_choice:
-            st.error("⚠️ DIRECTOR NODE CURRENTLY AT CAPACITY (1-WEEK LOCK)")
-            if is_operative:
-                # Pay the difference logic: 4999 - 1999 = 3000
-                final_amt = 3000 
-                st.info(f"UPGRADE DETECTED: Pay remaining ₹{final_amt} to bridge your clearance.")
-            else:
-                final_amt = 2499 if has_viral_clearance else dir_price
-                st.markdown(f"Price: ~~₹7,999~~ → **₹{final_amt}**")
-            tier_tag = "DIRECTOR"
-        else:
-            final_amt = 0
-            tier_tag = "AGENCY"
-
-        if final_amt > 0:
-            upi_id = "anuj05758@okicici"
-            payee_name = "VOID_EMPIRE"
-            transaction_note = f"ACT_{tier_tag}_{st.session_state.get('user_email', 'USER')}"
-            
-            params = {"pa": upi_id, "pn": payee_name, "am": str(final_amt), "cu": "INR", "tn": transaction_note}
-            upi_url = f"upi://pay?{urllib.parse.urlencode(params)}"
-            
-            st.link_button(f"🚀 Pay ₹{final_amt} via UPI", upi_url, use_container_width=True)
-        else:
-            st.info("Select a valid tier to generate payment link.")
-
-    with col_pay2:
-        if final_amt > 0:
-            qr_api_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={urllib.parse.quote(upi_url)}&chld=H"
-            st.markdown(f"<div style='text-align: center; background: white; padding:10px; border-radius:10px;'><img src='{qr_api_url}' width='230'></div>", unsafe_allow_html=True)
-            st.caption(f"Scan to Activate {tier_tag} Clearance")
-        else:
-            st.image("https://img.icons8.com/nolan/512/lock.png", width=200)
-
-    # 3. VERIFICATION
-    st.divider()
-    with st.container(border=True):
-        st.subheader("🛡️ Request Account Activation")
-        with st.form("payment_verify_final"):
-            u_mail = st.text_input("Confirm Registered Email", value=st.session_state.get('user_email', ''))
-            u_utr = st.text_input("UTR / Transaction ID (12 Digits)")
-            u_tier = st.selectbox("Tier Purchased", ["Operative", "Director Upgrade", "Director Full"])
-            
-            if st.form_submit_button("SEND ACTIVATION REQUEST"):
-                if u_mail and u_utr and (viral_proof or not has_viral_clearance):
-                    f_payload = {
-                        "email": u_mail.lower().strip(), 
-                        "message": f"UTR: {u_utr} | Tier: {u_tier} | Viral: {has_viral_clearance}", 
-                        "category": "PAYMENT_PENDING"
-                    }
-                    try:
-                        FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
-                        requests.post(FEEDBACK_API_URL, json=f_payload, timeout=10)
-                        st.success("✅ UPLINK SUCCESSFUL: Manual verification in progress (2-4 hours).")
-                        st.balloons()
-                    except:
-                        st.error("Uplink Error. Contact Support.")
-                else:
-                    st.warning("Complete all fields and ensure proof is uploaded for Viral Discount.")
-
-# --- MODULE 8: MEDIA UPLINK (THE DIRECTOR'S BRIDGE) ---
 elif page == "🛰️ Media Uplink":
     draw_title("🛰️", "MEDIA UPLINK // THE BRIDGE")
     st.info("Direct server-side downloading is throttled. Switching to 'Bridge Mode' for 100% reliability.")
@@ -2414,11 +2413,10 @@ elif page == "🛰️ Media Uplink":
                             'quiet': True,
                             'no_warnings': True,
                             'cookiefile': found_cookie_file if found_cookie_file else None,
-                            'format': 'best', # Get the best combined format
+                            'format': 'best',
                         }
                         
                         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                            # We only fetch info, we do NOT download on the server
                             info = ydl.extract_info(uplink_url, download=False)
                             direct_url = info.get('url')
                             title = info.get('title', 'Asset')
