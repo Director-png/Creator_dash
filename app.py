@@ -131,14 +131,21 @@ def force_redirect(target_page):
 
 # --- ANIMATION UTILITY ---
 def fetch_vault_data(sheet_name):
-    """Fetches any specific sheet from your empire's vault."""
+    """Fetches any specific sheet from your empire's vault via Secure Bridge."""
+    # We pull from secrets, fallback to the hardcoded ID only if necessary
     SHEET_IDS = {
-        "market": "2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS",
-        "users": "2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes",
-        "feedback": "AKfycbz1mLI3YkbjVsA4a8rMgMe_07w_1sS8H-f2Wvz1FtFCU-ZN4zCH7kDUGaDPDaaMbrvaPw",
-        "history": "2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes"
+        "market": get_void_secret("SHEET_ID_MARKET", "RESTRICTED"),
+        "users": get_void_secret("SHEET_ID_USERS", "RESTRICTED"),
+        "feedback": get_void_secret("SHEET_ID_FEEDBACK", "RESTRICTED"),
+        "history": get_void_secret("SHEET_ID_HISTORY", "RESTRICTED")
     }
-    url = f"https://docs.google.com/spreadsheets/d/e/{SHEET_IDS[sheet_name]}/pub?output=csv"
+    
+    # Safety check: if the ID is restricted and secret failed, stop here
+    current_id = SHEET_IDS.get(sheet_name)
+    if current_id == "RESTRICTED":
+        return pd.DataFrame()
+
+    url = f"https://docs.google.com/spreadsheets/d/e/{current_id}/pub?output=csv"
     try:
         res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
         df = pd.read_csv(io.StringIO(res.text))
@@ -187,15 +194,26 @@ if 'user_tier' not in st.session_state:
 is_paid_tier = st.session_state.user_tier in ["Pro", "Elite"]
 
 # --- 🛰️ DATA INFRASTRUCTURE ---
-MARKET_PULSE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
-USER_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?gid=2093671902&single=true&output=csv&t=" + str(time.time())
-FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
-SCRIPT_VAULT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8sFup141r9k9If9fu6ewnpWPkTthF-rMKSMSn7l26PqoY3Yb659FIDXcU3UIU9mo5d2VlR2Z8gHes/pub?output=csv"
-VAULT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfeDAY3gnWYlpH90EaJirxUc8d4obYUgiX72WJIah7Cya1VNQ/formResponse"
-VAULT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQTrDvNWe810s55puzBodFKvfUbfMV_l-QoQIfbdPxeQknClGGCQT33UQ471NyGTw4aHLrDTw/pub?gid=1490190727&single=true&output=csv"
-FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbz1mLI3YkbjVsA4a8rMgMe_07w_1sS8H-f2Wvz1FtFCU-ZN4zCH7kDUGaDPDaaMbrvaPw/exec"
-NEW_URL = "https://script.google.com/macros/s/AKfycbzBLwNA-37KxZ5mDyHp1DMNw23n8xyfBVaVbmg_zRs-oQAZGue6Zuxo44UwztuBvFIC/exec"
-NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68"
+# --- 🛰️ SECURE DATA INFRASTRUCTURE (FINAL GHOST VERSION) ---
+def get_void_secret(key, backup_link):
+    try:
+        return st.secrets[key]
+    except:
+        return backup_link
+
+# For Public safety, replace the backup links with "RESTRICTED" once verified
+MARKET_PULSE_URL = get_void_secret("MARKET_PULSE_URL", "RESTRICTED")
+
+# We add the time logic here so the URL always stays fresh
+USER_DB_URL = get_void_secret("USER_DB_URL", "RESTRICTED") + "&t=" + str(time.time())
+
+FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
+VAULT_FORM_URL = get_void_secret("VAULT_FORM_URL", "RESTRICTED")
+SCRIPT_VAULT_CSV_URL = get_void_secret("SCRIPT_VAULT_URL", "RESTRICTED")
+VAULT_SHEET_CSV_URL = get_void_secret("VAULT_SHEET_URL", "RESTRICTED")
+FEEDBACK_API_URL = get_void_secret("FEEDBACK_API_URL", "RESTRICTED")
+NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
+NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
 
 def draw_title(emoji, text):
@@ -322,9 +340,13 @@ import pandas as pd
 
 def sync_history_from_cloud():
     try:
-        # PASTE YOUR NEW CSV LINK HERE
-        CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQTrDvNWe810s55puzBodFKvfUbfMV_l-QoQIfbdPxeQknClGGCQT33UQ471NyGTw4aHLrDTw/pub?gid=1490190727&single=true&output=csv"
+        # Pull the link from our Security Bridge
+        # We use the existing VAULT_SHEET_URL secret
+        CSV_URL = get_void_secret("VAULT_SHEET_URL", "RESTRICTED")
         
+        if CSV_URL == "RESTRICTED":
+            return False
+            
         # Pull data and strip spaces from headers
         df = pd.read_csv(CSV_URL)
         df.columns = [c.strip() for c in df.columns]
@@ -332,15 +354,14 @@ def sync_history_from_cloud():
         user_email = st.session_state.get('user_email', 'N/A')
         
         if not df.empty:
-            # Check if 'Email' column exists before filtering
             if 'Email' in df.columns:
                 user_df = df[df['Email'] == user_email]
-                # Convert to records so the History Tab can loop through them
                 st.session_state.script_history = user_df.to_dict('records')
                 return True
         return False
     except Exception as e:
-        st.error(f"🛰️ HISTORY READ ERROR: {e}")
+        # On public repos, we keep errors vague to not leak info
+        st.error("🛰️ HISTORY UPLINK CALIBRATING...")
         return False
 
 def ask_void_agent(user_query, context_data):
@@ -382,24 +403,34 @@ def load_user_db():
 
 def load_history_db():
     try:
-        # Use your history tab CSV export link
-        # Format: https://docs.google.com/spreadsheets/d/ID/export?format=csv&gid=TAB_ID
-        history_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtSx9iQTrDvNWe810s55puzBodFKvfUbfMV_l-QoQIfbdPxeQknClGGCQT33UQ471NyGTw4aHLrDTw/pub?gid=678649061&single=true&output=csv" 
+        # Pull from secrets, fallback to restricted for safety
+        history_url = get_void_secret("HISTORY_DB_URL", "RESTRICTED")
+        
+        if history_url == "RESTRICTED":
+            return pd.DataFrame()
+
+        # Added the cache-busting timestamp logic back in
         df = pd.read_csv(f"{history_url}&cache={time.time()}")
         df.columns = [str(c).strip().lower() for c in df.columns]
         return df
     except Exception as e:
-        st.error(f"Vault Connection Error: {e}")
+        # Vague error for public security
+        st.error("Vault Connection Offline.")
         return pd.DataFrame()
 
 def fetch_live_market_data():
-    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN3zcXZqn9RMnPs7vNEa7vI9xr1Y2VVVlZLUcEwUVqsVqtLMadz1L_Ap4XK_WPA1nnFdpqGr8B_uS/pub?output=csv"
+    # Uses your existing MARKET_PULSE_URL secret
+    url = get_void_secret("MARKET_PULSE_URL", "RESTRICTED")
+    
+    if url == "RESTRICTED":
+        return pd.DataFrame()
+
     try:
         res = requests.get(url, timeout=10)
         df = pd.read_csv(io.StringIO(res.text))
         df.columns = [str(c).strip().lower() for c in df.columns]
         
-        # --- THE FIX: SCRUB THE GROWTH COLUMN ---
+        # --- THE FIX: SCRUB THE GROWTH COLUMN (LOGIC PRESERVED) ---
         if 'growth' in df.columns:
             # Remove %, commas, and whitespace, then convert to float
             df['growth'] = df['growth'].astype(str).str.replace('%', '').str.replace(',', '').str.strip()
@@ -407,7 +438,7 @@ def fetch_live_market_data():
             
         return df
     except Exception as e:
-        st.error(f"Uplink Error: {e}")
+        st.error("Market Uplink Error.")
         return pd.DataFrame()
 
 def fetch_live_news(query, api_key):
@@ -450,12 +481,19 @@ def get_saturation_status(score):
     return "🟢 EARLY (High Growth Opportunity)"
 
 def transmit_script(client, platform, topic, script, dna):
-    url = "https://script.google.com/macros/s/AKfycby9nYH4bTmC0rFoZQWj87S-hiu7lJeXXd4mVuRyJxrVTk-OGaPx5zFNZzgYZWSRuNH0/exec"
+    # Pull the secure URL from the Bridge
+    url = get_void_secret("TRANSMIT_SCRIPT_URL", "RESTRICTED")
+    
+    if url == "RESTRICTED":
+        return False
+
     payload = {"client": client, "platform": platform, "topic": topic, "script": script, "dna": dna}
     try:
+        # Standard payload logic preserved
         response = requests.post(url, data=payload)
         return response.status_code == 200
-    except: return False
+    except: 
+        return False
 
 def generate_oracle_report(topic, platform, tone):
     try:
@@ -685,10 +723,20 @@ trigger_monday_pulse()
 
 # --- 0. NEURAL CONFIGURATION (THE BRAIN SWAP) ---
 # Swapping Gemini for Groq for high-velocity solo development
+# --- SECURE GROQ INITIALIZATION ---
+# 1. Pull key from secrets (No hardcoding!)
 if 'groq_key' not in st.session_state:
-    st.session_state.groq_key = "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"
+    st.session_state.groq_key = get_void_secret("GROQ_API_KEY", "RESTRICTED")
 
-client = Groq(api_key=st.session_state.groq_key)
+# 2. Initialize Client safely
+if st.session_state.groq_key != "RESTRICTED":
+    try:
+        client = Groq(api_key=st.session_state.groq_key)
+    except Exception:
+        client = None
+else:
+    client = None
+
 MODEL_ID = "llama-3.3-70b-versatile"
 
 # --- 2. VISUAL FORGE (FREE IMAGE ENGINE) ---
@@ -698,7 +746,9 @@ def generate_visual(image_prompt):
     # Pollinations.ai provides high-quality text-to-image for free
     return f"https://pollinations.ai/p/{encoded_prompt}?width=1280&height=720&seed={seed}&nologo=true"
 # This part goes at the TOP of your script where functions are defined
+# --- MODULE 12: ACCESS UPLINK (THE REVENUE ENGINE) ---
 def show_upgrade_authority():
+    # Use the utility to draw the title
     draw_title("⚡", "ACCESS UPLINK // TIER ACTIVATION")
 
     # Current Status Check
@@ -736,7 +786,7 @@ def show_upgrade_authority():
     with col_pay1:
         st.subheader("💳 Select Your Path")
         
-        # Disable Director choice for now to create urge
+        # UI for Tier Selection
         tier_choice = st.radio(
             "Choose your level of authority:", 
             ["Operative Tier", "Director Tier (🔒 Restricted)", "Agency (Waitlist)"],
@@ -760,6 +810,7 @@ def show_upgrade_authority():
         elif "Director" in tier_choice:
             st.error("⚠️ DIRECTOR NODE CURRENTLY AT CAPACITY (1-WEEK LOCK)")
             if is_operative:
+                # Pay the difference logic
                 final_amt = 3000 
                 st.info(f"UPGRADE DETECTED: Pay remaining ₹{final_amt} to bridge your clearance.")
             else:
@@ -771,10 +822,12 @@ def show_upgrade_authority():
             tier_tag = "AGENCY"
 
         if final_amt > 0:
+            # Payment Meta
             upi_id = "anuj05758@okicici"
             payee_name = "VOID_EMPIRE"
             transaction_note = f"ACT_{tier_tag}_{st.session_state.get('user_email', 'USER')}"
             
+            # Construct UPI String safely using urllib
             params = {"pa": upi_id, "pn": payee_name, "am": str(final_amt), "cu": "INR", "tn": transaction_note}
             upi_url = f"upi://pay?{urllib.parse.urlencode(params)}"
             
@@ -784,6 +837,7 @@ def show_upgrade_authority():
 
     with col_pay2:
         if final_amt > 0:
+            # Generate QR Code via External API
             qr_api_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={urllib.parse.quote(upi_url)}&chld=H"
             st.markdown(f"<div style='text-align: center; background: white; padding:10px; border-radius:10px;'><img src='{qr_api_url}' width='230'></div>", unsafe_allow_html=True)
             st.caption(f"Scan to Activate {tier_tag} Clearance")
@@ -801,20 +855,26 @@ def show_upgrade_authority():
             
             if st.form_submit_button("SEND ACTIVATION REQUEST"):
                 if u_mail and u_utr:
+                    # Payload for Google Script Macro
                     f_payload = {
                         "email": u_mail.lower().strip(), 
                         "message": f"UTR: {u_utr} | Tier: {u_tier} | Viral: {has_viral_clearance}", 
                         "category": "PAYMENT_PENDING"
                     }
                     try:
-                        FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
-                        requests.post(FEEDBACK_API_URL, json=f_payload, timeout=10)
-                        st.success("✅ UPLINK SUCCESSFUL: Manual verification in progress (2-4 hours).")
-                        st.balloons()
+                        # Pull secure endpoint from bridge
+                        target_api = get_void_secret("FEEDBACK_API_URL", "RESTRICTED")
+                        
+                        if target_api != "RESTRICTED":
+                            requests.post(target_api, json=f_payload, timeout=10)
+                            st.success("✅ UPLINK SUCCESSFUL: Manual verification in progress (2-4 hours).")
+                            st.balloons()
+                        else:
+                            st.error("Uplink Terminal Offline. Contact Support.")
                     except:
-                        st.error("Uplink Error. Contact Support.")
+                        st.error("Uplink Error. Check your connection.")
                 else:
-                    st.warning("Complete all fields and ensure proof is uploaded for Viral Discount.")
+                    st.warning("Complete all fields to initiate verification.")
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -848,8 +908,9 @@ if st.sidebar.checkbox("🔍 Debug Node Mapping"):
     else:
         st.error("Sheet is empty or URL is invalid.")
 # --- CONFIGURATION (Ensure these are defined) ---
-# NEW_URL = "https://script.google.com/macros/s/AKfycbzBLwNA-37KxZ5mDyHp1DMNw23n8xyfBVaVbmg_zRs-oQAZGue6Zuxo44UwztuBvFIC/exec"
-# FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfnNLb9O-szEzYfYEL85aENIimZFtMd5H3a7o6fX-_6ftU_HA/formResponse"
+# Pulling from the secret vault we just set up
+NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
+FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 # --- GATEKEEPER START ---
 # 1. SESSION STATE INITIALIZATION
@@ -872,11 +933,11 @@ TIER_MAP = {
     "Free": "Free"
 }
 
-# ELITE BYPASS CODES
+# ELITE BYPASS CODES (Bridge Enabled)
 ELITE_CIPHERS = {
-    "VOID-V1-X7R2-DELTA": "Elite Pioneer 1",
-    "VOID-V1-K9P4-OMEGA": "Elite Pioneer 2",
-    "BETA_ELITE_2026": "Elite Pioneer",
+    get_void_secret("CIPHER_1", "VOID-X"): "Elite Pioneer 1",
+    get_void_secret("CIPHER_2", "VOID-Y"): "Elite Pioneer 2",
+    get_void_secret("CIPHER_3", "VOID-Z"): "Elite Pioneer",
 }
 
 if not st.session_state.logged_in:
@@ -892,7 +953,12 @@ if not st.session_state.logged_in:
         
         if st.button("INITIATE UPLINK", use_container_width=True):
             users = load_user_db() 
-            if email_in == "admin" and pw_in == "1234":
+            
+            # Secure Admin Check
+            adm_user = get_void_secret("GATEKEEPER_ADMIN_USER", "RESTRICTED")
+            adm_pw = get_void_secret("GATEKEEPER_ADMIN_PW", "RESTRICTED")
+            
+            if email_in == adm_user and pw_in == adm_pw and adm_user != "RESTRICTED":
                 st.session_state.update({
                     "logged_in": True, 
                     "user_name": "Master Director", 
@@ -982,7 +1048,6 @@ if not st.session_state.logged_in:
                 sa = st.text_input("SECURITY KEY (DOB/ANSWER)", key="reg_s")
                 ni = st.text_input("NICHE", key="reg_ni")
 
-            # --- ⚖️ LEGAL GATEKEEPER INTEGRATION ---
             st.divider()
             with st.expander("⚖️ VOID-OS DEPLOYMENT TERMS (REQUIRED)"):
                 st.markdown("""
@@ -1201,7 +1266,9 @@ with st.sidebar:
 if page == "🏗️ Script Architect":
     draw_title("⚔️", "SCRIPT ARCHITECT")
     
-    API_URL = "https://script.google.com/macros/s/AKfycby38DOr6SA2x_r-oS1gHudA39Gucb2BioMpVbfe6i288uOiBZnuv421vVlHv3O8J_KY/exec"
+    # --- SECURE BRIDGE ACTIVATED ---
+    # We pull the API URL from secrets to hide it from the public repo
+    API_URL = get_void_secret("ARCHITECT_API_URL", "RESTRICTED")
     TARGET_UPGRADE_PAGE = "⚡ Upgrade Authority" 
 
     # 1. INITIALIZE IDENTITY
@@ -1252,6 +1319,7 @@ if page == "🏗️ Script Architect":
                         )
                         
                         try:
+                            # Logic Intact: Using Groq Client initialized at top of script
                             res = groq_c.chat.completions.create(
                                 model="llama-3.1-8b-instant", 
                                 messages=[{"role": "user", "content": formation_prompt}]
@@ -1261,6 +1329,7 @@ if page == "🏗️ Script Architect":
                             
                             st.session_state.daily_usage_map[user_email] += 1
                             
+                            # Log and Sync
                             import datetime, requests
                             now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
                             payload = {
@@ -1268,8 +1337,12 @@ if page == "🏗️ Script Architect":
                                 "email": user_email, "platform": platform, "topic": topic,
                                 "script": generated_script, "visualDna": f"Vigor: {tone}", "status": "pending"
                             }
-                            requests.post(API_URL, json=payload, timeout=5)
-                            st.toast("⚡ ARCHIVE SYNCHRONIZED", icon="✅")
+                            
+                            # Only attempt transmission if API_URL is valid
+                            if API_URL != "RESTRICTED":
+                                requests.post(API_URL, json=payload, timeout=5)
+                                st.toast("⚡ ARCHIVE SYNCHRONIZED", icon="✅")
+                            
                             st.rerun()
                         except Exception as e:
                             st.error(f"SYSTEM FAILURE: {e}")
@@ -2169,10 +2242,12 @@ elif page == "📜 History":
 elif page == "🛡️ Admin Console":
     draw_title("🛡️", "SYSTEM ADMINISTRATION // DIRECTOR LEVEL")
     
-    # 1. Password Protection
+    # 1. Password Protection (Ghost Logic)
+    # We pull the master password from secrets
+    master_code = get_void_secret("ADMIN_PASSWORD", "RESTRICTED")
     auth = st.text_input("Enter Level 5 Authorization Code", type="password")
     
-    if auth == "IamAdmin": 
+    if auth == master_code and master_code != "RESTRICTED": 
         st.session_state['admin_verified'] = True
         st.success("Identity Verified. Welcome, Director.")
         
@@ -2181,7 +2256,6 @@ elif page == "🛡️ Admin Console":
         with col_m1:
             st.metric("Daily Credits Used", f"{st.session_state.get('daily_usage', 0)}")
         with col_m2:
-            # Placeholder for actual data from users_df
             st.metric("Projected ARR", "₹88,00,000", "+5.2%")
         with col_m3:
             st.metric("Global Nodes (USD)", "$1,200", "+$450")
@@ -2194,22 +2268,19 @@ elif page == "🛡️ Admin Console":
         # --- TAB 1: USER MANAGEMENT ---
         with tab1:
             st.subheader("👥 Citizen Database")
-            # Assuming load_user_db() is defined in your helper script
             users_df = load_user_db() if 'load_user_db' in globals() else pd.DataFrame()
             
             if not users_df.empty:
                 st.dataframe(users_df, use_container_width=True)
                 
-                # Dynamic Tier Count
                 st.divider()
                 st.subheader("🛰️ Node Traffic Analysis")
                 col_c1, col_c2 = st.columns(2)
                 with col_c1:
                     st.info(f"Total Database Entries: {len(users_df)}")
                 with col_c2:
-                    # Logic to count tiers if 'Status' column exists
                     if 'Status' in users_df.columns:
-                        pro_count = len(users_df[users_df['Status'] == 'Pro'])
+                        pro_count = len(users_df[users_df['Status'].str.title() == 'Pro'])
                         st.success(f"Active Pro Nodes: {pro_count}")
             else:
                 st.info("No active user data found in synchronization tunnel.")
@@ -2223,27 +2294,29 @@ elif page == "🛡️ Admin Console":
             
             if st.button("ACTIVATE PRO NODES"):
                 if target_mail:
-                    # 1. Prepare Payload for Role Upgrade (Preserved Logic)
                     payload = {
                         "email": target_mail.lower().strip(),
                         "category": "ROLE_UPGRADE",
                         "message": "PRO_ACTIVATION"
                     }
                     
-                    # 2. Execute Uplink
                     try:
-                        NEW_URL = "https://script.google.com/macros/s/AKfycbzBLwNA-37KxZ5mDyHp1DMNw23n8xyfBVaVbmg_zRs-oQAZGue6Zuxo44UwztuBvFIC/exec" 
-                        response = requests.post(NEW_URL, json=payload, timeout=30)
+                        # Pull secure URL from bridge
+                        NEW_URL = get_void_secret("ADMIN_ACTIVATE_URL", "RESTRICTED")
                         
-                        if response.status_code == 200 and "SUCCESS" in response.text:
-                            st.success(f"⚔️ OMNI-SYNC COMPLETE: {target_mail} updated in Google Sheets.")
-                            st.balloons()
-                            # Immediate Session Update if Admin is testing their own account
-                            if target_mail.lower().strip() == st.session_state.get('user_email'):
-                                st.session_state.user_status = 'Pro'
-                            st.rerun()
+                        if NEW_URL != "RESTRICTED":
+                            response = requests.post(NEW_URL, json=payload, timeout=30)
+                            
+                            if response.status_code == 200 and "SUCCESS" in response.text:
+                                st.success(f"⚔️ OMNI-SYNC COMPLETE: {target_mail} updated in Google Sheets.")
+                                st.balloons()
+                                if target_mail.lower().strip() == st.session_state.get('user_email'):
+                                    st.session_state.user_status = 'Pro'
+                                st.rerun()
+                            else:
+                                st.error(f"📡 SCRIPT RESPONSE: {response.text}")
                         else:
-                            st.error(f"📡 SCRIPT RESPONSE: {response.text}")
+                            st.error("Terminal restricted. Check Secrets.")
                     except Exception as e:
                         st.error(f"🚨 UPLINK CRASHED: {e}")
                 else:
@@ -2251,31 +2324,34 @@ elif page == "🛡️ Admin Console":
 
             st.divider()
             
-            # --- THE MANUAL VERIFY FORM (Incoming Requests) ---
+            # --- THE MANUAL VERIFY FORM ---
             with st.form("manual_verify_v2"):
                 st.write("### 🛰️ Transaction Log Check")
-                st.write("Review and log payment requests from users here.")
                 u_email = st.text_input("Registered Email")
                 u_txn = st.text_input("Transaction ID / Reference Number")
-                
-                FEEDBACK_API_URL = "https://script.google.com/macros/s/AKfycbxP8IMp3_WaK3Uxwnrm-haGVMuq8xPbiBMp7j4et8l6r2LvgQZo-RRaTd_OCa4rnZuxAA/exec"
                 
                 if st.form_submit_button("LOG VERIFICATION"):
                     if u_email and u_txn:
                         f_payload = {"email": u_email, "message": u_txn, "category": "PAYMENT_PENDING"}
                         try:
-                            f_res = requests.post(FEEDBACK_API_URL, json=f_payload, timeout=10)
-                            if f_res.status_code == 200:
-                                st.success("✅ TRANSMISSION SUCCESS: Verification request logged.")
-                                st.balloons()
+                            # Pull secure URL from bridge
+                            LOG_API = get_void_secret("ADMIN_LOG_URL", "RESTRICTED")
+                            
+                            if LOG_API != "RESTRICTED":
+                                f_res = requests.post(LOG_API, json=f_payload, timeout=10)
+                                if f_res.status_code == 200:
+                                    st.success("✅ TRANSMISSION SUCCESS: Verification request logged.")
+                                    st.balloons()
+                                else:
+                                    st.error(f"📡 UPLINK ERROR: {f_res.status_code}")
                             else:
-                                st.error(f"📡 UPLINK ERROR: {f_res.status_code}")
+                                st.error("Log Link restricted.")
                         except Exception as e:
                             st.error(f"🚨 CRITICAL SYSTEM FAILURE: {str(e)}")
                     else:
                         st.warning("Director, both fields are required.")
 
-        # --- TAB 3: LEAD DROP (Future Expansion DNA) ---
+        # --- TAB 3: LEAD DROP ---
         with tab3:
             st.subheader("📡 Broadcast New Leads")
             st.write("Upload leads for your Real Estate or Agency-tier users.")
@@ -2291,11 +2367,9 @@ elif page == "🛡️ Admin Console":
                 else:
                     st.error("No data package detected.")
 
-        # --- TAB 4: IDENTITY LOGS (Monitoring User DNA) ---
+        # --- TAB 4: IDENTITY LOGS ---
         with tab4:
             st.subheader("🔐 Vault Security Monitoring")
-            st.write("Monitor which users have established their Identity Anchors.")
-            # This is where you monitor if users are using the Vault properly
             if st.session_state.get('vault_anchor'):
                 st.write("✅ DIRECTOR DNA: Locally Active.")
             else:
@@ -2352,37 +2426,39 @@ elif page == "⚖️ Legal Archive":
         )
         if st.button("📤 SEND RECOMMENDATION", use_container_width=True):
             if user_suggestion:
-                import requests # Ensure this is at the top of your script
+                import requests # Logic Intact
                 
-                # --- 📡 THE GOOGLE FORM BRIDGE ---
-                # Replace the URL with your "formResponse" URL and match the entry IDs
-                form_url = "https://docs.google.com/forms/d/e/1FAIpQLSfeDAY3gnWYlpH90EaJirxUc8d4obYUgiX72WJIah7Cya1VNQ/formResponse"
+                # --- 📡 THE SECURE GOOGLE FORM BRIDGE ---
+                # Pulling the URL from the secret vault
+                form_url = get_void_secret("LEGAL_VAULT_FORM_URL", "RESTRICTED")
                 
-                payload = {
-                    "entry.2084741280": st.session_state.get('user_name', 'Unknown'), # User Name ID
-                    "entry.554052255": vote_choice,                                 # Priority ID
-                    "entry.2031301382": user_suggestion                              # Feedback ID
-                }
+                if form_url != "RESTRICTED":
+                    payload = {
+                        "entry.2084741280": st.session_state.get('user_name', 'Unknown'), # User Name ID
+                        "entry.554052255": vote_choice,                                 # Priority ID
+                        "entry.2031301382": user_suggestion                              # Feedback ID
+                    }
 
-                try:
-                    # We send the data "behind the scenes"
-                    response = requests.post(form_url, data=payload)
+                    try:
+                        # We send the data "behind the scenes"
+                        response = requests.post(form_url, data=payload)
+                        
+                        if response.status_code == 200:
+                            st.success(f"**Recommendation Locked, {st.session_state.get('user_name', 'Director')}!**")
+                            st.balloons()
+                            st.markdown(f"""
+                            > Your input has been transmitted directly to the Master Vault.
+                            > We are building this app for YOU, and we’ll surely work on making this a reality in the next update!""")
+                        else:
+                            st.error("Uplink Error: Transmission rejected. Verify Form IDs.")
                     
-                    if response.status_code == 200:
-                        st.success(f"**Recommendation Locked, {st.session_state.get('user_name', 'Director')}!**")
-                        st.balloons()
-                        st.markdown(f"""
-                        > Your input has been transmitted directly to the Master Vault.
-                        > We are building this app for YOU, and we’ll surely work on making this a reality in the next update!""")
-                    else:
-                        st.error("Uplink Error: Sheet rejected the data. Check Form IDs.")
-                
-                except Exception as e:
-                    st.error(f"Critical Failure: {e}")
+                    except Exception as e:
+                        st.error(f"Critical Failure: {e}")
+                else:
+                    st.error("Uplink Restricted. Check Terminal Secrets.")
             else:
                 st.warning("Director, please add a small suggestion first!")
                     
-                   
     # --- SECTION 3: BASIC CHECKLIST (The 'Now' value) ---
     st.divider()
     with st.expander("✅ VIEW BASIC SAFETY CHECKLIST"):
@@ -2545,6 +2621,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
