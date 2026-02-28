@@ -912,6 +912,13 @@ if not st.session_state.logged_in:
             else: st.error("INVALID CIPHER.")
     st.stop()
 
+
+def initiate_teleport(target_page):
+    st.session_state.current_page = target_page
+    # This forces the radio widget to update its own internal state immediately
+    st.session_state.nav_radio = target_page
+
+
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
     st.session_state.page = "🏠 Dashboard"
@@ -1080,7 +1087,7 @@ if page == "🏗️ Script Architect":
         if usage_count >= 3:
             st.error("🚨 DAILY UPLINK LIMIT REACHED")
             if st.button("🔓 UNLOCK UNLIMITED SLOTS", use_container_width=True, key="lockout_redir"):
-                st.session_state.current_page = TARGET_UPGRADE_PAGE
+                st.session_state.current_page = "⚡ Upgrade Authority"
                 st.rerun()
             st.stop()
             
@@ -1142,7 +1149,7 @@ if page == "🏗️ Script Architect":
                 st.warning("⚠️ Optimization & Trend Mapping is restricted to PRO Nodes.")
                 
                 if st.button("🧠 UPGRADE TO NEURAL FORGE", use_container_width=True, key="feat_upgrade"):
-                    st.session_state.current_page = TARGET_UPGRADE_PAGE
+                    st.session_state.current_page = "⚡ Upgrade Authority"
                     st.rerun()
             else:
                 st.info("Awaiting Tactical Input to manifest formation.")
@@ -2519,6 +2526,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
