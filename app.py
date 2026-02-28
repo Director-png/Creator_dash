@@ -2396,9 +2396,6 @@ def show_upgrade_authority():
 
 # --- MODULE 8: MEDIA UPLINK (THE DIRECTOR'S BRIDGE) ---
 elif page == "🛰️ Media Uplink":
-    import yt_dlp
-    import os
-
     draw_title("🛰️", "MEDIA UPLINK // THE BRIDGE")
     st.info("Direct server-side downloading is throttled. Switching to 'Bridge Mode' for 100% reliability.")
 
@@ -2549,6 +2546,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
