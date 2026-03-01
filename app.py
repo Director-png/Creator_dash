@@ -1147,6 +1147,21 @@ if 'page' not in st.session_state:
 
 # --- 2. SIDEBAR ARCHITECTURE ---
 with st.sidebar:
+    # --- THE GHOST OVERRIDE: SURGICAL STEALTH ---
+    # This block executes inside the sidebar to force-kill Streamlit branding & white borders
+    st.write(
+        f"<style>{''.join([
+            'header {visibility: hidden !important;}',
+            'footer {visibility: hidden !important;}',
+            '#MainMenu {visibility: hidden !important;}',
+            '.stAppDeployButton {display:none !important;}',
+            '[data-testid=\"stStatusWidget\"] {visibility: hidden !important;}',
+            '.stApp {background-color: #000000 !important;}',
+            '.block-container {padding: 0rem !important; margin: 0rem !important;}'
+        ])}</style>",
+        unsafe_allow_code=True
+    )
+
     try:
         # --- ENHANCED IDENTITY CORE ---
         profile_img = st.session_state.get('vault_anchor')
@@ -1183,19 +1198,6 @@ with st.sidebar:
         """, unsafe_allow_html=True)
         
         st.divider()
-# --- THE GHOST OVERRIDE ---
-st.write(
-    f"<style>{''.join([
-        'header {visibility: hidden !important;}',
-        'footer {visibility: hidden !important;}',
-        '#MainMenu {visibility: hidden !important;}',
-        '.stAppDeployButton {display:none !important;}',
-        '[data-testid=\"stStatusWidget\"] {visibility: hidden !important;}',
-        '.stApp {background-color: #000000 !important;}',
-        '.block-container {padding: 0rem !important; margin: 0rem !important;}'
-    ])}</style>",
-    unsafe_allow_code=True
-)
         
         # --- CLEARANCE VISUALS ---
         u_status = st.session_state.get('user_status', 'Free')
@@ -2663,6 +2665,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
