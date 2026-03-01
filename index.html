@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VOID OS | Private Terminal</title>
     <style>
-        /* This kills the white border at the browser level */
         body, html { 
             margin: 0; 
             padding: 0; 
@@ -14,20 +13,31 @@
             overflow: hidden; 
             background-color: #000; 
         }
+        /* THE CROP TECHNIQUE */
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
         iframe { 
             position: absolute;
-            top: 0;
+            /* Move the app up by 60px to hide the Streamlit header */
+            top: -60px; 
             left: 0;
             width: 100%; 
-            height: 100%; 
+            /* Make the height 60px longer so the footer stays off-screen */
+            height: calc(100% + 120px); 
             border: none;
         }
     </style>
 </head>
 <body>
-    <iframe 
-        src="https://void-os.streamlit.app/?embed=true&embed_options=disable_scrolling,light_theme" 
-        allow="fullscreen">
-    </iframe>
+    <div class="container">
+        <iframe 
+            src="https://void-os.streamlit.app/?embed=true&embed_options=disable_scrolling" 
+            allow="fullscreen">
+        </iframe>
+    </div>
 </body>
 </html>
