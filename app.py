@@ -27,6 +27,27 @@ import base64
 from io import BytesIO
 import urllib.parse
 
+st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="expanded")
+
+# --- STEALTH PATCH: HIDE STREAMLIT BRANDING ---
+st.markdown("""
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    .block-container {
+        padding-top: 0rem;
+        padding-bottom: 0rem;
+        padding-left: 0rem;
+        padding-right: 0rem;
+    }
+    /* This removes the white border around the app */
+    [data-testid="stAppViewContainer"] {
+        background-color: #000000;
+    }
+    </style>
+    """, unsafe_allow_code=True)
+
 # --- 1. GLOBAL UTILITIES (MUST BE AT THE TOP) ---
 def initiate_teleport(target_page):
     st.session_state.current_page = target_page
@@ -2628,6 +2649,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
