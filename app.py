@@ -128,13 +128,13 @@ if "current_page" not in st.session_state:
 
 if "GROQ_API_KEY" in st.secrets:
     try:
-        # strip() handles accidental spaces in the secrets tab
-       GROQ_API_KEY = st.secrets("GROQ_API_KEY")
-    except:
+        # Use square brackets [] to access the key
+        GROQ_API_KEY = st.secrets["GROQ_API_KEY"].strip()
+        groq_c = GROQ_API_KEY # Assigning it to your variable
+    except Exception:
         groq_c = None
 else:
     groq_c = None
-
 
 # --- INITIALIZE ALL KEYS ---
 if 'current_subs' not in st.session_state:
@@ -2650,6 +2650,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
