@@ -27,34 +27,22 @@ import base64
 from io import BytesIO
 import urllib.parse
 
-import streamlit as st
-
-# 1. MUST BE FIRST
+# 1. MUST BE THE ABSOLUTE FIRST COMMAND
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="expanded")
 
-# 2. THE CLEAN STEALTH PATCH
-st.markdown(
-    """
+# 2. BULLETPROOF CSS INJECTION (No Triple Quotes)
+hide_style = """
     <style>
-    /* Hide everything related to Streamlit branding */
     header {visibility: hidden !important;}
     footer {visibility: hidden !important;}
     #MainMenu {visibility: hidden !important;}
     .stAppDeployButton {display:none !important;}
-    div[data-testid="stStatusWidget"] {visibility: hidden !important;}
-    
-    /* Reset margins and background */
-    .stApp {
-        background-color: #000000 !important;
-    }
-    .block-container {
-        padding: 0rem !important;
-        max-width: 100% !important;
-    }
+    [data-testid="stStatusWidget"] {visibility: hidden !important;}
+    .stApp {background-color: #000000 !important;}
+    .block-container {padding: 0rem !important; max-width: 100% !important;}
     </style>
-    """, 
-    unsafe_allow_code=True
-)
+"""
+st.markdown(hide_style, unsafe_allow_code=True)
 
 # --- 1. GLOBAL UTILITIES (MUST BE AT THE TOP) ---
 def initiate_teleport(target_page):
@@ -2657,6 +2645,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
