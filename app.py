@@ -1711,7 +1711,7 @@ elif page == "⚔️ Trend Duel":
         st.error("📡 NEURAL LINK FAILURE: The function 'fetch_live_market_data' returned an empty set.")
 
 
-# --- MODULE 7: THE NEURAL FORGE ---
+# --- MODULE 7: THE NEURAL FORGE (EXCALIBUR UPGRADE) ---
 elif page == "🧠 Neural Forge":
     import random
     import datetime
@@ -1747,11 +1747,13 @@ elif page == "🧠 Neural Forge":
             f_colors = st.multiselect("Cinematic Palette", ["Cyberpunk Neon", "Midnight Teal", "Electric Orange", "Moody Noir", "Toxic Emerald"], default=["Midnight Teal", "Electric Orange"])
         with col_b:
             st.subheader("📡 Strategy")
-            f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock"])
+            f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock", "The 'Value-First' Pivot"])
+            f_interrupt = st.selectbox("Pattern Interrupt", ["Fast Zoom-in", "Flash Cut", "Text Overlay Shock", "Sudden Silence"])
             f_lighting = st.selectbox("Lighting Style", ["Dramatic Rim Light", "Soft Cinematic Glow", "Hard Shadows"])
         with col_c:
             st.subheader("🎬 Style")
             f_hook_type = st.radio("Emotional Anchor", ["Curiosity", "Fear", "Authority"])
+            f_hook_intensity = st.select_slider("Hook Intensity", ["Subtle", "High-Octane", "Extreme"])
             f_pacing = st.select_slider("Script Pacing", ["Slow Burn", "Dynamic", "Rapid Fire"])
             execute = st.button("🔥 EXECUTE FULL SYNTHESIS", use_container_width=True)
 
@@ -1762,16 +1764,19 @@ elif page == "🧠 Neural Forge":
         elif remaining_credits <= 0:
             st.error("🚨 NEURAL EXHAUSTION: Daily limit reached.")
         else:
-            with st.spinner("🌑 ARCHITECTING..."):
+            with st.spinner("🌑 ARCHITECTING EXCALIBUR..."):
                 try:
                     dna_context = f"Tone: {v_tone}" if v_tone else "Viral professional."
                     visual_anchor = "MANDATORY: Maintain facial features of reference subject." if vault_active else ""
                     
+                    # THE HOOK ARCHITECT LOGIC INJECTION
                     sys_msg = (
-                        f"Act as a Viral Strategist. 2026-02-06 Protocol.\n"
-                        f"SCRIPT: Write a {f_platform} script for '{f_topic}'. Framework: {f_framework}. {dna_context}\n"
-                        f"IMAGE PROMPTS: 3 Detailed prompts. Palette: {', '.join(f_colors)}. {visual_anchor}\n"
-                        f"FORMAT: Use headers --- SCRIPT --- and --- IMAGE PROMPTS ---"
+                        f"Act as a Viral Strategist & Hook Architect. Protocol 2026.\n"
+                        f"PLATFORM: {f_platform}. TOPIC: '{f_topic}'.\n"
+                        f"1. THE HOOK: Generate a {f_hook_intensity} {f_hook_type} hook. Start with a {f_interrupt} pattern interrupt.\n"
+                        f"2. SCRIPT: Follow {f_framework} framework. Pacing: {f_pacing}. {dna_context}\n"
+                        f"3. VISUALS: Provide 3 Image Prompts. Style: {f_lighting}. Palette: {', '.join(f_colors)}. {visual_anchor}\n"
+                        f"FORMAT: Use headers --- HOOK ARCHITECT ---, --- SCRIPT --- and --- IMAGE PROMPTS ---"
                     )
                     
                     res = groq_c.chat.completions.create(
@@ -1800,11 +1805,13 @@ elif page == "🧠 Neural Forge":
                         st.error("❌ No Voice ID in Vault.")
                     else:
                         with st.spinner("Synthesizing..."):
-                            script_only = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[0]
-                            clean_text = script_only.replace("--- SCRIPT ---", "").strip()
+                            # Logic to handle the new Hook Architect section in splitting
+                            parts = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")
+                            script_content = parts[0].replace("--- SCRIPT ---", "").replace("--- HOOK ARCHITECT ---", "").strip()
+                            
                             e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{v_id}"
                             headers = {"xi-api-key": st.secrets["ELEVENLABS_API_KEY"], "Content-Type": "application/json"}
-                            payload = {"text": clean_text, "model_id": "eleven_multilingual_v2"}
+                            payload = {"text": script_content, "model_id": "eleven_multilingual_v2"}
                             
                             audio_res = requests.post(e_url, json=payload, headers=headers)
                             if audio_res.status_code == 200:
@@ -2621,6 +2628,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
