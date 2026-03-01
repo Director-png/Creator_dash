@@ -129,7 +129,7 @@ if "current_page" not in st.session_state:
 if "GROQ_API_KEY" in st.secrets:
     try:
         # strip() handles accidental spaces in the secrets tab
-       GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+       GROQ_API_KEY = st.secret("GROQ_API_KEY")
     except:
         groq_c = None
 else:
@@ -2650,6 +2650,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
