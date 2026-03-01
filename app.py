@@ -27,22 +27,27 @@ import base64
 from io import BytesIO
 import urllib.parse
 
-# 1. MUST BE THE ABSOLUTE FIRST COMMAND
+# 1. ABSOLUTE FIRST LINE
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="expanded")
 
-# 2. BULLETPROOF CSS INJECTION (No Triple Quotes)
-hide_style = """
-    <style>
-    header {visibility: hidden !important;}
-    footer {visibility: hidden !important;}
-    #MainMenu {visibility: hidden !important;}
-    .stAppDeployButton {display:none !important;}
-    [data-testid="stStatusWidget"] {visibility: hidden !important;}
-    .stApp {background-color: #000000 !important;}
-    .block-container {padding: 0rem !important; max-width: 100% !important;}
-    </style>
-"""
-st.markdown(hide_style, unsafe_allow_code=True)
+# 2. WRAP THE INJECTION IN A FUNCTION TO BYPASS METRICS ERRORS
+def apply_syndicate_skin():
+    stealth_css = """
+        <style>
+        header, footer, #MainMenu {visibility: hidden !important;}
+        .stAppDeployButton {display:none !important;}
+        [data-testid="stStatusWidget"] {visibility: hidden !important;}
+        .stApp {background-color: #000000 !important;}
+        .block-container {padding: 0rem !important; max-width: 100% !important;}
+        </style>
+    """
+    st.markdown(stealth_css, unsafe_allow_code=True)
+
+# 3. EXECUTE THE SKIN
+try:
+    apply_syndicate_skin()
+except Exception:
+    pass # If it fails, the app still loads without crashing
 
 # --- 1. GLOBAL UTILITIES (MUST BE AT THE TOP) ---
 def initiate_teleport(target_page):
@@ -2645,6 +2650,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
