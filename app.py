@@ -1145,7 +1145,6 @@ if 'page' not in st.session_state:
 with st.sidebar:
     try:
         # --- THE GHOST OVERRIDE: STABLE STEALTH ---
-        # Using a safer, condensed format to prevent TypeError while forcing the app background to black.
         st.markdown("<style>.stApp {background-color: #000000 !important;} .block-container {padding: 0rem !important;}</style>", unsafe_allow_html=True)
 
         # --- ENHANCED IDENTITY CORE ---
@@ -1247,24 +1246,28 @@ with st.sidebar:
                     with st.chat_message("assistant", avatar="🌌"):
                         resp_container = st.empty()
                         full_resp = ""
-                        try:
-                            stream = groq_c.chat.completions.create(
-                                model="llama-3.3-70b-versatile",
-                                messages=[
-                                    {"role": "system", "content": "You are VOID-OS. Witty, elite, and strategic. Be concise."},
-                                    {"role": "user", "content": agent_input}
-                                ],
-                                stream=True
-                            )
-                            for chunk in stream:
-                                if chunk.choices[0].delta.content:
-                                    full_resp += chunk.choices[0].delta.content
-                                    resp_container.markdown(full_resp + "▌")
-                            
-                            resp_container.markdown(full_resp)
-                            st.session_state.manager_chat.append({"role": "assistant", "content": full_resp})
-                        except Exception as e:
-                            st.error(f"Uplink Error: {str(e)}")
+                        # Verified Logic: groq_c is now the Client object
+                        if groq_c:
+                            try:
+                                stream = groq_c.chat.completions.create(
+                                    model="llama-3.3-70b-versatile",
+                                    messages=[
+                                        {"role": "system", "content": "You are VOID-OS. Witty, elite, and strategic. Be concise."},
+                                        {"role": "user", "content": agent_input}
+                                    ],
+                                    stream=True
+                                )
+                                for chunk in stream:
+                                    if chunk.choices[0].delta.content:
+                                        full_resp += chunk.choices[0].delta.content
+                                        resp_container.markdown(full_resp + "▌")
+                                
+                                resp_container.markdown(full_resp)
+                                st.session_state.manager_chat.append({"role": "assistant", "content": full_resp})
+                            except Exception as e:
+                                st.error(f"Uplink Error: {str(e)}")
+                        else:
+                            st.error("Uplink Error: VOID-OS Engine (groq_c) is not initialized.")
 
         # --- 🛠️ GLOBAL ACTIONS ---
         st.divider()
@@ -1283,6 +1286,7 @@ with st.sidebar:
 
     except Exception as sidebar_err:
         st.error(f"System Error: {sidebar_err}")
+
 
 # --- MODULE 6: SCRIPT ARCHITECT ---
 if page == "🏗️ Script Architect":
@@ -2650,6 +2654,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
