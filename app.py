@@ -125,16 +125,18 @@ if "current_page" not in st.session_state:
 
 # --- 🛰️ SECURE AI UPLINK ---
 # 1. INITIALIZE GLOBAL CLIENTS (ONCE)
-
 if "GROQ_API_KEY" in st.secrets:
-    try:
-        # Use square brackets [] to access the key
-        GROQ_API_KEY = st.secrets["GROQ_API_KEY"].strip()
-        groq_c = GROQ_API_KEY # Assigning it to your variable
-    except Exception:
-        groq_c = None
+    raw_key = st.secrets["GROQ_API_KEY"].strip()
+else:
+    raw_key = None
+
+# 2. Initialize the ENGINE (This was the missing step)
+# This turns the 'str' into a 'Groq' object that has the '.chat' attribute
+if raw_key:
+    groq_c = Groq(api_key=raw_key)
 else:
     groq_c = None
+
 
 # --- INITIALIZE ALL KEYS ---
 if 'current_subs' not in st.session_state:
@@ -2654,6 +2656,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
