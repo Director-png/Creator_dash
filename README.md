@@ -3,8 +3,8 @@ title: VOID OS
 emoji: 🌌
 colorFrom: black
 colorTo: gray
-sdk: streamlit
-app_file: app.py
+sdk: docker
+app_port: 7860
 license: apache-2.0
 header: none
 ---
