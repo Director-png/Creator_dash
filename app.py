@@ -125,10 +125,6 @@ if "current_page" not in st.session_state:
 
 # --- 🛰️ SECURE AI UPLINK ---
 # 1. INITIALIZE GLOBAL CLIENTS (ONCE)
-if "GEMINI_API_KEY" in st.secrets:
-    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-else:
-    client = None
 
 if "GROQ_API_KEY" in st.secrets:
     try:
@@ -2654,6 +2650,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
