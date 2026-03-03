@@ -2050,8 +2050,8 @@ elif page == "🧪 Creator Lab":
     if is_admin or is_paid_tier:
         header_label = "ADMIN" if is_admin else user_status.upper()
         
-        draw_title("🧪", f"ROI ENGINE v2.0 // {header_label}")
-        st.info(f"🛰️ **{header_label} CLEARANCE:** Strategic Profit Projection active.")
+        draw_title("🧪", f"ROI ENGINE v2.1 // {header_label}")
+        st.info(f"🛰️ **{header_label} CLEARANCE:** Strategic Net Profit Projection active.")
         
         niche_data = {
             "🎮 Gaming & Entertainment": 3.0,
@@ -2078,16 +2078,23 @@ elif page == "🧪 Creator Lab":
             # 🧬 CALCULATIONS
             ad_rev_usd = (views / 1000) * cpm
             sales_rev_usd = (views * (conv_rate / 100)) * product_price
-            total_usd = ad_rev_usd + sales_rev_usd
-            total_inr = total_usd * conversion_factor
+            
+            # --- THE REALITY FILTER (20% OPERATIONAL TAX) ---
+            gross_usd = ad_rev_usd + sales_rev_usd
+            net_usd = gross_usd * 0.80  # Deducing 20% for fees/taxes
+            net_inr = net_usd * conversion_factor
 
             st.divider()
             res_col1, res_col2 = st.columns(2)
             with res_col1:
-                st.metric("TOTAL VALUE (USD)", f"${total_usd:,.2f}")
+                # Using delta to show the "Tax/Fee" transparency visually
+                st.metric("NET VALUE (USD)", f"${net_usd:,.2f}", delta="-20% (Fees/Tax)", delta_color="inverse")
             with res_col2:
-                st.markdown(f"#### PROJECTED REVENUE (INR)")
-                st.markdown(f"<h2 style='color: #00ff41;'>₹ {total_inr:,.2f}</h2>", unsafe_allow_html=True)
+                st.markdown(f"#### NET TAKE-HOME (INR)")
+                st.markdown(f"<h2 style='color: #00ff41;'>₹ {net_inr:,.2f}</h2>", unsafe_allow_html=True)
+
+            # --- TRANSPARENCY DISCLAIMER ---
+            st.caption("⚠️ *Note: A 20% operational buffer has been deducted from gross totals to account for platform fees, payment processing, and estimated taxes.*")
 
         # --- GENERATION LOGIC ---
         if st.button("🧬 GENERATE PROFIT BLUEPRINT", use_container_width=True):
@@ -2099,8 +2106,8 @@ elif page == "🧪 Creator Lab":
                     - Tier: {header_label}
                     - Niche: {selected_niche}
                     - Weekly Views: {views}
-                    - Total Weekly (INR): ₹{total_inr:,.2f}
-                    Task: Provide a 3-point 'Profit Blueprint' for this creator.
+                    - Net Weekly Income (INR): ₹{net_inr:,.2f}
+                    Task: Provide a 3-point 'Profit Blueprint' for this creator based on their NET income.
                     """
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile", 
@@ -2693,6 +2700,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
