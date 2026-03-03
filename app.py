@@ -247,19 +247,24 @@ def draw_title(emoji, text):
 def apply_void_os_css():
     st.markdown("""
     <style>
-    /* 1. THE VOID DEPTH */
+    /* 1. THE EXTERIOR VOID (Creating the Margins) */
     .stApp { 
-        background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
-    }
-    
-    /* 🛠️ HEADER RECOVERY */
-    /* Increased padding and removed height:0px to ensure the 'slot' for the header exists */
-    .main .block-container {
-        padding-top: 10rem !important; 
-        max-width: 95% !important;
+        background: #000000 !important; /* Pure black outer edge */
     }
 
-    /* 🌑 PURE BLACK SIDEBAR - Targeting every possible layer */
+    /* 2. THE FLOATING TERMINAL CORE */
+    /* This creates the 1cm side / 2cm top-bottom space logic */
+    .main .block-container {
+        background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important;
+        margin: 2cm 1cm !important; /* Top/Bottom: 2cm | Sides: 1cm */
+        padding: 5rem 3rem !important; /* Interior breathing room */
+        border: 1px solid rgba(0, 212, 255, 0.1); /* Subtle terminal edge */
+        border-radius: 12px;
+        box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.5);
+        max-width: calc(100% - 2cm) !important;
+    }
+
+    /* 🌑 PURE BLACK SIDEBAR */
     [data-testid="stSidebar"], 
     [data-testid="stSidebarUserContent"],
     section[data-testid="stSidebar"] > div {
@@ -267,12 +272,12 @@ def apply_void_os_css():
     }
     
     [data-testid="stSidebarUserContent"] {
-        padding-top: 5rem !important;
+        padding-top: 4rem !important;
     }
 
-    /* 2. THE NEURAL FORGE BUTTONS */
+    /* 3. THE NEURAL FORGE BUTTONS (Cyan-to-Green Gradient Integration) */
     div.stButton > button {
-        background: #000000 !important; /* Pure black for maximum contrast */
+        background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 0, 0, 1) 100%) !important;
         color: #00d4ff !important; 
         border: 2px solid #00d4ff !important; 
         border-radius: 4px !important;
@@ -281,18 +286,20 @@ def apply_void_os_css():
         text-transform: uppercase;
         letter-spacing: 2px;
         width: 100% !important;
-        transition: 0.3s ease-in-out !important;
-        opacity: 1 !important; /* Ensure they aren't faint */
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        opacity: 1 !important;
     }
     
     div.stButton > button:hover {
+        /* This creates the transition from Cyan to Matrix Green */
         border: 2px solid #00ff41 !important;
         color: #00ff41 !important;
-        background: rgba(0, 255, 65, 0.1) !important;
-        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.5) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 65, 0.15) 0%, rgba(0, 0, 0, 1) 100%) !important;
+        box-shadow: 0px 0px 25px rgba(0, 255, 65, 0.4) !important;
+        transform: scale(1.02);
     }
 
-    /* 3. NEURAL GRADIENT TEXT */
+    /* 4. NEURAL GRADIENT TEXT */
     .void-gradient-text {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
@@ -302,27 +309,21 @@ def apply_void_os_css():
         font-size: 2.5rem !important;
     }
 
-    /* 4. INPUT FIELDS */
+    /* 5. INPUT FIELDS */
     .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
         background-color: rgba(255, 255, 255, 0.05) !important;
         color: #00ff41 !important;
-        border: 1px solid #00d4ff !important;
+        border: 1px solid rgba(0, 212, 255, 0.3) !important;
     }
 
-    /* 5. SYSTEM OVERLAYS - Transparent instead of Hidden height */
-    header { 
-        background-color: rgba(0,0,0,0) !important;
-        border: none !important;
-    }
-    [data-testid="stHeader"] {
-        background: none !important;
-        color: rgba(0,0,0,0) !important;
-    }
+    /* 6. SYSTEM OVERLAYS */
+    header { background-color: rgba(0,0,0,0) !important; }
+    [data-testid="stHeader"] { visibility: hidden !important; }
     footer { visibility: hidden !important; }
     
     </style>
     """, unsafe_allow_html=True)
-    
+
 def typewriter_effect(text):
     container = st.empty()
     full_text = ""
@@ -2720,6 +2721,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
