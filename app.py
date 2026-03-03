@@ -1201,9 +1201,9 @@ with st.sidebar:
         if u_status == "Agency":
             options = ["🏠 Dashboard", "🔒 Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Agency Suite", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
         elif u_status == "Director":
-            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "🛰️ Media Uplink", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "🛰️ Media Uplink", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
         elif u_status == "Operative":
-            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
         else:
             options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
 
@@ -2692,6 +2692,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
