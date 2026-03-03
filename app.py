@@ -486,6 +486,11 @@ def calculate_vigor(views, followers):
     ratio = views / followers
     return min(100, int(ratio * 50))
 
+def trigger_upgrade():
+    # This runs BEFORE the script reruns, so it's safe!
+    st.session_state.nav_radio = "⚡ Upgrade Authority"
+    st.session_state.current_page = "⚡ Upgrade Authority"
+    
 def get_intel_image(entry):
     try:
         if 'media_content' in entry: return entry.media_content[0]['url']
@@ -2702,6 +2707,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
