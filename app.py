@@ -246,44 +246,225 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
-# --- 1. THE ARCHITECTURAL FORCE-FIELD ---
-# We use a query parameter check to ensure the sidebar isn't being 'killed' by the URL
-if "sidebar_state" not in st.session_state:
-    st.session_state.sidebar_state = "expanded"
+ import streamlit as st
 
-st.set_page_config(
-    page_title="VOID OS", 
-    layout="wide", 
-    initial_sidebar_state=st.session_state.sidebar_state # Controlled by state
-)
 
-# --- 2. THE CSS OVERRIDE (Injecting into the BODY to bypass iframes) ---
+
+# 1. INITIALIZE (Must be first)
+
+st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="expanded")
+
+
+
 st.markdown("""
+
     <style>
-        /* FORCE THE SIDEBAR TO BE PHYSICALLY PRESENT */
-        section[data-testid="stSidebar"] {
-            display: block !important;
-            visibility: visible !important;
-            left: 0 !important;
-            transform: none !important; /* Kills the sliding glitch */
-            transition: none !important;
-        }
+
+    /* 1. THE DEEP NAVY VOID (Matching the screenshot depth) */
+
+    .stApp { 
+
+        background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
+
+    }
+
+    /* 1. RELOCATE THE SIDEBAR TOGGLE */
+
+    /* This targets the button that opens the sidebar when it's closed */
+
+    [data-testid="stSidebarCollapsedControl"] {
+
+        top: 5rem !important; /* Pushes it down below the header/crop area */
+
+        left: 1rem !important;
+
+        background-color: rgba(0, 212, 255, 0.1) !important;
+
+        border-radius: 0 10px 10px 0 !important;
+
+        border: 1px solid rgba(0, 212, 255, 0.2) !important;
+
+        transition: all 0.3s ease !important;
+
+    }
+
+
+
+    [data-testid="stSidebarCollapsedControl"]:hover {
+
+        background-color: rgba(0, 212, 255, 0.3) !important;
+
+        box-shadow: 0px 0px 15px rgba(0, 212, 255, 0.5) !important;
+
+    }
+
+
+
+    /* 2. STYLE THE ICON INSIDE */
+
+    [data-testid="stSidebarCollapsedControl"] svg {
+
+        fill: #00d4ff !important;
+
+    }
+
+
+
+    /* 3. ENSURE THE SIDEBAR HEADER DOESN'T HIDE THE CLOSE BUTTON */
+
+    [data-testid="stSidebar"] [data-testid="stBaseButton-headerNoPadding"] {
+
+        top: 1rem !important;
+
+        color: #00d4ff !important;
+
+    }
+
+    
+
+    /* 2. CENTERED COMMAND CORE with 0.25cm Internal Border */
+
+    .main .block-container {
+
+        padding-top: 6rem !important; 
+
+        padding-left: 5% !important;
+
+        padding-right: 5% !important;
+
+        max-width: 90% !important;
+
+        text-align: center !important;
+
         
-        /* IF THE SIDEBAR IS HIDDEN, THIS BUTTON WILL APPEAR IN THE CENTER TO SAVE YOU */
-        .force-open-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 99999;
-        }
+
+        margin-top: 0.25cm !important;
+
+        margin-bottom: 0.25cm !important;
+
+        border: 0.25cm solid rgba(0, 212, 255, 0.03) !important;
+
+        border-radius: 20px !important;
+
+        background-color: transparent !important;
+
+    }
+
+
+
+    /* 3. BUTTONS: PHOTO-MATCHED STYLE */
+
+    div.stButton > button {
+
+        /* Deep Navy Semi-Transparent Fill */
+
+        background: rgba(5, 11, 20, 0.6) !important; 
+
+        color: #00d4ff !important; 
+
+        
+
+        /* Thin, elegant border like the photo */
+
+        border: 1.2px solid rgba(0, 212, 255, 0.3) !important; 
+
+        border-radius: 8px !important;
+
+        
+
+        padding: 10px 24px !important;
+
+        font-family: 'Space Grotesk', sans-serif;
+
+        text-transform: uppercase;
+
+        letter-spacing: 1.5px;
+
+        font-size: 0.9rem !important;
+
+        font-weight: 500 !important;
+
+        
+
+        width: auto !important; /* Removing the full-width logic */
+
+        min-width: 220px !important;
+
+        margin: 10px !important;
+
+        
+
+        transition: all 0.4s ease !important;
+
+    }
+
+    
+
+    div.stButton > button:hover {
+
+        /* Transitioning to the Matrix Green Gradient */
+
+        border: 1.2px solid #00ff41 !important;
+
+        color: #00ff41 !important;
+
+        background: rgba(0, 255, 65, 0.05) !important;
+
+        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2) !important;
+
+        transform: translateY(-2px);
+
+    }
+
+
+
+    /* 4. TEXT CENTRALIZATION */
+
+    .stMarkdown, .stText, h1, h2, h3, p {
+
+        text-align: center !important;
+
+        justify-content: center !important;
+
+    }
+
+
+
+    /* 5. NEURAL GRADIENT TEXT */
+
+    .void-gradient-text {
+
+        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
+
+        -webkit-background-clip: text !important;
+
+        -webkit-text-fill-color: transparent !important;
+
+        font-weight: 900 !important;
+
+        font-size: 2.8rem !important;
+
+        display: block;
+
+    }
+
+
+
+    /* 6. SIDEBAR & OVERLAY CLEANUP */
+
+    [data-testid="stSidebar"], [data-testid="stSidebarUserContent"] {
+
+        background-color: #000000 !important;
+
+    }
+
+    header, footer { visibility: hidden !important; }
+
+
+
     </style>
+
 """, unsafe_allow_html=True)
-
-# --- 3. THE EMERGENCY TOGGLE (Put this at the very top of your body) ---
-if st.button("🛰️ FORCE UPLINK (REVEAL SIDEBAR)", key="force_sidebar"):
-    st.session_state.sidebar_state = "expanded"
-    st.rerun()
-
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2667,6 +2848,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
