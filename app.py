@@ -255,6 +255,32 @@ st.markdown("""
     .stApp { 
         background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
     }
+    /* 1. RELOCATE THE SIDEBAR TOGGLE */
+    /* This targets the button that opens the sidebar when it's closed */
+    [data-testid="stSidebarCollapsedControl"] {
+        top: 5rem !important; /* Pushes it down below the header/crop area */
+        left: 1rem !important;
+        background-color: rgba(0, 212, 255, 0.1) !important;
+        border-radius: 0 10px 10px 0 !important;
+        border: 1px solid rgba(0, 212, 255, 0.2) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    [data-testid="stSidebarCollapsedControl"]:hover {
+        background-color: rgba(0, 212, 255, 0.3) !important;
+        box-shadow: 0px 0px 15px rgba(0, 212, 255, 0.5) !important;
+    }
+
+    /* 2. STYLE THE ICON INSIDE */
+    [data-testid="stSidebarCollapsedControl"] svg {
+        fill: #00d4ff !important;
+    }
+
+    /* 3. ENSURE THE SIDEBAR HEADER DOESN'T HIDE THE CLOSE BUTTON */
+    [data-testid="stSidebar"] [data-testid="stBaseButton-headerNoPadding"] {
+        top: 1rem !important;
+        color: #00d4ff !important;
+    }
     
     /* 2. CENTERED COMMAND CORE with 0.25cm Internal Border */
     .main .block-container {
@@ -2726,6 +2752,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
