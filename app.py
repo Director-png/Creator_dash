@@ -251,86 +251,81 @@ st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="e
 
 st.markdown("""
     <style>
-    /* 1. THE VOID DEPTH */
+    /* 1. THE DEEP NAVY VOID (Matching the screenshot depth) */
     .stApp { 
-        background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
+        background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
     }
     
-    /* 2. CENTERED COMMAND CORE */
+    /* 2. CENTERED COMMAND CORE with 0.25cm Internal Border */
     .main .block-container {
         padding-top: 6rem !important; 
-        padding-left: 2rem !important;
-        padding-right: 2rem !important;
+        padding-left: 5% !important;
+        padding-right: 5% !important;
         max-width: 90% !important;
-        text-align: center !important; /* Forces global text centering */
+        text-align: center !important;
         
-        /* THE SECONDARY SEAL */
         margin-top: 0.25cm !important;
         margin-bottom: 0.25cm !important;
-        border: 0.25cm solid rgba(0, 212, 255, 0.05) !important;
-        border-radius: 15px !important;
-        box-shadow: inset 0px 0px 20px rgba(0, 0, 0, 0.5), 0px 0px 15px rgba(0, 212, 255, 0.1) !important;
+        border: 0.25cm solid rgba(0, 212, 255, 0.03) !important;
+        border-radius: 20px !important;
+        background-color: transparent !important;
     }
 
-    /* Target specifically for centered headers and markdown */
+    /* 3. BUTTONS: PHOTO-MATCHED STYLE */
+    div.stButton > button {
+        /* Deep Navy Semi-Transparent Fill */
+        background: rgba(5, 11, 20, 0.6) !important; 
+        color: #00d4ff !important; 
+        
+        /* Thin, elegant border like the photo */
+        border: 1.2px solid rgba(0, 212, 255, 0.3) !important; 
+        border-radius: 8px !important;
+        
+        padding: 10px 24px !important;
+        font-family: 'Space Grotesk', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
+        
+        width: auto !important; /* Removing the full-width logic */
+        min-width: 220px !important;
+        margin: 10px !important;
+        
+        transition: all 0.4s ease !important;
+    }
+    
+    div.stButton > button:hover {
+        /* Transitioning to the Matrix Green Gradient */
+        border: 1.2px solid #00ff41 !important;
+        color: #00ff41 !important;
+        background: rgba(0, 255, 65, 0.05) !important;
+        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2) !important;
+        transform: translateY(-2px);
+    }
+
+    /* 4. TEXT CENTRALIZATION */
     .stMarkdown, .stText, h1, h2, h3, p {
         text-align: center !important;
         justify-content: center !important;
     }
 
-    /* 3. PURE BLACK SIDEBAR */
-    [data-testid="stSidebar"], [data-testid="stSidebarUserContent"] {
-        background-color: #000000 !important;
-    }
-
-    /* 4. THE GLASS-REFRACTION BUTTONS */
-    div.stButton > button {
-        background: linear-gradient(180deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%) !important;
-        color: #00d4ff !important; 
-        border: 1px solid rgba(0, 212, 255, 0.4) !important; 
-        border-radius: 4px !important;
-        padding: 12px 28px !important;
-        font-family: 'Space Grotesk', sans-serif;
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        width: 100% !important;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1) !important;
-    }
-    
-    div.stButton > button:hover {
-        /* Glass Refraction: Shifting to Matrix Green with a "glow-up" effect */
-        color: #00ff41 !important;
-        border: 1px solid #00ff41 !important;
-        background: linear-gradient(0deg, rgba(0, 255, 65, 0.15) 0%, rgba(0, 0, 0, 1) 100%) !important;
-        box-shadow: 0px 0px 30px rgba(0, 255, 65, 0.3), inset 0px 0px 10px rgba(0, 255, 65, 0.2) !important;
-        transform: translateY(-3px);
-        letter-spacing: 5px; /* Subtle expansion effect */
-    }
-
-    /* 5. NEURAL GRADIENT TEXT (Centered) */
+    /* 5. NEURAL GRADIENT TEXT */
     .void-gradient-text {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
-        background-clip: text !important;
         font-weight: 900 !important;
         font-size: 2.8rem !important;
         display: block;
-        margin-left: auto;
-        margin-right: auto;
     }
 
-    /* 6. INPUT FIELDS (Centered Text) */
-    .stTextInput>div>div>input, .stNumberInput>div>div>input {
-        text-align: center !important;
-        background-color: rgba(255, 255, 255, 0.03) !important;
-        color: #00ff41 !important;
-        border: 1px solid rgba(0, 212, 255, 0.3) !important;
+    /* 6. SIDEBAR & OVERLAY CLEANUP */
+    [data-testid="stSidebar"], [data-testid="stSidebarUserContent"] {
+        background-color: #000000 !important;
     }
-
     header, footer { visibility: hidden !important; }
+
     </style>
 """, unsafe_allow_html=True)
 
@@ -2731,6 +2726,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
