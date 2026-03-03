@@ -2,65 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VOID OS | Private Terminal</title>
     <style>
-        body, html { 
-            margin: 0; padding: 0; 
-            height: 100%; width: 100%;
-            overflow: hidden; background-color: #000; 
-        }
-        
-        .container {
-            position: relative;
-            /* Creates a small breathing room around the terminal */
-            width: calc(100vw - 40px); 
-            height: calc(100vh - 40px);
-            margin: 20px auto; 
-            overflow: hidden;
-            background: #000;
-            border-radius: 8px; /* Optional: Softens the corners of the "screen" */
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
+        .container { position: relative; width: 100vw; height: 100vh; overflow: hidden; background: #000; }
+
+        iframe { 
+            position: absolute;
+            top: -50px; /* The crop to hide the Streamlit header bar */
+            left: 0;
+            width: 100%; 
+            height: calc(100% + 100px); 
+            border: none;
         }
 
-        /* 📱 MOBILE VIEW (Maintains Full Screen) */
-        @media (max-width: 1023px) {
-            .container { width: 100vw; height: 100vh; margin: 0; border-radius: 0; }
-            iframe { 
-                position: absolute;
-                top: -55px; left: 0;
-                width: 100%; height: calc(100% + 110px); 
-                border: none;
-            }
-        }
-
-        /* 🖥️ DESKTOP PRECISION (Laptops/Monitors) */
         @media (min-width: 1024px) {
             iframe { 
-                position: absolute;
-                top: -60px; 
-                left: 0;
-                
-                /* We set the width to 117.6% (1 / 0.85) to ensure the 0.85 scale hits 100% width exactly */
-                width: 117.64%; 
-                height: calc(117.64% + 120px); 
-                
-                border: none;
-                
-                /* The Final Scale: 0.85 (85% of original size) */
-                transform: scale(0.85); 
+                width: 111.11%; 
+                height: calc(111.11% + 100px); 
+                transform: scale(0.9); /* Slightly less aggressive than 0.85 for better visibility */
                 transform-origin: top left;
-                
-                -webkit-font-smoothing: antialiased;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <iframe 
-            src="https://void-os.streamlit.app/?embed=true" 
-            allow="fullscreen; clipboard-read; clipboard-write">
-        </iframe>
+        <iframe src="https://void-os.streamlit.app/?embed=true" allow="fullscreen; clipboard-read; clipboard-write"></iframe>
     </div>
 </body>
 </html>
