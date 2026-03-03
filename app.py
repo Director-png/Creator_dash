@@ -252,15 +252,24 @@ st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="e
 # 2. THE SYSTEM OVERRIDE
 st.markdown("""
     <style>
-    /* 1. THE VOID DEPTH (Radial Gradient) */
+    /* 1. THE VOID DEPTH */
     .stApp { 
         background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
     }
     
-    /* 2. THE CONTENT BUFFER (Restores your Headers) */
+    /* 2. THE FLOATING CORE (The 0.25cm Border Logic) */
     .main .block-container {
         padding-top: 6rem !important; 
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
         max-width: 95% !important;
+        
+        /* THE SECONDARY SEAL */
+        margin-top: 0.25cm !important;
+        margin-bottom: 0.25cm !important;
+        border: 0.25cm solid rgba(0, 212, 255, 0.05) !important; /* The 0.25cm border */
+        border-radius: 15px !important;
+        box-shadow: inset 0px 0px 20px rgba(0, 0, 0, 0.5), 0px 0px 15px rgba(0, 212, 255, 0.1) !important;
     }
 
     /* 3. PURE BLACK SIDEBAR */
@@ -274,7 +283,7 @@ st.markdown("""
         padding-top: 3.5rem !important;
     }
 
-    /* 4. THE NEURAL FORGE BUTTONS (Cyan-to-Green Gradient) */
+    /* 4. THE NEURAL FORGE BUTTONS (Gradient Pulse) */
     div.stButton > button {
         background: linear-gradient(135deg, rgba(0, 0, 0, 1) 0%, rgba(0, 212, 255, 0.1) 100%) !important;
         color: #00d4ff !important; 
@@ -306,16 +315,14 @@ st.markdown("""
         font-size: 2.5rem !important;
     }
 
-    /* 6. SYSTEM OVERLAYS */
-    header { visibility: hidden !important; }
-    footer { visibility: hidden !important; }
-    
-    /* Input Fields Fix */
+    /* 6. INPUT FIELDS & OVERLAYS */
     .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
         background-color: rgba(255, 255, 255, 0.03) !important;
         color: #00ff41 !important;
         border: 1px solid rgba(0, 212, 255, 0.3) !important;
     }
+    header { visibility: hidden !important; }
+    footer { visibility: hidden !important; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -2716,6 +2723,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
