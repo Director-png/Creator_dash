@@ -246,65 +246,43 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
-# 1. INITIALIZE (Wide layout is mandatory to fix the glitch)
-st.set_page_config(page_title="VOID OS", layout="wide")
+# --- 1. THE ARCHITECTURAL FORCE-FIELD ---
+# We use a query parameter check to ensure the sidebar isn't being 'killed' by the URL
+if "sidebar_state" not in st.session_state:
+    st.session_state.sidebar_state = "expanded"
 
-# 2. THE STABILIZER CSS
+st.set_page_config(
+    page_title="VOID OS", 
+    layout="wide", 
+    initial_sidebar_state=st.session_state.sidebar_state # Controlled by state
+)
+
+# --- 2. THE CSS OVERRIDE (Injecting into the BODY to bypass iframes) ---
 st.markdown("""
     <style>
-    /* THE DEEP NAVY VOID */
-    .stApp { 
-        background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
-    }
-
-    /* KILL THE GLITCHY SIDEBAR COMPLETELY */
-    [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"], header, footer {
-        display: none !important;
-        visibility: hidden !important;
-    }
-
-    /* MAIN CONTAINER SETUP */
-    .main .block-container {
-        max-width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    /* THE 'FAKE' SIDEBAR (LEFT ANCHOR) */
-    .dna-vault {
-        background: rgba(0, 0, 0, 0.6);
-        border-right: 1px solid rgba(0, 212, 255, 0.2);
-        height: 100vh;
-        padding: 30px;
-        position: sticky;
-        top: 0;
-    }
-
-    /* BUTTONS: NEURAL FORGE STYLE */
-    div.stButton > button {
-        background: rgba(5, 11, 20, 0.8) !important; 
-        color: #00d4ff !important; 
-        border: 1.2px solid rgba(0, 212, 255, 0.3) !important; 
-        border-radius: 8px !important;
-        width: 100% !important;
-        transition: all 0.4s ease !important;
-    }
-    
-    div.stButton > button:hover {
-        border: 1.2px solid #00ff41 !important;
-        color: #00ff41 !important;
-        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.3) !important;
-    }
-
-    .void-gradient-text {
-        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        font-weight: 900;
-        font-size: 2.8rem;
-    }
+        /* FORCE THE SIDEBAR TO BE PHYSICALLY PRESENT */
+        section[data-testid="stSidebar"] {
+            display: block !important;
+            visibility: visible !important;
+            left: 0 !important;
+            transform: none !important; /* Kills the sliding glitch */
+            transition: none !important;
+        }
+        
+        /* IF THE SIDEBAR IS HIDDEN, THIS BUTTON WILL APPEAR IN THE CENTER TO SAVE YOU */
+        .force-open-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 99999;
+        }
     </style>
 """, unsafe_allow_html=True)
+
+# --- 3. THE EMERGENCY TOGGLE (Put this at the very top of your body) ---
+if st.button("🛰️ FORCE UPLINK (REVEAL SIDEBAR)", key="force_sidebar"):
+    st.session_state.sidebar_state = "expanded"
+    st.rerun()
 
 
 def typewriter_effect(text):
@@ -2689,6 +2667,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
