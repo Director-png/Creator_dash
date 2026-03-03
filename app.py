@@ -246,32 +246,23 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
-# 1. THE BRAIN OVERRIDE (Forces the 'Expanded' state into memory)
-if "sidebar_state" not in st.session_state:
-    st.session_state.sidebar_state = "expanded"
-
+# 1. THE ARCHITECTURAL OVERRIDE
+# We must set this to 'wide' to prevent the centering you see in your screenshot
 st.set_page_config(
-    page_title="VOID OS", 
-    layout="wide", 
+    page_title="VOID OS",
+    layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# 2. THE UNIFIED VOID CSS (Styles + Forces Visibility)
+# 2. THE TOTAL SYSTEM CSS
 st.markdown("""
     <style>
-    /* FORCE SIDEBAR VISIBILITY & LOCK */
-    [data-testid="stSidebar"] {
-        display: block !important;
-        visibility: visible !important;
-        width: 300px !important;
-        background-color: #000000 !important;
-        border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
-    }
-
-    /* HIDE THE 'X' AND TOGGLE BUTTONS */
-    [data-testid="stSidebarCollapsedControl"], 
-    button[kind="headerNoPadding"] {
-        display: none !important;
+    /* FORCE WIDE LAYOUT (Kills the centered look from your screenshot) */
+    .appview-container .main .block-container {
+        max-width: 100% !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+        width: 100% !important;
     }
 
     /* THE DEEP NAVY VOID BACKGROUND */
@@ -279,18 +270,22 @@ st.markdown("""
         background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
     }
 
-    /* 100% WIDTH CONTENT AREA */
-    .main .block-container {
-        padding-top: 4rem !important; 
-        max-width: 100% !important;
-        width: 100% !important;
-        margin: 0 !important;
-        text-align: center !important;
-        border: 0.25cm solid rgba(0, 212, 255, 0.03) !important;
-        min-height: 100vh !important;
+    /* FORCE SIDEBAR VISIBILITY */
+    [data-testid="stSidebar"] {
+        display: block !important;
+        visibility: visible !important;
+        width: 320px !important;
+        background-color: #000000 !important;
+        border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
     }
 
-    /* NEURAL FORGE BUTTONS (Photo-Matched) */
+    /* HIDE STREAMLIT BORDER & OVERLAYS */
+    header, footer, [data-testid="stHeader"] { 
+        visibility: hidden !important; 
+        height: 0 !important; 
+    }
+
+    /* NEURAL FORGE BUTTONS (Matching your reference photo) */
     div.stButton > button {
         background: rgba(5, 11, 20, 0.8) !important; 
         color: #00d4ff !important; 
@@ -301,7 +296,6 @@ st.markdown("""
         text-transform: uppercase;
         letter-spacing: 1.5px;
         min-width: 220px !important;
-        margin: 10px !important;
         transition: all 0.4s ease !important;
     }
     
@@ -312,32 +306,27 @@ st.markdown("""
         box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.3) !important;
     }
 
-    /* INTERFACE CLEANUP */
-    header, footer { visibility: hidden !important; height: 0 !important; }
-    
+    /* THE GRADIENT TEXT */
     .void-gradient-text {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         font-weight: 900 !important;
-        font-size: 2.8rem !important;
+        font-size: 3rem !important;
+        text-align: center;
         display: block;
+        margin-top: 2rem;
+    }
+    
+    /* INPUT FIELDS (Glassmorphism) */
+    .stTextInput>div>div>input {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        color: #00ff41 !important;
+        border: 1px solid rgba(0, 212, 255, 0.2) !important;
+        text-align: center !important;
     }
     </style>
 """, unsafe_allow_html=True)
-
-# 3. THE SIDEBAR CONTENT (Crucial: Sidebar won't show if empty)
-with st.sidebar:
-    st.markdown('<h2 style="color: #00d4ff; text-align: center;">IDENTITY VAULT</h2>', unsafe_allow_html=True)
-    st.markdown("---")
-    # This is where your DNA Anchor image or "Neural Anchor" status goes
-    st.info("System Status: DNA ANCHOR ACTIVE")
-    st.write("Neural Sync: 100%")
-    st.button("Reset Identity")
-
-# 4. MAIN PAGE CONTENT
-st.markdown('<p class="void-gradient-text">VOID OS TERMINAL</p>', unsafe_allow_html=True)
-# Add your ROI Engine or Neural Forge logic below...
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2736,6 +2725,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
