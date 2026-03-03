@@ -1208,6 +1208,11 @@ with st.sidebar:
             options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
 
         # --- NAVIGATION SYNC LOGIC ---
+        if st.session_state.get('redirect_request'):
+            st.session.current_page = st.session_state_redirect_request
+            del st.session_state.redirect_request
+
+        
         if 'current_page' not in st.session_state:
             st.session_state.current_page = options[0]
 
@@ -2696,6 +2701,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
