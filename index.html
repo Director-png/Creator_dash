@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VOID OS | Private Terminal</title>
     <style>
         body, html { 
@@ -18,27 +18,27 @@
             overflow: hidden;
         }
 
+        /* DEFAULT MOBILE STYLE (No Scaling) */
         iframe { 
             position: absolute;
-            /* Hide Streamlit Header & Footer */
             top: -50px; 
             left: 0;
-
-            /* FORCE DESKTOP PROPORTIONS */
-            /* We make the iframe much wider than the screen to force 'Desktop Mode' */
-            width: 133.33%; 
-            height: calc(133.33% + 100px); 
-            
+            width: 100%; 
+            height: calc(100% + 100px); 
             border: none;
+        }
 
-            /* SCALE BACK TO FIT SCREEN */
-            /* 0.75 scale brings 133.33% back down to exactly 100% */
-            transform: scale(0.75); 
-            transform-origin: top left;
-
-            /* Enhances text sharpness after downscaling */
-            -webkit-font-smoothing: antialiased;
-            image-rendering: -webkit-optimize-contrast;
+        /* 🖥️ DESKTOP-ONLY FIX (For Laptops & Monitors) */
+        @media (min-width: 1024px) {
+            iframe { 
+                /* We "stretch" the iframe to 125% width to force Streamlit into Desktop Mode */
+                width: 125%; 
+                height: calc(125% + 100px); 
+                /* We scale it back down to 0.8 to fit the laptop screen exactly */
+                transform: scale(0.8); 
+                transform-origin: top left;
+                /* Optional: Slight shift to center if needed, but top-left is usually safest */
+            }
         }
     </style>
 </head>
