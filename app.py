@@ -246,88 +246,91 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
-# 1. INITIALIZE (Centered Layout)
-st.set_page_config(
-    page_title="VOID OS", 
-    layout="centered", # Reverting to the balanced, centered look
-    initial_sidebar_state="collapsed"
-)
+# 1. INITIALIZE (Wide layout is mandatory to fix the glitch)
+st.set_page_config(page_title="VOID OS", layout="wide")
 
-# 2. THE FINAL VOID CSS
+# 2. THE STABILIZER CSS
 st.markdown("""
     <style>
-    /* 1. THE DEEP NAVY VOID */
+    /* THE DEEP NAVY VOID */
     .stApp { 
         background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
     }
 
-    /* 2. REMOVE ALL HEADER/FOOTER ELEMENTS (Absolute Wipe) */
-    header, footer, [data-testid="stHeader"], .stApp > header {
+    /* KILL THE GLITCHY SIDEBAR COMPLETELY */
+    [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"], header, footer {
         display: none !important;
         visibility: hidden !important;
-        height: 0 !important;
     }
 
-    /* 3. CENTERED COMMAND CORE with 0.25cm Internal Border */
+    /* MAIN CONTAINER SETUP */
     .main .block-container {
-        padding-top: 2rem !important; 
-        max-width: 800px !important; /* Keeps it tight and centered for the reel */
-        text-align: center !important;
-        
-        /* The Signature 0.25cm Frame */
-        border: 0.25cm solid rgba(0, 212, 255, 0.03) !important;
-        border-radius: 20px !important;
-        margin-top: 2rem !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
-    /* 4. CONTROL DECK BUTTONS (Photo-Matched) */
+    /* THE 'FAKE' SIDEBAR (LEFT ANCHOR) */
+    .dna-vault {
+        background: rgba(0, 0, 0, 0.6);
+        border-right: 1px solid rgba(0, 212, 255, 0.2);
+        height: 100vh;
+        padding: 30px;
+        position: sticky;
+        top: 0;
+    }
+
+    /* BUTTONS: NEURAL FORGE STYLE */
     div.stButton > button {
         background: rgba(5, 11, 20, 0.8) !important; 
         color: #00d4ff !important; 
-        border: 1.2px solid rgba(0, 212, 255, 0.4) !important; 
+        border: 1.2px solid rgba(0, 212, 255, 0.3) !important; 
         border-radius: 8px !important;
-        padding: 10px 24px !important;
-        font-family: 'Space Grotesk', sans-serif;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        min-width: 220px !important;
-        margin: 10px auto !important;
-        display: block !important;
+        width: 100% !important;
         transition: all 0.4s ease !important;
     }
     
     div.stButton > button:hover {
         border: 1.2px solid #00ff41 !important;
         color: #00ff41 !important;
-        background: rgba(0, 255, 65, 0.1) !important;
-        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.3) !important;
-        transform: translateY(-2px);
-    }
-
-    /* 5. TEXT STYLING */
-    .stMarkdown, h1, h2, h3, p {
-        text-align: center !important;
-        color: #ffffff !important;
+        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.3) !important;
     }
 
     .void-gradient-text {
-        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
+        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
-        font-weight: 900 !important;
-        font-size: 2.8rem !important;
-        margin-bottom: 2rem;
-    }
-
-    /* 6. INPUT FIELDS (Glassmorphism) */
-    .stTextInput>div>div>input {
-        background-color: rgba(255, 255, 255, 0.03) !important;
-        color: #00ff41 !important;
-        border: 1px solid rgba(0, 212, 255, 0.2) !important;
-        text-align: center !important;
+        font-weight: 900;
+        font-size: 2.8rem;
     }
     </style>
 """, unsafe_allow_html=True)
+
+# 3. THE 100% STABLE LAYOUT
+# We use columns to create a "Sidebar" that cannot glitch or disappear
+col_vault, col_forge = st.columns([1, 4], gap="small")
+
+with col_vault:
+    st.markdown('<div class="dna-vault">', unsafe_allow_html=True)
+    st.markdown('<h2 style="color: #00d4ff;">DNA VAULT</h2>', unsafe_allow_html=True)
+    st.write("---")
+    st.success("ANCHOR LOCKED")
+    st.button("🧬 SYNC FACE")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with col_forge:
+    st.markdown('<p class="void-gradient-text">NEURAL FORGE v4.0</p>', unsafe_allow_html=True)
+    
+    tabs = st.tabs(["⚒️ ARCHITECT", "📊 ROI ENGINE"])
+    
+    with tabs[0]:
+        st.slider("Hook Intensity Meter", 0, 100, 95)
+        st.multiselect("Active Features", ["Color Palettes", "Pattern Breaks", "Hook Intensity"], ["Color Palettes", "Hook Intensity"])
+        st.button("GENERATE SCRIPT")
+        
+    with tabs[1]:
+        st.metric("Projected ROI", "$24,500", "+18%")
+        st.button("CALCULATE FISCAL WEIGHT")
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2726,6 +2729,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
