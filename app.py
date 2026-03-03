@@ -246,56 +246,84 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
-# 1. FORCE THE WIDE ATTRIBUTE
-st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="expanded")
+# 1. ARCHITECTURAL FOUNDATION
+st.set_page_config(
+    page_title="VOID OS", 
+    layout="wide", 
+    initial_sidebar_state="expanded"
+)
 
-# 2. THE RECURSIVE SIDEBAR FORCE
-with st.sidebar:
-    # We inject the CSS HERE so it loads WITH the sidebar
-    st.markdown("""
-        <style>
-        /* PHYSICAL FORCE: SCREW THE WRAPPER */
-        section[data-testid="stSidebar"] {
-            display: block !important;
-            visibility: visible !important;
-            min-width: 300px !important;
-            max-width: 300px !important;
-            background-color: #000000 !important;
-            position: fixed !important;
-            z-index: 1000000 !important;
-            left: 0 !important;
-        }
-        
-        /* THE VOID MAIN PANEL */
-        .stApp { 
-            background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
-        }
+# 2. THE LEFT-ALIGN OVERRIDE
+st.markdown("""
+    <style>
+    /* 1. KILL CENTERING & FORCE FULL WIDTH */
+    .appview-container .main .block-container {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+        margin-left: 0 !important;
+        margin-right: auto !important;
+        text-align: left !important; /* Forces text and elements to the left */
+    }
 
-        /* BUTTONS & TEXT (Locked Logic) */
-        div.stButton > button {
-            background: rgba(5, 11, 20, 0.8) !important; 
-            color: #00d4ff !important; 
-            border: 1.2px solid rgba(0, 212, 255, 0.4) !important; 
-            border-radius: 8px !important;
-            width: 100% !important;
-        }
-        
-        .void-gradient-text {
-            background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
-            font-weight: 900;
-            font-size: 2.5rem;
-            text-align: center;
-        }
-        
-        /* HIDE ALL TOP BARS */
-        header, [data-testid="stHeader"], footer { visibility: hidden !important; height: 0 !important; }
-        </style>
-        
-        <h1 style="color: #00d4ff; font-family: sans-serif;">IDENTITY VAULT</h1>
-        <p style="color: white; opacity: 0.5;">v4.0 NEURAL SYNC</p>
-    """, unsafe_allow_html=True)
+    /* 2. PIN ALL MARKDOWN & HEADERS TO LEFT */
+    .stMarkdown, .stText, h1, h2, h3, p, label {
+        text-align: left !important;
+        justify-content: flex-start !important;
+        margin-left: 0 !important;
+    }
+
+    /* 3. THE DEEP NAVY VOID */
+    .stApp { 
+        background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
+    }
+
+    /* 4. FORCE SIDEBAR VISIBILITY (Emergency Layer) */
+    [data-testid="stSidebar"] {
+        display: block !important;
+        visibility: visible !important;
+        position: relative !important;
+        float: left !important;
+        background-color: #000000 !important;
+        border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
+    }
+
+    /* 5. BUTTONS (Refined Control Deck Style) */
+    div.stButton > button {
+        background: rgba(5, 11, 20, 0.8) !important; 
+        color: #00d4ff !important; 
+        border: 1.2px solid rgba(0, 212, 255, 0.4) !important; 
+        border-radius: 8px !important;
+        margin-left: 0 !important;
+        width: auto !important;
+        min-width: 220px !important;
+    }
+    
+    div.stButton > button:hover {
+        border: 1.2px solid #00ff41 !important;
+        color: #00ff41 !important;
+        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.3) !important;
+    }
+
+    /* 6. HIDE INTERFACE NOISE */
+    header, footer, [data-testid="stHeader"] { 
+        visibility: hidden !important; 
+        height: 0 !important; 
+    }
+
+    /* NEURAL GRADIENT (Pinned Left) */
+    .void-gradient-text {
+        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        font-weight: 900 !important;
+        font-size: 3rem !important;
+        text-align: left !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2694,6 +2722,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
