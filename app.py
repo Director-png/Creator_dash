@@ -246,84 +246,88 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
-# 1. ARCHITECTURAL FOUNDATION
+# 1. INITIALIZE (Centered Layout)
 st.set_page_config(
     page_title="VOID OS", 
-    layout="wide", 
-    initial_sidebar_state="expanded"
+    layout="centered", # Reverting to the balanced, centered look
+    initial_sidebar_state="collapsed"
 )
 
-# 2. THE LEFT-ALIGN OVERRIDE
+# 2. THE FINAL VOID CSS
 st.markdown("""
     <style>
-    /* 1. KILL CENTERING & FORCE FULL WIDTH */
-    .appview-container .main .block-container {
-        max-width: 100% !important;
-        width: 100% !important;
-        padding-left: 2rem !important;
-        padding-right: 2rem !important;
-        margin-left: 0 !important;
-        margin-right: auto !important;
-        text-align: left !important; /* Forces text and elements to the left */
-    }
-
-    /* 2. PIN ALL MARKDOWN & HEADERS TO LEFT */
-    .stMarkdown, .stText, h1, h2, h3, p, label {
-        text-align: left !important;
-        justify-content: flex-start !important;
-        margin-left: 0 !important;
-    }
-
-    /* 3. THE DEEP NAVY VOID */
+    /* 1. THE DEEP NAVY VOID */
     .stApp { 
         background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
     }
 
-    /* 4. FORCE SIDEBAR VISIBILITY (Emergency Layer) */
-    [data-testid="stSidebar"] {
-        display: block !important;
-        visibility: visible !important;
-        position: relative !important;
-        float: left !important;
-        background-color: #000000 !important;
-        border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
+    /* 2. REMOVE ALL HEADER/FOOTER ELEMENTS (Absolute Wipe) */
+    header, footer, [data-testid="stHeader"], .stApp > header {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
     }
 
-    /* 5. BUTTONS (Refined Control Deck Style) */
+    /* 3. CENTERED COMMAND CORE with 0.25cm Internal Border */
+    .main .block-container {
+        padding-top: 2rem !important; 
+        max-width: 800px !important; /* Keeps it tight and centered for the reel */
+        text-align: center !important;
+        
+        /* The Signature 0.25cm Frame */
+        border: 0.25cm solid rgba(0, 212, 255, 0.03) !important;
+        border-radius: 20px !important;
+        margin-top: 2rem !important;
+    }
+
+    /* 4. CONTROL DECK BUTTONS (Photo-Matched) */
     div.stButton > button {
         background: rgba(5, 11, 20, 0.8) !important; 
         color: #00d4ff !important; 
         border: 1.2px solid rgba(0, 212, 255, 0.4) !important; 
         border-radius: 8px !important;
-        margin-left: 0 !important;
-        width: auto !important;
+        padding: 10px 24px !important;
+        font-family: 'Space Grotesk', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
         min-width: 220px !important;
+        margin: 10px auto !important;
+        display: block !important;
+        transition: all 0.4s ease !important;
     }
     
     div.stButton > button:hover {
         border: 1.2px solid #00ff41 !important;
         color: #00ff41 !important;
+        background: rgba(0, 255, 65, 0.1) !important;
         box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.3) !important;
+        transform: translateY(-2px);
     }
 
-    /* 6. HIDE INTERFACE NOISE */
-    header, footer, [data-testid="stHeader"] { 
-        visibility: hidden !important; 
-        height: 0 !important; 
+    /* 5. TEXT STYLING */
+    .stMarkdown, h1, h2, h3, p {
+        text-align: center !important;
+        color: #ffffff !important;
     }
 
-    /* NEURAL GRADIENT (Pinned Left) */
     .void-gradient-text {
-        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 100%) !important;
+        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         font-weight: 900 !important;
-        font-size: 3rem !important;
-        text-align: left !important;
+        font-size: 2.8rem !important;
+        margin-bottom: 2rem;
+    }
+
+    /* 6. INPUT FIELDS (Glassmorphism) */
+    .stTextInput>div>div>input {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        color: #00ff41 !important;
+        border: 1px solid rgba(0, 212, 255, 0.2) !important;
+        text-align: center !important;
     }
     </style>
 """, unsafe_allow_html=True)
-
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2722,6 +2726,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
