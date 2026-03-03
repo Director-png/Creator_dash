@@ -245,60 +245,81 @@ def draw_title(emoji, text):
     """, unsafe_allow_html=True)
 
 def apply_void_os_css():
-    st.markdown("""
-    <style>
-    /* 1. THE VOID DEPTH (Radial Gradient) */
-    .stApp { 
-        background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
-    }
-    
-    /* 2. THE NEURAL FORGE BUTTONS (Cyan to Matrix Green) */
-    div.stButton > button {
-        background: rgba(0, 0, 0, 0.6) !important;
-        color: #00d4ff !important; 
-        border: 1px solid rgba(0, 212, 255, 0.3) !important; 
-        border-radius: 4px !important; /* Sharper edges for 2026 elite feel */
-        padding: 12px 28px !important;
-        font-family: 'Space Grotesk', sans-serif;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-    }
-    
-    div.stButton > button:hover {
-        border: 1px solid #00ff41 !important;
-        color: #00ff41 !important;
-        background: rgba(0, 255, 65, 0.05) !important;
-        box-shadow: 0px 0px 25px rgba(0, 255, 65, 0.3) !important;
-        transform: scale(1.02);
-    }
+    st.markdown("""
+    <style>
+    /* 1. THE VOID DEPTH (Radial Gradient) */
+    .stApp { 
+        background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
+    }
+    
+    /* 🛠️ HEADER RECOVERY: Pushing content down 120px to clear the crop */
+    .main .block-container {
+        padding-top: 7.5rem !important;
+        max-width: 95% !important;
+    }
 
-    /* 3. NEURAL GRADIENT TEXT (Pulsing Authority) */
-    .void-gradient-text {
-        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        background-clip: text !important;
-        font-weight: 900 !important;
-        font-size: 2.5rem !important;
-        letter-spacing: -1px;
-    }
+    /* 2. THE NEURAL FORGE BUTTONS (Cyan to Matrix Green) */
+    div.stButton > button {
+        background: rgba(0, 0, 0, 0.6) !important;
+        color: #00d4ff !important; 
+        border: 1px solid rgba(0, 212, 255, 0.4) !important; 
+        border-radius: 4px !important;
+        padding: 12px 28px !important;
+        font-family: 'Space Grotesk', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        width: 100% !important;
+        transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    }
+    
+    div.stButton > button:hover {
+        border: 1px solid #00ff41 !important;
+        color: #00ff41 !important;
+        background: rgba(0, 255, 65, 0.1) !important;
+        box-shadow: 0px 0px 30px rgba(0, 255, 65, 0.4) !important;
+        transform: scale(1.02);
+    }
 
-    /* 4. SIDEBAR OPTIMIZATION */
-    [data-testid="stSidebar"] {
-        background-color: #000000 !important;
-        border-right: 1px solid rgba(192, 192, 192, 0.1) !important;
-    }
+    /* 3. NEURAL GRADIENT TEXT (Pulsing Authority) */
+    .void-gradient-text {
+        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        font-weight: 900 !important;
+        font-size: 2.5rem !important;
+        letter-spacing: -1px;
+    }
 
-    /* 5. INPUT FIELDS (Glassmorphism) */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea {
-        background-color: rgba(255, 255, 255, 0.03) !important;
-        color: #C0C0C0 !important;
-        border: 1px solid rgba(0, 212, 255, 0.2) !important;
-        border-radius: 4px !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    /* 4. SIDEBAR OPTIMIZATION (Pure Black Lock) */
+    [data-testid="stSidebar"] {
+        background-color: #000000 !important;
+        border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
+    }
+
+    /* Ensures Sidebar items (DNA Anchor etc) sit below the crop */
+    [data-testid="stSidebarUserContent"] {
+        padding-top: 4.5rem !important;
+        background-color: #000000 !important;
+    }
+
+    /* 5. INPUT FIELDS (Glassmorphism) */
+    .stTextInput>div>div>input, 
+    .stTextArea>div>div>textarea,
+    .stNumberInput>div>div>input {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        color: #00ff41 !important;
+        border: 1px solid rgba(0, 212, 255, 0.2) !important;
+        border-radius: 4px !important;
+    }
+
+    /* 6. OVERLAY CLEANUP (Hide Streamlit Native Bar) */
+    header { visibility: hidden !important; }
+    footer { visibility: hidden !important; }
+    [data-testid="stHeader"] { background-color: rgba(0,0,0,0) !important; }
+
+    </style>
+    """, unsafe_allow_html=True)
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2697,6 +2718,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
