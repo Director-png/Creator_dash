@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, height=device-height">
     <title>VOID OS | Private Terminal</title>
     <style>
         body, html { 
@@ -13,30 +13,33 @@
             overflow: hidden; 
             background-color: #000; 
         }
-        /* THE CROP TECHNIQUE */
+        
         .container {
             position: relative;
             width: 100%;
-            height: 100%;
+            height: 100vh;
             overflow: hidden;
         }
+
         iframe { 
             position: absolute;
-            /* Move the app up by 60px to hide the Streamlit header */
-            top: -60px; 
+            /* Negative top to hide Streamlit's header (approx 50-60px) */
+            top: -55px; 
             left: 0;
             width: 100%; 
-            /* Make the height 60px longer so the footer stays off-screen */
-            height: calc(100% + 120px); 
+            /* Height is 100% + the 55px we hid at the top + extra to hide the bottom bar */
+            height: calc(100% + 100px); 
             border: none;
+            /* Ensures scaling remains 1:1 */
+            transform-origin: 0 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <iframe 
-            src="https://void-os.streamlit.app/?embed=true&embed_options=disable_scrolling" 
-            allow="fullscreen">
+            src="https://void-os.streamlit.app/?embed=true" 
+            allow="fullscreen; clipboard-read; clipboard-write">
         </iframe>
     </div>
 </body>
