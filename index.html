@@ -2,60 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VOID OS | Private Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOID OS</title>
     <style>
-        /* 1. RESET SYSTEM */
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            height: 100%; 
-            width: 100%; 
-            overflow: hidden; 
-            background-color: #000; 
-        }
-
-        /* 2. THE CONTAINER (Locked to Viewport) */
-        .container { 
-            position: relative; 
-            width: 100vw; 
-            height: 100vh; 
-            overflow: hidden; 
-        }
-
-        /* 3. THE IFRAME (Simplified) */
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
+        .container { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
         iframe { 
             position: absolute;
-            /* We reduce the crop to -40px to give the headers more breathing room */
-            top: -40px; 
+            top: -50px; /* Hide the Streamlit bar */
             left: 0;
             width: 100%; 
-            /* We expand the height to hide the Streamlit footer bar at the bottom */
-            height: calc(100% + 80px); 
+            height: calc(100% + 50px); 
             border: none;
-            
-            /* High-fidelity rendering for 2026 browsers */
-            image-rendering: -webkit-optimize-contrast;
-            transition: opacity 0.5s ease-in;
-        }
-
-        /* 4. DESKTOP OPTIMIZATION (No aggressive scaling) */
-        @media (min-width: 1024px) {
-            iframe {
-                /* Instead of scaling, we use a slight width expansion to trigger Desktop mode */
-                width: 100%; 
-                height: calc(100% + 80px);
-                transform: none; /* Removing the scale to fix the "missing buttons" bug */
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <iframe 
-            src="https://void-os.streamlit.app/?embed=true" 
-            allow="fullscreen; clipboard-read; clipboard-write">
-        </iframe>
+        <iframe src="https://void-os.streamlit.app/?embed=true"></iframe>
     </div>
 </body>
 </html>
