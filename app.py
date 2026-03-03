@@ -1126,12 +1126,9 @@ if not st.session_state.logged_in:
 if 'page' not in st.session_state:
     st.session_state.page = "🏠 Dashboard"
 
-# --- 2. SIDEBAR ARCHITECTURE ---
+# --- 3. SIDEBAR ARCHITECTURE (Logic Intact) ---
 with st.sidebar:
     try:
-        # --- THE GHOST OVERRIDE: STABLE STEALTH ---
-        st.markdown("<style>.stApp {background-color: #000000 !important;} .block-container {padding: 0rem !important;}</style>", unsafe_allow_html=True)
-
         # --- ENHANCED IDENTITY CORE ---
         profile_img = st.session_state.get('vault_anchor')
         identity_container = st.container()
@@ -1140,6 +1137,7 @@ with st.sidebar:
             col_img, col_name = st.columns([1, 3])
             with col_img:
                 if profile_img is not None:
+                    # Logic Intact: Using your image vault anchor
                     st.image(profile_img, use_container_width=True)
                 else:
                     st.markdown("<div style='width: 50px; height: 50px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px; font-weight: bold; margin-top:5px;'>DNA</div>", unsafe_allow_html=True)
@@ -1153,19 +1151,6 @@ with st.sidebar:
                     </div>
                 """, unsafe_allow_html=True)
 
-        st.markdown("""
-            <style>
-                [data-testid="stSidebar"] [data-testid="stImage"] img {
-                    border-radius: 50% !important;
-                    border: 2px solid #00ff41 !important;
-                    aspect-ratio: 1 / 1;
-                    object-fit: cover;
-                    width: 55px !important;
-                    height: 55px !important;
-                }
-            </style>
-        """, unsafe_allow_html=True)
-        
         st.divider()
         
         # --- CLEARANCE VISUALS ---
@@ -1196,7 +1181,6 @@ with st.sidebar:
             st.session_state.nav_radio = st.session_state.redirect_to
             del st.session_state.redirect_to
 
-        
         if 'current_page' not in st.session_state:
             st.session_state.current_page = options[0]
 
@@ -1237,9 +1221,10 @@ with st.sidebar:
                     with st.chat_message("assistant", avatar="🌌"):
                         resp_container = st.empty()
                         full_resp = ""
-                        # Verified Logic: groq_c is now the Client object
-                        if groq_c:
+                        # Your Logic Intact: Verified Groq Client check
+                        if 'groq_c' in globals() or 'groq_c' in locals():
                             try:
+                                # Ensure groq_c is defined in your main script
                                 stream = groq_c.chat.completions.create(
                                     model="llama-3.3-70b-versatile",
                                     messages=[
@@ -1258,7 +1243,7 @@ with st.sidebar:
                             except Exception as e:
                                 st.error(f"Uplink Error: {str(e)}")
                         else:
-                            st.error("Uplink Error: VOID-OS Engine (groq_c) is not initialized.")
+                            st.error("Uplink Error: Engine (groq_c) is not initialized.")
 
         # --- 🛠️ GLOBAL ACTIONS ---
         st.divider()
@@ -2704,6 +2689,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
