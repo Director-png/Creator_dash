@@ -2044,7 +2044,7 @@ elif page == "🧪 Creator Lab":
     # 🕵️ Check Persona and Status
     is_admin = st.session_state.get('user_role') == "admin"
     user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
-    is_pro = user_status in ['pro', 'paid']
+    is_pro = user_status in ['Pro', 'Elite', 'Core']
 
     # --- THE ROI ENGINE (ADMIN & PRO VERSION) ---
     if is_admin or is_pro:
@@ -2701,6 +2701,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
