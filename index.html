@@ -1,35 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOID OS | Private Terminal</title>
+def apply_void_os_css():
+    st.markdown("""
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
-        .container { position: relative; width: 100vw; height: 100vh; overflow: hidden; background: #000; }
+    /* 1. THE VOID DEPTH */
+    .stApp { 
+        background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
+    }
+    
+    /* 🛠️ HEADER RECOVERY (The Critical Fix) */
+    /* We need massive padding-top to counter the -50px crop in index.html */
+    .main .block-container {
+        padding-top: 10rem !important; 
+        max-width: 95% !important;
+    }
 
-        iframe { 
-            position: absolute;
-            top: -50px; /* The crop to hide the Streamlit header bar */
-            left: 0;
-            width: 100%; 
-            height: calc(100% + 100px); 
-            border: none;
-        }
+    /* 🌑 PURE BLACK SIDEBAR */
+    [data-testid="stSidebar"], [data-testid="stSidebarUserContent"] {
+        background-color: #000000 !important;
+    }
+    
+    [data-testid="stSidebarUserContent"] {
+        padding-top: 5rem !important; /* Pushes sidebar content down below crop */
+    }
 
-        @media (min-width: 1024px) {
-            iframe { 
-                width: 111.11%; 
-                height: calc(111.11% + 100px); 
-                transform: scale(0.9); /* Slightly less aggressive than 0.85 for better visibility */
-                transform-origin: top left;
-            }
-        }
+    /* 2. THE NEURAL FORGE BUTTONS (High Contrast Cyan) */
+    div.stButton > button {
+        background: rgba(0, 0, 0, 0.8) !important; /* Darker background for more pop */
+        color: #00d4ff !important; 
+        border: 2px solid #00d4ff !important; /* Thicker border to ensure visibility */
+        border-radius: 4px !important;
+        padding: 12px 28px !important;
+        font-family: 'Space Grotesk', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        width: 100% !important;
+        transition: 0.3s ease-in-out !important;
+    }
+    
+    div.stButton > button:hover {
+        border: 2px solid #00ff41 !important;
+        color: #00ff41 !important;
+        background: rgba(0, 255, 65, 0.1) !important;
+        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.5) !important;
+    }
+
+    /* 3. NEURAL GRADIENT TEXT */
+    .void-gradient-text {
+        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        font-weight: 900 !important;
+        font-size: 2.5rem !important;
+    }
+
+    /* 4. INPUT FIELDS */
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: #00ff41 !important;
+        border: 1px solid #00d4ff !important;
+    }
+
+    /* 5. SYSTEM OVERLAYS */
+    header { visibility: hidden !important; height: 0px !important; }
+    footer { visibility: hidden !important; }
+    
     </style>
-</head>
-<body>
-    <div class="container">
-        <iframe src="https://void-os.streamlit.app/?embed=true" allow="fullscreen; clipboard-read; clipboard-write"></iframe>
-    </div>
-</body>
-</html>
+    """, unsafe_allow_html=True)
