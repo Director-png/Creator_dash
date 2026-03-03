@@ -2050,15 +2050,18 @@ elif page == "🧪 Creator Lab":
     # 🕵️ Check Persona and Status
     is_admin = st.session_state.get('user_role') == "admin"
     user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
-    is_pro = user_status in ['Pro', 'Elite', 'Core']
+    
+    # Define Tiers that can access the ROI Engine
+    # Pro/Elite/Core/Director have access. Free/Operative do not.
+    is_pro = user_status in ['pro', 'elite', 'core', 'director']
 
     # --- THE ROI ENGINE (ADMIN & PRO VERSION) ---
     if is_admin or is_pro:
         header_color = "#00d4ff" if is_admin else "#00ff41"
-        header_label = "ADMIN" if is_admin else "PRO"
+        header_label = "ADMIN" if is_admin else "PRO/DIRECTOR"
         
-        draw_title("🧪", "ROI ENGINE v2.0")
-        st.info("🛰️ Strategic Profit Projection: Analyze the fiscal weight of your content.")
+        draw_title("🧪", f"ROI ENGINE v2.0 // {header_label}")
+        st.info("🛰️ **STRATEGIC PROFIT PROJECTION:** Analyze the fiscal weight of your content.")
         
         niche_data = {
             "🎮 Gaming & Entertainment": 3.0,
@@ -2093,6 +2096,8 @@ elif page == "🧪 Creator Lab":
             with res_col1:
                 st.metric("TOTAL VALUE (USD)", f"${total_usd:,.2f}")
             with res_col2:
+                # Highlighted INR value for Indian market impact
+                st.markdown(f"#### PROJECTED REVENUE (INR)")
                 st.markdown(f"<h2 style='color: #00ff41;'>₹ {total_inr:,.2f}</h2>", unsafe_allow_html=True)
 
         # --- GENERATION LOGIC ---
@@ -2122,7 +2127,6 @@ elif page == "🧪 Creator Lab":
                         messages=[{"role": "user", "content": roi_prompt}],
                         temperature=0.5
                     )
-                    # Save result to session state to prevent disappearance
                     st.session_state.roi_report = res.choices[0].message.content
                 except Exception as e:
                     st.error(f"Uplink Error: {str(e)}")
@@ -2136,10 +2140,12 @@ elif page == "🧪 Creator Lab":
                 del st.session_state.roi_report
                 st.rerun()
 
-    # --- THE BASIC LAB (HOOK & RETENTION) ---
+    # --- THE BASIC LAB (HOOK & RETENTION) - FOR OPERATIVES ---
     else:
-        draw_title("🧪", "CREATOR LAB")
-        st.info("📡 Content Optimization: Refine your hooks and retention strategy.")
+        draw_title("🧪", "CREATOR LAB // OPERATIVE TIER")
+        st.info("📡 **CONTENT OPTIMIZATION:** Refine your hooks and retention strategy to unlock ROI clearance.")
+        
+        st.warning("🔒 **ROI ENGINE LOCKED:** Reach 'Director' status to analyze profit projections.")
 
         tab_hook, tab_retention = st.tabs(["🔥 Hook Analyzer", "🧠 Cognitive Load"])
 
@@ -2707,6 +2713,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
