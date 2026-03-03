@@ -1,68 +1,61 @@
-def apply_void_os_css():
-    st.markdown("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VOID OS | Private Terminal</title>
     <style>
-    /* 1. THE VOID DEPTH */
-    .stApp { 
-        background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
-    }
-    
-    /* 🛠️ HEADER RECOVERY (The Critical Fix) */
-    /* We need massive padding-top to counter the -50px crop in index.html */
-    .main .block-container {
-        padding-top: 10rem !important; 
-        max-width: 95% !important;
-    }
+        /* 1. RESET SYSTEM */
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            height: 100%; 
+            width: 100%; 
+            overflow: hidden; 
+            background-color: #000; 
+        }
 
-    /* 🌑 PURE BLACK SIDEBAR */
-    [data-testid="stSidebar"], [data-testid="stSidebarUserContent"] {
-        background-color: #000000 !important;
-    }
-    
-    [data-testid="stSidebarUserContent"] {
-        padding-top: 5rem !important; /* Pushes sidebar content down below crop */
-    }
+        /* 2. THE CONTAINER (Locked to Viewport) */
+        .container { 
+            position: relative; 
+            width: 100vw; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
 
-    /* 2. THE NEURAL FORGE BUTTONS (High Contrast Cyan) */
-    div.stButton > button {
-        background: rgba(0, 0, 0, 0.8) !important; /* Darker background for more pop */
-        color: #00d4ff !important; 
-        border: 2px solid #00d4ff !important; /* Thicker border to ensure visibility */
-        border-radius: 4px !important;
-        padding: 12px 28px !important;
-        font-family: 'Space Grotesk', sans-serif;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        width: 100% !important;
-        transition: 0.3s ease-in-out !important;
-    }
-    
-    div.stButton > button:hover {
-        border: 2px solid #00ff41 !important;
-        color: #00ff41 !important;
-        background: rgba(0, 255, 65, 0.1) !important;
-        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.5) !important;
-    }
+        /* 3. THE IFRAME (Simplified) */
+        iframe { 
+            position: absolute;
+            /* We reduce the crop to -40px to give the headers more breathing room */
+            top: -40px; 
+            left: 0;
+            width: 100%; 
+            /* We expand the height to hide the Streamlit footer bar at the bottom */
+            height: calc(100% + 80px); 
+            border: none;
+            
+            /* High-fidelity rendering for 2026 browsers */
+            image-rendering: -webkit-optimize-contrast;
+            transition: opacity 0.5s ease-in;
+        }
 
-    /* 3. NEURAL GRADIENT TEXT */
-    .void-gradient-text {
-        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        background-clip: text !important;
-        font-weight: 900 !important;
-        font-size: 2.5rem !important;
-    }
-
-    /* 4. INPUT FIELDS */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        color: #00ff41 !important;
-        border: 1px solid #00d4ff !important;
-    }
-
-    /* 5. SYSTEM OVERLAYS */
-    header { visibility: hidden !important; height: 0px !important; }
-    footer { visibility: hidden !important; }
-    
+        /* 4. DESKTOP OPTIMIZATION (No aggressive scaling) */
+        @media (min-width: 1024px) {
+            iframe {
+                /* Instead of scaling, we use a slight width expansion to trigger Desktop mode */
+                width: 100%; 
+                height: calc(100% + 80px);
+                transform: none; /* Removing the scale to fix the "missing buttons" bug */
+            }
+        }
     </style>
-    """, unsafe_allow_html=True)
+</head>
+<body>
+    <div class="container">
+        <iframe 
+            src="https://void-os.streamlit.app/?embed=true" 
+            allow="fullscreen; clipboard-read; clipboard-write">
+        </iframe>
+    </div>
+</body>
+</html>
