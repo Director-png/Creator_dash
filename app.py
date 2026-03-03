@@ -246,225 +246,152 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
- import streamlit as st
-
-
-
 # 1. INITIALIZE (Must be first)
-
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="expanded")
 
-
-
+# 2. RESTORED ARCHITECTURAL CSS
 st.markdown("""
-
     <style>
-
-    /* 1. THE DEEP NAVY VOID (Matching the screenshot depth) */
-
+    /* 1. THE DEEP NAVY VOID */
     .stApp { 
-
         background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
-
     }
-
+    
     /* 1. RELOCATE THE SIDEBAR TOGGLE */
-
-    /* This targets the button that opens the sidebar when it's closed */
-
     [data-testid="stSidebarCollapsedControl"] {
-
-        top: 5rem !important; /* Pushes it down below the header/crop area */
-
+        top: 5rem !important; 
         left: 1rem !important;
-
         background-color: rgba(0, 212, 255, 0.1) !important;
-
         border-radius: 0 10px 10px 0 !important;
-
         border: 1px solid rgba(0, 212, 255, 0.2) !important;
-
         transition: all 0.3s ease !important;
-
     }
-
-
 
     [data-testid="stSidebarCollapsedControl"]:hover {
-
         background-color: rgba(0, 212, 255, 0.3) !important;
-
         box-shadow: 0px 0px 15px rgba(0, 212, 255, 0.5) !important;
-
     }
-
-
-
-    /* 2. STYLE THE ICON INSIDE */
 
     [data-testid="stSidebarCollapsedControl"] svg {
-
         fill: #00d4ff !important;
-
     }
-
-
-
-    /* 3. ENSURE THE SIDEBAR HEADER DOESN'T HIDE THE CLOSE BUTTON */
 
     [data-testid="stSidebar"] [data-testid="stBaseButton-headerNoPadding"] {
-
         top: 1rem !important;
-
         color: #00d4ff !important;
-
     }
-
     
-
-    /* 2. CENTERED COMMAND CORE with 0.25cm Internal Border */
-
+    /* 2. CENTERED COMMAND CORE */
     .main .block-container {
-
         padding-top: 6rem !important; 
-
         padding-left: 5% !important;
-
         padding-right: 5% !important;
-
         max-width: 90% !important;
-
         text-align: center !important;
-
         
-
         margin-top: 0.25cm !important;
-
         margin-bottom: 0.25cm !important;
-
         border: 0.25cm solid rgba(0, 212, 255, 0.03) !important;
-
         border-radius: 20px !important;
-
         background-color: transparent !important;
-
     }
-
-
 
     /* 3. BUTTONS: PHOTO-MATCHED STYLE */
-
     div.stButton > button {
-
-        /* Deep Navy Semi-Transparent Fill */
-
         background: rgba(5, 11, 20, 0.6) !important; 
-
         color: #00d4ff !important; 
-
-        
-
-        /* Thin, elegant border like the photo */
-
         border: 1.2px solid rgba(0, 212, 255, 0.3) !important; 
-
         border-radius: 8px !important;
-
-        
-
         padding: 10px 24px !important;
-
         font-family: 'Space Grotesk', sans-serif;
-
         text-transform: uppercase;
-
         letter-spacing: 1.5px;
-
         font-size: 0.9rem !important;
-
         font-weight: 500 !important;
-
-        
-
-        width: auto !important; /* Removing the full-width logic */
-
         min-width: 220px !important;
-
         margin: 10px !important;
-
-        
-
         transition: all 0.4s ease !important;
-
     }
-
     
-
     div.stButton > button:hover {
-
-        /* Transitioning to the Matrix Green Gradient */
-
         border: 1.2px solid #00ff41 !important;
-
         color: #00ff41 !important;
-
         background: rgba(0, 255, 65, 0.05) !important;
-
         box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2) !important;
-
         transform: translateY(-2px);
-
     }
-
-
 
     /* 4. TEXT CENTRALIZATION */
-
     .stMarkdown, .stText, h1, h2, h3, p {
-
         text-align: center !important;
-
         justify-content: center !important;
-
     }
-
-
 
     /* 5. NEURAL GRADIENT TEXT */
-
     .void-gradient-text {
-
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
-
         -webkit-background-clip: text !important;
-
         -webkit-text-fill-color: transparent !important;
-
         font-weight: 900 !important;
-
         font-size: 2.8rem !important;
-
         display: block;
-
+        margin: 20px auto;
     }
 
-
-
     /* 6. SIDEBAR & OVERLAY CLEANUP */
-
-    [data-testid="stSidebar"], [data-testid="stSidebarUserContent"] {
-
+    [data-testid="stSidebar"] {
         background-color: #000000 !important;
-
+        border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
+    }
+    
+    /* SIDEBAR IMAGE CIRCLE FIX */
+    [data-testid="stSidebar"] [data-testid="stImage"] img {
+        border-radius: 50% !important;
+        border: 2px solid #00ff41 !important;
+        object-fit: cover;
     }
 
     header, footer { visibility: hidden !important; }
-
-
-
     </style>
-
 """, unsafe_allow_html=True)
+
+# 3. SIDEBAR ARCHITECTURE (The Identity Vault)
+with st.sidebar:
+    st.markdown("<h2 style='color: #00d4ff; text-align: left !important;'>🔒 IDENTITY VAULT</h2>", unsafe_allow_html=True)
+    
+    # User Profile Section
+    col_img, col_name = st.columns([1, 2])
+    with col_img:
+        # DNA Anchor Placeholder
+        st.markdown("<div style='width: 60px; height: 60px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px; font-weight: bold;'>DNA</div>", unsafe_allow_html=True)
+    with col_name:
+        st.markdown("<p style='text-align: left !important; color: #888; font-size: 10px; margin: 0;'>DIRECTOR STATUS</p><h3 style='text-align: left !important; color: #ffffff; margin: 0;'>OPERATIVE</h3>", unsafe_allow_html=True)
+    
+    st.divider()
+    
+    # Navigation
+    st.radio("COMMAND MENU", ["📡 Dashboard", "🧠 Neural Forge", "📈 ROI Engine", "⚙️ Settings"], key="nav_main")
+    
+    st.divider()
+    st.markdown("### 🤖 VOID MANAGER")
+    with st.expander("📡 NEURAL UPLINK"):
+        st.chat_input("Direct Command...")
+
+# 4. MAIN INTERFACE
+st.markdown('<p class="void-gradient-text">VOID OS TERMINAL</p>', unsafe_allow_html=True)
+
+# Layout for Forge and ROI
+tab1, tab2 = st.tabs(["⚒️ NEURAL FORGE", "📊 FISCAL WEIGHT"])
+
+with tab1:
+    st.markdown("### Pattern Break Generator")
+    st.slider("Hook Intensity", 0, 100, 92)
+    st.button("FORGE SCRIPT")
+
+with tab2:
+    st.markdown("### ROI Projection")
+    st.metric(label="Projected Revenue", value="$18,450", delta="22%")
+    st.button("CALCULATE WEIGHT")
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2848,6 +2775,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
