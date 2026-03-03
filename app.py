@@ -1209,7 +1209,8 @@ with st.sidebar:
 
         # --- NAVIGATION SYNC LOGIC ---
         if st.session_state.get('redirect_to'):
-            st.session.current_page = st.session_state_redirect_to
+            st.session_state.current_page = st.session_state.redirect_to
+            st.session_state.nav_radio = st.session_state.redirect_to
             del st.session_state.redirect_to
 
         
@@ -2700,6 +2701,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
