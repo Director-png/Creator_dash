@@ -247,21 +247,28 @@ def draw_title(emoji, text):
 def apply_void_os_css():
     st.markdown("""
     <style>
-    /* 1. THE VOID DEPTH (Radial Gradient) */
+    /* 1. THE VOID DEPTH */
     .stApp { 
         background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
     }
     
-    /* 2. THE NEURAL FORGE BUTTONS (Cyan to Matrix Green) */
+    /* 🛠️ HEADER FIX: Ensure the main content doesn't vanish under the crop */
+    .main .block-container {
+        padding-top: 2rem !important; /* Forces content down so the header stays visible */
+        max-width: 95% !important;
+    }
+
+    /* 2. THE NEURAL FORGE BUTTONS */
     div.stButton > button {
         background: rgba(0, 0, 0, 0.6) !important;
         color: #00d4ff !important; 
         border: 1px solid rgba(0, 212, 255, 0.3) !important; 
-        border-radius: 4px !important; /* Sharper edges for 2026 elite feel */
+        border-radius: 4px !important;
         padding: 12px 28px !important;
         font-family: 'Space Grotesk', sans-serif;
         text-transform: uppercase;
         letter-spacing: 2px;
+        width: 100% !important; /* Ensures stability across desktop/mobile */
         transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     }
     
@@ -270,33 +277,44 @@ def apply_void_os_css():
         color: #00ff41 !important;
         background: rgba(0, 255, 65, 0.05) !important;
         box-shadow: 0px 0px 25px rgba(0, 255, 65, 0.3) !important;
-        transform: scale(1.02);
+        transform: scale(1.01);
     }
 
-    /* 3. NEURAL GRADIENT TEXT (Pulsing Authority) */
+    /* 3. NEURAL GRADIENT TEXT */
     .void-gradient-text {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
         font-weight: 900 !important;
-        font-size: 2.5rem !important;
+        font-size: 2.2rem !important; /* Slightly reduced for better mobile/desktop fit */
         letter-spacing: -1px;
     }
 
     /* 4. SIDEBAR OPTIMIZATION */
     [data-testid="stSidebar"] {
         background-color: #000000 !important;
-        border-right: 1px solid rgba(192, 192, 192, 0.1) !important;
+        border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
+    }
+    
+    /* Ensure Sidebar text is visible against black */
+    [data-testid="stSidebar"] .stMarkdown p {
+        color: #C0C0C0 !important;
     }
 
     /* 5. INPUT FIELDS (Glassmorphism) */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea {
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
         background-color: rgba(255, 255, 255, 0.03) !important;
-        color: #C0C0C0 !important;
+        color: #00ff41 !important; /* Matrix Green for input data */
         border: 1px solid rgba(0, 212, 255, 0.2) !important;
         border-radius: 4px !important;
     }
+
+    /* 6. HIDE DEFAULT ELEMENTS */
+    header {visibility: hidden;} /* Hides the gray Streamlit bar while keeping padding */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    
     </style>
     """, unsafe_allow_html=True)
 
@@ -2700,6 +2718,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
