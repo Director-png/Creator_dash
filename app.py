@@ -247,71 +247,72 @@ def draw_title(emoji, text):
 def apply_void_os_css():
     st.markdown("""
     <style>
-    /* 1. FORCE APP BACKGROUND */
-    .stAppViewMain {
-        background-color: #000000 !important;
+    /* 1. THE VOID DEPTH */
+    .stApp { 
+        background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
     }
-
-    /* 2. THE FLOATING TERMINAL FRAME */
-    /* We target the main data-testid to ensure the margin is respected */
-    [data-testid="stMainViewContainer"] {
-        background: #000000 !important;
-        padding: 2cm 1cm !important;
-    }
-
-    [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] {
-        /* This creates the inner glowing terminal look */
-    }
-
+    
+    /* 🛠️ CONTENT ALIGNMENT */
+    /* Pushes content down slightly so it clears the iframe crop perfectly */
     .main .block-container {
-        background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important;
-        border: 1.5px solid rgba(0, 212, 255, 0.2) !important;
-        border-radius: 15px !important;
-        box-shadow: 0px 0px 30px rgba(0, 0, 0, 1) !important;
         padding-top: 5rem !important;
+        max-width: 95% !important;
     }
 
-    /* 3. THE NEURAL FORGE BUTTONS (Gradient Pulse) */
-    /* Using the exact button selector for the 2026 build */
-    button[kind="secondary"] {
-        background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 0, 0, 1) 100%) !important;
-        color: #00d4ff !important;
-        border: 2px solid #00d4ff !important;
-        border-radius: 4px !important;
-        font-family: 'Space Grotesk', sans-serif !important;
-        text-transform: uppercase !important;
-        letter-spacing: 2px !important;
-        transition: all 0.3s ease !important;
-    }
-
-    button[kind="secondary"]:hover {
-        background: linear-gradient(135deg, rgba(0, 255, 65, 0.2) 0%, rgba(0, 0, 0, 1) 100%) !important;
-        color: #00ff41 !important;
-        border: 2px solid #00ff41 !important;
-        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.4) !important;
-        transform: translateY(-2px) !important;
-    }
-
-    /* 4. SIDEBAR DARK LOCK */
-    [data-testid="stSidebar"] {
+    /* 🌑 PURE BLACK SIDEBAR LOCK */
+    [data-testid="stSidebar"], 
+    [data-testid="stSidebarUserContent"],
+    section[data-testid="stSidebar"] > div {
         background-color: #000000 !important;
-        border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
+    }
+    
+    /* Pushes DNA Anchor and Sidebar content down */
+    [data-testid="stSidebarUserContent"] {
+        padding-top: 3.5rem !important;
     }
 
-    /* 5. HEADER RECOVERY */
-    header[data-testid="stHeader"] {
-        background: transparent !important;
-        color: transparent !important;
+    /* 2. THE NEURAL FORGE BUTTONS (Cyan-to-Green Gradient) */
+    div.stButton > button {
+        background: linear-gradient(135deg, rgba(0, 0, 0, 1) 0%, rgba(0, 212, 255, 0.05) 100%) !important;
+        color: #00d4ff !important; 
+        border: 2px solid #00d4ff !important; 
+        border-radius: 4px !important;
+        padding: 12px 28px !important;
+        font-family: 'Space Grotesk', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        width: 100% !important;
+        transition: all 0.3s ease-in-out !important;
+    }
+    
+    div.stButton > button:hover {
+        border: 2px solid #00ff41 !important;
+        color: #00ff41 !important;
+        background: linear-gradient(135deg, rgba(0, 0, 0, 1) 0%, rgba(0, 255, 65, 0.15) 100%) !important;
+        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.4) !important;
     }
 
-    /* 6. NEURAL GRADIENT TEXT */
+    /* 3. NEURAL GRADIENT TEXT */
     .void-gradient-text {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
         font-weight: 900 !important;
         font-size: 2.5rem !important;
     }
+
+    /* 4. INPUT FIELDS (Glassmorphism) */
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        color: #00ff41 !important;
+        border: 1px solid rgba(0, 212, 255, 0.2) !important;
+    }
+
+    /* 5. OVERLAY CLEANUP */
+    header { visibility: hidden !important; }
+    footer { visibility: hidden !important; }
+    
     </style>
     """, unsafe_allow_html=True)
 
@@ -2712,6 +2713,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
