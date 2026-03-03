@@ -249,7 +249,6 @@ import streamlit as st
 # 1. INITIALIZE (Must be first)
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="expanded")
 
-# 2. THE SYSTEM OVERRIDE
 st.markdown("""
     <style>
     /* 1. THE VOID DEPTH */
@@ -257,72 +256,81 @@ st.markdown("""
         background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
     }
     
-    /* 2. THE FLOATING CORE (The 0.25cm Border Logic) */
+    /* 2. CENTERED COMMAND CORE */
     .main .block-container {
         padding-top: 6rem !important; 
         padding-left: 2rem !important;
         padding-right: 2rem !important;
-        max-width: 95% !important;
+        max-width: 90% !important;
+        text-align: center !important; /* Forces global text centering */
         
         /* THE SECONDARY SEAL */
         margin-top: 0.25cm !important;
         margin-bottom: 0.25cm !important;
-        border: 0.25cm solid rgba(0, 212, 255, 0.05) !important; /* The 0.25cm border */
+        border: 0.25cm solid rgba(0, 212, 255, 0.05) !important;
         border-radius: 15px !important;
         box-shadow: inset 0px 0px 20px rgba(0, 0, 0, 0.5), 0px 0px 15px rgba(0, 212, 255, 0.1) !important;
     }
 
-    /* 3. PURE BLACK SIDEBAR */
-    [data-testid="stSidebar"], 
-    [data-testid="stSidebarUserContent"],
-    section[data-testid="stSidebar"] > div {
-        background-color: #000000 !important;
-    }
-    
-    [data-testid="stSidebarUserContent"] {
-        padding-top: 3.5rem !important;
+    /* Target specifically for centered headers and markdown */
+    .stMarkdown, .stText, h1, h2, h3, p {
+        text-align: center !important;
+        justify-content: center !important;
     }
 
-    /* 4. THE NEURAL FORGE BUTTONS (Gradient Pulse) */
+    /* 3. PURE BLACK SIDEBAR */
+    [data-testid="stSidebar"], [data-testid="stSidebarUserContent"] {
+        background-color: #000000 !important;
+    }
+
+    /* 4. THE GLASS-REFRACTION BUTTONS */
     div.stButton > button {
-        background: linear-gradient(135deg, rgba(0, 0, 0, 1) 0%, rgba(0, 212, 255, 0.1) 100%) !important;
+        background: linear-gradient(180deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%) !important;
         color: #00d4ff !important; 
-        border: 2px solid #00d4ff !important; 
+        border: 1px solid rgba(0, 212, 255, 0.4) !important; 
         border-radius: 4px !important;
         padding: 12px 28px !important;
         font-family: 'Space Grotesk', sans-serif;
         text-transform: uppercase;
-        letter-spacing: 2px;
+        letter-spacing: 3px;
         width: 100% !important;
-        transition: all 0.3s ease-in-out !important;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1) !important;
     }
     
     div.stButton > button:hover {
-        border: 2px solid #00ff41 !important;
+        /* Glass Refraction: Shifting to Matrix Green with a "glow-up" effect */
         color: #00ff41 !important;
-        background: linear-gradient(135deg, rgba(0, 0, 0, 1) 0%, rgba(0, 255, 65, 0.2) 100%) !important;
-        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.4) !important;
-        transform: translateY(-2px);
+        border: 1px solid #00ff41 !important;
+        background: linear-gradient(0deg, rgba(0, 255, 65, 0.15) 0%, rgba(0, 0, 0, 1) 100%) !important;
+        box-shadow: 0px 0px 30px rgba(0, 255, 65, 0.3), inset 0px 0px 10px rgba(0, 255, 65, 0.2) !important;
+        transform: translateY(-3px);
+        letter-spacing: 5px; /* Subtle expansion effect */
     }
 
-    /* 5. NEURAL GRADIENT TEXT */
+    /* 5. NEURAL GRADIENT TEXT (Centered) */
     .void-gradient-text {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
         font-weight: 900 !important;
-        font-size: 2.5rem !important;
+        font-size: 2.8rem !important;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
     }
 
-    /* 6. INPUT FIELDS & OVERLAYS */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
+    /* 6. INPUT FIELDS (Centered Text) */
+    .stTextInput>div>div>input, .stNumberInput>div>div>input {
+        text-align: center !important;
         background-color: rgba(255, 255, 255, 0.03) !important;
         color: #00ff41 !important;
         border: 1px solid rgba(0, 212, 255, 0.3) !important;
     }
-    header { visibility: hidden !important; }
-    footer { visibility: hidden !important; }
+
+    header, footer { visibility: hidden !important; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -2723,6 +2731,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
