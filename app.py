@@ -1965,6 +1965,9 @@ elif page == "🔒 Identity Vault":
         with c2:
             if st.button("🚀 UPGRADE TO DIRECTOR", use_container_width=True, type="primary"):
                 st.toast("Redirecting to Command Center for Tier Upgrade...")
+                # Redirect logic
+                st.session_state.page = "⚡ Upgrade Authority"
+                st.rerun()
 
     # --- 3. SYSTEM SYNC CHECK + PROTOCOL STATUS ---
     st.divider()
@@ -2692,6 +2695,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
