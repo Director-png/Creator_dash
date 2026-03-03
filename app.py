@@ -244,78 +244,27 @@ def draw_title(emoji, text):
         </div>
     """, unsafe_allow_html=True)
 
-def apply_void_os_css():
-    st.markdown("<style>button { background-color: pink !important; }</style>", unsafe_allow_html=True)
-    st.markdown("""
+import streamlit as st
+
+# 1. FORCE THE PAGE CONFIG FIRST
+st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="expanded")
+
+# 2. IMMEDIATE INJECTION (No function, just raw execution)
+st.markdown("""
     <style>
-    /* 1. THE VOID DEPTH */
-    .stApp { 
-        background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
+    /* THE "IF THIS WORKS, IT'S PINK" TEST */
+    div.stButton > button {
+        background-color: #FF69B4 !important; 
+        color: white !important;
+        border: 5px solid white !important;
     }
     
-    /* 🛠️ CONTENT ALIGNMENT */
-    /* Pushes content down slightly so it clears the iframe crop perfectly */
-    .main .block-container {
-        padding-top: 5rem !important;
-        max-width: 95% !important;
-    }
-
-    /* 🌑 PURE BLACK SIDEBAR LOCK */
-    [data-testid="stSidebar"], 
-    [data-testid="stSidebarUserContent"],
-    section[data-testid="stSidebar"] > div {
+    /* FORCE SIDEBAR BLACK */
+    [data-testid="stSidebar"] {
         background-color: #000000 !important;
     }
-    
-    /* Pushes DNA Anchor and Sidebar content down */
-    [data-testid="stSidebarUserContent"] {
-        padding-top: 3.5rem !important;
-    }
-
-    /* 2. THE NEURAL FORGE BUTTONS (Cyan-to-Green Gradient) */
-    div.stButton > button {
-        background: linear-gradient(135deg, rgba(0, 0, 0, 1) 0%, rgba(0, 212, 255, 0.05) 100%) !important;
-        color: #00d4ff !important; 
-        border: 2px solid #00d4ff !important; 
-        border-radius: 4px !important;
-        padding: 12px 28px !important;
-        font-family: 'Space Grotesk', sans-serif;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        width: 100% !important;
-        transition: all 0.3s ease-in-out !important;
-    }
-    
-    div.stButton > button:hover {
-        border: 2px solid #00ff41 !important;
-        color: #00ff41 !important;
-        background: linear-gradient(135deg, rgba(0, 0, 0, 1) 0%, rgba(0, 255, 65, 0.15) 100%) !important;
-        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.4) !important;
-    }
-
-    /* 3. NEURAL GRADIENT TEXT */
-    .void-gradient-text {
-        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        background-clip: text !important;
-        font-weight: 900 !important;
-        font-size: 2.5rem !important;
-    }
-
-    /* 4. INPUT FIELDS (Glassmorphism) */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
-        background-color: rgba(255, 255, 255, 0.03) !important;
-        color: #00ff41 !important;
-        border: 1px solid rgba(0, 212, 255, 0.2) !important;
-    }
-
-    /* 5. OVERLAY CLEANUP */
-    header { visibility: hidden !important; }
-    footer { visibility: hidden !important; }
-    
     </style>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2714,6 +2663,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
