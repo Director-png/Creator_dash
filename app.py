@@ -246,22 +246,75 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
-# 1. FORCE THE PAGE CONFIG FIRST
+# 1. INITIALIZE (Must be first)
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="expanded")
 
-# 2. IMMEDIATE INJECTION (No function, just raw execution)
+# 2. THE SYSTEM OVERRIDE
 st.markdown("""
     <style>
-    /* THE "IF THIS WORKS, IT'S PINK" TEST */
-    div.stButton > button {
-        background-color: #FF69B4 !important; 
-        color: white !important;
-        border: 5px solid white !important;
+    /* 1. THE VOID DEPTH (Radial Gradient) */
+    .stApp { 
+        background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
     }
     
-    /* FORCE SIDEBAR BLACK */
-    [data-testid="stSidebar"] {
+    /* 2. THE CONTENT BUFFER (Restores your Headers) */
+    .main .block-container {
+        padding-top: 6rem !important; 
+        max-width: 95% !important;
+    }
+
+    /* 3. PURE BLACK SIDEBAR */
+    [data-testid="stSidebar"], 
+    [data-testid="stSidebarUserContent"],
+    section[data-testid="stSidebar"] > div {
         background-color: #000000 !important;
+    }
+    
+    [data-testid="stSidebarUserContent"] {
+        padding-top: 3.5rem !important;
+    }
+
+    /* 4. THE NEURAL FORGE BUTTONS (Cyan-to-Green Gradient) */
+    div.stButton > button {
+        background: linear-gradient(135deg, rgba(0, 0, 0, 1) 0%, rgba(0, 212, 255, 0.1) 100%) !important;
+        color: #00d4ff !important; 
+        border: 2px solid #00d4ff !important; 
+        border-radius: 4px !important;
+        padding: 12px 28px !important;
+        font-family: 'Space Grotesk', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        width: 100% !important;
+        transition: all 0.3s ease-in-out !important;
+    }
+    
+    div.stButton > button:hover {
+        border: 2px solid #00ff41 !important;
+        color: #00ff41 !important;
+        background: linear-gradient(135deg, rgba(0, 0, 0, 1) 0%, rgba(0, 255, 65, 0.2) 100%) !important;
+        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.4) !important;
+        transform: translateY(-2px);
+    }
+
+    /* 5. NEURAL GRADIENT TEXT */
+    .void-gradient-text {
+        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        font-weight: 900 !important;
+        font-size: 2.5rem !important;
+    }
+
+    /* 6. SYSTEM OVERLAYS */
+    header { visibility: hidden !important; }
+    footer { visibility: hidden !important; }
+    
+    /* Input Fields Fix */
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        color: #00ff41 !important;
+        border: 1px solid rgba(0, 212, 255, 0.3) !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -2663,6 +2716,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
