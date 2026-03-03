@@ -1599,8 +1599,13 @@ elif page == "📡 My Growth Hub":
 elif page == "🌐 Global Pulse":
     draw_title("🌐", "GLOBAL INTELLIGENCE PULSE")
     
-    # 🔑 CONFIGURATION
-    NEWS_API_KEY = "7640df120b1f4008a744bc780f147e68" 
+    # 🔑 CONFIGURATION - Now pulling from Streamlit Secrets
+    # Ensure you have NEWS_API_KEY = "your_key" in your .streamlit/secrets.toml
+    try:
+        NEWS_API_KEY = st.secrets["NEWS_API_KEY"]
+    except:
+        st.error("🔑 API KEY MISSING: Add 'NEWS_API_KEY' to your Streamlit Secrets.")
+        NEWS_API_KEY = None
 
     # 1. TRIGGER DATA UPLINK
     df_pulse = fetch_live_market_data()
@@ -1657,24 +1662,36 @@ elif page == "🌐 Global Pulse":
 
         # --- 4. LIVE WORLD INTELLIGENCE ---
         st.subheader("📰 LIVE WORLD INTELLIGENCE")
-        news_topic = search_query if search_query else (display_df[name_col].iloc[0] if not display_df.empty else "Technology")
-        articles = fetch_live_news(news_topic, NEWS_API_KEY)
+        
+        # We clean the topic name to ensure the API understands it
+        news_topic = search_query if search_query else (display_df[name_col].iloc[0] if not display_df.empty else "AI Technology")
+        
+        if NEWS_API_KEY:
+            articles = fetch_live_news(news_topic, NEWS_API_KEY)
 
-        if articles:
-            for art in articles[:8]:
-                with st.container(border=True):
-                    c_img, c_txt = st.columns([1, 2])
-                    with c_img:
-                        img_url = art.get('urlToImage') or "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400"
-                        st.image(img_url, use_container_width=True)
-                    with c_txt:
-                        st.markdown(f"<h4 style='color: #00ff41; margin:0;'>{art['title']}</h4>", unsafe_allow_html=True)
-                        desc = art.get('description') or "Detailed intel for this vector is encrypted."
-                        st.write(f"{desc[:200]}...")
-                        st.markdown(f"🔗 [READ FULL REPORT]({art['url']})")
-                        st.caption(f"Source: {art['source']['name']} | {art['publishedAt'][:10]}")
+            # BAILOUT LOGIC: If no specific news, fetch general tech news
+            if not articles:
+                st.write(f"🛰️ Specific intel for '{news_topic}' is sparse. Expanding search radius...")
+                articles = fetch_live_news("AI Tech Trends", NEWS_API_KEY)
+
+            if articles:
+                for art in articles[:8]:
+                    with st.container(border=True):
+                        c_img, c_txt = st.columns([1, 2])
+                        with c_img:
+                            img_url = art.get('urlToImage') or "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400"
+                            st.image(img_url, use_container_width=True)
+                        with c_txt:
+                            st.markdown(f"<h4 style='color: #00ff41; margin:0;'>{art['title']}</h4>", unsafe_allow_html=True)
+                            desc = art.get('description') or "Detailed intel for this vector is encrypted."
+                            st.write(f"{desc[:180]}...")
+                            st.markdown(f"🔗 [READ FULL REPORT]({art['url']})")
+                            source_name = art.get('source', {}).get('name', 'Intel Hub')
+                            st.caption(f"Source: {source_name} | {art.get('publishedAt', '')[:10]}")
+            else:
+                st.info(f"📡 NEURAL SILENCE: No live feeds found for '{news_topic}'. Check API quota.")
         else:
-            st.info(f"🛰️ No live news for '{news_topic}'. Searching broader vectors...")
+            st.warning("⚠️ NEWS FEED OFFLINE: Configure API Key in Secrets to enable.")
             
     else:
         st.error("📡 NEURAL LINK FAILURE: The CSV is unreachable.")
@@ -2702,6 +2719,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
