@@ -1883,6 +1883,7 @@ elif page == "🧠 Neural Forge":
                     )
                     st.warning(r_res.choices[0].message.content)
 
+
 # --- MODULE 6: IDENTITY VAULT (THE NEURAL ANCHOR) ---
 elif page == "🔒 Identity Vault":
     draw_title("🔒", "IDENTITY VAULT // DNA ANCHOR")
@@ -1938,48 +1939,45 @@ elif page == "🔒 Identity Vault":
                     st.session_state.vault_anchor = None
                     st.rerun()
 
-    # --- 2. LINGUISTIC DNA (VOICE CLONE) ---
+    # --- 2. LINGUISTIC DNA (VOICE CLONE) - LOCKED FOR DIRECTOR TIER ---
     with st.expander("🎙️ LINGUISTIC DNA (VOICE CLONE)", expanded=True):
-        st.markdown("##### ElevenLabs Integration")
+        st.markdown("##### 💎 DIRECTOR TIER FEATURE")
+        st.warning("📡 **ACCESS DENIED:** Your current uplink (Operative Tier) does not support Linguistic Cloning.")
         
-        # Voice ID Input
+        # Inputs disabled to enforce Tier Logic
         v_id = st.text_input(
             "Enter ElevenLabs Voice ID", 
-            value=st.session_state.get('linguistic_dna_id', ""),
-            placeholder="e.g., pNInz6obpgDQGcFmaJgB",
-            help="Copy this from ElevenLabs. It links the Neural Forge to your specific voice."
+            value="LOCKED_PROTOCOL_V2",
+            disabled=True,
+            help="Upgrade to DIRECTOR TIER to unlock Neural Voice Forge integration."
         )
         
-        # Tone Description
         v_tone = st.text_area(
             "Linguistic Tone/Style Description", 
-            value=st.session_state.get('linguistic_dna', ""),
-            placeholder="e.g., Authoritative, rhythmic, cinematic noir..."
+            value="Upgrade required to sequence linguistic style...",
+            disabled=True
         )
 
         c1, c2 = st.columns(2)
         with c1:
-            if st.button("🛰️ SYNC LINGUISTIC DNA", use_container_width=True):
-                st.session_state.linguistic_dna_id = v_id
-                st.session_state.linguistic_dna = v_tone
-                st.toast("⚡ DNA SEQUENCED TO FORGE")
+            st.button("🛰️ SYNC LINGUISTIC DNA", use_container_width=True, disabled=True)
         
         with c2:
-            if st.button("🗑️ PURGE VOICE ID", use_container_width=True):
-                st.session_state.linguistic_dna_id = ""
-                st.session_state.linguistic_dna = ""
-                st.rerun()
+            if st.button("🚀 UPGRADE TO DIRECTOR", use_container_width=True, type="primary"):
+                st.toast("Redirecting to Command Center for Tier Upgrade...")
 
     # --- 3. SYSTEM SYNC CHECK + PROTOCOL STATUS ---
     st.divider()
-    if st.session_state.get('vault_anchor') and st.session_state.get('linguistic_dna_id'):
-        st.success("🛰️ IDENTITY FULLY SYNCHRONIZED: Protocol 2026-02-06 Active.")
+    # Note: Logic remains purely visual for the sync check since Linguistic is locked
+    if st.session_state.get('vault_anchor'):
+        st.success("🛰️ VISUAL IDENTITY SYNCHRONIZED: Protocol 2026-02-06 Active.")
         st.markdown("##### 🛡️ SECURITY OVERVIEW")
         st.code("""
         [PROTOCOL_ACTIVE]: ZERO_KNOWLEDGE_VAULT
         [SIGNATURE_STATUS]: SIGNED_BY_DIRECTOR
         [DEEPFAKE_PROTECTION]: NODES_CALIBRATED
         [PERSISTENCE]: EPHEMERAL_SESSION_ONLY
+        [LINGUISTIC_UPLINK]: STANDBY_LOCKED
         """, language="bash")
     else:
         st.warning("📡 IDENTITY INCOMPLETE: Sidebar DNA will remain in standby.")
@@ -2694,6 +2692,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
