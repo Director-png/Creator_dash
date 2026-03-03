@@ -355,44 +355,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. SIDEBAR ARCHITECTURE (The Identity Vault)
-with st.sidebar:
-    st.markdown("<h2 style='color: #00d4ff; text-align: left !important;'>🔒 IDENTITY VAULT</h2>", unsafe_allow_html=True)
-    
-    # User Profile Section
-    col_img, col_name = st.columns([1, 2])
-    with col_img:
-        # DNA Anchor Placeholder
-        st.markdown("<div style='width: 60px; height: 60px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px; font-weight: bold;'>DNA</div>", unsafe_allow_html=True)
-    with col_name:
-        st.markdown("<p style='text-align: left !important; color: #888; font-size: 10px; margin: 0;'>DIRECTOR STATUS</p><h3 style='text-align: left !important; color: #ffffff; margin: 0;'>OPERATIVE</h3>", unsafe_allow_html=True)
-    
-    st.divider()
-    
-    # Navigation
-    st.radio("COMMAND MENU", ["📡 Dashboard", "🧠 Neural Forge", "📈 ROI Engine", "⚙️ Settings"], key="nav_main")
-    
-    st.divider()
-    st.markdown("### 🤖 VOID MANAGER")
-    with st.expander("📡 NEURAL UPLINK"):
-        st.chat_input("Direct Command...")
-
-# 4. MAIN INTERFACE
-st.markdown('<p class="void-gradient-text">VOID OS TERMINAL</p>', unsafe_allow_html=True)
-
-# Layout for Forge and ROI
-tab1, tab2 = st.tabs(["⚒️ NEURAL FORGE", "📊 FISCAL WEIGHT"])
-
-with tab1:
-    st.markdown("### Pattern Break Generator")
-    st.slider("Hook Intensity", 0, 100, 92)
-    st.button("FORGE SCRIPT")
-
-with tab2:
-    st.markdown("### ROI Projection")
-    st.metric(label="Projected Revenue", value="$18,450", delta="22%")
-    st.button("CALCULATE WEIGHT")
-
 def typewriter_effect(text):
     container = st.empty()
     full_text = ""
@@ -2775,6 +2737,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
