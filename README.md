@@ -1,10 +1,9 @@
 ---
 title: VOID OS
 emoji: 🌌
-colorFrom: black
-colorTo: gray
 sdk: docker
 app_port: 7860
 license: apache-2.0
-header: none
+# Remove 'header: none' to let Python handle the layout
+# Remove 'colorFrom/To' to stop the container from forcing a gray theme
 ---
