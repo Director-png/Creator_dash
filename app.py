@@ -2051,119 +2051,121 @@ elif page == "🧪 Creator Lab":
     is_admin = st.session_state.get('user_role') == "admin"
     user_status = str(st.session_state.get('user_status', 'free')).strip().lower()
     
-    # Define Tiers that can access the ROI Engine
-    # Pro/Elite/Core/Director have access. Free/Operative do not.
-    is_pro = user_status in ['pro', 'elite', 'core', 'director']
-
-    # --- THE ROI ENGINE (ADMIN & PRO VERSION) ---
-    if is_admin or is_pro:
-        header_color = "#00d4ff" if is_admin else "#00ff41"
-        header_label = "ADMIN" if is_admin else "PRO/DIRECTOR"
-        
-        draw_title("🧪", f"ROI ENGINE v2.0 // {header_label}")
-        st.info("🛰️ **STRATEGIC PROFIT PROJECTION:** Analyze the fiscal weight of your content.")
-        
-        niche_data = {
-            "🎮 Gaming & Entertainment": 3.0,
-            "🧘 Lifestyle & Vlogging": 5.0,
-            "👗 Fashion & Beauty": 8.0,
-            "🤖 AI & Tech": 15.0,
-            "💼 Business & SaaS": 22.0,
-            "💰 Finance & Crypto": 35.0
-        }
-
-        with st.container():
-            st.subheader("📊 PROFIT PROJECTION")
-            col1, col2 = st.columns(2)
-            with col1:
-                selected_niche = st.selectbox("Select Target Niche", list(niche_data.keys()))
-                views = st.number_input("Projected Weekly Views", min_value=0, value=50000, step=5000)
-                product_price = st.number_input("Product/Service Price ($)", value=100)
-            with col2:
-                default_cpm = niche_data[selected_niche]
-                cpm = st.number_input(f"Est. {selected_niche} CPM ($)", value=default_cpm)
-                conv_rate = st.slider("Conversion Rate (%)", 0.1, 5.0, 1.0)
-                conversion_factor = st.number_input("USD to INR Rate", value=83.0)
-
-            # 🧬 CALCULATIONS
-            ad_rev_usd = (views / 1000) * cpm
-            sales_rev_usd = (views * (conv_rate / 100)) * product_price
-            total_usd = ad_rev_usd + sales_rev_usd
-            total_inr = total_usd * conversion_factor
-
-            st.divider()
-            res_col1, res_col2 = st.columns(2)
-            with res_col1:
-                st.metric("TOTAL VALUE (USD)", f"${total_usd:,.2f}")
-            with res_col2:
-                # Highlighted INR value for Indian market impact
-                st.markdown(f"#### PROJECTED REVENUE (INR)")
-                st.markdown(f"<h2 style='color: #00ff41;'>₹ {total_inr:,.2f}</h2>", unsafe_allow_html=True)
-
-        # --- GENERATION LOGIC ---
-        if st.button("🧬 GENERATE PROFIT BLUEPRINT", use_container_width=True):
-            with st.spinner("Calculating Strategic Trajectory..."):
-                try:
-                    roi_prompt = f"""
-                    System: You are VOID-OS, a strategic financial AI for elite creators.
-                    User Data:
-                    - Niche: {selected_niche}
-                    - Weekly Views: {views}
-                    - Product Price: ${product_price}
-                    - Conversion Rate: {conv_rate}%
-                    - Ad Revenue (USD): ${ad_rev_usd}
-                    - Sales Revenue (USD): ${sales_rev_usd}
-                    - Total Weekly (INR): ₹{total_inr:,.2f}
-
-                    Task: Provide a 3-point 'Profit Blueprint' that is easy to understand.
-                    1. Revenue Breakdown (Simple terms)
-                    2. Scaling Advice (How to double these numbers)
-                    3. High-Vigor Warning (Potential risks in this niche)
-                    Keep it punchy, professional, and tactical. Use bolding for key terms.
-                    """
-                    
-                    res = groq_c.chat.completions.create(
-                        model="llama-3.3-70b-versatile", 
-                        messages=[{"role": "user", "content": roi_prompt}],
-                        temperature=0.5
-                    )
-                    st.session_state.roi_report = res.choices[0].message.content
-                except Exception as e:
-                    st.error(f"Uplink Error: {str(e)}")
-
-        # --- PERSISTENT DISPLAY ---
-        if 'roi_report' in st.session_state:
-            st.markdown("---")
-            st.markdown(f"### 📑 {header_label} STRATEGY REPORT")
-            st.info(st.session_state.roi_report)
-            if st.button("Clear Report"):
-                del st.session_state.roi_report
-                st.rerun()
-
-    # --- THE BASIC LAB (HOOK & RETENTION) - FOR OPERATIVES ---
+    # --- ACCESS LOGIC: ROI ENGINE FOR ALL TIERS ---
+    # We allow 'pro', 'elite', 'core', 'director', and 'admin'
+    draw_title("🧪", "CREATOR LAB // ROI ENGINE v2.0")
+    
+    if is_admin:
+        header_label = "ADMIN"
+        header_info = "🛰️ FULL COMMAND ACCESS: Global profit projection active."
+    elif user_status in ['pro', 'elite', 'director']:
+        header_label = "DIRECTOR"
+        header_info = "💎 PREMIUM CLEARANCE: Advanced revenue scaling enabled."
     else:
-        draw_title("🧪", "CREATOR LAB // OPERATIVE TIER")
-        st.info("📡 **CONTENT OPTIMIZATION:** Refine your hooks and retention strategy to unlock ROI clearance.")
-        
-        st.warning("🔒 **ROI ENGINE LOCKED:** Reach 'Director' status to analyze profit projections.")
+        header_label = "OPERATIVE"
+        header_info = "📡 BASELINE ACCESS: Projecting niche-based profit potential."
 
-        tab_hook, tab_retention = st.tabs(["🔥 Hook Analyzer", "🧠 Cognitive Load"])
+    st.info(header_info)
+    
+    niche_data = {
+        "🎮 Gaming & Entertainment": 3.0,
+        "🧘 Lifestyle & Vlogging": 5.0,
+        "👗 Fashion & Beauty": 8.0,
+        "🤖 AI & Tech": 15.0,
+        "💼 Business & SaaS": 22.0,
+        "💰 Finance & Crypto": 35.0
+    }
 
-        with tab_hook:
-            st.subheader("Viral Hook Architect")
-            user_hook = st.text_area("Paste your opening line (Hook):", placeholder="Example: Most creators are failing at AI...")
-            if st.button("ANALYZE HOOK"):
-                with st.spinner("Neural Processing..."):
-                    hook_prompt = f"Analyze this hook for viral potential: {user_hook}. Rate it 1-10 and suggest a 'High-Vigor' rewrite."
-                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": hook_prompt}])
-                    st.success(res.choices[0].message.content)
+    # --- THE ROI ENGINE ---
+    with st.container():
+        st.subheader(f"📊 {header_label} PROFIT PROJECTION")
+        col1, col2 = st.columns(2)
+        with col1:
+            selected_niche = st.selectbox("Select Target Niche", list(niche_data.keys()))
+            views = st.number_input("Projected Weekly Views", min_value=0, value=50000, step=5000)
+            product_price = st.number_input("Product/Service Price ($)", value=100)
+        with col2:
+            default_cpm = niche_data[selected_niche]
+            cpm = st.number_input(f"Est. {selected_niche} CPM ($)", value=default_cpm)
+            conv_rate = st.slider("Conversion Rate (%)", 0.1, 5.0, 1.0)
+            conversion_factor = st.number_input("USD to INR Rate", value=83.0)
 
-        with tab_retention:
-            st.subheader("Cognitive Retention Check")
-            st.caption("Identify 'Boredom Gaps' in your script.")
-            script_text = st.text_area("Paste Full Script:")
-            if st.button("IDENTIFY DROPOFF POINTS"):
-                st.warning("Analysis complete: Section 2 is too 'Wordy'. Add a visual pattern interrupt at 0:15.")
+        # 🧬 CALCULATIONS
+        ad_rev_usd = (views / 1000) * cpm
+        sales_rev_usd = (views * (conv_rate / 100)) * product_price
+        total_usd = ad_rev_usd + sales_rev_usd
+        total_inr = total_usd * conversion_factor
+
+        st.divider()
+        res_col1, res_col2 = st.columns(2)
+        with res_col1:
+            st.metric("TOTAL VALUE (USD)", f"${total_usd:,.2f}")
+        with res_col2:
+            st.markdown(f"#### PROJECTED REVENUE (INR)")
+            st.markdown(f"<h2 style='color: #00ff41;'>₹ {total_inr:,.2f}</h2>", unsafe_allow_html=True)
+
+    # --- GENERATION LOGIC ---
+    if st.button("🧬 GENERATE PROFIT BLUEPRINT", use_container_width=True):
+        with st.spinner("Calculating Strategic Trajectory..."):
+            try:
+                roi_prompt = f"""
+                System: You are VOID-OS, a strategic financial AI for elite creators.
+                User Data:
+                - User Tier: {header_label}
+                - Niche: {selected_niche}
+                - Weekly Views: {views}
+                - Product Price: ${product_price}
+                - Conversion Rate: {conv_rate}%
+                - Ad Revenue (USD): ${ad_rev_usd}
+                - Sales Revenue (USD): ${sales_rev_usd}
+                - Total Weekly (INR): ₹{total_inr:,.2f}
+
+                Task: Provide a 3-point 'Profit Blueprint' that is easy to understand.
+                1. Revenue Breakdown (Simple terms)
+                2. Scaling Advice (How to double these numbers)
+                3. High-Vigor Warning (Potential risks in this niche)
+                Keep it punchy, professional, and tactical. Use bolding for key terms.
+                """
+                
+                res = groq_c.chat.completions.create(
+                    model="llama-3.3-70b-versatile", 
+                    messages=[{"role": "user", "content": roi_prompt}],
+                    temperature=0.5
+                )
+                st.session_state.roi_report = res.choices[0].message.content
+            except Exception as e:
+                st.error(f"Uplink Error: {str(e)}")
+
+    # --- PERSISTENT DISPLAY ---
+    if 'roi_report' in st.session_state:
+        st.markdown("---")
+        st.markdown(f"### 📑 {header_label} STRATEGY REPORT")
+        st.info(st.session_state.roi_report)
+        if st.button("Clear Report"):
+            del st.session_state.roi_report
+            st.rerun()
+
+    st.divider()
+    
+    # --- SECONDARY TOOLS: HOOK & RETENTION ---
+    st.subheader("🛠️ CONTENT OPTIMIZATION TOOLS")
+    tab_hook, tab_retention = st.tabs(["🔥 Hook Analyzer", "🧠 Cognitive Load"])
+
+    with tab_hook:
+        st.subheader("Viral Hook Architect")
+        user_hook = st.text_area("Paste your opening line (Hook):", placeholder="Example: Most creators are failing at AI...")
+        if st.button("ANALYZE HOOK"):
+            with st.spinner("Neural Processing..."):
+                hook_prompt = f"Analyze this hook for viral potential: {user_hook}. Rate it 1-10 and suggest a 'High-Vigor' rewrite."
+                res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": hook_prompt}])
+                st.success(res.choices[0].message.content)
+
+    with tab_retention:
+        st.subheader("Cognitive Retention Check")
+        st.caption("Identify 'Boredom Gaps' in your script.")
+        script_text = st.text_area("Paste Full Script:")
+        if st.button("IDENTIFY DROPOFF POINTS"):
+            st.warning("Analysis complete: Section 2 is too 'Wordy'. Add a visual pattern interrupt at 0:15.")
 
 # --- MODULE 9: LEAD SOURCE (RESILIENT AUTO-SWITCH) ---
 elif page == "🛰️ Lead Source":
@@ -2713,6 +2715,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
