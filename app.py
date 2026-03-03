@@ -252,27 +252,29 @@ def apply_void_os_css():
         background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
     }
     
-    /* 🛠️ HEADER RECOVERY (The Critical Fix) */
-    /* We need massive padding-top to counter the -50px crop in index.html */
+    /* 🛠️ HEADER RECOVERY */
+    /* Increased padding and removed height:0px to ensure the 'slot' for the header exists */
     .main .block-container {
         padding-top: 10rem !important; 
         max-width: 95% !important;
     }
 
-    /* 🌑 PURE BLACK SIDEBAR */
-    [data-testid="stSidebar"], [data-testid="stSidebarUserContent"] {
+    /* 🌑 PURE BLACK SIDEBAR - Targeting every possible layer */
+    [data-testid="stSidebar"], 
+    [data-testid="stSidebarUserContent"],
+    section[data-testid="stSidebar"] > div {
         background-color: #000000 !important;
     }
     
     [data-testid="stSidebarUserContent"] {
-        padding-top: 5rem !important; /* Pushes sidebar content down below crop */
+        padding-top: 5rem !important;
     }
 
-    /* 2. THE NEURAL FORGE BUTTONS (High Contrast Cyan) */
+    /* 2. THE NEURAL FORGE BUTTONS */
     div.stButton > button {
-        background: rgba(0, 0, 0, 0.8) !important; /* Darker background for more pop */
+        background: #000000 !important; /* Pure black for maximum contrast */
         color: #00d4ff !important; 
-        border: 2px solid #00d4ff !important; /* Thicker border to ensure visibility */
+        border: 2px solid #00d4ff !important; 
         border-radius: 4px !important;
         padding: 12px 28px !important;
         font-family: 'Space Grotesk', sans-serif;
@@ -280,6 +282,7 @@ def apply_void_os_css():
         letter-spacing: 2px;
         width: 100% !important;
         transition: 0.3s ease-in-out !important;
+        opacity: 1 !important; /* Ensure they aren't faint */
     }
     
     div.stButton > button:hover {
@@ -306,13 +309,20 @@ def apply_void_os_css():
         border: 1px solid #00d4ff !important;
     }
 
-    /* 5. SYSTEM OVERLAYS */
-    header { visibility: hidden !important; height: 0px !important; }
+    /* 5. SYSTEM OVERLAYS - Transparent instead of Hidden height */
+    header { 
+        background-color: rgba(0,0,0,0) !important;
+        border: none !important;
+    }
+    [data-testid="stHeader"] {
+        background: none !important;
+        color: rgba(0,0,0,0) !important;
+    }
     footer { visibility: hidden !important; }
     
     </style>
     """, unsafe_allow_html=True)
-
+    
 def typewriter_effect(text):
     container = st.empty()
     full_text = ""
@@ -2710,6 +2720,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
