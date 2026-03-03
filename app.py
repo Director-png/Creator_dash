@@ -251,59 +251,55 @@ st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="e
 
 st.markdown("""
     <style>
-    /* 1. THE DEEP NAVY VOID - Full Canvas Coverage */
+    /* 1. THE DEEP NAVY VOID */
     .stApp { 
         background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
         width: 100vw !important;
         height: 100vh !important;
     }
 
-    /* 2. SIDEBAR TOGGLE RECOVERY */
+    /* 🆘 EMERGENCY SIDEBAR RECOVERY (The Floating Trigger) */
     [data-testid="stSidebarCollapsedControl"] {
-        top: 2rem !important; 
-        left: 1rem !important;
-        background-color: rgba(0, 212, 255, 0.1) !important;
-        border-radius: 0 10px 10px 0 !important;
-        border: 1px solid rgba(0, 212, 255, 0.2) !important;
-        transition: all 0.3s ease !important;
-        z-index: 999999 !important;
+        display: flex !important;
+        visibility: visible !important;
+        position: fixed !important;
+        top: 10rem !important; /* Pushed significantly down to avoid the 'Dead Zone' */
+        left: 0px !important;
+        width: 50px !important;
+        height: 50px !important;
+        background: rgba(0, 212, 255, 0.2) !important;
+        border: 2px solid #00d4ff !important;
+        border-radius: 0 15px 15px 0 !important;
+        z-index: 9999999 !important; /* Maximum Authority */
+        
+        /* Pulse Animation so you can find it */
+        animation: pulse-cyan 2s infinite;
     }
 
-    [data-testid="stSidebarCollapsedControl"]:hover {
-        background-color: rgba(0, 212, 255, 0.3) !important;
-        box-shadow: 0px 0px 15px rgba(0, 212, 255, 0.5) !important;
+    @keyframes pulse-cyan {
+        0% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(0, 212, 255, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0); }
     }
 
+    /* 2. STYLE THE ICON INSIDE */
     [data-testid="stSidebarCollapsedControl"] svg {
         fill: #00d4ff !important;
+        width: 30px !important;
+        height: 30px !important;
     }
 
-    [data-testid="stSidebar"] [data-testid="stBaseButton-headerNoPadding"] {
-        top: 1rem !important;
-        color: #00d4ff !important;
-    }
-    
-    /* 3. FULL WIDTH & LENGTH CORE */
+    /* 3. FULL WIDTH CORE */
     .main .block-container {
-        padding-top: 4rem !important; 
-        padding-left: 2rem !important;
-        padding-right: 2rem !important;
-        padding-bottom: 2rem !important;
-        
-        /* 100% Logic: Removing max-width and margins */
+        padding-top: 5rem !important; 
         max-width: 100% !important;
         width: 100% !important;
         margin: 0 !important;
-        min-height: 100vh !important;
-        
         text-align: center !important;
-        
-        /* Keeping the border logic but edge-to-edge */
         border: 0.25cm solid rgba(0, 212, 255, 0.03) !important;
-        background-color: transparent !important;
     }
 
-    /* 4. BUTTONS: PHOTO-MATCHED STYLE (No changes to logic) */
+    /* 4. BUTTONS (Photo-Matched) */
     div.stButton > button {
         background: rgba(5, 11, 20, 0.6) !important; 
         color: #00d4ff !important; 
@@ -313,9 +309,6 @@ st.markdown("""
         font-family: 'Space Grotesk', sans-serif;
         text-transform: uppercase;
         letter-spacing: 1.5px;
-        font-size: 0.9rem !important;
-        font-weight: 500 !important;
-        width: auto !important;
         min-width: 220px !important;
         margin: 10px !important;
         transition: all 0.4s ease !important;
@@ -326,30 +319,12 @@ st.markdown("""
         color: #00ff41 !important;
         background: rgba(0, 255, 65, 0.05) !important;
         box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2) !important;
-        transform: translateY(-2px);
     }
 
-    /* 5. TEXT CENTRALIZATION */
-    .stMarkdown, .stText, h1, h2, h3, p {
-        text-align: center !important;
-        justify-content: center !important;
-    }
-
-    /* 6. NEURAL GRADIENT TEXT */
-    .void-gradient-text {
-        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        font-weight: 900 !important;
-        font-size: 2.8rem !important;
-        display: block;
-    }
-
-    /* 7. SIDEBAR & OVERLAY CLEANUP */
-    [data-testid="stSidebar"], [data-testid="stSidebarUserContent"] {
-        background-color: #000000 !important;
-    }
-    header, footer { visibility: hidden !important; }
+    /* 5. TEXT & SIDEBAR CLEANUP */
+    .stMarkdown, .stText, h1, h2, h3, p { text-align: center !important; }
+    [data-testid="stSidebar"] { background-color: #000000 !important; }
+    header, footer { visibility: hidden !important; height: 0 !important; }
 
     </style>
 """, unsafe_allow_html=True)
@@ -2751,6 +2726,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
