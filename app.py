@@ -1974,12 +1974,12 @@ elif page == "🔒 Identity Vault":
             st.button("🛰️ SYNC LINGUISTIC DNA", use_container_width=True, disabled=True)
         
         with c2:
-            if st.button("🚀 UPGRADE TO DIRECTOR", use_container_width=True, type="primary"):
-                st.toast("Redirecting to Command Center for Tier Upgrade...")
-                # Redirect logic
-                st.session_state.nav_radio = "⚡ Upgrade Authority"
-                st.session_state.current_page = "⚡ Upgrade Authority"
-                st.rerun()
+            st.button(
+                "🚀 UPGRADE TO DIRECTOR",
+                use_container_width=True,
+                type="primary",
+                on_click=trigger_upgrade
+            )
 
     # --- 3. SYSTEM SYNC CHECK + PROTOCOL STATUS ---
     st.divider()
@@ -2707,6 +2707,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
