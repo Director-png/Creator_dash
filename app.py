@@ -1887,7 +1887,17 @@ elif page == "🧠 Neural Forge":
 elif page == "🔒 Identity Vault":
     draw_title("🔒", "IDENTITY VAULT // DNA ANCHOR")
     
-    # --- TRIPLE-LOCK SECURITY DASHBOARD (NEW) ---
+    # --- 🛡️ EPHEMERAL AUTHORITY PROTOCOL (SIDEBAR UI) ---
+    with st.sidebar:
+        st.divider()
+        st.markdown("### 🛡️ PRIVACY PROTOCOL")
+        stealth_mode = st.toggle("Stealth Persistence", value=True, help="When ON, VOID OS purges all DNA data from volatile memory upon session termination.")
+        if stealth_mode:
+            st.caption("✅ **ZERO-FOOTPRINT ACTIVE:** No biometric data will be written to permanent databases.")
+        else:
+            st.caption("⚠️ **CAUTION:** Persistent storage increases the attack surface of your Digital Twin.")
+
+    # --- TRIPLE-LOCK SECURITY DASHBOARD ---
     st.markdown("### 🛡️ SYSTEM SECURITY PROTOCOL")
     sec_col1, sec_col2, sec_col3 = st.columns(3)
     with sec_col1:
@@ -1898,6 +1908,7 @@ elif page == "🔒 Identity Vault":
         st.metric("SIGNATURE", "VOID-V1", delta="HASHED")
     
     st.info("🛰️ **ZERO-KNOWLEDGE PROTOCOL:** VOID OS does not store raw keys. Your DNA is encrypted locally using the Director's Private Key.")
+    st.warning("⚡ **SECURITY NOTICE:** To prevent 'Digital Twin' leaks, VOID OS operates on a zero-footprint logic. All anchored DNA is purged upon refresh or session exit.")
 
     st.divider()
 
@@ -1968,6 +1979,7 @@ elif page == "🔒 Identity Vault":
         [PROTOCOL_ACTIVE]: ZERO_KNOWLEDGE_VAULT
         [SIGNATURE_STATUS]: SIGNED_BY_DIRECTOR
         [DEEPFAKE_PROTECTION]: NODES_CALIBRATED
+        [PERSISTENCE]: EPHEMERAL_SESSION_ONLY
         """, language="bash")
     else:
         st.warning("📡 IDENTITY INCOMPLETE: Sidebar DNA will remain in standby.")
@@ -2682,6 +2694,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
