@@ -245,6 +245,7 @@ def draw_title(emoji, text):
     """, unsafe_allow_html=True)
 
 def apply_void_os_css():
+    st.markdown("<style>button { background-color: pink !important; }</style>", unsafe_allow_html=True)
     st.markdown("""
     <style>
     /* 1. THE VOID DEPTH */
@@ -2713,6 +2714,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
