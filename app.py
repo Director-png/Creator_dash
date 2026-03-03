@@ -252,10 +252,15 @@ def apply_void_os_css():
         background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
     }
     
-    /* 🛠️ HEADER FIX: Ensure the main content doesn't vanish under the crop */
+    /* 🛠️ THE HEADER DROP: Pushing the entire UI down */
     .main .block-container {
-        padding-top: 2rem !important; /* Forces content down so the header stays visible */
+        padding-top: 5rem !important; /* Increased from 2rem to 5rem */
         max-width: 95% !important;
+    }
+
+    /* 🛰️ SIDEBAR TOP-MARGIN: Prevents status from being cut off */
+    [data-testid="stSidebarUserContent"] {
+        padding-top: 3rem !important;
     }
 
     /* 2. THE NEURAL FORGE BUTTONS */
@@ -268,7 +273,7 @@ def apply_void_os_css():
         font-family: 'Space Grotesk', sans-serif;
         text-transform: uppercase;
         letter-spacing: 2px;
-        width: 100% !important; /* Ensures stability across desktop/mobile */
+        width: 100% !important;
         transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     }
     
@@ -287,7 +292,7 @@ def apply_void_os_css():
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
         font-weight: 900 !important;
-        font-size: 2.2rem !important; /* Slightly reduced for better mobile/desktop fit */
+        font-size: 2.2rem !important;
         letter-spacing: -1px;
     }
 
@@ -297,29 +302,20 @@ def apply_void_os_css():
         border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
     }
     
-    /* Ensure Sidebar text is visible against black */
-    [data-testid="stSidebar"] .stMarkdown p {
-        color: #C0C0C0 !important;
-    }
-
     /* 5. INPUT FIELDS (Glassmorphism) */
     .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
         background-color: rgba(255, 255, 255, 0.03) !important;
-        color: #00ff41 !important; /* Matrix Green for input data */
+        color: #00ff41 !important;
         border: 1px solid rgba(0, 212, 255, 0.2) !important;
         border-radius: 4px !important;
     }
 
-    /* 6. HIDE DEFAULT ELEMENTS */
-    header {visibility: hidden;} /* Hides the gray Streamlit bar while keeping padding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
+    /* 6. HIDE NATIVE OVERLAYS */
+    header {visibility: hidden !important;}
+    footer {visibility: hidden !important;}
     
     </style>
     """, unsafe_allow_html=True)
-
-# CALL THIS AT THE TOP
-apply_void_os_css()
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2718,6 +2714,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
