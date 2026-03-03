@@ -2,42 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VOID OS | Private Terminal</title>
     <style>
         body, html { 
             margin: 0; padding: 0; 
-            height: 100%; width: 100%;
+            height: 100%; width: 100vw;
             overflow: hidden; background-color: #000; 
         }
         
         .container {
             position: relative;
-            width: 100%;
+            width: 100vw;
             height: 100vh;
             overflow: hidden;
         }
 
-        /* DEFAULT MOBILE STYLE (No Scaling) */
+        /* 📱 MOBILE VIEW (1:1 Scale) */
         iframe { 
             position: absolute;
-            top: -50px; 
+            top: -55px; 
             left: 0;
             width: 100%; 
-            height: calc(100% + 100px); 
+            height: calc(100% + 110px); 
             border: none;
         }
 
-        /* 🖥️ DESKTOP-ONLY FIX (For Laptops & Monitors) */
+        /* 🖥️ DESKTOP PRECISION (Laptops/Monitors) */
         @media (min-width: 1024px) {
             iframe { 
-                /* We "stretch" the iframe to 125% width to force Streamlit into Desktop Mode */
-                width: 125%; 
-                height: calc(125% + 100px); 
-                /* We scale it back down to 0.8 to fit the laptop screen exactly */
-                transform: scale(0.8); 
+                /* Increase virtual resolution to 111% to trigger Desktop Mode */
+                width: 111.11%; 
+                height: calc(111.11% + 110px); 
+                
+                /* Scale back down to exactly 100% of the screen (1/1.11 = 0.9) */
+                transform: scale(0.9); 
                 transform-origin: top left;
-                /* Optional: Slight shift to center if needed, but top-left is usually safest */
+                
+                /* Hardware acceleration for crisp text */
+                -webkit-font-smoothing: antialiased;
             }
         }
     </style>
