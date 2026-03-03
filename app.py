@@ -251,19 +251,22 @@ st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="e
 
 st.markdown("""
     <style>
-    /* 1. THE DEEP NAVY VOID (Matching the screenshot depth) */
+    /* 1. THE DEEP NAVY VOID - Full Canvas Coverage */
     .stApp { 
         background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
+        width: 100vw !important;
+        height: 100vh !important;
     }
-    /* 1. RELOCATE THE SIDEBAR TOGGLE */
-    /* This targets the button that opens the sidebar when it's closed */
+
+    /* 2. SIDEBAR TOGGLE RECOVERY */
     [data-testid="stSidebarCollapsedControl"] {
-        top: 5rem !important; /* Pushes it down below the header/crop area */
+        top: 2rem !important; 
         left: 1rem !important;
         background-color: rgba(0, 212, 255, 0.1) !important;
         border-radius: 0 10px 10px 0 !important;
         border: 1px solid rgba(0, 212, 255, 0.2) !important;
         transition: all 0.3s ease !important;
+        z-index: 999999 !important;
     }
 
     [data-testid="stSidebarCollapsedControl"]:hover {
@@ -271,58 +274,54 @@ st.markdown("""
         box-shadow: 0px 0px 15px rgba(0, 212, 255, 0.5) !important;
     }
 
-    /* 2. STYLE THE ICON INSIDE */
     [data-testid="stSidebarCollapsedControl"] svg {
         fill: #00d4ff !important;
     }
 
-    /* 3. ENSURE THE SIDEBAR HEADER DOESN'T HIDE THE CLOSE BUTTON */
     [data-testid="stSidebar"] [data-testid="stBaseButton-headerNoPadding"] {
         top: 1rem !important;
         color: #00d4ff !important;
     }
     
-    /* 2. CENTERED COMMAND CORE with 0.25cm Internal Border */
+    /* 3. FULL WIDTH & LENGTH CORE */
     .main .block-container {
-        padding-top: 6rem !important; 
-        padding-left: 5% !important;
-        padding-right: 5% !important;
-        max-width: 90% !important;
+        padding-top: 4rem !important; 
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+        padding-bottom: 2rem !important;
+        
+        /* 100% Logic: Removing max-width and margins */
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        min-height: 100vh !important;
+        
         text-align: center !important;
         
-        margin-top: 0.25cm !important;
-        margin-bottom: 0.25cm !important;
+        /* Keeping the border logic but edge-to-edge */
         border: 0.25cm solid rgba(0, 212, 255, 0.03) !important;
-        border-radius: 20px !important;
         background-color: transparent !important;
     }
 
-    /* 3. BUTTONS: PHOTO-MATCHED STYLE */
+    /* 4. BUTTONS: PHOTO-MATCHED STYLE (No changes to logic) */
     div.stButton > button {
-        /* Deep Navy Semi-Transparent Fill */
         background: rgba(5, 11, 20, 0.6) !important; 
         color: #00d4ff !important; 
-        
-        /* Thin, elegant border like the photo */
         border: 1.2px solid rgba(0, 212, 255, 0.3) !important; 
         border-radius: 8px !important;
-        
         padding: 10px 24px !important;
         font-family: 'Space Grotesk', sans-serif;
         text-transform: uppercase;
         letter-spacing: 1.5px;
         font-size: 0.9rem !important;
         font-weight: 500 !important;
-        
-        width: auto !important; /* Removing the full-width logic */
+        width: auto !important;
         min-width: 220px !important;
         margin: 10px !important;
-        
         transition: all 0.4s ease !important;
     }
     
     div.stButton > button:hover {
-        /* Transitioning to the Matrix Green Gradient */
         border: 1.2px solid #00ff41 !important;
         color: #00ff41 !important;
         background: rgba(0, 255, 65, 0.05) !important;
@@ -330,13 +329,13 @@ st.markdown("""
         transform: translateY(-2px);
     }
 
-    /* 4. TEXT CENTRALIZATION */
+    /* 5. TEXT CENTRALIZATION */
     .stMarkdown, .stText, h1, h2, h3, p {
         text-align: center !important;
         justify-content: center !important;
     }
 
-    /* 5. NEURAL GRADIENT TEXT */
+    /* 6. NEURAL GRADIENT TEXT */
     .void-gradient-text {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
@@ -346,7 +345,7 @@ st.markdown("""
         display: block;
     }
 
-    /* 6. SIDEBAR & OVERLAY CLEANUP */
+    /* 7. SIDEBAR & OVERLAY CLEANUP */
     [data-testid="stSidebar"], [data-testid="stSidebarUserContent"] {
         background-color: #000000 !important;
     }
@@ -2752,6 +2751,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
