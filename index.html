@@ -13,21 +13,20 @@
             overflow: hidden;
         }
         .terminal-container {
-            /* Precise 1cm/2cm framing */
-            width: calc(100vw - 2cm); 
-            height: calc(100vh - 4cm);
+            /* Full Screen View to prevent clipping */
+            width: 100vw; 
+            height: 100vh;
             background: #000;
-            border: 1px solid rgba(0, 212, 255, 0.1);
-            border-radius: 8px;
             overflow: hidden;
             position: relative;
         }
         iframe {
             position: absolute;
-            top: -45px; /* Surgical crop of the Streamlit bar */
+            /* DO NOT CROP HERE. We will hide the header using Python CSS instead. */
+            top: 0; 
             left: 0;
             width: 100%;
-            height: calc(100% + 45px);
+            height: 100%;
             border: none;
         }
     </style>
