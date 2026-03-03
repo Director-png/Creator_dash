@@ -247,81 +247,70 @@ def draw_title(emoji, text):
 def apply_void_os_css():
     st.markdown("""
     <style>
-    /* 1. THE VOID DEPTH (Main App) */
+    /* 1. THE VOID DEPTH (Radial Gradient) */
     .stApp { 
         background: radial-gradient(circle at top, #0d0d0d 0%, #000000 100%) !important; 
     }
     
-    /* 🛠️ HEADER VISIBILITY & POSITIONING */
-    /* We make the header container visible but clear to maintain spacing */
-    header[data-testid="stHeader"] {
-        background-color: rgba(0,0,0,0) !important;
-        visibility: visible !important;
-        height: 5rem !important;
-    }
-
-    /* Pushing the main content down to clear the iframe crop */
+    /* 🛠️ HEADER RECOVERY: Adjusting the padding within your structure */
     .main .block-container {
-        padding-top: 6rem !important; 
-        max-width: 95% !important;
+        padding-top: 6rem !important;
     }
 
-    /* 🌑 SIDEBAR DARK MODE LOCK */
-    [data-testid="stSidebar"] {
-        background-color: #000000 !important;
-        border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
-    }
-    
-    /* Ensuring sidebar text is bright enough to see */
-    [data-testid="stSidebar"] section[data-testid="stSidebarUserContent"] {
-        padding-top: 3.5rem !important;
-    }
-    
-    [data-testid="stSidebar"] .stMarkdown p {
-        color: #C0C0C0 !important;
-    }
-
-    /* 2. THE NEURAL FORGE BUTTONS */
+    /* 2. THE NEURAL FORGE BUTTONS (Cyan to Matrix Green) */
     div.stButton > button {
         background: rgba(0, 0, 0, 0.6) !important;
         color: #00d4ff !important; 
         border: 1px solid rgba(0, 212, 255, 0.3) !important; 
-        border-radius: 4px !important;
+        border-radius: 4px !important; /* Sharper edges for 2026 elite feel */
         padding: 12px 28px !important;
         font-family: 'Space Grotesk', sans-serif;
         text-transform: uppercase;
         letter-spacing: 2px;
-        width: 100% !important;
         transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     }
     
     div.stButton > button:hover {
         border: 1px solid #00ff41 !important;
         color: #00ff41 !important;
+        background: rgba(0, 255, 65, 0.05) !important;
         box-shadow: 0px 0px 25px rgba(0, 255, 65, 0.3) !important;
-        transform: scale(1.01);
+        transform: scale(1.02);
     }
 
-    /* 3. NEURAL GRADIENT TEXT */
+    /* 3. NEURAL GRADIENT TEXT (Pulsing Authority) */
     .void-gradient-text {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
         font-weight: 900 !important;
+        font-size: 2.5rem !important;
+        letter-spacing: -1px;
     }
 
-    /* 4. INPUT FIELDS (Glassmorphism) */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
-        background-color: rgba(255, 255, 255, 0.03) !important;
-        color: #00ff41 !important;
-        border: 1px solid rgba(0, 212, 255, 0.2) !important;
+    /* 4. SIDEBAR OPTIMIZATION (Dark Lock) */
+    [data-testid="stSidebar"] {
+        background-color: #000000 !important;
+        border-right: 1px solid rgba(192, 192, 192, 0.1) !important;
     }
-
-    /* 5. CLEANUP */
-    footer {visibility: hidden !important;}
-    #MainMenu {visibility: hidden !important;}
     
+    /* Fix: Ensuring sidebar content starts below the crop */
+    [data-testid="stSidebarUserContent"] {
+        padding-top: 3rem !important;
+    }
+
+    /* 5. INPUT FIELDS (Glassmorphism) */
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        color: #C0C0C0 !important;
+        border: 1px solid rgba(0, 212, 255, 0.2) !important;
+        border-radius: 4px !important;
+    }
+
+    /* 6. SYSTEM OVERLAYS */
+    header { visibility: hidden !important; }
+    footer { visibility: hidden !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -2722,6 +2711,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
