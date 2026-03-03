@@ -2,16 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VOID OS | Private Terminal</title>
     <style>
         body, html { 
-            margin: 0; 
-            padding: 0; 
-            height: 100%; 
-            width: 100%;
-            overflow: hidden; 
-            background-color: #000; 
+            margin: 0; padding: 0; 
+            height: 100%; width: 100%;
+            overflow: hidden; background-color: #000; 
         }
         
         .container {
@@ -19,27 +16,28 @@
             width: 100%;
             height: 100vh;
             overflow: hidden;
-            background: #000;
         }
 
         iframe { 
             position: absolute;
-            /* Hiding the Streamlit Header */
-            top: -55px; 
+            /* Hide Streamlit Header & Footer */
+            top: -50px; 
             left: 0;
-            
-            /* We make the width 111% and then scale it down by 0.9 (0.9 * 1.11 ≈ 100%) */
-            /* This effectively "zooms out" the UI to make it look sharp and small */
-            width: 111.11%; 
-            height: calc(111.11% + 100px); 
+
+            /* FORCE DESKTOP PROPORTIONS */
+            /* We make the iframe much wider than the screen to force 'Desktop Mode' */
+            width: 133.33%; 
+            height: calc(133.33% + 100px); 
             
             border: none;
-            
-            /* The Magic Fix: Shrink the content to native desktop proportions */
-            transform: scale(0.9); 
-            transform-origin: 0 0;
-            
-            /* Smooth rendering */
+
+            /* SCALE BACK TO FIT SCREEN */
+            /* 0.75 scale brings 133.33% back down to exactly 100% */
+            transform: scale(0.75); 
+            transform-origin: top left;
+
+            /* Enhances text sharpness after downscaling */
+            -webkit-font-smoothing: antialiased;
             image-rendering: -webkit-optimize-contrast;
         }
     </style>
