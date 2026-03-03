@@ -306,31 +306,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. THE 100% STABLE LAYOUT
-# We use columns to create a "Sidebar" that cannot glitch or disappear
-col_vault, col_forge = st.columns([1, 4], gap="small")
-
-with col_vault:
-    st.markdown('<div class="dna-vault">', unsafe_allow_html=True)
-    st.markdown('<h2 style="color: #00d4ff;">DNA VAULT</h2>', unsafe_allow_html=True)
-    st.write("---")
-    st.success("ANCHOR LOCKED")
-    st.button("🧬 SYNC FACE")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with col_forge:
-    st.markdown('<p class="void-gradient-text">NEURAL FORGE v4.0</p>', unsafe_allow_html=True)
-    
-    tabs = st.tabs(["⚒️ ARCHITECT", "📊 ROI ENGINE"])
-    
-    with tabs[0]:
-        st.slider("Hook Intensity Meter", 0, 100, 95)
-        st.multiselect("Active Features", ["Color Palettes", "Pattern Breaks", "Hook Intensity"], ["Color Palettes", "Hook Intensity"])
-        st.button("GENERATE SCRIPT")
-        
-    with tabs[1]:
-        st.metric("Projected ROI", "$24,500", "+18%")
-        st.button("CALCULATE FISCAL WEIGHT")
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2729,6 +2704,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
