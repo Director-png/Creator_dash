@@ -5,55 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VOID OS | Private Terminal</title>
     <style>
-        /* 1. THE EXTERIOR VOID */
         body, html { 
-            margin: 0; 
-            padding: 0; 
-            height: 100%; 
-            width: 100%; 
-            background-color: #000; /* The outer bezel color */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin: 0; padding: 0; 
+            height: 100%; width: 100%; 
+            background-color: #000; 
+            display: flex; align-items: center; justify-content: center;
             overflow: hidden;
         }
-
-        /* 2. THE HARDWARE CONTAINER */
-        .terminal-frame {
-            position: relative;
-            /* Creating the 1cm side and 2cm top/bottom gap */
+        .terminal-container {
+            /* Precise 1cm/2cm framing */
             width: calc(100vw - 2cm); 
             height: calc(100vh - 4cm);
-            
             background: #000;
-            border: 1px solid rgba(0, 212, 255, 0.15); /* Subtle glowing edge */
-            box-shadow: 0px 0px 50px rgba(0, 0, 0, 1);
-            border-radius: 12px;
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 8px;
             overflow: hidden;
+            position: relative;
         }
-
-        /* 3. THE LIVE FEED (Streamlit) */
-        iframe { 
+        iframe {
             position: absolute;
-            /* This shift hides the default Streamlit top-bar */
-            top: -45px; 
+            top: -45px; /* Surgical crop of the Streamlit bar */
             left: 0;
-            width: 100%; 
-            /* Height covers the crop + bottom bar */
-            height: calc(100% + 90px); 
+            width: 100%;
+            height: calc(100% + 45px);
             border: none;
-            
-            /* Crucial: No scaling used here to preserve button gradients */
-            transform: none; 
         }
     </style>
 </head>
 <body>
-    <div class="terminal-frame">
-        <iframe 
-            src="https://void-os.streamlit.app/?embed=true" 
-            allow="fullscreen; clipboard-read; clipboard-write">
-        </iframe>
+    <div class="terminal-container">
+        <iframe src="https://void-os.streamlit.app/?embed=true"></iframe>
     </div>
 </body>
 </html>
