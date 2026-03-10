@@ -1826,12 +1826,21 @@ elif page == "🧠 Neural Forge":
             st.subheader("🧬 Production")
             f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"])
             f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of AI")
+            
+            # --- LANGUAGE SELECTION BAR (Logic Added) ---
+            f_lang = st.selectbox("Script Language", [
+                "English", "Hinglish", "Hindi", "Spanish", "French", "German", 
+                "Japanese", "Korean", "Russian", "Portuguese", "Italian", "Mandarin"
+            ])
+            
             f_colors = st.multiselect("Cinematic Palette", ["Cyberpunk Neon", "Midnight Teal", "Electric Orange", "Moody Noir", "Toxic Emerald"], default=["Midnight Teal", "Electric Orange"])
+        
         with col_b:
             st.subheader("📡 Strategy")
             f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock", "The 'Value-First' Pivot"])
             f_interrupt = st.selectbox("Pattern Interrupt", ["Fast Zoom-in", "Flash Cut", "Text Overlay Shock", "Sudden Silence"])
             f_lighting = st.selectbox("Lighting Style", ["Dramatic Rim Light", "Soft Cinematic Glow", "Hard Shadows"])
+        
         with col_c:
             st.subheader("🎬 Style")
             f_hook_type = st.radio("Emotional Anchor", ["Curiosity", "Fear", "Authority"])
@@ -1851,12 +1860,12 @@ elif page == "🧠 Neural Forge":
                     dna_context = f"Tone: {v_tone}" if v_tone else "Viral professional."
                     visual_anchor = "MANDATORY: Maintain facial features of reference subject." if vault_active else ""
                     
-                    # THE HOOK ARCHITECT LOGIC INJECTION
+                    # UPDATED SYSTEM MESSAGE WITH LANGUAGE PARAMETER
                     sys_msg = (
                         f"Act as a Viral Strategist & Hook Architect. Protocol 2026.\n"
-                        f"PLATFORM: {f_platform}. TOPIC: '{f_topic}'.\n"
+                        f"PLATFORM: {f_platform}. TOPIC: '{f_topic}'. LANGUAGE: {f_lang}.\n"
                         f"1. THE HOOK: Generate a {f_hook_intensity} {f_hook_type} hook. Start with a {f_interrupt} pattern interrupt.\n"
-                        f"2. SCRIPT: Follow {f_framework} framework. Pacing: {f_pacing}. {dna_context}\n"
+                        f"2. SCRIPT: Follow {f_framework} framework in {f_lang}. Pacing: {f_pacing}. {dna_context}\n"
                         f"3. VISUALS: Provide 3 Image Prompts. Style: {f_lighting}. Palette: {', '.join(f_colors)}. {visual_anchor}\n"
                         f"FORMAT: Use headers --- HOOK ARCHITECT ---, --- SCRIPT --- and --- IMAGE PROMPTS ---"
                     )
@@ -1887,7 +1896,6 @@ elif page == "🧠 Neural Forge":
                         st.error("❌ No Voice ID in Vault.")
                     else:
                         with st.spinner("Synthesizing..."):
-                            # Logic to handle the new Hook Architect section in splitting
                             parts = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")
                             script_content = parts[0].replace("--- SCRIPT ---", "").replace("--- HOOK ARCHITECT ---", "").strip()
                             
@@ -1936,7 +1944,6 @@ elif page == "🧠 Neural Forge":
                         messages=[{"role": "user", "content": f"RETENTION MAP: {st.session_state.pro_forge_txt[:1500]}"}]
                     )
                     st.warning(r_res.choices[0].message.content)
-
 
 # --- MODULE 6: IDENTITY VAULT (THE NEURAL ANCHOR) ---
 elif page == "🔒 Identity Vault":
@@ -2752,6 +2759,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
