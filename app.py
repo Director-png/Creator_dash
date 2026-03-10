@@ -249,7 +249,7 @@ import streamlit as st
 # 1. INITIALIZE
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. THE TOTAL SYSTEM OVERRIDE
+# 2. THE PHANTOM OVERRIDE
 st.markdown("""
     <style>
     /* 1. THE VOID BACKGROUND */
@@ -257,24 +257,24 @@ st.markdown("""
         background: radial-gradient(circle at right, #050b14 0%, #000000 100%) !important; 
     }
 
-    /* 2. THE BLACKOUT MASK (Kills the Double Title) */
-    /* This creates a black bar over the default Streamlit header area */
+    /* 2. MAKE HEADER INVISIBLE BUT FUNCTIONAL */
+    /* This removes the black bar while keeping the toggle button "hook" alive */
     header[data-testid="stHeader"] {
-        background-color: #000000 !important;
-        height: 60px !important;
+        background-color: rgba(0,0,0,0) !important;
+        border: none !important;
     }
     
-    /* Hides the actual text inside the default header */
+    /* Kill any remaining text in the ghost layer */
     header[data-testid="stHeader"] * {
-        visibility: hidden !important;
+        color: transparent !important;
     }
 
-    /* 3. THE GHOST HANDLE (FORCE-PINNED TO LEFT) */
+    /* 3. THE GHOST HANDLE (THE ONLY VISIBLE SYSTEM PIECE) */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         position: fixed !important;
-        top: 12rem !important; 
+        top: 2rem !important; /* Moved higher to look more integrated */
         left: 0 !important;
         z-index: 1000000 !important;
         background: rgba(0, 212, 255, 0.1) !important;
@@ -282,25 +282,24 @@ st.markdown("""
         border-left: none !important;
         border-radius: 0 10px 10px 0 !important;
         width: 45px !important;
-        height: 55px !important;
-        justify-content: center !important;
-        align-items: center !important;
+        height: 50px !important;
     }
 
     [data-testid="stSidebarCollapsedControl"] svg {
         fill: #00d4ff !important;
     }
 
-    /* 4. RIGHT-ALIGNED COMMAND CENTER */
+    /* 4. RIGHT-ALIGNED COMMAND CENTER (UPWARD SHIFT) */
     .main .block-container {
-        padding-top: 2rem !important;
+        padding-top: 0rem !important;
+        margin-top: -60px !important; /* PULLS UI UP OVER THE GHOST HEADER */
         max-width: 1100px !important;
         margin-right: 3rem !important;
         margin-left: auto !important;
         text-align: right !important;
     }
 
-    /* 5. TITLES & TEXT (RIGHT ALIGNED) */
+    /* 5. TITLES (RIGHT ALIGNED) */
     .void-title {
         background: linear-gradient(270deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
@@ -311,38 +310,24 @@ st.markdown("""
         margin-bottom: 0px !important;
     }
 
-    /* Aligning Form Elements to the right */
-    .stTabs [data-baseweb="tab-list"] {
-        justify-content: flex-end !important;
-    }
-    
-    div[data-testid="stTextInput"] {
-        width: 450px !important;
-        margin-left: auto !important;
-    }
+    /* Form Alignment */
+    .stTabs [data-baseweb="tab-list"] { justify-content: flex-end !important; }
+    div[data-testid="stTextInput"] { width: 450px !important; margin-left: auto !important; }
+    div[data-testid="stTextInput"] input { text-align: right !important; }
 
-    div[data-testid="stTextInput"] label, 
-    div[data-testid="stTextInput"] input {
-        text-align: right !important;
-    }
-
-    /* 6. SIDEBAR CLEANUP */
-    [data-testid="stSidebar"] { background-color: #000000 !important; }
     footer { visibility: hidden !important; }
     [data-testid="stDecoration"] { display: none !important; }
     </style>
 """, unsafe_allow_html=True)
 
 # 3. INTERFACE RENDER
-# We wrap this in a container to ensure singular state
 main_core = st.container()
 
 with main_core:
     st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
     st.markdown('<p style="text-align:right; color:rgba(0, 212, 255, 0.5); margin-top:-20px; letter-spacing:4px;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
 
-    st.markdown("<br><br>", unsafe_allow_html=True)
-
+    st.markdown("<br>", unsafe_allow_html=True)
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2726,6 +2711,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
