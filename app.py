@@ -244,35 +244,36 @@ def draw_title(emoji, text):
         </div>
     """, unsafe_allow_html=True)
 
+
 import streamlit as st
 
-# 1. INITIALIZE
-st.set_page_config(page_title="", layout="wide", initial_sidebar_state="collapsed")
+# 1. THE TRICK: Set a blank page title to "occupy" the ghost header
+st.set_page_config(page_title=" ", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. THE TOTAL SYSTEM OVERRIDE
+# 2. THE CSS OVERRIDE
 st.markdown("""
     <style>
-    /* 1. THE VOID BACKGROUND */
+    /* 1. COMPLETELY WIPE THE DEFAULT HEADER & SPACE */
+    [data-testid="stHeader"], header {
+        background-color: rgba(0,0,0,0) !important;
+        height: 0px !important;
+        visibility: hidden !important;
+    }
+    
+    /* 2. THE VOID BACKGROUND */
     .stApp { 
         background: radial-gradient(circle at center, #050b14 0%, #000000 100%) !important; 
     }
 
-    /* 2. NUCLEAR STRIKE ON DEFAULT LAYERS (Kills Double Title) */
-    [data-testid="stHeader"], header, [data-testid="stDecoration"] {
-        display: none !important;
-        height: 0px !important;
-        visibility: hidden !important;
-    }
-
-    /* 3. THE GHOST HANDLE (FORCE-PINNED TO LEFT) */
+    /* 3. RESTORE THE TOGGLE HANDLE (FORCED VISIBILITY) */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         position: fixed !important;
-        top: 5% !important; 
+        top: 20px !important; 
         left: 0 !important;
         z-index: 1000001 !important;
-        background: transparent !important; /* Hollow Handle */
+        background: transparent !important;
         border: 1px solid rgba(0, 212, 255, 0.4) !important;
         border-left: none !important;
         border-radius: 0 8px 8px 0 !important;
@@ -284,16 +285,14 @@ st.markdown("""
         fill: #00d4ff !important;
     }
 
-    /* 4. RE-CENTERED COMMAND CORE WITH OVERLAP STRIKE */
+    /* 4. MAIN CONTAINER (Pushed slightly down to avoid the 'hidden' header area) */
     .main .block-container {
-        padding-top: 0rem !important; 
-        margin-top: -70px !important; /* PULLS UI UP TO OVERWRITE THE GHOST TITLE */
+        padding-top: 2rem !important; 
         max-width: 900px !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
+        margin: auto !important;
     }
 
-    /* 5. THE TITLES */
+    /* 5. TITLES */
     .void-title {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
@@ -304,9 +303,9 @@ st.markdown("""
         margin: 0 !important;
     }
 
-    /* 6. HOLLOW BUTTON PROTOCOL */
+    /* 6. THE HOLLOW BUTTONS (Refined) */
     div.stButton > button {
-        background: transparent !important; /* NO FILL */
+        background: transparent !important;
         color: #00d4ff !important;
         border: 1px solid rgba(0, 212, 255, 0.6) !important;
         border-radius: 4px !important;
@@ -315,20 +314,14 @@ st.markdown("""
         font-weight: 400 !important;
         text-transform: uppercase;
         letter-spacing: 4px;
-        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
+        transition: all 0.3s ease;
     }
 
     div.stButton > button:hover {
         border-color: #00ff41 !important;
         color: #00ff41 !important;
-        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.2) !important;
-        background: rgba(0, 255, 65, 0.05) !important; /* Slight tint on hover only */
-    }
-
-    /* Tab Styling to match */
-    .stTabs [data-baseweb="tab-list"] {
-        justify-content: center !important;
-        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        background: rgba(0, 255, 65, 0.05) !important;
+        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2) !important;
     }
 
     footer { visibility: hidden !important; }
@@ -336,11 +329,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 3. INTERFACE RENDER
-with st.container():
-    st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align:center; color:rgba(0, 212, 255, 0.5); margin-top:-15px; letter-spacing:5px; font-weight:300; font-size:0.8rem;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
+st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
+st.markdown('<p style="text-align:center; color:rgba(0, 212, 255, 0.5); margin-top:-15px; letter-spacing:5px; font-size:0.8rem;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
 
 def typewriter_effect(text):
@@ -2725,6 +2717,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
