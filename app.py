@@ -263,7 +263,6 @@ st.markdown("""
     }
 
     /* 3. FORCE THE TOGGLE TO BE VISIBLE AND INTERACTABLE */
-    /* This targets the button that opens the sidebar */
     button[data-testid="stSidebarCollapsedControl"], 
     .st-emotion-cache-6q9sum {
         display: flex !important;
@@ -283,7 +282,7 @@ st.markdown("""
         fill: #00d4ff !important;
     }
 
-    /* 4. HOLLOW BUTTONS + HOVER GLOW (Preserved logic) */
+    /* 4. HOLLOW BUTTONS + HOVER GLOW */
     div.stButton > button {
         background: transparent !important;
         color: #00d4ff !important;
@@ -299,9 +298,43 @@ st.markdown("""
         transform: scale(1.02);
     }
 
-    /* 5. FIX THE MAIN APP PADDING (Prevent the "Double Title" look) */
+    /* 5. FIX THE MAIN APP PADDING */
     .stAppViewMain {
         padding-top: 0rem !important;
+    }
+
+    /* 6. THE NEON DATA CARD */
+    .stat-card {
+        background: rgba(0, 212, 255, 0.05) !important;
+        border: 1px solid rgba(0, 212, 255, 0.2) !important;
+        border-radius: 15px !important;
+        padding: 20px !important;
+        transition: all 0.4s ease !important;
+        backdrop-filter: blur(10px);
+        margin-bottom: 15px;
+    }
+
+    .stat-card:hover {
+        border-color: #00ff41 !important;
+        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.2) !important;
+        transform: translateY(-5px);
+    }
+
+    .stat-value {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 2rem !important;
+        font-weight: bold;
+        color: #00ff41;
+        text-shadow: 0px 0px 10px rgba(0, 255, 65, 0.5);
+        margin: 0;
+    }
+
+    .stat-label {
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: #00d4ff;
+        font-size: 0.7rem;
+        margin: 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -2719,6 +2752,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
