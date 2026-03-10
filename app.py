@@ -247,9 +247,9 @@ def draw_title(emoji, text):
 import streamlit as st
 
 # 1. INITIALIZE (Must be first)
-st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. UPDATED ARCHITECTURAL CSS (Fixing the Invisible Toggle)
+# 2. FULL ERRORLESS CSS
 st.markdown("""
     <style>
     /* 1. THE DEEP NAVY VOID */
@@ -257,51 +257,50 @@ st.markdown("""
         background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
     }
     
-    /* 2. FORCE-VISIBLE SIDEBAR TOGGLE (The "Ghost Handle") */
-    /* This overrides Streamlit's hidden header specifically for the toggle */
-    [data-testid="stSidebarCollapsedControl"] {
+    /* 2. FORCE-RENDER SIDEBAR TOGGLE (THE GHOST HANDLE) */
+    /* This targets the button specifically even when header is hidden */
+    section[data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
         visibility: visible !important;
         position: fixed !important;
-        top: 20% !important; /* Positioned mid-top for ergonomic access */
+        top: 12rem !important; /* Positioned mid-top */
         left: 0 !important;
-        z-index: 999999 !important;
+        z-index: 1000001 !important;
         background: rgba(0, 212, 255, 0.1) !important;
         border: 1px solid rgba(0, 212, 255, 0.3) !important;
         border-left: none !important;
-        border-radius: 0 10px 10px 0 !important;
-        width: 45px !important;
-        height: 55px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        border-radius: 0 12px 12px 0 !important;
+        width: 48px !important;
+        height: 52px !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
         cursor: pointer !important;
     }
 
-    [data-testid="stSidebarCollapsedControl"]:hover {
+    section[data-testid="stSidebarCollapsedControl"]:hover {
         background: rgba(0, 255, 65, 0.1) !important;
         border: 1px solid rgba(0, 255, 65, 0.5) !important;
-        border-left: none !important;
-        width: 55px !important; /* Expands on hover to invite the click */
-        box-shadow: 5px 0px 15px rgba(0, 255, 65, 0.2) !important;
+        width: 60px !important; 
+        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.3) !important;
     }
 
-    /* Icon color fix */
-    [data-testid="stSidebarCollapsedControl"] svg {
-        fill: #00d4ff !important;
-        transition: fill 0.3s ease !important;
+    section[data-testid="stSidebarCollapsedControl"] button {
+        background: transparent !important;
+        border: none !important;
+        width: 100% !important;
+        height: 100% !important;
     }
-    
-    [data-testid="stSidebarCollapsedControl"]:hover svg {
-        fill: #00ff41 !important;
+
+    section[data-testid="stSidebarCollapsedControl"] svg {
+        fill: #00d4ff !important;
+        width: 28px !important;
+        height: 28px !important;
     }
 
     /* 3. CENTERED COMMAND CORE */
     .main .block-container {
-        padding-top: 5rem !important; 
+        padding-top: 2rem !important; 
         max-width: 90% !important;
         text-align: center !important;
-        margin-top: 10px !important;
     }
 
     /* 4. BUTTONS: PHOTO-MATCHED STYLE */
@@ -332,14 +331,16 @@ st.markdown("""
         text-align: center !important;
     }
 
-    /* 6. NEURAL GRADIENT TEXT (VOID OS TITLE) */
+    /* 6. NEURAL GRADIENT TEXT */
     .void-gradient-text {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         font-weight: 900 !important;
-        font-size: 3rem !important;
-        margin: 20px auto;
+        font-size: 3.2rem !important;
+        margin-top: 0px !important;
+        margin-bottom: 5px !important;
+        display: inline-block;
     }
 
     /* 7. SIDEBAR CLEANUP */
@@ -348,13 +349,19 @@ st.markdown("""
         border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
     }
 
-    header, footer { visibility: hidden !important; }
+    /* HIDES THE DOUBLE TITLE & DEFAULT UI */
+    header[data-testid="stHeader"] { visibility: hidden !important; height: 0px !important; }
+    footer { visibility: hidden !important; }
+    
+    /* Remove default Streamlit padding */
+    .st-emotion-cache-18ni7ap { padding-top: 0rem !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. CONTENT RENDER
-st.markdown('<h1 class="void-gradient-text">VOID OS</h1>', unsafe_allow_html=True)
-st.write("INTELLIGENCE ACCESS PROTOCOL v4.0")
+# 3. COMMAND CENTER RENDER (Single Title Logic)
+st.markdown('<div style="text-align:center;"><span class="void-gradient-text">VOID OS</span></div>', unsafe_allow_html=True)
+st.markdown('<p style="color: rgba(255,255,255,0.6); letter-spacing: 2px; font-size: 0.8rem; margin-top: -10px;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
+
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2738,6 +2745,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
