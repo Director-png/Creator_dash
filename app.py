@@ -246,93 +246,48 @@ def draw_title(emoji, text):
 
 
 import streamlit as st
+import requests
+import datetime
 
-# 1. THE TRICK: Set a blank page title to "occupy" the ghost header
+# 1. PAGE CONFIG (Must be first)
 st.set_page_config(page_title=" ", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. THE CSS OVERRIDE
+# 2. THE UNIVERSAL OVERRIDE (Put this BEFORE the Gatekeeper)
 st.markdown("""
     <style>
-    /* 1. COMPLETELY WIPE THE DEFAULT HEADER & SPACE */
-    [data-testid="stHeader"], header {
-        background-color: rgba(0,0,0,0) !important;
-        height: 0px !important;
-        visibility: hidden !important;
-    }
+    /* Kill the Ghost Header */
+    [data-testid="stHeader"], header { display: none !important; height: 0px !important; }
     
-    /* 2. THE VOID BACKGROUND */
-    .stApp { 
-        background: radial-gradient(circle at center, #050b14 0%, #000000 100%) !important; 
-    }
+    /* Void Background */
+    .stApp { background: radial-gradient(circle at center, #050b14 0%, #000000 100%) !important; }
 
-    /* 3. RESTORE THE TOGGLE HANDLE (FORCED VISIBILITY) */
-    [data-testid="stSidebarCollapsedControl"] {
-        display: flex !important;
-        visibility: visible !important;
-        position: fixed !important;
-        top: 20px !important; 
-        left: 0 !important;
-        z-index: 1000001 !important;
-        background: transparent !important;
-        border: 1px solid rgba(0, 212, 255, 0.4) !important;
-        border-left: none !important;
-        border-radius: 0 8px 8px 0 !important;
-        width: 45px !important;
-        height: 50px !important;
-    }
-
-    [data-testid="stSidebarCollapsedControl"] svg {
-        fill: #00d4ff !important;
-    }
-
-    /* 4. MAIN CONTAINER (Pushed slightly down to avoid the 'hidden' header area) */
-    .main .block-container {
-        padding-top: 2rem !important; 
-        max-width: 900px !important;
-        margin: auto !important;
-    }
-
-    /* 5. TITLES */
+    /* The Only Authorized Title Styling */
     .void-title {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
-        font-weight: 900 !important;
-        font-size: 3.5rem !important;
-        text-align: center !important;
-        margin: 0 !important;
+        font-weight: 900 !important; font-size: 3.5rem !important;
+        text-align: center !important; margin: 0 !important;
     }
 
-    /* 6. THE HOLLOW BUTTONS (Refined) */
+    /* Hollow Buttons */
     div.stButton > button {
         background: transparent !important;
         color: #00d4ff !important;
         border: 1px solid rgba(0, 212, 255, 0.6) !important;
-        border-radius: 4px !important;
-        width: 100% !important;
-        padding: 12px !important;
-        font-weight: 400 !important;
-        text-transform: uppercase;
         letter-spacing: 4px;
-        transition: all 0.3s ease;
+        text-transform: uppercase;
     }
-
-    div.stButton > button:hover {
-        border-color: #00ff41 !important;
-        color: #00ff41 !important;
-        background: rgba(0, 255, 65, 0.05) !important;
-        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2) !important;
+    
+    /* Restore Toggle Control */
+    [data-testid="stSidebarCollapsedControl"] {
+        display: flex !important; visibility: visible !important;
+        position: fixed !important; top: 20px !important; left: 0 !important;
+        z-index: 1000001 !important;
     }
-
-    footer { visibility: hidden !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. INTERFACE RENDER
-st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
-st.markdown('<p style="text-align:center; color:rgba(0, 212, 255, 0.5); margin-top:-15px; letter-spacing:5px; font-size:0.8rem;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
 
 
 def typewriter_effect(text):
@@ -2717,6 +2672,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
