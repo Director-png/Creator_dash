@@ -1792,7 +1792,6 @@ elif page == "⚔️ Trend Duel":
     else:
         st.error("📡 NEURAL LINK FAILURE: The function 'fetch_live_market_data' returned an empty set.")
 
-
 # --- MODULE 7: THE NEURAL FORGE (EXCALIBUR UPGRADE) ---
 elif page == "🧠 Neural Forge":
     import random
@@ -1827,7 +1826,7 @@ elif page == "🧠 Neural Forge":
             f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"])
             f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of AI")
             
-            # --- LANGUAGE SELECTION BAR (Logic Added) ---
+            # Language list - purges Urdu/Arabic, includes Hinglish
             f_lang = st.selectbox("Script Language", [
                 "English", "Hinglish", "Hindi", "Spanish", "French", "German", 
                 "Japanese", "Korean", "Russian", "Portuguese", "Italian", "Mandarin"
@@ -1855,18 +1854,19 @@ elif page == "🧠 Neural Forge":
         elif remaining_credits <= 0:
             st.error("🚨 NEURAL EXHAUSTION: Daily limit reached.")
         else:
-            with st.spinner("🌑 ARCHITECTING EXCALIBUR..."):
+            with st.spinner(f"🌑 ARCHITECTING {f_lang.upper()} EXCALIBUR..."):
                 try:
                     dna_context = f"Tone: {v_tone}" if v_tone else "Viral professional."
                     visual_anchor = "MANDATORY: Maintain facial features of reference subject." if vault_active else ""
                     
-                    # UPDATED SYSTEM MESSAGE WITH LANGUAGE PARAMETER
+                    # ENHANCED PROMPT FOR ASIAN LANGUAGES
                     sys_msg = (
-                        f"Act as a Viral Strategist & Hook Architect. Protocol 2026.\n"
+                        f"Act as a Viral Strategist. Protocol 2026.\n"
                         f"PLATFORM: {f_platform}. TOPIC: '{f_topic}'. LANGUAGE: {f_lang}.\n"
-                        f"1. THE HOOK: Generate a {f_hook_intensity} {f_hook_type} hook. Start with a {f_interrupt} pattern interrupt.\n"
-                        f"2. SCRIPT: Follow {f_framework} framework in {f_lang}. Pacing: {f_pacing}. {dna_context}\n"
-                        f"3. VISUALS: Provide 3 Image Prompts. Style: {f_lighting}. Palette: {', '.join(f_colors)}. {visual_anchor}\n"
+                        f"CRITICAL: You MUST write the --- SCRIPT --- section in the NATIVE SCRIPT of {f_lang} (e.g., Use Kanji/Hanzi/Hangul). Do not use placeholders.\n"
+                        f"1. THE HOOK: Generate a {f_hook_intensity} {f_hook_type} hook in {f_lang}. Start with a {f_interrupt} pattern.\n"
+                        f"2. SCRIPT: Follow {f_framework} framework. Pacing: {f_pacing}. {dna_context}. Write full content in {f_lang}.\n"
+                        f"3. VISUALS: Provide 3 Image Prompts in English. Style: {f_lighting}. Palette: {', '.join(f_colors)}. {visual_anchor}\n"
                         f"FORMAT: Use headers --- HOOK ARCHITECT ---, --- SCRIPT --- and --- IMAGE PROMPTS ---"
                     )
                     
@@ -1883,6 +1883,7 @@ elif page == "🧠 Neural Forge":
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 PRODUCTION BLUEPRINT")
+        # Ensure the UI can render the characters
         st.info(st.session_state.pro_forge_txt)
         
         # --- DIRECTOR TOOLS ---
@@ -1901,6 +1902,7 @@ elif page == "🧠 Neural Forge":
                             
                             e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{v_id}"
                             headers = {"xi-api-key": st.secrets["ELEVENLABS_API_KEY"], "Content-Type": "application/json"}
+                            # Using multilingual_v2 is correct as it supports Mandarin/Korean/Japanese
                             payload = {"text": script_content, "model_id": "eleven_multilingual_v2"}
                             
                             audio_res = requests.post(e_url, json=payload, headers=headers)
@@ -2759,6 +2761,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
