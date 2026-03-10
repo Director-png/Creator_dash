@@ -1826,7 +1826,6 @@ elif page == "🧠 Neural Forge":
             f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"])
             f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of AI")
             
-            # Language list - purges Urdu/Arabic, includes Hinglish
             f_lang = st.selectbox("Script Language", [
                 "English", "Hinglish", "Hindi", "Spanish", "French", "German", 
                 "Japanese", "Korean", "Russian", "Portuguese", "Italian", "Mandarin"
@@ -1854,31 +1853,35 @@ elif page == "🧠 Neural Forge":
         elif remaining_credits <= 0:
             st.error("🚨 NEURAL EXHAUSTION: Daily limit reached.")
         else:
-            with st.spinner(f"🌑 ARCHITECTING {f_lang.upper()} EXCALIBUR..."):
+            with st.spinner(f"🌑 FORGING {f_lang.upper()} CORE..."):
                 try:
                     dna_context = f"Tone: {v_tone}" if v_tone else "Viral professional."
                     visual_anchor = "MANDATORY: Maintain facial features of reference subject." if vault_active else ""
                     
-                    # HARD-CODED TEMPLATE TO FORCE CHARACTER RENDERING
+                    # SYSTEM OVERRIDE: Using forced translation triggers for Asian scripts
+                    lang_trigger = {
+                        "Mandarin": "Use ONLY Simplified Chinese characters (汉字).",
+                        "Japanese": "Use ONLY Kanji, Hiragana, and Katakana.",
+                        "Korean": "Use ONLY Hangul (한글)."
+                    }.get(f_lang, f"Use {f_lang}.")
+
                     sys_msg = (
-                        f"Act as a Viral Strategist and Native Content Creator. Protocol 2026.\n"
-                        f"TARGET LANGUAGE: {f_lang}.\n"
-                        f"PLATFORM: {f_platform}. TOPIC: '{f_topic}'.\n\n"
-                        f"STRICT INSTRUCTION: You must write the Hook and Script using the actual native script/characters of {f_lang}. \n"
-                        f"For Mandarin use Simplified Chinese, for Japanese use Kanji/Kana, for Korean use Hangul.\n\n"
-                        f"TEMPLATE:\n"
+                        f"SYSTEM PROTOCOL: {lang_trigger}\n"
+                        f"You are a native {f_lang} scriptwriter. \n"
+                        f"PLATFORM: {f_platform} | TOPIC: {f_topic}\n\n"
                         f"--- HOOK ARCHITECT ---\n"
-                        f"(Native {f_lang} hook here using {f_interrupt} pattern)\n\n"
+                        f"Write a {f_hook_intensity} hook strictly in {f_lang} using {f_interrupt}.\n\n"
                         f"--- SCRIPT ---\n"
-                        f"(Full {f_lang} script using {f_framework} framework and {f_pacing} pacing. {dna_context})\n\n"
+                        f"Write the full script in {f_lang} using {f_framework} framework and {f_pacing} pacing. {dna_context}\n\n"
                         f"--- IMAGE PROMPTS ---\n"
-                        f"(3 Cinematic Prompts in English. Style: {f_lighting}. Palette: {', '.join(f_colors)}. {visual_anchor})"
+                        f"Write 3 image prompts in ENGLISH. Palette: {', '.join(f_colors)}. Style: {f_lighting}. {visual_anchor}"
                     )
                     
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
                         messages=[{"role": "user", "content": sys_msg}],
-                        temperature=0.5 # Lowered for linguistic precision
+                        temperature=0.3, # Dropped significantly to prevent "creative" placeholder use
+                        top_p=0.9
                     )
                     st.session_state.pro_forge_txt = res.choices[0].message.content
                     st.session_state.daily_usage += 1
@@ -1890,10 +1893,10 @@ elif page == "🧠 Neural Forge":
         st.divider()
         st.markdown("### 💎 PRODUCTION BLUEPRINT")
         
-        # Using a specialized container for native character rendering
+        # UI FIX: Rendering with st.markdown inside a div for character support
         st.markdown(f"""
-        <div class="stat-card" style="padding: 25px; border-left: 5px solid #00ff41;">
-            {st.session_state.pro_forge_txt}
+        <div style="background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.2); padding: 20px; border-radius: 10px; color: white; font-size: 1.1rem;">
+            {st.session_state.pro_forge_txt.replace('\n', '<br>')}
         </div>
         """, unsafe_allow_html=True)
         
@@ -1908,6 +1911,7 @@ elif page == "🧠 Neural Forge":
                         st.error("❌ No Voice ID in Vault.")
                     else:
                         with st.spinner("Synthesizing..."):
+                            # Logic to isolate script content
                             parts = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")
                             script_content = parts[0].replace("--- SCRIPT ---", "").replace("--- HOOK ARCHITECT ---", "").strip()
                             
@@ -1934,7 +1938,7 @@ elif page == "🧠 Neural Forge":
                         except Exception as e:
                             st.error(f"Visual Error: {e}")
 
-        # --- MISSING AUDIT BUTTONS ---
+        # --- AUDIT ---
         st.divider()
         st.subheader("🧪 VOID Intelligence Audit")
         t_col1, t_col2 = st.columns(2)
@@ -1944,7 +1948,7 @@ elif page == "🧠 Neural Forge":
                 with st.spinner("Calculating..."):
                     v_res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": f"Provide a VIRALITY AUDIT IN ENGLISH for this content: {st.session_state.pro_forge_txt[:1000]}"}]
+                        messages=[{"role": "user", "content": f"AUDIT THIS CONTENT IN ENGLISH ONLY: {st.session_state.pro_forge_txt[:1500]}"}]
                     )
                     st.info(v_res.choices[0].message.content)
                         
@@ -1953,7 +1957,7 @@ elif page == "🧠 Neural Forge":
                 with st.spinner("Scanning..."):
                     r_res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": f"Provide a RETENTION MAP IN ENGLISH for this content: {st.session_state.pro_forge_txt[:1000]}"}]
+                        messages=[{"role": "user", "content": f"RETENTION MAP IN ENGLISH ONLY: {st.session_state.pro_forge_txt[:1500]}"}]
                     )
                     st.warning(r_res.choices[0].message.content)
 
@@ -2771,6 +2775,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
