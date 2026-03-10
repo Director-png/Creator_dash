@@ -1826,6 +1826,7 @@ elif page == "🧠 Neural Forge":
             f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"])
             f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of AI")
             
+            # Language list - purges Urdu/Arabic, includes Hinglish
             f_lang = st.selectbox("Script Language", [
                 "English", "Hinglish", "Hindi", "Spanish", "French", "German", 
                 "Japanese", "Korean", "Russian", "Portuguese", "Italian", "Mandarin"
@@ -1853,26 +1854,31 @@ elif page == "🧠 Neural Forge":
         elif remaining_credits <= 0:
             st.error("🚨 NEURAL EXHAUSTION: Daily limit reached.")
         else:
-            with st.spinner(f"🌑 SYNTHESIZING {f_lang.upper()}..."):
+            with st.spinner(f"🌑 ARCHITECTING {f_lang.upper()} EXCALIBUR..."):
                 try:
                     dna_context = f"Tone: {v_tone}" if v_tone else "Viral professional."
                     visual_anchor = "MANDATORY: Maintain facial features of reference subject." if vault_active else ""
                     
-                    # ATOMIC PROMPT: HARD CODES THE CHARACTER REQUIREMENT
+                    # HARD-CODED TEMPLATE TO FORCE CHARACTER RENDERING
                     sys_msg = (
-                        f"You are a master scriptwriter. You must write the output in {f_lang}.\n"
-                        f"HARD REQUIREMENT: Use {f_lang} native characters ONLY for the Hook and Script sections.\n"
-                        f"If {f_lang} is Mandarin, use Simplified Chinese characters. If Japanese, use Kanji/Kana. If Korean, use Hangul.\n\n"
-                        f"TOPIC: {f_topic} | PLATFORM: {f_platform}\n"
-                        f"1. --- HOOK ARCHITECT ---: Write a {f_hook_intensity} hook in {f_lang} using {f_interrupt}.\n"
-                        f"2. --- SCRIPT ---: Write a full script in {f_lang} using the {f_framework} framework. Pacing: {f_pacing}. {dna_context}\n"
-                        f"3. --- IMAGE PROMPTS ---: Write 3 prompts in ENGLISH for DALL-E. Palette: {', '.join(f_colors)}. Style: {f_lighting}. {visual_anchor}\n"
+                        f"Act as a Viral Strategist and Native Content Creator. Protocol 2026.\n"
+                        f"TARGET LANGUAGE: {f_lang}.\n"
+                        f"PLATFORM: {f_platform}. TOPIC: '{f_topic}'.\n\n"
+                        f"STRICT INSTRUCTION: You must write the Hook and Script using the actual native script/characters of {f_lang}. \n"
+                        f"For Mandarin use Simplified Chinese, for Japanese use Kanji/Kana, for Korean use Hangul.\n\n"
+                        f"TEMPLATE:\n"
+                        f"--- HOOK ARCHITECT ---\n"
+                        f"(Native {f_lang} hook here using {f_interrupt} pattern)\n\n"
+                        f"--- SCRIPT ---\n"
+                        f"(Full {f_lang} script using {f_framework} framework and {f_pacing} pacing. {dna_context})\n\n"
+                        f"--- IMAGE PROMPTS ---\n"
+                        f"(3 Cinematic Prompts in English. Style: {f_lighting}. Palette: {', '.join(f_colors)}. {visual_anchor})"
                     )
                     
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
                         messages=[{"role": "user", "content": sys_msg}],
-                        temperature=0.6 # Lowered temperature for higher linguistic accuracy
+                        temperature=0.5 # Lowered for linguistic precision
                     )
                     st.session_state.pro_forge_txt = res.choices[0].message.content
                     st.session_state.daily_usage += 1
@@ -1883,9 +1889,13 @@ elif page == "🧠 Neural Forge":
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 PRODUCTION BLUEPRINT")
-        # Use a container with border for better rendering of non-Latin characters
-        with st.container(border=True):
-            st.markdown(st.session_state.pro_forge_txt)
+        
+        # Using a specialized container for native character rendering
+        st.markdown(f"""
+        <div class="stat-card" style="padding: 25px; border-left: 5px solid #00ff41;">
+            {st.session_state.pro_forge_txt}
+        </div>
+        """, unsafe_allow_html=True)
         
         # --- DIRECTOR TOOLS ---
         if user_status in ["Director", "Agency"]:
@@ -1924,7 +1934,7 @@ elif page == "🧠 Neural Forge":
                         except Exception as e:
                             st.error(f"Visual Error: {e}")
 
-        # --- AUDIT ---
+        # --- MISSING AUDIT BUTTONS ---
         st.divider()
         st.subheader("🧪 VOID Intelligence Audit")
         t_col1, t_col2 = st.columns(2)
@@ -1934,7 +1944,7 @@ elif page == "🧠 Neural Forge":
                 with st.spinner("Calculating..."):
                     v_res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": f"AUDIT IN ENGLISH: {st.session_state.pro_forge_txt[:1500]}"}]
+                        messages=[{"role": "user", "content": f"Provide a VIRALITY AUDIT IN ENGLISH for this content: {st.session_state.pro_forge_txt[:1000]}"}]
                     )
                     st.info(v_res.choices[0].message.content)
                         
@@ -1943,7 +1953,7 @@ elif page == "🧠 Neural Forge":
                 with st.spinner("Scanning..."):
                     r_res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": f"RETENTION MAP IN ENGLISH: {st.session_state.pro_forge_txt[:1500]}"}]
+                        messages=[{"role": "user", "content": f"Provide a RETENTION MAP IN ENGLISH for this content: {st.session_state.pro_forge_txt[:1000]}"}]
                     )
                     st.warning(r_res.choices[0].message.content)
 
@@ -2761,6 +2771,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
