@@ -514,9 +514,9 @@ def generate_oracle_report(topic, platform, tone):
         Topic: {topic} | Tone: {tone}
         
         Provide a 'Growth Intelligence Report' with:
-        1. 📈 VIRAL VELOCITY: Why this topic is peaking now based on global sentiment.
-        2. 🧠 PSYCHOLOGICAL HOOK: The specific 'Human Bias' (like FOMO or Zeigarnik effect) this script exploits.
-        3. 🚀 SCALING STRATEGY: How to turn this one video into a 5-part series for maximum retention.
+        1. 📈 **VIRAL VELOCITY**: Why this topic is peaking now based on global sentiment.
+        2. 🧠 **PSYCHOLOGICAL HOOK**: The specific 'Human Bias' (like FOMO or Zeigarnik effect) this script exploits.
+        3. 🚀 **SCALING STRATEGY**: How to turn this one video into a 5-part series for maximum retention.
         """
         res = groq_c.chat.completions.create(
             model="llama-3.3-70b-versatile",
@@ -2698,6 +2698,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
