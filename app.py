@@ -246,10 +246,12 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
+import streamlit as st
+
 # 1. INITIALIZE (Must be first)
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="expanded")
 
-# 2. RESTORED ARCHITECTURAL CSS
+# 2. RESTORED ARCHITECTURAL CSS + NEW SIDEBAR SLIDER LOGIC
 st.markdown("""
     <style>
     /* 1. THE DEEP NAVY VOID */
@@ -257,25 +259,37 @@ st.markdown("""
         background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
     }
     
-    /* 1. RELOCATE THE SIDEBAR TOGGLE */
+    /* 1. RELOCATE & ENHANCE THE SIDEBAR TOGGLE */
+    /* This target controls the button when the sidebar is CLOSED */
     [data-testid="stSidebarCollapsedControl"] {
-        top: 5rem !important; 
-        left: 1rem !important;
-        background-color: rgba(0, 212, 255, 0.1) !important;
-        border-radius: 0 10px 10px 0 !important;
-        border: 1px solid rgba(0, 212, 255, 0.2) !important;
-        transition: all 0.3s ease !important;
+        top: 15rem !important; /* Moved lower for better ergonomic access */
+        left: 0rem !important;
+        background-color: rgba(0, 212, 255, 0.05) !important;
+        border-radius: 0 15px 15px 0 !important;
+        border: 1px solid rgba(0, 212, 255, 0.1) !important;
+        width: 40px !important;
+        height: 60px !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
+    /* THE "SENSING EDGE" LOGIC: Glows when user approaches the left wall */
     [data-testid="stSidebarCollapsedControl"]:hover {
-        background-color: rgba(0, 212, 255, 0.3) !important;
-        box-shadow: 0px 0px 15px rgba(0, 212, 255, 0.5) !important;
+        left: 0.5rem !important; /* Subtle "pop out" effect */
+        background-color: rgba(0, 212, 255, 0.2) !important;
+        box-shadow: 5px 0px 20px rgba(0, 212, 255, 0.4) !important;
+        border: 1px solid rgba(0, 212, 255, 0.5) !important;
     }
 
     [data-testid="stSidebarCollapsedControl"] svg {
         fill: #00d4ff !important;
+        width: 25px !important;
+        height: 25px !important;
     }
 
+    /* Ensures the close button inside the sidebar matches the theme */
     [data-testid="stSidebar"] [data-testid="stBaseButton-headerNoPadding"] {
         top: 1rem !important;
         color: #00d4ff !important;
@@ -2737,6 +2751,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
