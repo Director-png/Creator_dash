@@ -250,54 +250,58 @@ st.set_page_config(page_title=" ", layout="wide", initial_sidebar_state="collaps
 # 2. UNIVERSAL CSS OVERRIDE (Kills Double Title + Restores Toggle + Hover Glow)
 st.markdown("""
 <style>
-    /* Kill Ghost Header & Double Title */
-    [data-testid="stHeader"], header {
+    /* 1. HIDE HEADER CONTENT BUT KEEP THE HEIGHT FOR THE TOGGLE */
+    header[data-testid="stHeader"] {
+        background-color: rgba(0,0,0,0) !important;
+        background: transparent !important;
+        color: transparent !important;
+    }
+
+    /* 2. KILL THE DECORATION LINE (The line at the very top) */
+    [data-testid="stDecoration"] {
         display: none !important;
-        height: 0px !important;
     }
 
-    /* Void Background */
-    .stApp { 
-        background: radial-gradient(circle at center, #050b14 0%, #000000 100%) !important; 
-    }
-
-    /* Restore Sidebar Toggle Handle */
-    [data-testid="stSidebarCollapsedControl"] {
+    /* 3. FORCE THE TOGGLE TO BE VISIBLE AND INTERACTABLE */
+    /* This targets the button that opens the sidebar */
+    button[data-testid="stSidebarCollapsedControl"], 
+    .st-emotion-cache-6q9sum {
         display: flex !important;
         visibility: visible !important;
         position: fixed !important;
-        top: 15px !important; 
-        left: 10px !important;
-        z-index: 9999999 !important;
+        top: 12px !important;
+        left: 12px !important;
+        z-index: 99999999 !important;
         background: rgba(0, 212, 255, 0.1) !important;
         border: 1px solid rgba(0, 212, 255, 0.4) !important;
-        border-radius: 5px !important;
+        border-radius: 8px !important;
+        color: #00d4ff !important;
     }
 
-    /* Hollow Buttons + Hover Logic */
+    /* Target the icon inside the toggle */
+    button[data-testid="stSidebarCollapsedControl"] svg {
+        fill: #00d4ff !important;
+    }
+
+    /* 4. HOLLOW BUTTONS + HOVER GLOW (Preserved logic) */
     div.stButton > button {
         background: transparent !important;
         color: #00d4ff !important;
         border: 1px solid rgba(0, 212, 255, 0.5) !important;
-        border-radius: 4px !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        letter-spacing: 2px !important;
     }
 
     div.stButton > button:hover {
         border-color: #00ff41 !important;
         color: #00ff41 !important;
         background-color: rgba(0, 255, 65, 0.05) !important;
-        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.3) !important;
+        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.4) !important;
+        transform: scale(1.02);
     }
 
-    /* Custom Void Title Styling */
-    .void-title {
-        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        font-weight: 900 !important; font-size: 3.5rem !important;
-        text-align: center !important; margin: 0 !important;
+    /* 5. FIX THE MAIN APP PADDING (Prevent the "Double Title" look) */
+    .stAppViewMain {
+        padding-top: 0rem !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -2715,6 +2719,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
