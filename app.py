@@ -249,27 +249,21 @@ import streamlit as st
 # 1. INITIALIZE (Must be first)
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. THE TOTAL SYSTEM OVERRIDE
+# 2. THE ABSOLUTE OVERRIDE CSS
 st.markdown("""
     <style>
-    /* 1. NUCLEAR STRIKE ON HEADER (Kills the double title) */
-    [data-testid="stHeader"], 
-    header, 
-    .st-emotion-cache-18ni7ap {
-        display: none !important;
-        height: 0px !important;
-        width: 0px !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-    }
-
-    /* 2. THE DEEP NAVY VOID */
+    /* 1. THE DEEP NAVY VOID */
     .stApp { 
         background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
     }
-
-    /* 3. THE GHOST HANDLE (FORCE RENDER) */
-    /* We target the toggle button globally and rip it out of the header flow */
+    
+    /* 2. KILL THE GHOST HEADER & PULL CONTENT UP */
+    header[data-testid="stHeader"], .st-emotion-cache-18ni7ap {
+        display: none !important;
+        height: 0px !important;
+    }
+    
+    /* 3. THE GHOST HANDLE (FORCE RENDER ON THE LEFT) */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
@@ -283,27 +277,17 @@ st.markdown("""
         border-radius: 0 10px 10px 0 !important;
         width: 45px !important;
         height: 55px !important;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
         justify-content: center !important;
         align-items: center !important;
     }
 
-    [data-testid="stSidebarCollapsedControl"]:hover {
-        background: rgba(0, 255, 65, 0.15) !important;
-        border-color: #00ff41 !important;
-        width: 55px !important;
-        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.4) !important;
-    }
-
-    [data-testid="stSidebarCollapsedControl"] svg {
-        fill: #00d4ff !important;
-    }
-
-    /* 4. MAIN CONTAINER ADJUSTMENT */
+    /* 4. MAIN CONTAINER RESET */
     .main .block-container {
-        padding-top: 1rem !important; /* Forces content to the absolute top */
+        padding-top: 0rem !important; 
+        margin-top: -50px !important; /* Pulls content into the 'Ghost Header' space */
         max-width: 900px !important;
-        margin: auto !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
 
     /* 5. THE ONLY AUTHORIZED TITLE */
@@ -314,28 +298,25 @@ st.markdown("""
         font-weight: 900 !important;
         font-size: 3.5rem !important;
         text-align: center !important;
-        margin-top: 0px !important;
+        margin-bottom: 0px !important;
     }
 
     /* 6. SIDEBAR & FOOTER CLEANUP */
     [data-testid="stSidebar"] { background-color: #000000 !important; }
     footer { visibility: hidden !important; }
-    [data-testid="stDecoration"] { display: none !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. INTERFACE RENDER
-st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
-st.markdown('<p style="text-align:center; color:rgba(0, 212, 255, 0.5); margin-top:-20px; letter-spacing:3px;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
+# 3. THE SINGLE-RENDER LOGIC (Prevents Duplication)
+# Use a placeholder to ensure the app only writes to one area
+main_container = st.container()
 
-# Spacing & Content
-st.markdown("<br>", unsafe_allow_html=True)
-tab1, tab2, tab3 = st.tabs(["🔑 LOGIN", "🛡️ IDENTITY", "🌌 UPLINK"])
-
-with tab1:
-    st.text_input("DIRECTOR EMAIL")
-    st.text_input("PASSKEY", type="password")
-    st.button("INITIATE UPLINK")
+with main_container:
+    st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center; color:rgba(0, 212, 255, 0.5); margin-top:-20px; letter-spacing:3px;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2719,6 +2700,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
