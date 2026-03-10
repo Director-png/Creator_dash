@@ -244,24 +244,69 @@ def draw_title(emoji, text):
         </div>
     """, unsafe_allow_html=True)
 
-
 import streamlit as st
-import requests
-import datetime
 
-# 1. PAGE CONFIG (Must be first)
+# 1. INITIALIZE (Must be first)
 st.set_page_config(page_title=" ", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. THE UNIVERSAL OVERRIDE (Put this BEFORE the Gatekeeper)
+# 2. THE TOTAL SYSTEM OVERRIDE (Forcing Visibility & Hover)
 st.markdown("""
     <style>
-    /* Kill the Ghost Header */
-    [data-testid="stHeader"], header { display: none !important; height: 0px !important; }
-    
-    /* Void Background */
-    .stApp { background: radial-gradient(circle at center, #050b14 0%, #000000 100%) !important; }
+    /* A. THE GHOST KILLER (Double Title Fix) */
+    [data-testid="stHeader"], header {
+        display: none !important;
+        height: 0px !important;
+    }
 
-    /* The Only Authorized Title Styling */
+    /* B. THE VOID BACKGROUND */
+    .stApp { 
+        background: radial-gradient(circle at center, #050b14 0%, #000000 100%) !important; 
+    }
+
+    /* C. RESTORE TOGGLE (FORCE LAYER 1M) */
+    [data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        position: fixed !important;
+        top: 15px !important; 
+        left: 5px !important;
+        z-index: 9999999 !important; /* Extremely high z-index */
+        background: rgba(0, 212, 255, 0.05) !important;
+        border: 1px solid rgba(0, 212, 255, 0.3) !important;
+        border-radius: 5px !important;
+    }
+
+    [data-testid="stSidebarCollapsedControl"] svg {
+        fill: #00d4ff !important;
+    }
+
+    /* D. HOLLOW BUTTONS + HOVER GLOW */
+    /* Target the button AND its hover state explicitly */
+    div.stButton > button {
+        background: transparent !important;
+        color: #00d4ff !important;
+        border: 1px solid rgba(0, 212, 255, 0.5) !important;
+        border-radius: 4px !important;
+        width: 100% !important;
+        padding: 12px !important;
+        letter-spacing: 4px;
+        transition: all 0.3s ease-in-out !important;
+    }
+
+    /* THE HOVER TRIGGER */
+    div.stButton > button:hover {
+        border-color: #00ff41 !important;
+        color: #00ff41 !important;
+        background: rgba(0, 255, 65, 0.1) !important;
+        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.3) !important;
+        transform: translateY(-1px);
+    }
+
+    /* E. TAB STYLING */
+    .stTabs [data-baseweb="tab-list"] {
+        justify-content: center !important;
+    }
+    
     .void-title {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
@@ -269,26 +314,20 @@ st.markdown("""
         font-weight: 900 !important; font-size: 3.5rem !important;
         text-align: center !important; margin: 0 !important;
     }
-
-    /* Hollow Buttons */
-    div.stButton > button {
-        background: transparent !important;
-        color: #00d4ff !important;
-        border: 1px solid rgba(0, 212, 255, 0.6) !important;
-        letter-spacing: 4px;
-        text-transform: uppercase;
-    }
     
-    /* Restore Toggle Control */
-    [data-testid="stSidebarCollapsedControl"] {
-        display: flex !important; visibility: visible !important;
-        position: fixed !important; top: 20px !important; left: 0 !important;
-        z-index: 1000001 !important;
-    }
+    footer { visibility: hidden !important; }
     </style>
 """, unsafe_allow_html=True)
 
+# 3. GATEKEEPER LOGIC
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
 
+if not st.session_state.logged_in:
+    st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center; color:rgba(0, 212, 255, 0.5); margin-top:-15px; letter-spacing:5px;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2672,6 +2711,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
