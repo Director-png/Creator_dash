@@ -246,57 +246,51 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
-# 1. INITIALIZE (Must be the very first Streamlit command)
+# 1. INITIALIZE
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="collapsed")
 
 # 2. THE TOTAL SYSTEM OVERRIDE
 st.markdown("""
     <style>
-    /* 1. ERASE ALL STREAMLIT DEFAULT LAYERS */
-    /* This targets the exact classes that cause the double title and black bars */
-    [data-testid="stHeader"], 
-    header, 
-    [data-testid="stDecoration"],
-    .st-emotion-cache-18ni7ap {
-        display: none !important;
-        height: 0px !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-    }
-
-    /* 2. THE VOID BACKGROUND */
+    /* 1. THE VOID BACKGROUND */
     .stApp { 
         background: radial-gradient(circle at center, #050b14 0%, #000000 100%) !important; 
     }
 
-    /* 3. THE GHOST HANDLE (THE SIDEBAR TOGGLE) */
-    /* We force this to appear on the left edge independently */
+    /* 2. NUCLEAR STRIKE ON DEFAULT LAYERS (Kills Double Title) */
+    [data-testid="stHeader"], header, [data-testid="stDecoration"] {
+        display: none !important;
+        height: 0px !important;
+        visibility: hidden !important;
+    }
+
+    /* 3. THE GHOST HANDLE (FORCE-PINNED TO LEFT) */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         position: fixed !important;
-        top: 20px !important; 
+        top: 5% !important; 
         left: 0 !important;
         z-index: 1000001 !important;
-        background: rgba(0, 212, 255, 0.1) !important;
+        background: transparent !important; /* Hollow Handle */
         border: 1px solid rgba(0, 212, 255, 0.4) !important;
         border-left: none !important;
-        border-radius: 0 10px 10px 0 !important;
+        border-radius: 0 8px 8px 0 !important;
         width: 45px !important;
         height: 50px !important;
-        justify-content: center !important;
-        align-items: center !important;
     }
 
     [data-testid="stSidebarCollapsedControl"] svg {
         fill: #00d4ff !important;
     }
 
-    /* 4. RE-CENTERED COMMAND CORE */
+    /* 4. RE-CENTERED COMMAND CORE WITH OVERLAP STRIKE */
     .main .block-container {
-        padding-top: 3rem !important; 
+        padding-top: 0rem !important; 
+        margin-top: -70px !important; /* PULLS UI UP TO OVERWRITE THE GHOST TITLE */
         max-width: 900px !important;
-        margin: auto !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
 
     /* 5. THE TITLES */
@@ -310,32 +304,31 @@ st.markdown("""
         margin: 0 !important;
     }
 
-    /* 6. BUTTON COLOR RESTORATION */
-    /* Ensuring the buttons glow and are visible */
+    /* 6. HOLLOW BUTTON PROTOCOL */
     div.stButton > button {
-        background: linear-gradient(90deg, rgba(0,212,255,0.1), rgba(0,255,65,0.1)) !important;
+        background: transparent !important; /* NO FILL */
         color: #00d4ff !important;
-        border: 1px solid rgba(0, 212, 255, 0.5) !important;
-        border-radius: 5px !important;
+        border: 1px solid rgba(0, 212, 255, 0.6) !important;
+        border-radius: 4px !important;
         width: 100% !important;
-        padding: 10px !important;
-        font-weight: bold !important;
-        transition: all 0.3s ease !important;
+        padding: 12px !important;
+        font-weight: 400 !important;
         text-transform: uppercase;
-        letter-spacing: 2px;
+        letter-spacing: 4px;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
     }
 
     div.stButton > button:hover {
         border-color: #00ff41 !important;
         color: #00ff41 !important;
-        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.4) !important;
-        background: rgba(0, 255, 65, 0.15) !important;
+        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.2) !important;
+        background: rgba(0, 255, 65, 0.05) !important; /* Slight tint on hover only */
     }
 
-    /* 7. TAB STYLING */
+    /* Tab Styling to match */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 10px !important;
         justify-content: center !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
     }
 
     footer { visibility: hidden !important; }
@@ -343,12 +336,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 3. INTERFACE RENDER
-# We use a single container to prevent Streamlit from double-drawing
 with st.container():
     st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align:center; color:rgba(0, 212, 255, 0.6); margin-top:-15px; letter-spacing:4px; font-weight:300;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center; color:rgba(0, 212, 255, 0.5); margin-top:-15px; letter-spacing:5px; font-weight:300; font-size:0.8rem;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
+
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2732,6 +2725,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
