@@ -244,77 +244,63 @@ def draw_title(emoji, text):
         </div>
     """, unsafe_allow_html=True)
 
-import streamlit as st
-
-# 1. INITIALIZE (Must be first)
+# 1. SYSTEM INITIALIZATION (MUST BE FIRST)
 st.set_page_config(page_title=" ", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. THE TOTAL SYSTEM OVERRIDE (Forcing Visibility & Hover)
+# 2. UNIVERSAL CSS OVERRIDE (Kills Double Title + Restores Toggle + Hover Glow)
 st.markdown("""
-    <style>
-    /* 1. COMPLETELY ERASE THE HEADER BUT KEEP THE TOGGLE ALIVE */
-[data-testid="stHeader"], header {
-    background: transparent !important;
-    height: 0px !important;
-    border: none !important;
-}
+<style>
+    /* Kill Ghost Header & Double Title */
+    [data-testid="stHeader"], header {
+        display: none !important;
+        height: 0px !important;
+    }
 
-/* 2. FORCE THE TOGGLE TO APPEAR ON THE LEFT EDGE */
-/* This targets the collapsed control button specifically */
-[data-testid="stSidebarCollapsedControl"], 
-.st-emotion-cache-6q9sum, 
-.st-emotion-cache-1wbqy5l {
-    display: flex !important;
-    visibility: visible !important;
-    position: fixed !important;
-    top: 20px !important; 
-    left: 10px !important;
-    z-index: 9999999 !important; /* Ensure it stays above everything */
-    background: rgba(0, 212, 255, 0.1) !important;
-    border: 1px solid rgba(0, 212, 255, 0.4) !important;
-    border-radius: 8px !important;
-    width: 45px !important;
-    height: 45px !important;
-    transition: all 0.3s ease !important;
-}
+    /* Void Background */
+    .stApp { 
+        background: radial-gradient(circle at center, #050b14 0%, #000000 100%) !important; 
+    }
 
-/* 3. ICON STYLING (The little chevron/arrow) */
-[data-testid="stSidebarCollapsedControl"] svg {
-    fill: #00d4ff !important;
-    width: 24px !important;
-    height: 24px !important;
-}
+    /* Restore Sidebar Toggle Handle */
+    [data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        position: fixed !important;
+        top: 15px !important; 
+        left: 10px !important;
+        z-index: 9999999 !important;
+        background: rgba(0, 212, 255, 0.1) !important;
+        border: 1px solid rgba(0, 212, 255, 0.4) !important;
+        border-radius: 5px !important;
+    }
 
-/* 4. HOVER EFFECT FOR THE TOGGLE */
-[data-testid="stSidebarCollapsedControl"]:hover {
-    background: rgba(0, 255, 65, 0.1) !important;
-    border-color: #00ff41 !important;
-    box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.3) !important;
-}
+    /* Hollow Buttons + Hover Logic */
+    div.stButton > button {
+        background: transparent !important;
+        color: #00d4ff !important;
+        border: 1px solid rgba(0, 212, 255, 0.5) !important;
+        border-radius: 4px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        letter-spacing: 2px !important;
+    }
 
-/* 5. HOLLOW BUTTONS + HOVER GLOW (For your Login/Action buttons) */
-div.stButton > button {
-    background-color: transparent !important;
-    color: #00d4ff !important;
-    border: 1px solid rgba(0, 212, 255, 0.5) !important;
-    border-radius: 4px !important;
-    transition: all 0.3s ease-in-out !important;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-}
+    div.stButton > button:hover {
+        border-color: #00ff41 !important;
+        color: #00ff41 !important;
+        background-color: rgba(0, 255, 65, 0.05) !important;
+        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.3) !important;
+    }
 
-div.stButton > button:hover {
-    border-color: #00ff41 !important;
-    color: #00ff41 !important;
-    background-color: rgba(0, 255, 65, 0.05) !important;
-    box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.2) !important;
-}
-
-/* 6. REMOVE THE DOUBLE TITLE GHOST */
-[data-testid="stDecoration"], 
-.st-emotion-cache-18ni7ap {
-    display: none !important;
-}
+    /* Custom Void Title Styling */
+    .void-title {
+        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        font-weight: 900 !important; font-size: 3.5rem !important;
+        text-align: center !important; margin: 0 !important;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 def typewriter_effect(text):
     container = st.empty()
@@ -507,17 +493,20 @@ def transmit_script(client, platform, topic, script, dna):
     except: 
         return False
 
+# 3. CORE LOGIC FUNCTIONS (LOGIC PRESERVED)
 def generate_oracle_report(topic, platform, tone):
     try:
-        prompt = f"""
-        System: You are the VOID OS Oracle. Analyze content architecture for {platform}.
-        Topic: {topic} | Tone: {tone}
+        # Sanitized f-string to prevent syntax errors with emojis and non-standard spacing
+        prompt = (
+            f"System: You are the VOID OS Oracle. Analyze content architecture for {platform}.\n"
+            f"Topic: {topic} | Tone: {tone}\n\n"
+            "Provide a 'Growth Intelligence Report' with:\n"
+            "1. 📈 **VIRAL VELOCITY**: Why this topic is peaking now based on global sentiment.\n"
+            "2. 🧠 **PSYCHOLOGICAL HOOK**: The specific 'Human Bias' (like FOMO or Zeigarnik effect) this script exploits.\n"
+            "3. 🚀 **SCALING STRATEGY**: How to turn this one video into a 5-part series for maximum retention."
+        )
         
-        Provide a 'Growth Intelligence Report' with:
-        1. 📈 **VIRAL VELOCITY**: Why this topic is peaking now based on global sentiment.
-        2. 🧠 **PSYCHOLOGICAL HOOK**: The specific 'Human Bias' (like FOMO or Zeigarnik effect) this script exploits.
-        3. 🚀 **SCALING STRATEGY**: How to turn this one video into a 5-part series for maximum retention.
-        """
+        # Ensure groq_c is initialized in your environment
         res = groq_c.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}]
@@ -526,6 +515,31 @@ def generate_oracle_report(topic, platform, tone):
     except Exception as e:
         return f"Oracle connection interrupted: {e}"
 
+def get_live_stats(url):
+    if not url: return None, None
+    is_ig = "instagram.com" in url.lower()
+    
+    ydl_opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'skip_download': True,
+        'extract_flat': True,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'Accept-Language': 'en-US,en;q=0.9',
+        }
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            subs = info.get('follower_count') or info.get('subscriber_count')
+            views = info.get('view_count', 0)
+            return subs, views
+    except Exception:
+        return None, None
+
+# 4. SESSION STATE
 if 'user_profiles' not in st.session_state:
     st.session_state.user_profiles = {
         "youtube": "",
@@ -533,6 +547,9 @@ if 'user_profiles' not in st.session_state:
         "x": "",
         "goals": {"followers": 0, "current": 0}
     }
+
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
 
 # --- UPDATED INTERCEPTOR ---
 def get_live_stats(url):
@@ -2698,6 +2715,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
