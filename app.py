@@ -249,7 +249,7 @@ import streamlit as st
 # 1. INITIALIZE (Must be first)
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. THE TOTAL SYSTEM OVERRIDE
+# 2. THE ABSOLUTE OVERRIDE CSS
 st.markdown("""
     <style>
     /* 1. THE DEEP NAVY VOID */
@@ -257,52 +257,50 @@ st.markdown("""
         background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
     }
     
-    /* 2. KILL THE DEFAULT STREAMLIT HEADER & TITLE */
-    header[data-testid="stHeader"] {
+    /* 2. COMPLETELY ERASE THE HEADER AREA */
+    header[data-testid="stHeader"], [data-testid="stHeader"] {
         display: none !important;
+        height: 0px !important;
     }
     
-    /* Remove top padding that causes the 'ghost' space */
-    .st-emotion-cache-18ni7ap, .st-emotion-cache-z5fcl4 {
-        padding-top: 0rem !important;
-    }
-
-    /* 3. THE GHOST HANDLE (Sidebar Toggle) */
-    /* We use fixed positioning to pull it out of the hidden header flow */
-    [data-testid="stSidebarCollapsedControl"] {
+    /* 3. THE GHOST HANDLE (FORCE RENDER) */
+    /* We are targeting the button with extreme specificity */
+    button[kind="headerNoPadding"], [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         position: fixed !important;
-        top: 10rem !important; 
-        left: 0 !important;
-        z-index: 1000000 !important;
-        background: rgba(0, 212, 255, 0.15) !important;
+        top: 15% !important; 
+        left: 0px !important;
+        z-index: 9999999 !important; /* Maximum Priority */
+        background: rgba(0, 212, 255, 0.1) !important;
         border: 1px solid rgba(0, 212, 255, 0.4) !important;
-        border-left: none !important;
         border-radius: 0 10px 10px 0 !important;
-        width: 42px !important;
+        width: 45px !important;
         height: 50px !important;
-        transition: all 0.3s ease !important;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     }
 
-    [data-testid="stSidebarCollapsedControl"]:hover {
-        background: rgba(0, 255, 65, 0.2) !important;
-        width: 52px !important;
+    /* Hover State for the Handle */
+    button[kind="headerNoPadding"]:hover, [data-testid="stSidebarCollapsedControl"]:hover {
+        background: rgba(0, 255, 65, 0.15) !important;
+        width: 55px !important;
         box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.4) !important;
+        border-color: #00ff41 !important;
     }
 
+    /* Icon Color Fix */
     [data-testid="stSidebarCollapsedControl"] svg {
         fill: #00d4ff !important;
     }
 
-    /* 4. CENTERED COMMAND CORE */
+    /* 4. CLEAN UP THE MAIN BLOCK */
     .main .block-container {
-        padding-top: 3rem !important; 
-        max-width: 900px !important; /* Tightened for better login feel */
+        padding-top: 1rem !important; 
+        max-width: 800px !important;
         margin: auto !important;
     }
 
-    /* 5. NEURAL GRADIENT TEXT (THE ONLY TITLE) */
+    /* 5. TITLES & TEXT */
     .void-title {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
@@ -310,39 +308,31 @@ st.markdown("""
         font-weight: 900 !important;
         font-size: 3.5rem !important;
         text-align: center !important;
-        letter-spacing: -1px;
-        margin-bottom: 0px !important;
+        margin-top: 0 !important;
     }
 
-    /* 6. BUTTON & INPUT STYLING */
-    div.stButton > button {
-        background: rgba(5, 11, 20, 0.6) !important; 
-        color: #00d4ff !important; 
-        border: 1.2px solid rgba(0, 212, 255, 0.3) !important; 
-        border-radius: 8px !important;
-        width: 100% !important;
-        transition: all 0.4s ease !important;
+    /* SIDEBAR STYLING */
+    [data-testid="stSidebar"] {
+        background-color: #000000 !important;
+        border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
     }
     
-    div.stButton > button:hover {
-        border: 1.2px solid #00ff41 !important;
-        color: #00ff41 !important;
-        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.2) !important;
+    /* Remove all default spacing from the top */
+    .st-emotion-cache-18ni7ap, .st-emotion-cache-z5fcl4 {
+        padding-top: 0rem !important;
     }
 
-    /* SIDEBAR CLEANUP */
-    [data-testid="stSidebar"] { background-color: #000000 !important; }
     footer { visibility: hidden !important; }
     </style>
 """, unsafe_allow_html=True)
 
 # 3. INTERFACE RENDER
+# Using a single container to prevent double rendering
 st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
-st.markdown('<p style="text-align:center; color:rgba(255,255,255,0.5); margin-top:-15px; letter-spacing:3px;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
+st.markdown('<p style="text-align:center; color:rgba(255,255,255,0.4); margin-top:-20px; letter-spacing:4px; font-weight:300;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
 
 # Spacing
 st.markdown("<br>", unsafe_allow_html=True)
-
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2726,6 +2716,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
