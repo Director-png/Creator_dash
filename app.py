@@ -249,37 +249,41 @@ import streamlit as st
 # 1. INITIALIZE (Must be first)
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. THE NUCLEAR OVERRIDE (Fixes Double Title & Invisible Toggle)
+# 2. THE TOTAL SYSTEM OVERRIDE
 st.markdown("""
     <style>
-    /* 1. ERASE THE DEFAULT HEADER COMPLETELY */
-    [data-testid="stHeader"] {
+    /* 1. NUCLEAR STRIKE ON HEADER (Kills the double title) */
+    [data-testid="stHeader"], 
+    header, 
+    .st-emotion-cache-18ni7ap {
         display: none !important;
         height: 0px !important;
-        visibility: hidden !important;
+        width: 0px !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
-    
+
     /* 2. THE DEEP NAVY VOID */
     .stApp { 
         background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
     }
 
-    /* 3. FORCE-RENDER THE SIDEBAR TOGGLE */
-    /* Targeting the specific button inside the hidden control container */
+    /* 3. THE GHOST HANDLE (FORCE RENDER) */
+    /* We target the toggle button globally and rip it out of the header flow */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         position: fixed !important;
-        top: 15% !important;
+        top: 15rem !important; 
         left: 0 !important;
-        z-index: 1000000 !important;
+        z-index: 9999999 !important;
         background: rgba(0, 212, 255, 0.1) !important;
-        border: 1.5px solid rgba(0, 212, 255, 0.3) !important;
+        border: 1px solid rgba(0, 212, 255, 0.3) !important;
         border-left: none !important;
-        border-radius: 0 12px 12px 0 !important;
-        width: 50px !important;
-        height: 60px !important;
-        transition: all 0.4s ease !important;
+        border-radius: 0 10px 10px 0 !important;
+        width: 45px !important;
+        height: 55px !important;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
         justify-content: center !important;
         align-items: center !important;
     }
@@ -287,53 +291,51 @@ st.markdown("""
     [data-testid="stSidebarCollapsedControl"]:hover {
         background: rgba(0, 255, 65, 0.15) !important;
         border-color: #00ff41 !important;
-        width: 65px !important;
-        box-shadow: 5px 0px 15px rgba(0, 255, 65, 0.3) !important;
+        width: 55px !important;
+        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.4) !important;
     }
 
-    /* Target the SVG icon inside the toggle */
     [data-testid="stSidebarCollapsedControl"] svg {
         fill: #00d4ff !important;
-        transform: scale(1.5) !important;
     }
 
-    /* 4. CONTENT POSITIONING (Removes the top gap) */
+    /* 4. MAIN CONTAINER ADJUSTMENT */
     .main .block-container {
-        padding-top: 1rem !important;
+        padding-top: 1rem !important; /* Forces content to the absolute top */
         max-width: 900px !important;
         margin: auto !important;
     }
 
-    /* 5. TITLES: NEURAL GRADIENT */
+    /* 5. THE ONLY AUTHORIZED TITLE */
     .void-title {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         font-weight: 900 !important;
-        font-size: 3.8rem !important;
+        font-size: 3.5rem !important;
         text-align: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
+        margin-top: 0px !important;
     }
 
-    /* 6. SIDEBAR STYLING */
-    [data-testid="stSidebar"] {
-        background-color: #000000 !important;
-        border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
-    }
-
-    /* Hide standard Streamlit footer and decoration line */
-    footer {visibility: hidden !important;}
-    [data-testid="stDecoration"] {display: none !important;}
+    /* 6. SIDEBAR & FOOTER CLEANUP */
+    [data-testid="stSidebar"] { background-color: #000000 !important; }
+    footer { visibility: hidden !important; }
+    [data-testid="stDecoration"] { display: none !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. INTERFACE RENDER (Single Instance Title)
+# 3. INTERFACE RENDER
 st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
-st.markdown('<p style="text-align:center; color:rgba(0, 212, 255, 0.6); margin-top:-20px; letter-spacing:3px; font-weight:300;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
+st.markdown('<p style="text-align:center; color:rgba(0, 212, 255, 0.5); margin-top:-20px; letter-spacing:3px;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
 
-# Login Hub
+# Spacing & Content
 st.markdown("<br>", unsafe_allow_html=True)
+tab1, tab2, tab3 = st.tabs(["🔑 LOGIN", "🛡️ IDENTITY", "🌌 UPLINK"])
+
+with tab1:
+    st.text_input("DIRECTOR EMAIL")
+    st.text_input("PASSKEY", type="password")
+    st.button("INITIATE UPLINK")
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2717,6 +2719,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
