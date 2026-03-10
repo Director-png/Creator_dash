@@ -246,12 +246,10 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
-import streamlit as st
-
 # 1. INITIALIZE (Must be first)
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="expanded")
 
-# 2. RESTORED ARCHITECTURAL CSS + NEW SIDEBAR SLIDER LOGIC
+# 2. UPDATED ARCHITECTURAL CSS (Fixing the Invisible Toggle)
 st.markdown("""
     <style>
     /* 1. THE DEEP NAVY VOID */
@@ -259,58 +257,54 @@ st.markdown("""
         background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
     }
     
-    /* 1. RELOCATE & ENHANCE THE SIDEBAR TOGGLE */
-    /* This target controls the button when the sidebar is CLOSED */
+    /* 2. FORCE-VISIBLE SIDEBAR TOGGLE (The "Ghost Handle") */
+    /* This overrides Streamlit's hidden header specifically for the toggle */
     [data-testid="stSidebarCollapsedControl"] {
-        top: 15rem !important; /* Moved lower for better ergonomic access */
-        left: 0rem !important;
-        background-color: rgba(0, 212, 255, 0.05) !important;
-        border-radius: 0 15px 15px 0 !important;
-        border: 1px solid rgba(0, 212, 255, 0.1) !important;
-        width: 40px !important;
-        height: 60px !important;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        visibility: visible !important;
+        position: fixed !important;
+        top: 20% !important; /* Positioned mid-top for ergonomic access */
+        left: 0 !important;
+        z-index: 999999 !important;
+        background: rgba(0, 212, 255, 0.1) !important;
+        border: 1px solid rgba(0, 212, 255, 0.3) !important;
+        border-left: none !important;
+        border-radius: 0 10px 10px 0 !important;
+        width: 45px !important;
+        height: 55px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        cursor: pointer !important;
     }
 
-    /* THE "SENSING EDGE" LOGIC: Glows when user approaches the left wall */
     [data-testid="stSidebarCollapsedControl"]:hover {
-        left: 0.5rem !important; /* Subtle "pop out" effect */
-        background-color: rgba(0, 212, 255, 0.2) !important;
-        box-shadow: 5px 0px 20px rgba(0, 212, 255, 0.4) !important;
-        border: 1px solid rgba(0, 212, 255, 0.5) !important;
+        background: rgba(0, 255, 65, 0.1) !important;
+        border: 1px solid rgba(0, 255, 65, 0.5) !important;
+        border-left: none !important;
+        width: 55px !important; /* Expands on hover to invite the click */
+        box-shadow: 5px 0px 15px rgba(0, 255, 65, 0.2) !important;
     }
 
+    /* Icon color fix */
     [data-testid="stSidebarCollapsedControl"] svg {
         fill: #00d4ff !important;
-        width: 25px !important;
-        height: 25px !important;
-    }
-
-    /* Ensures the close button inside the sidebar matches the theme */
-    [data-testid="stSidebar"] [data-testid="stBaseButton-headerNoPadding"] {
-        top: 1rem !important;
-        color: #00d4ff !important;
+        transition: fill 0.3s ease !important;
     }
     
-    /* 2. CENTERED COMMAND CORE */
-    .main .block-container {
-        padding-top: 6rem !important; 
-        padding-left: 5% !important;
-        padding-right: 5% !important;
-        max-width: 90% !important;
-        text-align: center !important;
-        
-        margin-top: 0.25cm !important;
-        margin-bottom: 0.25cm !important;
-        border: 0.25cm solid rgba(0, 212, 255, 0.03) !important;
-        border-radius: 20px !important;
-        background-color: transparent !important;
+    [data-testid="stSidebarCollapsedControl"]:hover svg {
+        fill: #00ff41 !important;
     }
 
-    /* 3. BUTTONS: PHOTO-MATCHED STYLE */
+    /* 3. CENTERED COMMAND CORE */
+    .main .block-container {
+        padding-top: 5rem !important; 
+        max-width: 90% !important;
+        text-align: center !important;
+        margin-top: 10px !important;
+    }
+
+    /* 4. BUTTONS: PHOTO-MATCHED STYLE */
     div.stButton > button {
         background: rgba(5, 11, 20, 0.6) !important; 
         color: #00d4ff !important; 
@@ -321,9 +315,7 @@ st.markdown("""
         text-transform: uppercase;
         letter-spacing: 1.5px;
         font-size: 0.9rem !important;
-        font-weight: 500 !important;
         min-width: 220px !important;
-        margin: 10px !important;
         transition: all 0.4s ease !important;
     }
     
@@ -335,39 +327,34 @@ st.markdown("""
         transform: translateY(-2px);
     }
 
-    /* 4. TEXT CENTRALIZATION */
+    /* 5. TEXT CENTRALIZATION */
     .stMarkdown, .stText, h1, h2, h3, p {
         text-align: center !important;
-        justify-content: center !important;
     }
 
-    /* 5. NEURAL GRADIENT TEXT */
+    /* 6. NEURAL GRADIENT TEXT (VOID OS TITLE) */
     .void-gradient-text {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         font-weight: 900 !important;
-        font-size: 2.8rem !important;
-        display: block;
+        font-size: 3rem !important;
         margin: 20px auto;
     }
 
-    /* 6. SIDEBAR & OVERLAY CLEANUP */
+    /* 7. SIDEBAR CLEANUP */
     [data-testid="stSidebar"] {
         background-color: #000000 !important;
         border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
-    }
-    
-    /* SIDEBAR IMAGE CIRCLE FIX */
-    [data-testid="stSidebar"] [data-testid="stImage"] img {
-        border-radius: 50% !important;
-        border: 2px solid #00ff41 !important;
-        object-fit: cover;
     }
 
     header, footer { visibility: hidden !important; }
     </style>
 """, unsafe_allow_html=True)
+
+# 3. CONTENT RENDER
+st.markdown('<h1 class="void-gradient-text">VOID OS</h1>', unsafe_allow_html=True)
+st.write("INTELLIGENCE ACCESS PROTOCOL v4.0")
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2751,6 +2738,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
