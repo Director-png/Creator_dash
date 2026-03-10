@@ -252,85 +252,69 @@ st.set_page_config(page_title=" ", layout="wide", initial_sidebar_state="collaps
 # 2. THE TOTAL SYSTEM OVERRIDE (Forcing Visibility & Hover)
 st.markdown("""
     <style>
-    /* 1. ERASE ALL HEADER CONTAINERS BY ATTRIBUTE (Nuclear Option) */
-    [data-testid="stHeader"], 
-    header, 
-    .st-emotion-cache-18ni7ap, 
-    .st-emotion-cache-v698uo {
-        display: none !important;
-        height: 0px !important;
-        width: 0px !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-    }
+    /* 1. COMPLETELY ERASE THE HEADER BUT KEEP THE TOGGLE ALIVE */
+[data-testid="stHeader"], header {
+    background: transparent !important;
+    height: 0px !important;
+    border: none !important;
+}
 
-    /* 2. THE VOID BACKGROUND */
-    .stApp { 
-        background: radial-gradient(circle at center, #050b14 0%, #000000 100%) !important; 
-    }
+/* 2. FORCE THE TOGGLE TO APPEAR ON THE LEFT EDGE */
+/* This targets the collapsed control button specifically */
+[data-testid="stSidebarCollapsedControl"], 
+.st-emotion-cache-6q9sum, 
+.st-emotion-cache-1wbqy5l {
+    display: flex !important;
+    visibility: visible !important;
+    position: fixed !important;
+    top: 20px !important; 
+    left: 10px !important;
+    z-index: 9999999 !important; /* Ensure it stays above everything */
+    background: rgba(0, 212, 255, 0.1) !important;
+    border: 1px solid rgba(0, 212, 255, 0.4) !important;
+    border-radius: 8px !important;
+    width: 45px !important;
+    height: 45px !important;
+    transition: all 0.3s ease !important;
+}
 
-    /* 3. THE GHOST HANDLE (FORCE-PINNED TO VIEWPORT) */
-    /* We use 'fixed' to ensure it stays even if the header is 'gone' */
-    [data-testid="stSidebarCollapsedControl"],
-    .st-emotion-cache-6q9sum {
-        display: flex !important;
-        visibility: visible !important;
-        position: fixed !important;
-        top: 20px !important; 
-        left: 0px !important;
-        z-index: 99999999 !important;
-        background: rgba(0, 212, 255, 0.1) !important;
-        border: 1px solid rgba(0, 212, 255, 0.4) !important;
-        border-left: none !important;
-        border-radius: 0 10px 10px 0 !important;
-        width: 45px !important;
-        height: 50px !important;
-        cursor: pointer !important;
-    }
+/* 3. ICON STYLING (The little chevron/arrow) */
+[data-testid="stSidebarCollapsedControl"] svg {
+    fill: #00d4ff !important;
+    width: 24px !important;
+    height: 24px !important;
+}
 
-    [data-testid="stSidebarCollapsedControl"] svg {
-        fill: #00d4ff !important;
-    }
+/* 4. HOVER EFFECT FOR THE TOGGLE */
+[data-testid="stSidebarCollapsedControl"]:hover {
+    background: rgba(0, 255, 65, 0.1) !important;
+    border-color: #00ff41 !important;
+    box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.3) !important;
+}
 
-    /* 4. HOLLOW BUTTONS + HOVER GLOW */
-    /* Targeting the button by its test-id to ensure the hover works */
-    button[kind="secondary"], 
-    .stButton > button {
-        background-color: transparent !important;
-        color: #00d4ff !important;
-        border: 1px solid rgba(0, 212, 255, 0.5) !important;
-        border-radius: 4px !important;
-        width: 100% !important;
-        letter-spacing: 4px !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        text-transform: uppercase !important;
-    }
+/* 5. HOLLOW BUTTONS + HOVER GLOW (For your Login/Action buttons) */
+div.stButton > button {
+    background-color: transparent !important;
+    color: #00d4ff !important;
+    border: 1px solid rgba(0, 212, 255, 0.5) !important;
+    border-radius: 4px !important;
+    transition: all 0.3s ease-in-out !important;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+}
 
-    /* THE HOVER TRIGGER (FORCED) */
-    .stButton > button:hover {
-        border-color: #00ff41 !important;
-        color: #00ff41 !important;
-        background-color: rgba(0, 255, 65, 0.1) !important;
-        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.4) !important;
-    }
+div.stButton > button:hover {
+    border-color: #00ff41 !important;
+    color: #00ff41 !important;
+    background-color: rgba(0, 255, 65, 0.05) !important;
+    box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.2) !important;
+}
 
-    /* 5. TITLE ALIGNMENT */
-    .void-title {
-        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        font-weight: 900 !important;
-        font-size: 3.5rem !important;
-        text-align: center !important;
-        margin-top: -30px !important; /* Pull up to reclaim header space */
-    }
-
-    /* 6. CLEANUP */
-    [data-testid="stDecoration"] { display: none !important; }
-    footer { visibility: hidden !important; }
-    </style>
-""", unsafe_allow_html=True)
-
+/* 6. REMOVE THE DOUBLE TITLE GHOST */
+[data-testid="stDecoration"], 
+.st-emotion-cache-18ni7ap {
+    display: none !important;
+}
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2714,6 +2698,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
