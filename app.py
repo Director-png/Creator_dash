@@ -247,87 +247,92 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
-# 1. INITIALIZE (Must be first)
+# 1. INITIALIZE
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. THE RIGHT-ALIGNED OVERRIDE CSS
+# 2. THE ABSOLUTE UI OVERRIDE
 st.markdown("""
     <style>
-    /* 1. THE DEEP NAVY VOID */
-    .stApp { 
-        background: radial-gradient(circle at right, #050b14 0%, #000000 100%) !important; 
-    }
-    
-    /* 2. NUCLEAR STRIKE ON DEFAULT HEADER */
-    [data-testid="stHeader"], header {
+    /* 1. NUCLEAR ERASE OF ALL DEFAULT HEADERS */
+    header, [data-testid="stHeader"], [data-testid="stDecoration"] {
         display: none !important;
         height: 0px !important;
         opacity: 0 !important;
     }
 
-    /* 3. THE GHOST HANDLE (NOW CLEARLY VISIBLE ON THE LEFT) */
+    /* 2. THE VOID BACKGROUND */
+    .stApp { 
+        background: radial-gradient(circle at right, #050b14 0%, #000000 100%) !important; 
+    }
+
+    /* 3. THE GHOST HANDLE (NOW PINNED & VISIBLE) */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         position: fixed !important;
-        top: 20% !important; 
+        top: 15% !important;
         left: 0 !important;
-        z-index: 1000000 !important;
+        z-index: 9999999 !important;
         background: rgba(0, 212, 255, 0.1) !important;
-        border: 1.5px solid rgba(0, 212, 255, 0.3) !important;
+        border: 1px solid rgba(0, 212, 255, 0.3) !important;
         border-left: none !important;
         border-radius: 0 10px 10px 0 !important;
-        width: 50px !important;
-        height: 60px !important;
-    }
-    
-    [data-testid="stSidebarCollapsedControl"] svg {
-        fill: #00d4ff !important;
+        width: 45px !important;
+        height: 55px !important;
     }
 
-    /* 4. RIGHT-ALIGNED COMMAND CORE */
+    /* 4. RIGHT-ALIGNED COMMAND CENTER */
     .main .block-container {
-        padding-top: 2rem !important; 
-        max-width: 1200px !important;
-        text-align: right !important; /* THE PIVOT */
-        margin-right: 5% !important;
+        padding-top: 0rem !important;
+        max-width: 1000px !important;
+        margin-right: 2rem !important;
+        margin-left: auto !important;
+        text-align: right !important;
     }
 
-    /* 5. RIGHT-ALIGNED TEXT & INPUTS */
+    /* 5. TITLES & TEXT (RIGHT ALIGNED) */
     .void-title {
         background: linear-gradient(270deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         font-weight: 900 !important;
-        font-size: 4rem !important;
+        font-size: 3.8rem !important;
+        text-align: right !important;
+        margin-bottom: 0px !important;
+    }
+
+    /* Aligning Form Elements */
+    .stTabs [data-baseweb="tab-list"] {
+        justify-content: flex-end !important;
+    }
+    
+    div[data-testid="stTextInput"] label {
+        text-align: right !important;
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* Input Box Width for Right Alignment */
+    div[data-testid="stTextInput"] > div > div > input {
         text-align: right !important;
     }
 
-    /* Aligning the tabs and inputs to the right */
-    .stTabs, .stTextInput, .stButton {
+    /* Button Alignment */
+    div.stButton {
         text-align: right !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-end !important;
     }
 
-    /* Adjusting input widths for right alignment */
-    div[data-testid="stTextInput"] {
-        width: 400px !important;
-    }
-
-    /* 6. CLEANUP */
-    [data-testid="stSidebar"] { background-color: #000000 !important; }
     footer { visibility: hidden !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. INTERFACE RENDER
-st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
-st.markdown('<p style="color:rgba(0, 212, 255, 0.5); letter-spacing:3px;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
+# 3. INTERFACE RENDER (Single Instance)
+# Using a container to lock the state
+with st.container():
+    st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:right; color:rgba(0, 212, 255, 0.5); margin-top:-20px; letter-spacing:3px;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
-    
+    st.markdown("<br><br>", unsafe_allow_html=True)    
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2711,6 +2716,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
