@@ -246,38 +246,40 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
-# 1. INITIALIZE (Must be first)
+# 1. INITIALIZE (Must be the very first Streamlit command)
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. THE NUCLEAR CSS OVERRIDE (Fixes Double Title & Invisible Toggle)
+# 2. THE TOTAL SYSTEM OVERRIDE
 st.markdown("""
     <style>
-    /* 1. COMPLETELY ERASE THE PROTECTED HEADER LAYER */
-    header[data-testid="stHeader"], 
-    [data-testid="stHeader"],
+    /* 1. ERASE ALL STREAMLIT DEFAULT LAYERS */
+    /* This targets the exact classes that cause the double title and black bars */
+    [data-testid="stHeader"], 
+    header, 
+    [data-testid="stDecoration"],
     .st-emotion-cache-18ni7ap {
         display: none !important;
         height: 0px !important;
-        width: 0px !important;
-        position: fixed !important;
-    }
-    
-    /* 2. THE VOID BACKGROUND */
-    .stApp { 
-        background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
+        visibility: hidden !important;
+        opacity: 0 !important;
     }
 
-    /* 3. THE GHOST HANDLE (FORCE-PINNED TO LEFT) */
-    /* This survives even when the header is 'deleted' */
+    /* 2. THE VOID BACKGROUND */
+    .stApp { 
+        background: radial-gradient(circle at center, #050b14 0%, #000000 100%) !important; 
+    }
+
+    /* 3. THE GHOST HANDLE (THE SIDEBAR TOGGLE) */
+    /* We force this to appear on the left edge independently */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         position: fixed !important;
-        top: 2rem !important; 
+        top: 20px !important; 
         left: 0 !important;
-        z-index: 9999999 !important;
+        z-index: 1000001 !important;
         background: rgba(0, 212, 255, 0.1) !important;
-        border: 1px solid rgba(0, 212, 255, 0.3) !important;
+        border: 1px solid rgba(0, 212, 255, 0.4) !important;
         border-left: none !important;
         border-radius: 0 10px 10px 0 !important;
         width: 45px !important;
@@ -290,53 +292,63 @@ st.markdown("""
         fill: #00d4ff !important;
     }
 
-    /* 4. CENTERED COMMAND CORE (Re-Centering for a clean look) */
+    /* 4. RE-CENTERED COMMAND CORE */
     .main .block-container {
-        padding-top: 2rem !important;
-        max-width: 850px !important;
+        padding-top: 3rem !important; 
+        max-width: 900px !important;
         margin: auto !important;
-        text-align: center !important;
     }
 
-    /* 5. THE ONLY AUTHORIZED TITLE (NEURAL GRADIENT) */
+    /* 5. THE TITLES */
     .void-title {
         background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         font-weight: 900 !important;
-        font-size: 4rem !important;
+        font-size: 3.5rem !important;
         text-align: center !important;
-        margin-top: 0px !important;
-        margin-bottom: 0px !important;
+        margin: 0 !important;
     }
 
-    /* Subtext Styling */
-    .void-subtext {
-        color: rgba(0, 212, 255, 0.6) !important;
-        letter-spacing: 5px !important;
-        font-size: 0.8rem !important;
-        margin-top: -15px !important;
+    /* 6. BUTTON COLOR RESTORATION */
+    /* Ensuring the buttons glow and are visible */
+    div.stButton > button {
+        background: linear-gradient(90deg, rgba(0,212,255,0.1), rgba(0,255,65,0.1)) !important;
+        color: #00d4ff !important;
+        border: 1px solid rgba(0, 212, 255, 0.5) !important;
+        border-radius: 5px !important;
+        width: 100% !important;
+        padding: 10px !important;
+        font-weight: bold !important;
+        transition: all 0.3s ease !important;
         text-transform: uppercase;
+        letter-spacing: 2px;
     }
 
-    /* 6. CLEANUP */
-    [data-testid="stSidebar"] { background-color: #000000 !important; }
+    div.stButton > button:hover {
+        border-color: #00ff41 !important;
+        color: #00ff41 !important;
+        box-shadow: 0px 0px 15px rgba(0, 255, 65, 0.4) !important;
+        background: rgba(0, 255, 65, 0.15) !important;
+    }
+
+    /* 7. TAB STYLING */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px !important;
+        justify-content: center !important;
+    }
+
     footer { visibility: hidden !important; }
-    [data-testid="stDecoration"] { display: none !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. INTERFACE RENDER (Single Instance)
-# Wrapping in a container to prevent duplication
-ui_layer = st.container()
-
-with ui_layer:
+# 3. INTERFACE RENDER
+# We use a single container to prevent Streamlit from double-drawing
+with st.container():
     st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="void-subtext">Intelligence Access Protocol v4.0</p>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center; color:rgba(0, 212, 255, 0.6); margin-top:-15px; letter-spacing:4px; font-weight:300;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-
-
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2720,6 +2732,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
