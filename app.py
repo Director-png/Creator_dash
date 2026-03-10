@@ -246,88 +246,97 @@ def draw_title(emoji, text):
 
 import streamlit as st
 
-# 1. INITIALIZE
+# 1. INITIALIZE (Must be first)
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. THE PHANTOM OVERRIDE
+# 2. THE NUCLEAR CSS OVERRIDE (Fixes Double Title & Invisible Toggle)
 st.markdown("""
     <style>
-    /* 1. THE VOID BACKGROUND */
-    .stApp { 
-        background: radial-gradient(circle at right, #050b14 0%, #000000 100%) !important; 
-    }
-
-    /* 2. MAKE HEADER INVISIBLE BUT FUNCTIONAL */
-    /* This removes the black bar while keeping the toggle button "hook" alive */
-    header[data-testid="stHeader"] {
-        background-color: rgba(0,0,0,0) !important;
-        border: none !important;
+    /* 1. COMPLETELY ERASE THE PROTECTED HEADER LAYER */
+    header[data-testid="stHeader"], 
+    [data-testid="stHeader"],
+    .st-emotion-cache-18ni7ap {
+        display: none !important;
+        height: 0px !important;
+        width: 0px !important;
+        position: fixed !important;
     }
     
-    /* Kill any remaining text in the ghost layer */
-    header[data-testid="stHeader"] * {
-        color: transparent !important;
+    /* 2. THE VOID BACKGROUND */
+    .stApp { 
+        background: radial-gradient(circle at top, #050b14 0%, #000000 100%) !important; 
     }
 
-    /* 3. THE GHOST HANDLE (THE ONLY VISIBLE SYSTEM PIECE) */
+    /* 3. THE GHOST HANDLE (FORCE-PINNED TO LEFT) */
+    /* This survives even when the header is 'deleted' */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         position: fixed !important;
-        top: 2rem !important; /* Moved higher to look more integrated */
+        top: 2rem !important; 
         left: 0 !important;
-        z-index: 1000000 !important;
+        z-index: 9999999 !important;
         background: rgba(0, 212, 255, 0.1) !important;
         border: 1px solid rgba(0, 212, 255, 0.3) !important;
         border-left: none !important;
         border-radius: 0 10px 10px 0 !important;
         width: 45px !important;
         height: 50px !important;
+        justify-content: center !important;
+        align-items: center !important;
     }
 
     [data-testid="stSidebarCollapsedControl"] svg {
         fill: #00d4ff !important;
     }
 
-    /* 4. RIGHT-ALIGNED COMMAND CENTER (UPWARD SHIFT) */
+    /* 4. CENTERED COMMAND CORE (Re-Centering for a clean look) */
     .main .block-container {
-        padding-top: 0rem !important;
-        margin-top: -60px !important; /* PULLS UI UP OVER THE GHOST HEADER */
-        max-width: 1100px !important;
-        margin-right: 3rem !important;
-        margin-left: auto !important;
-        text-align: right !important;
+        padding-top: 2rem !important;
+        max-width: 850px !important;
+        margin: auto !important;
+        text-align: center !important;
     }
 
-    /* 5. TITLES (RIGHT ALIGNED) */
+    /* 5. THE ONLY AUTHORIZED TITLE (NEURAL GRADIENT) */
     .void-title {
-        background: linear-gradient(270deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
+        background: linear-gradient(90deg, #ffffff 0%, #00d4ff 50%, #00ff41 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         font-weight: 900 !important;
-        font-size: 3.8rem !important;
-        text-align: right !important;
+        font-size: 4rem !important;
+        text-align: center !important;
+        margin-top: 0px !important;
         margin-bottom: 0px !important;
     }
 
-    /* Form Alignment */
-    .stTabs [data-baseweb="tab-list"] { justify-content: flex-end !important; }
-    div[data-testid="stTextInput"] { width: 450px !important; margin-left: auto !important; }
-    div[data-testid="stTextInput"] input { text-align: right !important; }
+    /* Subtext Styling */
+    .void-subtext {
+        color: rgba(0, 212, 255, 0.6) !important;
+        letter-spacing: 5px !important;
+        font-size: 0.8rem !important;
+        margin-top: -15px !important;
+        text-transform: uppercase;
+    }
 
+    /* 6. CLEANUP */
+    [data-testid="stSidebar"] { background-color: #000000 !important; }
     footer { visibility: hidden !important; }
     [data-testid="stDecoration"] { display: none !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. INTERFACE RENDER
-main_core = st.container()
+# 3. INTERFACE RENDER (Single Instance)
+# Wrapping in a container to prevent duplication
+ui_layer = st.container()
 
-with main_core:
+with ui_layer:
     st.markdown('<h1 class="void-title">VOID OS</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align:right; color:rgba(0, 212, 255, 0.5); margin-top:-20px; letter-spacing:4px;">INTELLIGENCE ACCESS PROTOCOL v4.0</p>', unsafe_allow_html=True)
+    st.markdown('<p class="void-subtext">Intelligence Access Protocol v4.0</p>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
+
+
 
 def typewriter_effect(text):
     container = st.empty()
@@ -2711,6 +2720,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
