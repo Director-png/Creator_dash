@@ -1236,7 +1236,6 @@ with st.sidebar:
         else:
             options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
 
-        # Navigation Persistence
         if st.session_state.get('redirect_to'):
             st.session_state.current_page = st.session_state.redirect_to
             st.session_state.nav_radio = st.session_state.redirect_to
@@ -1257,45 +1256,46 @@ with st.sidebar:
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
-        # 1. Neural Uplink (Chat)
         with st.expander("📡 NEURAL UPLINK", expanded=False):
             chat_msg_container = st.container()
             if "manager_chat" not in st.session_state: st.session_state.manager_chat = []
-            
-            with chat_msg_container:
-                for msg in st.session_state.manager_chat:
-                    with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
-                        st.markdown(msg["content"])
-
+            for msg in st.session_state.manager_chat:
+                with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
+                    st.markdown(msg["content"])
             agent_input = st.chat_input("Command VOID-OS...")
             if agent_input:
                 st.session_state.manager_chat.append({"role": "user", "content": agent_input})
-                # Groq logic remains operational here as per your main file
                 st.rerun()
 
-        # 2. Integrated Feedback Node
+        # --- INLINE FEEDBACK NODE (The Fix) ---
         if st.session_state.get('show_feedback_box', False):
             with st.expander("💬 SYSTEM FEEDBACK", expanded=True):
-                feedback_txt = st.text_area("Observations:", placeholder="Report glitches or insights...", key="fb_area")
+                feedback_txt = st.text_area("Observations:", placeholder="Report glitches...", key="fb_area")
+                
                 if st.button("📤 TRANSMIT TO AGENCY", use_container_width=True):
                     if feedback_txt:
                         try:
-                            # Direct Post to Google Sheets via Web App URL
-                            api_url = st.secrets["FEEDBACK_API_URL"]
-                            payload = {
-                                "user": st.session_state.get('user_name', 'Unknown'),
-                                "status": st.session_state.get('user_status', 'Free'),
-                                "feedback": feedback_txt,
-                                "timestamp": str(datetime.datetime.now())
-                            }
-                            response = requests.post(api_url, json=payload, timeout=10)
-                            
-                            if response.status_code == 200:
-                                st.success("TRANSMISSION SUCCESSFUL.")
-                                st.session_state.show_feedback_box = False
-                                st.rerun()
+                            api_url = st.secrets.get("FEEDBACK_API_URL")
+                            if not api_url:
+                                st.error("Missing FEEDBACK_API_URL in Secrets.")
                             else:
-                                st.error(f"Uplink Error: {response.status_code}")
+                                # ENSURE THESE KEYS MATCH YOUR GSCRIPT JSON PARSER
+                                payload = {
+                                    "user_name": str(st.session_state.get('user_name', 'DIRECTOR')),
+                                    "user_status": str(st.session_state.get('user_status', 'Free')),
+                                    "message": str(feedback_txt),
+                                    "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                }
+                                
+                                # Using json=payload automatically sets Content-Type to application/json
+                                response = requests.post(api_url, json=payload, timeout=10)
+                                
+                                if response.status_code == 200:
+                                    st.success("TRANSMISSION SUCCESSFUL.")
+                                    st.session_state.show_feedback_box = False
+                                    st.rerun()
+                                else:
+                                    st.error(f"Uplink Error: {response.status_code}")
                         except Exception as e:
                             st.error(f"Network Failure: {str(e)}")
                     else:
@@ -1308,7 +1308,6 @@ with st.sidebar:
             st.rerun()
 
         if st.button("🔄 RE-CALIBRATE", use_container_width=True):
-            # Clear cache and reset UI while preserving session status
             st.cache_data.clear()
             st.rerun()
 
@@ -2767,6 +2766,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
