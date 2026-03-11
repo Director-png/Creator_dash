@@ -1828,7 +1828,7 @@ elif page == "🧠 Neural Forge":
             
             f_lang = st.selectbox("Script Language", [
                 "English", "Hinglish", "Hindi", "Spanish", "French", "German", 
-                "Japanese", "Korean", "Russian", "Portuguese", "Italian", "Mandarin"
+                "Russian", "Portuguese", "Italian"
             ])
             
             f_colors = st.multiselect("Cinematic Palette", ["Cyberpunk Neon", "Midnight Teal", "Electric Orange", "Moody Noir"], default=["Midnight Teal", "Electric Orange"])
@@ -2774,6 +2774,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
