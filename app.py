@@ -1189,7 +1189,7 @@ if not st.session_state.logged_in:
 if 'page' not in st.session_state:
     st.session_state.page = "🏠 Dashboard"
 
-# --- 3. SIDEBAR ARCHITECTURE (Logic Intact) ---
+# --- 3. SIDEBAR ARCHITECTURE ---
 with st.sidebar:
     try:
         # --- ENHANCED IDENTITY CORE ---
@@ -1200,7 +1200,6 @@ with st.sidebar:
             col_img, col_name = st.columns([1, 3])
             with col_img:
                 if profile_img is not None:
-                    # Logic Intact: Using your image vault anchor
                     st.image(profile_img, use_container_width=True)
                 else:
                     st.markdown("<div style='width: 50px; height: 50px; border-radius: 50%; background: #111; border: 1px solid #00ff41; display: flex; align-items: center; justify-content: center; color: #00ff41; font-size: 10px; font-weight: bold; margin-top:5px;'>DNA</div>", unsafe_allow_html=True)
@@ -1230,15 +1229,20 @@ with st.sidebar:
 
         # --- DYNAMIC MENU MAPPING ---
         if u_status == "Agency":
-            options = ["🏠 Dashboard", "🔒 Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Agency Suite", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+            options = ["🏠 Dashboard", "🔒 Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Agency Suite", "⚖️ Legal Archive", "📜 History", "💬 Feedback", "⚙️ Settings"]
         elif u_status == "Director":
-            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "🛰️ Media Uplink", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
+            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "🛰️ Media Uplink", "⚖️ Legal Archive", "📜 History", "💬 Feedback", "⚡ Upgrade Authority", "⚙️ Settings"]
         elif u_status == "Operative":
-            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
+            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "💬 Feedback", "⚡ Upgrade Authority", "⚙️ Settings"]
         else:
-            options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
+            options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "💬 Feedback", "⚡ Upgrade Authority", "⚙️ Settings"]
 
-        # --- NAVIGATION SYNC LOGIC ---
+        # --- NAVIGATION SYNC & FEEDBACK REDIRECT ---
+        if st.session_state.get('show_feedback_node'):
+            st.session_state.current_page = "💬 Feedback"
+            st.session_state.nav_radio = "💬 Feedback"
+            del st.session_state.show_feedback_node
+
         if st.session_state.get('redirect_to'):
             st.session_state.current_page = st.session_state.redirect_to
             st.session_state.nav_radio = st.session_state.redirect_to
@@ -1284,10 +1288,8 @@ with st.sidebar:
                     with st.chat_message("assistant", avatar="🌌"):
                         resp_container = st.empty()
                         full_resp = ""
-                        # Your Logic Intact: Verified Groq Client check
                         if 'groq_c' in globals() or 'groq_c' in locals():
                             try:
-                                # Ensure groq_c is defined in your main script
                                 stream = groq_c.chat.completions.create(
                                     model="llama-3.3-70b-versatile",
                                     messages=[
@@ -1315,6 +1317,7 @@ with st.sidebar:
             st.rerun()
 
         if st.button("🔄 RE-CALIBRATE", use_container_width=True):
+            # Clears cache and triggers a clean rerun without logging out
             st.cache_data.clear()
             st.rerun()
 
@@ -2774,6 +2777,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
