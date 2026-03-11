@@ -1791,6 +1791,7 @@ elif page == "⚔️ Trend Duel":
             )
     else:
         st.error("📡 NEURAL LINK FAILURE: The function 'fetch_live_market_data' returned an empty set.")
+
 # --- MODULE 7: THE NEURAL FORGE (EXCALIBUR UPGRADE) ---
 elif page == "🧠 Neural Forge":
     import random
@@ -1798,7 +1799,7 @@ elif page == "🧠 Neural Forge":
     import requests  
     import openai 
 
-    # 1. ACCESS CONTROL
+    # 1. ACCESS CONTROL & LIMITS
     if not st.session_state.get('logged_in'):
         st.error("🚨 CLEARANCE REQUIRED: Access Denied.")
         st.stop()
@@ -1812,7 +1813,7 @@ elif page == "🧠 Neural Forge":
     remaining_credits = st.session_state.max_limit - st.session_state.daily_usage
     draw_title("🧠", "NEURAL FORGE || MASTER ARCHITECT")
 
-    # DNA Variables
+    # DNA & Vault Variables
     v_id = st.session_state.get('linguistic_dna_id', "").strip()
     v_tone = st.session_state.get('linguistic_dna', "")
     vault_active = 'vault_anchor' in st.session_state and st.session_state.vault_anchor is not None
@@ -1822,7 +1823,7 @@ elif page == "🧠 Neural Forge":
         col_a, col_b, col_c = st.columns(3, gap="small")
         with col_a:
             st.subheader("🧬 Production")
-            f_platform = st.selectbox("Target Platform", ["YouTube Long-form", "YouTube Shorts", "Instagram Reels", "TikTok"])
+            f_platform = st.selectbox("Target Platform", ["YouTube Shorts", "Instagram Reels", "TikTok", "YouTube Long-form"])
             f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of AI")
             
             f_lang = st.selectbox("Script Language", [
@@ -1830,12 +1831,12 @@ elif page == "🧠 Neural Forge":
                 "Japanese", "Korean", "Russian", "Portuguese", "Italian", "Mandarin"
             ])
             
-            f_colors = st.multiselect("Cinematic Palette", ["Cyberpunk Neon", "Midnight Teal", "Electric Orange", "Moody Noir", "Toxic Emerald"], default=["Midnight Teal", "Electric Orange"])
+            f_colors = st.multiselect("Cinematic Palette", ["Cyberpunk Neon", "Midnight Teal", "Electric Orange", "Moody Noir"], default=["Midnight Teal", "Electric Orange"])
         
         with col_b:
             st.subheader("📡 Strategy")
             f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock", "The 'Value-First' Pivot"])
-            f_interrupt = st.selectbox("Pattern Interrupt", ["Fast Zoom-in", "Flash Cut", "Text Overlay Shock", "Sudden Silence"])
+            f_interrupt = st.selectbox("Pattern Interrupt", ["Fast Zoom-in", "Flash Cut", "Sudden Silence"])
             f_lighting = st.selectbox("Lighting Style", ["Dramatic Rim Light", "Soft Cinematic Glow", "Hard Shadows"])
         
         with col_c:
@@ -1845,42 +1846,46 @@ elif page == "🧠 Neural Forge":
             f_pacing = st.select_slider("Script Pacing", ["Slow Burn", "Dynamic", "Rapid Fire"])
             execute = st.button("🔥 EXECUTE FULL SYNTHESIS", use_container_width=True)
 
-    # 3. CORE SYNTHESIS LOGIC
+    # 3. CORE SYNTHESIS LOGIC (THE TRIPLE-LOCK PROTOCOL)
     if execute:
         if not f_topic:
             st.warning("⚠️ Please enter a Core Concept.")
         elif remaining_credits <= 0:
             st.error("🚨 NEURAL EXHAUSTION: Daily limit reached.")
         else:
-            with st.spinner(f"🌑 ATOMIC SYNTHESIS: {f_lang.upper()}..."):
+            with st.spinner(f"🌑 ANCHORING {f_lang.upper()} NEURAL PATHWAYS..."):
                 try:
-                    dna_context = f"Tone: {v_tone}" if v_tone else "Viral professional."
+                    dna_context = f"Tone: {v_tone}" if v_tone else "Viral and professional."
                     visual_anchor = "MANDATORY: Maintain facial features of reference subject." if vault_active else ""
                     
-                    # DIRECTIVE OVERRIDE FOR ASIAN LANGUAGES
-                    instruction = "Write in English."
-                    if f_lang == "Mandarin": instruction = "Use Simplified Chinese (汉字) ONLY."
-                    elif f_lang == "Japanese": instruction = "Use Kanji/Kana (日本語) ONLY."
-                    elif f_lang == "Korean": instruction = "Use Hangul (한글) ONLY."
-                    elif f_lang == "Hindi": instruction = "Use Devanagari script."
+                    # SYSTEM OVERRIDE: ENFORCING NATIVE SCRIPTS
+                    lang_instruction = {
+                        "Mandarin": "You MUST write in Simplified Chinese characters (汉字). No English in the script.",
+                        "Japanese": "You MUST write in Kanji/Kana (日本語). No English in the script.",
+                        "Korean": "You MUST write in Hangul (한글). No English in the script.",
+                        "Hindi": "You MUST write in Devanagari script (हिन्दी)."
+                    }.get(f_lang, f"Write strictly in {f_lang}.")
 
+                    # CONSTRUCTING THE MASTER PROMPT
                     sys_msg = (
-                        f"You are a native {f_lang} Viral Expert. {instruction}\n"
-                        f"DO NOT use English for the script. DO NOT use only punctuation.\n"
-                        f"TOPIC: {f_topic}\n"
-                        f"FORMAT:\n"
-                        f"--- HOOK ARCHITECT ---\n[Your {f_lang} hook here]\n\n"
-                        f"--- SCRIPT ---\n[Your full {f_lang} script using {f_framework} framework]\n\n"
-                        f"--- IMAGE PROMPTS ---\n[3 Prompts in English]"
+                        f"SYSTEM PROTOCOL: {lang_instruction}\n"
+                        f"PLATFORM: {f_platform} | TOPIC: {f_topic}\n"
+                        f"DO NOT repeat punctuation. DO NOT use commas as placeholders. Write actual words.\n\n"
+                        f"--- HOOK ARCHITECT ---\n"
+                        f"Write a {f_hook_intensity} {f_hook_type} hook in {f_lang} using a {f_interrupt} pattern.\n\n"
+                        f"--- SCRIPT ---\n"
+                        f"Write a full viral script in {f_lang} using the {f_framework} framework. Pacing: {f_pacing}. {dna_context}\n\n"
+                        f"--- IMAGE PROMPTS ---\n"
+                        f"Provide 3 English prompts for DALL-E. Palette: {', '.join(f_colors)}. Style: {f_lighting}. {visual_anchor}"
                     )
                     
-                    # Switch to a more stable model for translation/Asian scripts if necessary
-                    # Keeping llama-3.3-70b but strictly limiting output tokens to prevent loops
+                    # THE DETERMINISTIC API CALL
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
                         messages=[{"role": "user", "content": sys_msg}],
-                        temperature=0.2, # Ultra-low for stability
-                        max_tokens=2000
+                        temperature=0.1,  # DETERMINISTIC LOCK
+                        top_p=0.1,        # ELIMINATES TOKEN DRIFT
+                        max_tokens=1500   # PREVENTS INFINITE LOOPS
                     )
                     st.session_state.pro_forge_txt = res.choices[0].message.content
                     st.session_state.daily_usage += 1
@@ -1892,9 +1897,8 @@ elif page == "🧠 Neural Forge":
         st.divider()
         st.markdown("### 💎 PRODUCTION BLUEPRINT")
         
-        # UI Rendering Fix for Hangul/Hanzi
-        with st.container(border=True):
-            st.write(st.session_state.pro_forge_txt)
+        # USE TEXT_AREA TO ENSURE CHARACTER RENDERING STABILITY
+        st.text_area("FORGE OUTPUT (RAW)", st.session_state.pro_forge_txt, height=450)
         
         # --- DIRECTOR TOOLS ---
         if user_status in ["Director", "Agency"]:
@@ -1927,12 +1931,13 @@ elif page == "🧠 Neural Forge":
                         try:
                             client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
                             prompt_part = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[1].strip().split("\n")[0]
-                            final_p = f"{prompt_part}. Photo-realistic, cinematic, matching reference facial structure."
+                            final_p = f"{prompt_part}. Photo-realistic, cinematic style."
                             img_res = client.images.generate(model="dall-e-3", prompt=final_p, n=1, size="1024x1024")
                             st.image(img_res.data[0].url, caption="✅ MANIFESTED")
                         except Exception as e:
                             st.error(f"Visual Error: {e}")
 
+        # --- AUDIT SUITE ---
         st.divider()
         st.subheader("🧪 VOID Intelligence Audit")
         t_col1, t_col2 = st.columns(2)
@@ -1942,7 +1947,7 @@ elif page == "🧠 Neural Forge":
                 with st.spinner("Calculating..."):
                     v_res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": f"AUDIT IN ENGLISH: {st.session_state.pro_forge_txt[:1000]}"}]
+                        messages=[{"role": "user", "content": f"Provide a Viral Audit IN ENGLISH for this content: {st.session_state.pro_forge_txt[:800]}"}]
                     )
                     st.info(v_res.choices[0].message.content)
                         
@@ -1951,7 +1956,7 @@ elif page == "🧠 Neural Forge":
                 with st.spinner("Scanning..."):
                     r_res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": f"RETENTION MAP IN ENGLISH: {st.session_state.pro_forge_txt[:1000]}"}]
+                        messages=[{"role": "user", "content": f"Provide a Retention Map IN ENGLISH for this content: {st.session_state.pro_forge_txt[:800]}"}]
                     )
                     st.warning(r_res.choices[0].message.content)
 
@@ -2769,6 +2774,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
