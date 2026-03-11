@@ -1252,50 +1252,76 @@ with st.sidebar:
         page = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = page
 
-        # --- 🤖 VOID MANAGER & FEEDBACK INTERFACE ---
+        # --- 🤖 VOID MANAGER (FULL CHAT LOGIC RESTORED) ---
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
         with st.expander("📡 NEURAL UPLINK", expanded=False):
             chat_msg_container = st.container()
-            if "manager_chat" not in st.session_state: st.session_state.manager_chat = []
-            for msg in st.session_state.manager_chat:
-                with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
-                    st.markdown(msg["content"])
+            if "manager_chat" not in st.session_state:
+                st.session_state.manager_chat = []
+
+            with chat_msg_container:
+                for msg in st.session_state.manager_chat:
+                    with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
+                        st.markdown(msg["content"])
+
             agent_input = st.chat_input("Command VOID-OS...")
+            
             if agent_input:
                 st.session_state.manager_chat.append({"role": "user", "content": agent_input})
-                st.rerun()
+                with chat_msg_container:
+                    with st.chat_message("user", avatar="👤"):
+                        st.markdown(agent_input)
+                
+                with chat_msg_container:
+                    with st.chat_message("assistant", avatar="🌌"):
+                        resp_container = st.empty()
+                        full_resp = ""
+                        # Verify Groq client
+                        if 'groq_c' in globals() or 'groq_c' in locals():
+                            try:
+                                stream = groq_c.chat.completions.create(
+                                    model="llama-3.3-70b-versatile",
+                                    messages=[
+                                        {"role": "system", "content": "You are VOID-OS. Witty, elite, and strategic AI manager. Be concise and helpful."},
+                                        {"role": "user", "content": agent_input}
+                                    ],
+                                    stream=True
+                                )
+                                for chunk in stream:
+                                    if chunk.choices[0].delta.content:
+                                        full_resp += chunk.choices[0].delta.content
+                                        resp_container.markdown(full_resp + "▌")
+                                
+                                resp_container.markdown(full_resp)
+                                st.session_state.manager_chat.append({"role": "assistant", "content": full_resp})
+                            except Exception as e:
+                                st.error(f"Uplink Error: {str(e)}")
+                        else:
+                            st.error("Uplink Error: Engine (groq_c) not initialized.")
 
-        # --- INLINE FEEDBACK NODE (The Fix) ---
+        # --- INLINE FEEDBACK NODE (The Re-Aligned Version) ---
         if st.session_state.get('show_feedback_box', False):
             with st.expander("💬 SYSTEM FEEDBACK", expanded=True):
-                feedback_txt = st.text_area("Observations:", placeholder="Report glitches...", key="fb_area")
-                
+                feedback_txt = st.text_area("Observations:", placeholder="Report to the Agency...", key="fb_area")
                 if st.button("📤 TRANSMIT TO AGENCY", use_container_width=True):
                     if feedback_txt:
                         try:
                             api_url = st.secrets.get("FEEDBACK_API_URL")
-                            if not api_url:
-                                st.error("Missing FEEDBACK_API_URL in Secrets.")
+                            payload = {
+                                "user_name": str(st.session_state.get('user_name', 'DIRECTOR')),
+                                "user_status": str(st.session_state.get('user_status', 'Free')),
+                                "message": str(feedback_txt),
+                                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            }
+                            response = requests.post(api_url, json=payload, timeout=10)
+                            if response.status_code == 200:
+                                st.success("TRANSMISSION SUCCESSFUL.")
+                                st.session_state.show_feedback_box = False
+                                st.rerun()
                             else:
-                                # ENSURE THESE KEYS MATCH YOUR GSCRIPT JSON PARSER
-                                payload = {
-                                    "Email": str(st.session_state.get('Email', 'anuj05758@gmail.com')),
-                                    "user_status": str(st.session_state.get('user_status', 'Operative')),
-                                    "message": str(feedback_txt),
-                                    "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                }
-                                
-                                # Using json=payload automatically sets Content-Type to application/json
-                                response = requests.post(api_url, json=payload, timeout=10)
-                                
-                                if response.status_code == 200:
-                                    st.success("TRANSMISSION SUCCESSFUL.")
-                                    st.session_state.show_feedback_box = False
-                                    st.rerun()
-                                else:
-                                    st.error(f"Uplink Error: {response.status_code}")
+                                st.error(f"Uplink Error: {response.status_code}")
                         except Exception as e:
                             st.error(f"Network Failure: {str(e)}")
                     else:
@@ -1318,6 +1344,7 @@ with st.sidebar:
 
     except Exception as sidebar_err:
         st.error(f"System Error: {sidebar_err}")
+
 
 # --- MODULE 6: SCRIPT ARCHITECT ---
 if page == "🏗️ Script Architect":
@@ -2766,6 +2793,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
