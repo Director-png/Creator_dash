@@ -1281,8 +1281,8 @@ with st.sidebar:
                             else:
                                 # ENSURE THESE KEYS MATCH YOUR GSCRIPT JSON PARSER
                                 payload = {
-                                    "user_name": str(st.session_state.get('user_name', 'DIRECTOR')),
-                                    "user_status": str(st.session_state.get('user_status', 'Free')),
+                                    "Email": str(st.session_state.get('Email', 'anuj05758@gmail.com')),
+                                    "user_status": str(st.session_state.get('user_status', 'Operative')),
                                     "message": str(feedback_txt),
                                     "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 }
@@ -2766,6 +2766,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
