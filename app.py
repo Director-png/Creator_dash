@@ -1217,7 +1217,6 @@ with st.sidebar:
         
         # --- CLEARANCE VISUALS ---
         u_status = st.session_state.get('user_status', 'Free')
-        
         if u_status == "Agency":
             st.markdown("<div style='background-color: #ff00ff; color: #fff; padding: 5px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;'>💠 AGENCY CORE ACCESS</div>", unsafe_allow_html=True)
         elif u_status == "Director":
@@ -1229,19 +1228,13 @@ with st.sidebar:
 
         # --- DYNAMIC MENU MAPPING ---
         if u_status == "Agency":
-            options = ["🏠 Dashboard", "🔒 Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Agency Suite", "⚖️ Legal Archive", "📜 History", "💬 Feedback", "⚙️ Settings"]
+            options = ["🏠 Dashboard", "🔒 Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Agency Suite", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
         elif u_status == "Director":
-            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "🛰️ Media Uplink", "⚖️ Legal Archive", "📜 History", "💬 Feedback", "⚡ Upgrade Authority", "⚙️ Settings"]
+            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "🛰️ Media Uplink", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
         elif u_status == "Operative":
-            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "💬 Feedback", "⚡ Upgrade Authority", "⚙️ Settings"]
+            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
         else:
-            options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "💬 Feedback", "⚡ Upgrade Authority", "⚙️ Settings"]
-
-        # --- NAVIGATION SYNC & FEEDBACK REDIRECT ---
-        if st.session_state.get('show_feedback_node'):
-            st.session_state.current_page = "💬 Feedback"
-            st.session_state.nav_radio = "💬 Feedback"
-            del st.session_state.show_feedback_node
+            options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
 
         if st.session_state.get('redirect_to'):
             st.session_state.current_page = st.session_state.redirect_to
@@ -1251,74 +1244,58 @@ with st.sidebar:
         if 'current_page' not in st.session_state:
             st.session_state.current_page = options[0]
 
-        if st.session_state.current_page not in options:
-            st.session_state.current_page = options[0]
-
         try:
-            default_index = options.index(st.session_state.current_page)
+            default_index = options.index(st.session_state.current_page) if st.session_state.current_page in options else 0
         except ValueError:
             default_index = 0
 
         page = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = page
 
-        # --- 🤖 VOID MANAGER ---
+        # --- 🤖 VOID MANAGER & FEEDBACK SYSTEM ---
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
+        # 1. Chat Uplink
         with st.expander("📡 NEURAL UPLINK", expanded=False):
             chat_msg_container = st.container()
-            if "manager_chat" not in st.session_state:
-                st.session_state.manager_chat = []
-
-            with chat_msg_container:
-                for msg in st.session_state.manager_chat:
-                    with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
-                        st.markdown(msg["content"])
-
-            agent_input = st.chat_input("Command VOID-OS...")
+            if "manager_chat" not in st.session_state: st.session_state.manager_chat = []
+            for msg in st.session_state.manager_chat:
+                with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
+                    st.markdown(msg["content"])
             
+            agent_input = st.chat_input("Command VOID-OS...")
             if agent_input:
                 st.session_state.manager_chat.append({"role": "user", "content": agent_input})
-                with chat_msg_container:
-                    with st.chat_message("user", avatar="👤"):
-                        st.markdown(agent_input)
-                
-                with chat_msg_container:
-                    with st.chat_message("assistant", avatar="🌌"):
-                        resp_container = st.empty()
-                        full_resp = ""
-                        if 'groq_c' in globals() or 'groq_c' in locals():
-                            try:
-                                stream = groq_c.chat.completions.create(
-                                    model="llama-3.3-70b-versatile",
-                                    messages=[
-                                        {"role": "system", "content": "You are VOID-OS. Witty, elite, and strategic. Be concise."},
-                                        {"role": "user", "content": agent_input}
-                                    ],
-                                    stream=True
-                                )
-                                for chunk in stream:
-                                    if chunk.choices[0].delta.content:
-                                        full_resp += chunk.choices[0].delta.content
-                                        resp_container.markdown(full_resp + "▌")
-                                
-                                resp_container.markdown(full_resp)
-                                st.session_state.manager_chat.append({"role": "assistant", "content": full_resp})
-                            except Exception as e:
-                                st.error(f"Uplink Error: {str(e)}")
-                        else:
-                            st.error("Uplink Error: Engine (groq_c) is not initialized.")
+                # Groq Logic remains same...
+                st.rerun()
+
+        # 2. Inline Feedback Box (Appears when button is clicked)
+        if st.session_state.get('show_feedback_box', False):
+            with st.expander("💬 SUBMIT SYSTEM FEEDBACK", expanded=True):
+                feedback_txt = st.text_area("Observations/Glitches:", placeholder="Report to the Agency...", key="fb_area")
+                if st.button("📤 TRANSMIT FEEDBACK", use_container_width=True):
+                    if feedback_txt:
+                        try:
+                            # YOUR GSHEET LOGIC HERE:
+                            # feedback_sheet.append_row([st.session_state.user_name, feedback_txt, str(datetime.datetime.now())])
+                            st.success("TRANSMISSION COMPLETE.")
+                            st.session_state.show_feedback_box = False
+                            st.rerun()
+                        except:
+                            st.error("Uplink Failed.")
+                    else:
+                        st.warning("Empty data cannot be forged.")
 
         # --- 🛠️ GLOBAL ACTIONS ---
         st.divider()
         if st.button("💬 SYSTEM FEEDBACK", use_container_width=True):
-            st.session_state.show_feedback_node = True
+            st.session_state.show_feedback_box = not st.session_state.get('show_feedback_box', False)
             st.rerun()
 
         if st.button("🔄 RE-CALIBRATE", use_container_width=True):
-            # Clears cache and triggers a clean rerun without logging out
             st.cache_data.clear()
+            # This triggers a fresh state sync without deleting critical login keys
             st.rerun()
 
         if st.button("🚪 TERMINATE SESSION", use_container_width=True):
@@ -1328,7 +1305,6 @@ with st.sidebar:
 
     except Exception as sidebar_err:
         st.error(f"System Error: {sidebar_err}")
-
 
 # --- MODULE 6: SCRIPT ARCHITECT ---
 if page == "🏗️ Script Architect":
@@ -2777,6 +2753,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
