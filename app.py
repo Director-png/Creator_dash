@@ -1236,6 +1236,7 @@ with st.sidebar:
         else:
             options = ["📡 My Growth Hub", "🌐 Global Pulse", "⚔️ Trend Duel", "🏗️ Script Architect", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
 
+        # Navigation Persistence
         if st.session_state.get('redirect_to'):
             st.session_state.current_page = st.session_state.redirect_to
             st.session_state.nav_radio = st.session_state.redirect_to
@@ -1252,40 +1253,53 @@ with st.sidebar:
         page = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = page
 
-        # --- 🤖 VOID MANAGER & FEEDBACK SYSTEM ---
+        # --- 🤖 VOID MANAGER & FEEDBACK INTERFACE ---
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
-        # 1. Chat Uplink
+        # 1. Neural Uplink (Chat)
         with st.expander("📡 NEURAL UPLINK", expanded=False):
             chat_msg_container = st.container()
             if "manager_chat" not in st.session_state: st.session_state.manager_chat = []
-            for msg in st.session_state.manager_chat:
-                with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
-                    st.markdown(msg["content"])
             
+            with chat_msg_container:
+                for msg in st.session_state.manager_chat:
+                    with st.chat_message(msg["role"], avatar="🌌" if msg["role"] == "assistant" else "👤"):
+                        st.markdown(msg["content"])
+
             agent_input = st.chat_input("Command VOID-OS...")
             if agent_input:
                 st.session_state.manager_chat.append({"role": "user", "content": agent_input})
-                # Groq Logic remains same...
+                # Groq logic remains operational here as per your main file
                 st.rerun()
 
-        # 2. Inline Feedback Box (Appears when button is clicked)
+        # 2. Integrated Feedback Node
         if st.session_state.get('show_feedback_box', False):
-            with st.expander("💬 SUBMIT SYSTEM FEEDBACK", expanded=True):
-                feedback_txt = st.text_area("Observations/Glitches:", placeholder="Report to the Agency...", key="fb_area")
-                if st.button("📤 TRANSMIT FEEDBACK", use_container_width=True):
+            with st.expander("💬 SYSTEM FEEDBACK", expanded=True):
+                feedback_txt = st.text_area("Observations:", placeholder="Report glitches or insights...", key="fb_area")
+                if st.button("📤 TRANSMIT TO AGENCY", use_container_width=True):
                     if feedback_txt:
                         try:
-                            # YOUR GSHEET LOGIC HERE:
-                            # feedback_sheet.append_row([st.session_state.user_name, feedback_txt, str(datetime.datetime.now())])
-                            st.success("TRANSMISSION COMPLETE.")
-                            st.session_state.show_feedback_box = False
-                            st.rerun()
-                        except:
-                            st.error("Uplink Failed.")
+                            # Direct Post to Google Sheets via Web App URL
+                            api_url = st.secrets["FEEDBACK_API_URL"]
+                            payload = {
+                                "user": st.session_state.get('user_name', 'Unknown'),
+                                "status": st.session_state.get('user_status', 'Free'),
+                                "feedback": feedback_txt,
+                                "timestamp": str(datetime.datetime.now())
+                            }
+                            response = requests.post(api_url, json=payload, timeout=10)
+                            
+                            if response.status_code == 200:
+                                st.success("TRANSMISSION SUCCESSFUL.")
+                                st.session_state.show_feedback_box = False
+                                st.rerun()
+                            else:
+                                st.error(f"Uplink Error: {response.status_code}")
+                        except Exception as e:
+                            st.error(f"Network Failure: {str(e)}")
                     else:
-                        st.warning("Empty data cannot be forged.")
+                        st.warning("Feedback field is void.")
 
         # --- 🛠️ GLOBAL ACTIONS ---
         st.divider()
@@ -1294,8 +1308,8 @@ with st.sidebar:
             st.rerun()
 
         if st.button("🔄 RE-CALIBRATE", use_container_width=True):
+            # Clear cache and reset UI while preserving session status
             st.cache_data.clear()
-            # This triggers a fresh state sync without deleting critical login keys
             st.rerun()
 
         if st.button("🚪 TERMINATE SESSION", use_container_width=True):
@@ -2753,6 +2767,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
