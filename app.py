@@ -812,14 +812,25 @@ def generate_visual(image_prompt):
 # This part goes at the TOP of your script where functions are defined
 
 def show_upgrade_authority():
-    # Use the utility to draw the title
     draw_title("⚡", "ACCESS UPLINK // TIER ACTIVATION")
 
-    # 1. THE URGENCY BANNER
+    # --- 1. LIVE COUNTDOWN LOGIC (5 Days from Launch) ---
+    # Assuming launch start was today for this logic
+    launch_date = datetime(2026, 3, 12, 12, 0) # March 12, 2026
+    expiry_date = launch_date + timedelta(days=5)
+    time_left = expiry_date - datetime.now()
+    
+    days = time_left.days
+    hours, remainder = divmod(time_left.seconds, 3600)
+    minutes, _ = divmod(remainder, 60)
+
     st.markdown(f"""
-        <div style="background-color: #3e1212; padding: 12px; border-radius: 8px; border: 1px solid #ff4b4b; margin-bottom: 20px;">
-            <p style="color: #ff4b4b; margin: 0; font-weight: bold; text-align: center; font-size: 0.9rem;">
-                🚨 URGENT: Only 7/50 'Founder Tier' slots remaining. Launch prices revert to standard rates soon.
+        <div style="background-color: #3e1212; padding: 15px; border-radius: 10px; border: 1px solid #ff4b4b; margin-bottom: 25px;">
+            <p style="color: #ff4b4b; margin: 0; font-weight: bold; text-align: center;">
+                🚨 FOUNDER SLOTS EXPIRING IN: {days}d {hours}h {minutes}m
+            </p>
+            <p style="color: #fff; font-size: 0.8rem; text-align: center; margin: 5px 0 0 0;">
+                Only 7/50 'Operative' seats remaining at launch rates.
             </p>
         </div>
     """, unsafe_allow_html=True)
@@ -828,84 +839,101 @@ def show_upgrade_authority():
     user_status = st.session_state.get('user_status', 'Free')
     is_operative = user_status == "Operative"
 
-    # 2. THE POWER MATRIX (Restored & Refined)
+    # --- 2. THE POWER MATRIX ---
     st.subheader("📊 Feature Authority Matrix")
-    
     comparison_data = {
         "Feature": ["Neural Forge Access", "Identity Vault", "Linguistic DNA", "Intelligence Audit", "Daily Limits", "Support"],
-        "Operative (₹999*)": ["✅ Standard", "✅", "❌", "Standard", "15 Credits", "Standard"],
-        "Director (₹2,499*)": ["✅ Unlimited", "✅", "✅ Full", "Elite (CoT)", "50 Credits", "Sovereign"],
+        "Operative (₹899*)": ["✅ Standard", "✅", "❌", "Standard", "15 Credits", "Standard"],
+        "Director (₹1,999*)": ["✅ Unlimited", "✅", "✅ Full", "Elite (CoT)", "50 Credits", "Sovereign"],
     }
     st.table(comparison_data)
-    st.caption("*Prices reflect Limited-Time Founder Discount.")
 
-    # 3. DYNAMIC PAYMENT SECTION
+    # --- 3. VIRAL CLEARANCE (MISSION CONTROL) ---
     st.divider()
-    
-    # Viral Bypass Logic (Keep for Subconscious Hurry)
-    st.markdown("### 🎁 VIRAL CLEARANCE DISCOUNT")
+    st.markdown("### 🎁 MISSION: VIRAL CLEARANCE")
     with st.container(border=True):
-        st.write("Complete the mission to unlock an **ADDITIONAL DISCOUNT** (₹999 for Operative).")
+        st.write("Unlock the **DIRECTOR'S REBATE** (Lowest possible price) by following these steps:")
         st.markdown("""
-        1. Follow Official Account & Like latest Transmission.
-        2. Share the Video with 5 Peers/Groups.
+        1. Follow Official Accounts & Like the latest Transmission.
+        2. Share the project with 5 Peers/Groups who need an AI-OS.
         """)
-        has_viral_clearance = st.checkbox("I have shared the proof to claim the ₹999 / ₹2,499 rate.", value=False)
+        
+        # PROOF LOCK LOGIC
+        proof_files = st.file_uploader("Upload Screenshots of Proof", accept_multiple_files=True)
+        
+        # Disable checkbox unless files are uploaded
+        disable_discount = True if not proof_files else False
+        has_viral_clearance = st.checkbox(
+            "I have provided proof to unlock the Absolute Lowest Rate.", 
+            value=False, 
+            disabled=disable_discount,
+            help="Upload screenshots first to enable this discount."
+        )
+        
+        if disable_discount:
+            st.caption("⚠️ Upload proof screenshots to unlock the discount checkbox.")
 
-    col_pay1, col_pay2 = st.columns([1, 1], gap="large")
+    # --- 4. DYNAMIC PAYMENT SECTION ---
+    col_pay1, col_pay2 = st.columns([1.2, 1], gap="large")
 
     with col_pay1:
         st.subheader("💳 Select Your Path")
         
-        tier_choice = st.radio(
-            "Choose your level of authority:", 
-            ["Operative Tier", "Director Tier (🔒 Restricted)", "Agency (Waitlist)"],
-            index=0
-        )
+        # Define Tiers based on current status
+        if is_operative:
+            tier_options = ["Director Upgrade (Bridge)", "Agency (Waitlist)"]
+            st.info("⚡ OPERATIVE STATUS DETECTED: Upgrading to Director Tier.")
+        else:
+            tier_options = ["Operative Tier", "Director Tier (Full)", "Agency (Waitlist)"]
+
+        tier_choice = st.radio("Choose level:", tier_options, index=0)
         
-        # --- PRICING ENGINE (Realistic Anchors) ---
+        # --- PRICING ENGINE ---
         if "Operative" in tier_choice:
-            anchor_price = "₹1,999"
-            final_amt = 999 if has_viral_clearance else 1499
+            anchor = "₹1,999"
+            final_amt = 899 if has_viral_clearance else 1299
             tier_tag = "OPERATIVE"
-            st.markdown(f"### Current Rate: ~~{anchor_price}~~ → <span style='color:#00FFCC;'>₹{final_amt}</span>", unsafe_allow_html=True)
-            
+            st.markdown(f"### Current Rate: ~~{anchor}~~ → <span style='color:#00FFCC;'>₹{final_amt}</span>", unsafe_allow_html=True)
+
         elif "Director" in tier_choice:
-            anchor_price = "₹4,999"
-            final_amt = 2499 if has_viral_clearance else 3499
+            if is_operative:
+                # BRIDGE PRICE: Director Full (1999) - Operative Paid (899 approx)
+                anchor = "₹2,499"
+                final_amt = 1100 if has_viral_clearance else 1500
+                st.markdown(f"### Upgrade Rate: ~~{anchor}~~ → <span style='color:#00FFCC;'>₹{final_amt}</span>", unsafe_allow_html=True)
+                st.caption("Special Bridge Price for existing Operatives.")
+            else:
+                anchor = "₹4,999"
+                final_amt = 1999 if has_viral_clearance else 2999
+                st.markdown(f"### Current Rate: ~~{anchor}~~ → <span style='color:#00FFCC;'>₹{final_amt}</span>", unsafe_allow_html=True)
             tier_tag = "DIRECTOR"
-            st.markdown(f"### Current Rate: ~~{anchor_price}~~ → <span style='color:#00FFCC;'>₹{final_amt}</span>", unsafe_allow_html=True)
         else:
             final_amt = 0
             tier_tag = "AGENCY"
 
         if final_amt > 0:
-            # Payment Meta
             upi_id = "anuj05758@okicici"
             transaction_note = f"ACT_{tier_tag}_{st.session_state.get('user_email', 'USER')}"[:50]
-            
-            # Construct UPI String
             params = {"pa": upi_id, "pn": "VOID_EMPIRE", "am": str(final_amt), "cu": "INR", "tn": transaction_note}
             upi_url = f"upi://pay?{urllib.parse.urlencode(params)}"
-            
             st.link_button(f"🚀 Pay ₹{final_amt} via UPI", upi_url, use_container_width=True)
         else:
-            st.info("Select a valid tier to generate payment link.")
+            st.info("Select a valid tier to proceed.")
 
     with col_pay2:
         if final_amt > 0:
             qr_api_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={urllib.parse.quote(upi_url)}&chld=H"
             st.markdown(f"""
-                <div style="text-align: center; background: white; padding:15px; border-radius:15px;">
-                    <img src="{qr_api_url}" width="210">
-                    <p style="color: black; font-weight: bold; margin-top: 5px; font-family: monospace;">{upi_id}</p>
+                <div style="text-align: center; background: white; padding:15px; border-radius:15px; border: 3px solid #00FFCC;">
+                    <img src="{qr_api_url}" width="200">
+                    <p style="color: black; font-weight: bold; margin-top: 5px; font-family: monospace; font-size: 0.8rem;">{upi_id}</p>
                 </div>
             """, unsafe_allow_html=True)
             st.caption(f"Scan to Activate {tier_tag} Clearance")
         else:
             st.image("https://img.icons8.com/nolan/512/lock.png", width=200)
 
-    # 4. VERIFICATION
+    # --- 5. VERIFICATION FORM ---
     st.divider()
     with st.container(border=True):
         st.subheader("🛡️ Request Account Activation")
@@ -925,14 +953,12 @@ def show_upgrade_authority():
                         target_api = get_void_secret("FEEDBACK_API_URL", "RESTRICTED")
                         if target_api != "RESTRICTED":
                             requests.post(target_api, json=f_payload, timeout=10)
-                            st.success("✅ UPLINK SUCCESSFUL: Manual verification in progress (2-4 hours).")
+                            st.success("✅ UPLINK SUCCESSFUL: Manual verification in progress.")
                             st.balloons()
-                        else:
-                            st.error("Uplink Terminal Offline. Contact Support.")
                     except:
-                        st.error("Uplink Error. Check your connection.")
+                        st.error("Uplink Error. Check connection.")
                 else:
-                    st.warning("Complete all fields to initiate verification.")
+                    st.warning("Complete all fields.")
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -2785,6 +2811,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
