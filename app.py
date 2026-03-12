@@ -814,13 +814,13 @@ def generate_visual(image_prompt):
 import streamlit as st
 import urllib.parse
 import requests
-from datetime import datetime, timedelta  # Ensure this is your import at the top of the file
+from datetime import datetime, timedelta
 
 def show_upgrade_authority():
+    # Use the utility to draw the title
     draw_title("⚡", "ACCESS UPLINK // TIER ACTIVATION")
 
-    # --- 1. LIVE COUNTDOWN LOGIC (Fixed TypeError) ---
-    # Using datetime.combine or explicit naming to avoid the 'not callable' error
+    # --- 1. LIVE COUNTDOWN LOGIC ---
     now = datetime.now()
     launch_start = datetime(2026, 3, 12, 12, 0) 
     expiry_date = launch_start + timedelta(days=5)
@@ -931,30 +931,38 @@ def show_upgrade_authority():
             st.image("https://img.icons8.com/nolan/512/lock.png", width=200)
 
     # --- 5. VERIFICATION FORM ---
-    if st.form_submit_button("SEND ACTIVATION REQUEST"):
-        if u_mail and u_utr:
-           # THE ALIGNED PAYLOAD
-           # Column Order: Timestamp (auto-handled by Script), Email ID, Transaction ID, Product type, Name
-           f_payload = {
-                "email_id": u_mail.lower().strip(),
-                "transaction_id": u_utr,
-                "product_type": u_tier,
-                "name": st.sesssion_state.get('user_name', 'Not Provided'),
-                "category": "PAYMENT_VERIFY"
-                }
-                try:
-                    target_api = st.secrets["FEEDBACK_API_URL"]
-                    response = requests.post(target_api, json=f_payload, timeout=10)
+    st.divider()
+    with st.container(border=True):
+        st.subheader("🛡️ Request Account Activation")
+        with st.form("payment_verify_final"):
+            u_mail = st.text_input("Confirm Registered Email", value=st.session_state.get('user_email', ''))
+            u_utr = st.text_input("UTR / Transaction ID (12 Digits)")
+            u_tier = st.selectbox("Tier Purchased", ["Operative", "Director Upgrade", "Director Full"])
+            
+            if st.form_submit_button("SEND ACTIVATION REQUEST"):
+                if u_mail and u_utr:
+                    # THE ALIGNED PAYLOAD
+                    f_payload = {
+                        "email_id": u_mail.lower().strip(),
+                        "transaction_id": u_utr,
+                        "product_type": u_tier,
+                        "name": st.session_state.get('user_name', 'Not Provided'),
+                        "category": "PAYMENT_VERIFY"
+                    }
+                    try:
+                        target_api = st.secrets["FEEDBACK_API_URL"]
+                        response = requests.post(target_api, json=f_payload, timeout=10)
 
-                    if response.status_code == 200:
-                       st.success("✅ UPLINK SUCCESSFUL: Data logged in Master Vault.")
-                       st.balloons()
-                    else:
-                        st.error(f"Server Error: {response.status_code}")
-                except Exception as e:
-                    st.error(f"Connection Failed; Ensure 'FEEDBACK_API_URL' is set in Secrets.")
-        else:
-            st.warning("Please complete all fields to initiate activation.")
+                        if response.status_code == 200:
+                            st.success("✅ UPLINK SUCCESSFUL: Manual verification in progress.")
+                            st.balloons()
+                        else:
+                            st.error(f"Server Error: {response.status_code}")
+                    except Exception as e:
+                        st.error(f"Connection Failed; Ensure 'FEEDBACK_API_URL' is set in Secrets.")
+                else:
+                    st.warning("Please complete all fields to initiate activation.")
+
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 # --- GLOBAL PERSONA DETECTION (Do this before any pages load) ---
