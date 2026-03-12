@@ -931,19 +931,29 @@ def show_upgrade_authority():
             st.image("https://img.icons8.com/nolan/512/lock.png", width=200)
 
     # --- 5. VERIFICATION FORM ---
-    st.divider()
-    with st.container(border=True):
-        st.subheader("🛡️ Request Account Activation")
-        with st.form("payment_verify_final"):
-            u_mail = st.text_input("Confirm Email", value=st.session_state.get('user_email', ''))
-            u_utr = st.text_input("UTR / Transaction ID (12 Digits)")
-            u_tier = st.selectbox("Tier Purchased", ["Operative", "Director Upgrade", "Director Full"])
-            
-            if st.form_submit_button("SEND ACTIVATION REQUEST"):
-                if u_mail and u_utr:
-                    # Payload Logic Here...
-                    st.success("✅ UPLINK SUCCESSFUL: Manual verification in progress.")
-                    st.balloons()
+    if st.form_submit_button("SEND ACTIVATION REQUEST"):
+        if u_mail and u_utr:
+           # THE ALIGNED PAYLOAD
+           # Column Order: Timestamp (auto-handled by Script), Email ID, Transaction ID, Product type, Name
+           f_payload = {
+                "email_id": u_mail.lower().strip(),
+                "transaction_id": u_utr,
+                "product_type": u_tier,
+                "name": st.sesssion_state.get('user_name', 'Not Provided'),
+                "category": "PAYMENT_VERIFY"
+                }
+                try:
+                    target_api = st.secrets["FEEDBACK_API_URL"]
+
+                    response = requests.post(target_api, json=f_payload, timeout=10)
+
+                    if response.status_code == 200:
+                       st.success("✅ UPLINK SUCCESSFUL: Data logged in Master Vault.")
+                       st.balloons()
+                    else:
+                        st.error(f"Server Error: {response.status_code}")
+                except Exception as e:
+                    st.error(f"Connection Failed; Ensure 'FEEDBACK_API_URL' is set in Secrets.")
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -2796,6 +2806,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
