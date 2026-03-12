@@ -811,115 +811,128 @@ def generate_visual(image_prompt):
     return f"https://pollinations.ai/p/{encoded_prompt}?width=1280&height=720&seed={seed}&nologo=true"
 # This part goes at the TOP of your script where functions are defined
 
-import streamlit as st
-import urllib.parse
-import requests
-
-def get_user_currency():
-    try:
-        # Fast IP lookup
-        response = requests.get('https://ipapi.co/json/', timeout=3).json()
-        if response.get('country_code') == 'IN':
-            return "INR", "₹"
-        return "USD", "$"
-    except:
-        return "INR", "₹" # Default to your home market
-
 def show_upgrade_authority():
-    # 1. UI HEADER & URGENCY
+    # Use the utility to draw the title
+    draw_title("⚡", "ACCESS UPLINK // TIER ACTIVATION")
+
+    # 1. THE URGENCY BANNER
     st.markdown(f"""
-        <div style="background-color: #3e1212; padding: 15px; border-radius: 10px; border: 1px solid #ff4b4b; margin-bottom: 25px;">
-            <p style="color: #ff4b4b; margin: 0; font-weight: bold; text-align: center;">
-                🚨 URGENT: Only 7/50 'Founder Tier' slots remaining for your region. 
-                Prices revert to full rate in 03:44:12.
+        <div style="background-color: #3e1212; padding: 12px; border-radius: 8px; border: 1px solid #ff4b4b; margin-bottom: 20px;">
+            <p style="color: #ff4b4b; margin: 0; font-weight: bold; text-align: center; font-size: 0.9rem;">
+                🚨 URGENT: Only 7/50 'Founder Tier' slots remaining. Launch prices revert to standard rates soon.
             </p>
         </div>
     """, unsafe_allow_html=True)
 
-    currency, symbol = get_user_currency()
+    # Current Status Check
+    user_status = st.session_state.get('user_status', 'Free')
+    is_operative = user_status == "Operative"
 
-    # 2. PRICING SELECTION
-    col_main1, col_main2 = st.columns([1.2, 1], gap="large")
+    # 2. THE POWER MATRIX (Restored & Refined)
+    st.subheader("📊 Feature Authority Matrix")
+    
+    comparison_data = {
+        "Feature": ["Neural Forge Access", "Identity Vault", "Linguistic DNA", "Intelligence Audit", "Daily Limits", "Support"],
+        "Operative (₹999*)": ["✅ Standard", "✅", "❌", "Standard", "15 Credits", "Standard"],
+        "Director (₹2,499*)": ["✅ Unlimited", "✅", "✅ Full", "Elite (CoT)", "50 Credits", "Sovereign"],
+    }
+    st.table(comparison_data)
+    st.caption("*Prices reflect Limited-Time Founder Discount.")
 
-    with col_main1:
+    # 3. DYNAMIC PAYMENT SECTION
+    st.divider()
+    
+    # Viral Bypass Logic (Keep for Subconscious Hurry)
+    st.markdown("### 🎁 VIRAL CLEARANCE DISCOUNT")
+    with st.container(border=True):
+        st.write("Complete the mission to unlock an **ADDITIONAL DISCOUNT** (₹999 for Operative).")
+        st.markdown("""
+        1. Follow Official Account & Like latest Transmission.
+        2. Share the Video with 5 Peers/Groups.
+        """)
+        has_viral_clearance = st.checkbox("I have shared the proof to claim the ₹999 / ₹2,499 rate.", value=False)
+
+    col_pay1, col_pay2 = st.columns([1, 1], gap="large")
+
+    with col_pay1:
         st.subheader("💳 Select Your Path")
-        tier_choice = st.radio(
-            "Target Clearance Level:", 
-            ["Operative Tier", "Director Tier (🔒 Restricted)"],
-            index=0,
-            label_visibility="collapsed"
-        )
-
-        # Logic for Dynamic Pricing
-        if currency == "INR":
-            op_anchor, op_real = "₹3,999", "999"
-            dir_anchor, dir_real = "₹9,999", "2,499"
-        else:
-            op_anchor, op_real = "$59", "29"
-            dir_anchor, dir_real = "$199", "79"
-
-        # 3. THE "APPEALING" PRICE BLOCK
-        st.markdown("---")
-        if "Operative" in tier_choice:
-            anchor, real = op_anchor, op_real
-            tag = "OPERATIVE"
-        else:
-            anchor, real = dir_anchor, dir_real
-            tag = "DIRECTOR"
-
-        # Big Visual Price Display
-        st.markdown(f"""
-            <div style="background: #111; padding: 20px; border-radius: 15px; border-left: 5px solid #00FFCC;">
-                <p style="color: #888; text-decoration: line-through; margin-bottom: -5px; font-size: 1.2rem;">{anchor}</p>
-                <h1 style="color: #fff; margin-top: 0; font-size: 3rem;">{symbol}{real} <span style="font-size: 1rem; color: #00FFCC;">/ Lifetime Access</span></h1>
-                <p style="color: #00FFCC; font-weight: bold; margin-top: -15px;">🔥 75% LAUNCH DISCOUNT APPLIED</p>
-            </div>
-        """, unsafe_allow_html=True)
         
-        st.write("") # Spacer
-
-        # 4. ACTION BUTTONS
-        user_email = st.session_state.get('user_email', 'USER')
-        transaction_note = f"ACT_{tag}_{user_email}"[:50]
-
-        if currency == "INR":
-            upi_id = "anuj05758@okicici"
-            params = {"pa": upi_id, "pn": "VOID_EMPIRE", "am": real.replace(',', ''), "cu": "INR", "tn": transaction_note}
-            payment_url = f"upi://pay?{urllib.parse.urlencode(params)}"
-            st.link_button(f"🚀 PAY {symbol}{real} VIA UPI", payment_url, use_container_width=True)
+        tier_choice = st.radio(
+            "Choose your level of authority:", 
+            ["Operative Tier", "Director Tier (🔒 Restricted)", "Agency (Waitlist)"],
+            index=0
+        )
+        
+        # --- PRICING ENGINE (Realistic Anchors) ---
+        if "Operative" in tier_choice:
+            anchor_price = "₹1,999"
+            final_amt = 999 if has_viral_clearance else 1499
+            tier_tag = "OPERATIVE"
+            st.markdown(f"### Current Rate: ~~{anchor_price}~~ → <span style='color:#00FFCC;'>₹{final_amt}</span>", unsafe_allow_html=True)
+            
+        elif "Director" in tier_choice:
+            anchor_price = "₹4,999"
+            final_amt = 2499 if has_viral_clearance else 3499
+            tier_tag = "DIRECTOR"
+            st.markdown(f"### Current Rate: ~~{anchor_price}~~ → <span style='color:#00FFCC;'>₹{final_amt}</span>", unsafe_allow_html=True)
         else:
-            payment_url = "https://your-global-link.com" # Placeholder
-            st.link_button(f"🌎 INTERNATIONAL CHECKOUT ({symbol}{real})", payment_url, use_container_width=True)
+            final_amt = 0
+            tier_tag = "AGENCY"
 
-    with col_main2:
-        if currency == "INR":
-            st.write("### Quick Scan")
-            qr_api_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={urllib.parse.quote(payment_url)}&chld=H"
+        if final_amt > 0:
+            # Payment Meta
+            upi_id = "anuj05758@okicici"
+            transaction_note = f"ACT_{tier_tag}_{st.session_state.get('user_email', 'USER')}"[:50]
+            
+            # Construct UPI String
+            params = {"pa": upi_id, "pn": "VOID_EMPIRE", "am": str(final_amt), "cu": "INR", "tn": transaction_note}
+            upi_url = f"upi://pay?{urllib.parse.urlencode(params)}"
+            
+            st.link_button(f"🚀 Pay ₹{final_amt} via UPI", upi_url, use_container_width=True)
+        else:
+            st.info("Select a valid tier to generate payment link.")
+
+    with col_pay2:
+        if final_amt > 0:
+            qr_api_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={urllib.parse.quote(upi_url)}&chld=H"
             st.markdown(f"""
-                <div style="text-align: center; background: white; padding: 20px; border-radius: 20px;">
-                    <img src="{qr_api_url}" width="220">
-                    <p style="color: black; font-weight: bold; margin-top: 10px; font-family: monospace;">UPI ID: {upi_id}</p>
+                <div style="text-align: center; background: white; padding:15px; border-radius:15px;">
+                    <img src="{qr_api_url}" width="210">
+                    <p style="color: black; font-weight: bold; margin-top: 5px; font-family: monospace;">{upi_id}</p>
                 </div>
             """, unsafe_allow_html=True)
-            st.caption("Scan with PhonePe, GooglePay, or Paytm")
+            st.caption(f"Scan to Activate {tier_tag} Clearance")
         else:
-            st.image("https://img.icons8.com/nolan/512/security-lock.png", width=250)
-            st.info("International nodes use secure Stripe/PayPal encryption.")
+            st.image("https://img.icons8.com/nolan/512/lock.png", width=200)
 
-    # 5. THE ACTIVATION FORM
-    st.markdown("---")
-    with st.expander("🛡️ SUBMIT ACTIVATION REQUEST"):
-        with st.form("activation_form"):
-            u_mail = st.text_input("Confirm Email", value=st.session_state.get('user_email', ''))
-            u_utr = st.text_input("Transaction ID / UTR")
-            if st.form_submit_button("ACTIVATE CLEARANCE"):
+    # 4. VERIFICATION
+    st.divider()
+    with st.container(border=True):
+        st.subheader("🛡️ Request Account Activation")
+        with st.form("payment_verify_final"):
+            u_mail = st.text_input("Confirm Registered Email", value=st.session_state.get('user_email', ''))
+            u_utr = st.text_input("UTR / Transaction ID (12 Digits)")
+            u_tier = st.selectbox("Tier Purchased", ["Operative", "Director Upgrade", "Director Full"])
+            
+            if st.form_submit_button("SEND ACTIVATION REQUEST"):
                 if u_mail and u_utr:
-                    # Payload for Sheets
-                    payload = {"email": u_mail, "message": f"UTR: {u_utr} | Tier: {tag}", "category": "PAYMENT_VERIFY"}
-                    # Send to API...
-                    st.success("Uplink successful. Manual verification initiated.")
+                    f_payload = {
+                        "email": u_mail.lower().strip(), 
+                        "message": f"UTR: {u_utr} | Tier: {u_tier} | Viral: {has_viral_clearance}", 
+                        "category": "PAYMENT_PENDING"
+                    }
+                    try:
+                        target_api = get_void_secret("FEEDBACK_API_URL", "RESTRICTED")
+                        if target_api != "RESTRICTED":
+                            requests.post(target_api, json=f_payload, timeout=10)
+                            st.success("✅ UPLINK SUCCESSFUL: Manual verification in progress (2-4 hours).")
+                            st.balloons()
+                        else:
+                            st.error("Uplink Terminal Offline. Contact Support.")
+                    except:
+                        st.error("Uplink Error. Check your connection.")
                 else:
-                    st.warning("All fields required.")
+                    st.warning("Complete all fields to initiate verification.")
 
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
@@ -2772,6 +2785,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
