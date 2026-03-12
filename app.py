@@ -944,7 +944,6 @@ def show_upgrade_authority():
                 }
                 try:
                     target_api = st.secrets["FEEDBACK_API_URL"]
-
                     response = requests.post(target_api, json=f_payload, timeout=10)
 
                     if response.status_code == 200:
@@ -954,7 +953,8 @@ def show_upgrade_authority():
                         st.error(f"Server Error: {response.status_code}")
                 except Exception as e:
                     st.error(f"Connection Failed; Ensure 'FEEDBACK_API_URL' is set in Secrets.")
-
+        else:
+            st.warning("Please complete all fields to initiate activation.")
 # --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 # --- GLOBAL PERSONA DETECTION (Do this before any pages load) ---
@@ -2806,6 +2806,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
