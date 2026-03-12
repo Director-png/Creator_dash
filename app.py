@@ -811,6 +811,11 @@ def generate_visual(image_prompt):
     return f"https://pollinations.ai/p/{encoded_prompt}?width=1280&height=720&seed={seed}&nologo=true"
 # This part goes at the TOP of your script where functions are defined
 
+import streamlit as st
+import urllib.parse
+import requests
+from datetime import datetime, timedelta  # Ensure this is your import at the top of the file
+
 def show_upgrade_authority():
     draw_title("⚡", "ACCESS UPLINK // TIER ACTIVATION")
 
@@ -2791,6 +2796,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
