@@ -883,7 +883,7 @@ def show_upgrade_authority():
                     "category": "REEL_SUBMISSION"
                 }
                 try:
-                    res = requests.post(st.secrets["FEEDBACK_API_URL"], json=r_payload, timeout=10)
+                    res = requests.post(st.secrets["REEL_API_URL"], json=r_payload, timeout=10)
                     if "success" in res.text.lower():
                         st.success("✅ REEL LOGGED: The Director will verify your link shortly.")
                         st.session_state['reel_verified'] = True
@@ -2863,6 +2863,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
