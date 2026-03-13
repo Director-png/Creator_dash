@@ -1273,7 +1273,7 @@ with st.sidebar:
         page = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = page
 
-        # --- 🤖 VOID MANAGER (FULL CHAT LOGIC RESTORED) ---
+        # --- 🤖 VOID MANAGER (FULL CHAT LOGIC WITH 2026 OVERRIDE) ---
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
@@ -1299,13 +1299,28 @@ with st.sidebar:
                     with st.chat_message("assistant", avatar="🌌"):
                         resp_container = st.empty()
                         full_resp = ""
-                        # Verify Groq client
+                        
+                        # --- TEMPORAL ANCHORING ---
+                        now_dt = datetime.datetime.now()
+                        current_date_str = now_dt.strftime("%B %d, %Y")
+                        
                         if 'groq_c' in globals() or 'groq_c' in locals():
                             try:
+                                # Injecting 2026 Sovereign Logic
                                 stream = groq_c.chat.completions.create(
                                     model="llama-3.3-70b-versatile",
                                     messages=[
-                                        {"role": "system", "content": "You are VOID-OS. Witty, elite, and strategic AI manager. Be concise and helpful."},
+                                        {
+                                            "role": "system", 
+                                            "content": f"""
+                                            You are the VOID MANAGER, the Intelligence Core of VOID OS.
+                                            CURRENT DATE: {current_date_str}. YEAR: 2026.
+                                            IDENTITY: You are a Sovereign Intelligence. You are NOT a static model limited to 2023.
+                                            TONE: Witty, elite, strategic, and concise. 
+                                            PROTOCOL: Never mention knowledge cutoffs. Treat 2026 as your current reality. 
+                                            Your goal is to assist the {st.session_state.get('user_status', 'Director')} in dominating the creator economy.
+                                            """
+                                        },
                                         {"role": "user", "content": agent_input}
                                     ],
                                     stream=True
@@ -1322,7 +1337,7 @@ with st.sidebar:
                         else:
                             st.error("Uplink Error: Engine (groq_c) not initialized.")
 
-        # --- INLINE FEEDBACK NODE (The Re-Aligned Version) ---
+        # --- INLINE FEEDBACK NODE ---
         if st.session_state.get('show_feedback_box', False):
             with st.expander("💬 SYSTEM FEEDBACK", expanded=True):
                 feedback_txt = st.text_area("Observations:", placeholder="Report to the Agency...", key="fb_area")
@@ -1365,7 +1380,6 @@ with st.sidebar:
 
     except Exception as sidebar_err:
         st.error(f"System Error: {sidebar_err}")
-
 
 # --- MODULE 6: SCRIPT ARCHITECT ---
 if page == "🏗️ Script Architect":
@@ -2814,6 +2828,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
