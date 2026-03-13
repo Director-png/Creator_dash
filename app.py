@@ -818,7 +818,6 @@ from datetime import datetime, timedelta
 
 def show_upgrade_authority():
     # Use the utility to draw the title
-    # Note: Ensure draw_title is defined in your main script
     try:
         draw_title("⚡", "ACCESS UPLINK // TIER ACTIVATION")
     except NameError:
@@ -862,25 +861,47 @@ def show_upgrade_authority():
     }
     st.table(comparison_data)
 
-    # --- 3. VIRAL CLEARANCE (MISSION CONTROL) ---
+    # --- 3. VIRAL CLEARANCE (REEL-GATE PROTOCOL) ---
     st.divider()
     st.markdown("### 🎁 MISSION: VIRAL CLEARANCE")
     with st.container(border=True):
-        st.write("Unlock the **DIRECTOR'S REBATE** (Lowest possible price):")
-        st.markdown("- Follow Official Accounts & Like the latest Transmission.\n- Share with 5 Peers/Groups.")
+        st.write("Unlock the **DIRECTOR'S REBATE** (Absolute Lowest Rate):")
+        st.markdown("""
+        - Create a 30-60s Reel/Video promoting **VOID-OS**.
+        - Tag our official account and mention the 'Sovereign Protocol' in the caption.
+        - Paste your public link below to authorize your discount.
+        """)
         
-        proof_files = st.file_uploader("Upload Screenshots of Proof", accept_multiple_files=True)
+        reel_link = st.text_input("🔗 Public Reel / Video Link", placeholder="https://www.instagram.com/reels/...")
         
-        # LOGIC: Checkbox is ONLY enabled if files are uploaded
-        disable_check = True if not proof_files else False
+        # Action button to log the link to GSheets
+        if st.button("UPLINK REEL FOR VERIFICATION", use_container_width=True):
+            if reel_link:
+                r_payload = {
+                    "email": st.session_state.get('user_email', 'Unknown'),
+                    "reel_url": reel_link,
+                    "category": "REEL_SUBMISSION"
+                }
+                try:
+                    res = requests.post(st.secrets["FEEDBACK_API_URL"], json=r_payload, timeout=10)
+                    if "success" in res.text.lower():
+                        st.success("✅ REEL LOGGED: The Director will verify your link shortly.")
+                        st.session_state['reel_verified'] = True
+                    else:
+                        st.error(f"Uplink Failed: {res.text}")
+                except Exception as e:
+                    st.error("Connection Error: Check FEEDBACK_API_URL.")
+            else:
+                st.warning("Please provide a valid link before uplinking.")
+
+        # Logic: Discount is applied if session_state['reel_verified'] is True
         has_viral_clearance = st.checkbox(
-            "I have provided proof to unlock the Absolute Lowest Rate.", 
-            value=False, 
-            disabled=disable_check
+            "Apply the 'Viral Clearance' Rebate to this session.", 
+            value=st.session_state.get('reel_verified', False)
         )
         
-        if disable_check:
-            st.caption("⚠️ Upload proof screenshots to unlock the discount.")
+        if not st.session_state.get('reel_verified', False):
+            st.caption("⚠️ Uplink your video link above to activate the discount.")
 
     # --- 4. DYNAMIC PAYMENT SECTION ---
     col_pay1, col_pay2 = st.columns([1.2, 1], gap="large")
@@ -957,6 +978,7 @@ def show_upgrade_authority():
                         target_api = st.secrets["VERIFICATION_API_URL"]
                         response = requests.post(target_api, json=f_payload, timeout=15)
 
+                        # MODIFIED: More robust check for 'success' in response
                         if response.status_code == 200 and "success" in response.text.lower():
                             st.success("✅ UPLINK SUCCESSFUL: Data transmitted to the Payments Sheet.")
                             st.balloons()
@@ -2841,6 +2863,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
