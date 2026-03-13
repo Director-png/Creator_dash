@@ -818,7 +818,11 @@ from datetime import datetime, timedelta
 
 def show_upgrade_authority():
     # Use the utility to draw the title
-    draw_title("⚡", "ACCESS UPLINK // TIER ACTIVATION")
+    # Note: Ensure draw_title is defined in your main script
+    try:
+        draw_title("⚡", "ACCESS UPLINK // TIER ACTIVATION")
+    except NameError:
+        st.title("⚡ ACCESS UPLINK // TIER ACTIVATION")
 
     # --- 1. LIVE COUNTDOWN LOGIC ---
     now = datetime.now()
@@ -941,7 +945,7 @@ def show_upgrade_authority():
             
             if st.form_submit_button("SEND ACTIVATION REQUEST"):
                 if u_mail and u_utr:
-                    # THE ALIGNED PAYLOAD
+                    # THE ALIGNED PAYLOAD FOR THE GSHEET COLUMNS
                     f_payload = {
                         "email_id": u_mail.lower().strip(),
                         "transaction_id": u_utr,
@@ -951,15 +955,15 @@ def show_upgrade_authority():
                     }
                     try:
                         target_api = st.secrets["FEEDBACK_API_URL"]
-                        response = requests.post(target_api, json=f_payload, timeout=10)
+                        response = requests.post(target_api, json=f_payload, timeout=15)
 
-                        if response.status_code == 200:
-                            st.success("✅ UPLINK SUCCESSFUL: Manual verification in progress.")
+                        if response.status_code == 200 and response.text == "SUCCESS":
+                            st.success("✅ UPLINK SUCCESSFUL: Data transmitted to the Payments Sheet.")
                             st.balloons()
                         else:
-                            st.error(f"Server Error: {response.status_code}")
+                            st.error(f"Uplink Error: {response.text}")
                     except Exception as e:
-                        st.error(f"Connection Failed; Ensure 'FEEDBACK_API_URL' is set in Secrets.")
+                        st.error(f"Connection Failed: Ensure the Apps Script Web App URL is in Secrets.")
                 else:
                     st.warning("Please complete all fields to initiate activation.")
 
@@ -2837,6 +2841,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
