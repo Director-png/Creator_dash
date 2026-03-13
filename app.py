@@ -954,7 +954,7 @@ def show_upgrade_authority():
                         "category": "PAYMENT_VERIFY"
                     }
                     try:
-                        target_api = st.secrets["FEEDBACK_API_URL"]
+                        target_api = st.secrets["VERIFICATION_API_URL"]
                         response = requests.post(target_api, json=f_payload, timeout=15)
 
                         if response.status_code == 200 and "success" in response.text.lower():
@@ -2841,6 +2841,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
