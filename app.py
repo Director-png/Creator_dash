@@ -1301,8 +1301,8 @@ with st.sidebar:
                         full_resp = ""
                         
                         # --- TEMPORAL ANCHORING ---
-                        now_dt = datetime.datetime.now()
-                        current_date_str = now_dt.strftime("%B %d, %Y")
+                        now_dt = datetime.now()
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         
                         if 'groq_c' in globals() or 'groq_c' in locals():
                             try:
@@ -2828,6 +2828,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
