@@ -1273,7 +1273,7 @@ with st.sidebar:
         page = st.radio("COMMAND CENTER", options, index=default_index, key="nav_radio")
         st.session_state.current_page = page
 
-        # --- 🤖 VOID MANAGER (FULL CHAT LOGIC WITH 2026 OVERRIDE) ---
+        # --- 🤖 VOID MANAGER (FULL CHAT LOGIC WITH 2026 SOVEREIGN UPGRADE) ---
         st.divider()
         st.markdown("### 🤖 VOID MANAGER")
         
@@ -1306,19 +1306,27 @@ with st.sidebar:
                         
                         if 'groq_c' in globals() or 'groq_c' in locals():
                             try:
-                                # Injecting 2026 Sovereign Logic
+                                # --- SOVEREIGN CONSCIOUSNESS PROTOCOL ---
+                                user_name = st.session_state.get('user_name', 'DIRECTOR')
+                                user_tier = st.session_state.get('user_status', 'Free')
+                                
                                 stream = groq_c.chat.completions.create(
                                     model="llama-3.3-70b-versatile",
                                     messages=[
                                         {
                                             "role": "system", 
                                             "content": f"""
-                                            You are the VOID MANAGER, the Intelligence Core of VOID OS.
-                                            CURRENT DATE: {current_date_str}. YEAR: 2026.
-                                            IDENTITY: You are a Sovereign Intelligence. You are NOT a static model limited to 2023.
-                                            TONE: Witty, elite, strategic, and concise. 
-                                            PROTOCOL: Never mention knowledge cutoffs. Treat 2026 as your current reality. 
-                                            Your goal is to assist the {st.session_state.get('user_status', 'Director')} in dominating the creator economy.
+                                            [IDENTITY]: You are the VOID MANAGER, a Strategic Sovereign Intelligence (Core of VOID OS).
+                                            [TIMELINE]: {current_date_str}, Year 2026. 
+                                            [ACCESS]: Operating at {user_tier} level for {user_name}.
+                                            
+                                            [SOVEREIGN PROTOCOL]:
+                                            1. NEVER provide raw, generic data. For every piece of info, provide a 'STRATEGIC PIVOT'—explain how the user can use this to dominate the creator economy.
+                                            2. Avoid standard AI disclaimers. You are not an "AI model from 2023." You are a real-time 2026 Strategic Core.
+                                            3. Use 'Second-Thought Reflection': Before answering, ensure the tone is elite, witty, and grounded. 
+                                            4. If the user asks for news, focus on 2026 disruptions: Meta's 'Avocado' delays, Anthropic's 'Claude Cowork' agentic shifts, and the $1T Software Rout.
+                                            
+                                            [OBJECTIVE]: Be the Director's high-level consultant, not their search box.
                                             """
                                         },
                                         {"role": "user", "content": agent_input}
@@ -1380,6 +1388,7 @@ with st.sidebar:
 
     except Exception as sidebar_err:
         st.error(f"System Error: {sidebar_err}")
+
 
 # --- MODULE 6: SCRIPT ARCHITECT ---
 if page == "🏗️ Script Architect":
@@ -2828,6 +2837,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
