@@ -1302,7 +1302,7 @@ with st.sidebar:
                         
                         # --- TEMPORAL ANCHORING ---
                         now_dt = datetime.now()
-                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        current_date_str = now_dt.strftime("%B %d, %Y")
                         
                         if 'groq_c' in globals() or 'groq_c' in locals():
                             try:
@@ -1349,7 +1349,7 @@ with st.sidebar:
                                 "user_name": str(st.session_state.get('user_name', 'DIRECTOR')),
                                 "user_status": str(st.session_state.get('user_status', 'Free')),
                                 "message": str(feedback_txt),
-                                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             }
                             response = requests.post(api_url, json=payload, timeout=10)
                             if response.status_code == 200:
@@ -2828,6 +2828,7 @@ with f_col3:
     st.caption("📍 Udham Singh Nagar, Uttarakhand, India")
 
 st.markdown("<p style='text-align: center; font-size: 10px; color: gray;'>Transaction Security by Razorpay | © 2026 VOID OS</p>", unsafe_allow_html=True)
+
 
 
 
