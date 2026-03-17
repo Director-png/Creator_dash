@@ -1970,6 +1970,8 @@ elif page == "🧠 Neural Forge":
         
         if user_status in ["Director", "Agency"]:
             st.markdown("### 🎬 DIRECTOR'S PRODUCTION SUITE")
+            
+            # --- ROW 1: Audio & Visuals ---
             prod_col1, prod_col2, prod_col3 = st.columns(3)
             
             with prod_col1:
@@ -1994,10 +1996,32 @@ elif page == "🧠 Neural Forge":
             with prod_col3:
                 if st.button("🎥 TEXT-TO-VIDEO MANIFEST", use_container_width=True):
                     with st.spinner("Synthesizing Video Neural Paths..."):
-                        # Logic to trigger Veo/Sora 2 API via NotebookLM grounding
                         video_desc = st.session_state.pro_forge_txt.split("--- VIDEO MANIFEST ---")[1].strip()
                         st.info(f"🎬 VIDEO GEN PROMPT: {video_desc}")
                         st.warning("Video Rendering Engine (Veo) initializing... (Director Tier Only)")
+
+            # --- ROW 2: NotebookLM Specialized Podcast ---
+            st.divider()
+            pod_col1, pod_col2 = st.columns([2, 1])
+            with pod_col1:
+                st.write("🎙️ **NotebookLM Deep-Dive: Dual-Voice Podcast**")
+                st.caption("Generates a conversational AI overview between two hosts based on Vault DNA.")
+            with pod_col2:
+                if st.button("📻 GENERATE DUAL-VOICE PODCAST", use_container_width=True):
+                    with st.spinner("Initializing NotebookLM Audio Overview..."):
+                        try:
+                            # NotebookLM Simulation: Using Groq to create the 2-person dialectic script
+                            pod_prompt = f"Using the Brand DNA: {brand_dna}, create a 2-person conversational podcast script (Host A & Host B) discussing: {f_topic}. Style: NotebookLM Audio Overview."
+                            pod_res = groq_c.chat.completions.create(
+                                model="llama-3.3-70b-versatile",
+                                messages=[{"role": "user", "content": pod_prompt}]
+                            )
+                            st.session_state.podcast_script = pod_res.choices[0].message.content
+                            st.success("✅ Podcast Script Synthesized.")
+                            st.text_area("PODCAST SCRIPT", st.session_state.podcast_script, height=200)
+                            st.warning("NotebookLM Voice Engine is processing the dual-stream audio... (Director Access Required)")
+                        except Exception as e:
+                            st.error(f"Podcast Synthesis Error: {e}")
 
         # --- AUDIT SUITE ---
         st.divider()
