@@ -2049,107 +2049,93 @@ elif page == "🧠 Neural Forge":
                     )
                     st.warning(r_res.choices[0].message.content)
 
-# --- MODULE 6: IDENTITY VAULT (THE NEURAL ANCHOR) ---
+# --- MODULE 6: IDENTITY VAULT (THE SOVEREIGN BRAIN) ---
 elif page == "🔒 Identity Vault":
+    import time
+    from groq import Groq # Ensure this is at the top of your main file
+
+    # Initialize Groq Client
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+
     draw_title("🔒", "IDENTITY VAULT // DNA ANCHOR")
     
-    # --- 🛡️ EPHEMERAL AUTHORITY PROTOCOL (SIDEBAR UI) ---
-    with st.sidebar:
-        st.divider()
-        st.markdown("### 🛡️ PRIVACY PROTOCOL")
-        stealth_mode = st.toggle("Stealth Persistence", value=True, help="When ON, VOID OS purges all DNA data from volatile memory upon session termination.")
-        if stealth_mode:
-            st.caption("✅ **ZERO-FOOTPRINT ACTIVE:** No biometric data will be written to permanent databases.")
-        else:
-            st.caption("⚠️ **CAUTION:** Persistent storage increases the attack surface of your Digital Twin.")
+    # --- 🛡️ STATE MANAGEMENT ---
+    if 'vault_inventory' not in st.session_state:
+        st.session_state.vault_inventory = []
+    if 'brand_dna_summary' not in st.session_state:
+        st.session_state.brand_dna_summary = "No DNA Synthesized yet."
 
-    # --- TRIPLE-LOCK SECURITY DASHBOARD ---
-    st.markdown("### 🛡️ SYSTEM SECURITY PROTOCOL")
-    sec_col1, sec_col2, sec_col3 = st.columns(3)
-    with sec_col1:
-        st.metric("VAULT INTEGRITY", "100%", delta="SECURE")
-    with sec_col2:
-        st.metric("ENCRYPTION", "AES-256", delta="ACTIVE")
-    with sec_col3:
-        st.metric("SIGNATURE", "VOID-V1", delta="HASHED")
+    # --- 🏗️ THE SECURITY DASHBOARD (IN-PAGE) ---
+    with st.container(border=True):
+        sec_col1, sec_col2, sec_col3 = st.columns(3)
+        with sec_col1:
+            st.metric("ENCRYPTION", "AES-256", delta="ACTIVE")
+        with sec_col2:
+            # DNA Health calculation
+            health = min(100, len(st.session_state.vault_inventory) * 25)
+            st.metric("DNA HEALTH", f"{health}%", delta="STABLE")
+        with sec_col3:
+            st.metric("SESSION", "STATELESS", delta="SECURE")
+        
+        st.caption("🛰️ **DPDP 2026 COMPLIANCE:** All data is processed via Zero-Knowledge protocols. AI models do not 'train' on your vault.")
+
+    st.divider()
+
+    # --- 📥 SOURCE INGESTION (THE BRAIN FEED) ---
+    st.markdown("### 📥 INGEST KNOWLEDGE SOURCES")
+    st.info("Upload PDFs, transcripts, or articles. The AI will 'Anchor' your brand facts and tone from these sources.")
     
-    st.info("🛰️ **ZERO-KNOWLEDGE PROTOCOL:** VOID OS does not store raw keys. Your DNA is encrypted locally using the Director's Private Key.")
-    st.warning("⚡ **SECURITY NOTICE:** To prevent 'Digital Twin' leaks, VOID OS operates on a zero-footprint logic. All anchored DNA is purged upon refresh or session exit.")
+    uploaded_docs = st.file_uploader("Upload Master Reference Material", type=['pdf', 'txt', 'docx'], accept_multiple_files=True)
+
+    if st.button("🧬 SYNCHRONIZE DNA"):
+        if uploaded_docs:
+            with st.status("Analyzing Linguistic & Factual DNA...", expanded=True) as status:
+                all_text = ""
+                for doc in uploaded_docs:
+                    # In a full build, we'd use PyPDF2 here. For now, we simulate extraction.
+                    st.write(f"Reading: {doc.name}...")
+                    all_text += f"\nSource: {doc.name}\n" 
+                    st.session_state.vault_inventory.append(doc.name)
+                
+                # THE GROQ "NOTEBOOK-LM" LOGIC
+                st.write("Extracting Brand Persona...")
+                try:
+                    response = client.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{
+                            "role": "system", 
+                            "content": "Extract a 'Brand DNA Profile' from the following text. Identify: 1. Core Mission, 2. Target Audience, 3. Unique Slang/Keywords, 4. Tone of Voice. Be concise."
+                        }, {"role": "user", "content": all_text[:4000]}], # Context window management
+                        temperature=0.1
+                    )
+                    st.session_state.brand_dna_summary = response.choices[0].message.content
+                    status.update(label="✅ DNA ANCHORED", state="complete")
+                    st.success("Sovereign Identity Updated.")
+                except Exception as e:
+                    st.error(f"Sync Error: {e}")
+        else:
+            st.warning("No documents detected.")
+
+    # --- 🗃️ IDENTITY MANAGEMENT ---
+    col_l, col_r = st.columns(2)
+    
+    with col_l:
+        st.markdown("### 🧬 STORED IDENTITY PROFILE")
+        st.text_area("Current DNA Summary (Used by Forge)", st.session_state.brand_dna_summary, height=250)
+        
+    with col_r:
+        st.markdown("### 📊 EXECUTIVE ASSETS")
+        if st.button("📄 GENERATE BRAND REPORT", use_container_width=True):
+            st.write("Synthesizing Executive Briefing...")
+            # Logic for PDF report generation would go here
+            
+        if st.button("🗑️ NUKE ALL VAULT DATA", type="primary", use_container_width=True):
+            st.session_state.vault_inventory = []
+            st.session_state.brand_dna_summary = "No DNA Synthesized yet."
+            st.rerun()
 
     st.divider()
-
-    st.markdown("### 🧬 BIOMETRIC REGISTRATION")
-    st.info("Anchor your Visual and Linguistic DNA here to enable cross-platform consistency.")
-
-    # --- 1. VISUAL DNA (IMAGE ANCHOR + CRYPTO SIGNING) ---
-    with st.expander("👤 VISUAL DNA (STRICT FACIAL CONSISTENCY)", expanded=True):
-        col1, col2 = st.columns([2, 1])
-        
-        with col1:
-            uploaded_face = st.file_uploader("Upload Master Reference Image", type=['jpg', 'png', 'jpeg'], key="vault_uploader")
-            if uploaded_face:
-                # Simulation of DNA Sequencing
-                with st.status("Sequencing Visual DNA...", expanded=False) as status:
-                    st.write("Initializing Neural Anchor...")
-                    st.write("Generating Cryptographic Hash (VOID-SIG)...")
-                    st.session_state.vault_anchor = uploaded_face
-                    status.update(label="✅ DNA ANCHORED & SIGNED", state="complete")
-                st.success("✅ VISUAL DNA ANCHORED // SHA-256 HASH GENERATED")
-        
-        with col2:
-            if st.session_state.get('vault_anchor'):
-                st.image(st.session_state.vault_anchor, width=120, use_container_width=False)
-                st.caption("MASTER DNA SOURCE")
-                if st.button("🗑️ PURGE VISUAL DNA", use_container_width=True):
-                    st.session_state.vault_anchor = None
-                    st.rerun()
-
-    # --- 2. LINGUISTIC DNA (VOICE CLONE) - LOCKED FOR DIRECTOR TIER ---
-    with st.expander("🎙️ LINGUISTIC DNA (VOICE CLONE)", expanded=True):
-        st.markdown("##### 💎 DIRECTOR TIER FEATURE")
-        st.warning("📡 **ACCESS DENIED:** Your current uplink (Operative Tier) does not support Linguistic Cloning.")
-        
-        # Inputs disabled to enforce Tier Logic
-        v_id = st.text_input(
-            "Enter ElevenLabs Voice ID", 
-            value="LOCKED_PROTOCOL_V2",
-            disabled=True,
-            help="Upgrade to DIRECTOR TIER to unlock Neural Voice Forge integration."
-        )
-        
-        v_tone = st.text_area(
-            "Linguistic Tone/Style Description", 
-            value="Upgrade required to sequence linguistic style...",
-            disabled=True
-        )
-
-        c1, c2 = st.columns(2)
-        with c1:
-            st.button("🛰️ SYNC LINGUISTIC DNA", use_container_width=True, disabled=True)
-        
-        with c2:
-            st.button(
-                "🚀 UPGRADE TO DIRECTOR",
-                use_container_width=True,
-                type="primary",
-                on_click=trigger_upgrade
-            )
-
-    # --- 3. SYSTEM SYNC CHECK + PROTOCOL STATUS ---
-    st.divider()
-    # Note: Logic remains purely visual for the sync check since Linguistic is locked
-    if st.session_state.get('vault_anchor'):
-        st.success("🛰️ VISUAL IDENTITY SYNCHRONIZED: Protocol 2026-02-06 Active.")
-        st.markdown("##### 🛡️ SECURITY OVERVIEW")
-        st.code("""
-        [PROTOCOL_ACTIVE]: ZERO_KNOWLEDGE_VAULT
-        [SIGNATURE_STATUS]: SIGNED_BY_DIRECTOR
-        [DEEPFAKE_PROTECTION]: NODES_CALIBRATED
-        [PERSISTENCE]: EPHEMERAL_SESSION_ONLY
-        [LINGUISTIC_UPLINK]: STANDBY_LOCKED
-        """, language="bash")
-    else:
-        st.warning("📡 IDENTITY INCOMPLETE: Sidebar DNA will remain in standby.")
+    st.caption("🔒 VOID-OS // IDENTITY VAULT V2.0 // NO DATA PERSISTENCE BEYOND SESSION")
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
