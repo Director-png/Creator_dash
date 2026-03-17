@@ -2092,10 +2092,13 @@ elif page == "🔒 Identity Vault":
             with st.status("Analyzing Linguistic & Factual DNA...", expanded=True) as status:
                 all_text = ""
                 for doc in uploaded_docs:
-                    # In a full build, we'd use PyPDF2 here. For now, we simulate extraction.
                     st.write(f"Reading: {doc.name}...")
-                    all_text += f"\nSource: {doc.name}\n" 
-                    st.session_state.vault_inventory.append(doc.name)
+                    try:
+                        file_content = doc.read().decode("utf-8")
+                        all_text += f"\n--- SOURCE: {doc.name} ---\n{file_content}\n"
+                        st.session_state.vault_inventory.append(doc.name)
+                    except Exception as e:
+                         st.error(f"Error reading {doc.name}: {e}")
                 
                 # THE GROQ "NOTEBOOK-LM" LOGIC
                 st.write("Extracting Brand Persona...")
