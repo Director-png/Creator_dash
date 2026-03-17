@@ -2104,7 +2104,7 @@ elif page == "🔒 Identity Vault":
                         model="llama-3.3-70b-versatile",
                         messages=[{
                             "role": "system", 
-                            "content": "Extract a 'Brand DNA Profile' from the following text. Identify: 1. Core Mission, 2. Target Audience, 3. Unique Slang/Keywords, 4. Tone of Voice. Be concise."
+                            "content": "You are a Brand Strategist. Analyze the provided text and extract a 'Brand DNA Profile'. Identify: 1. Core Mission, 2. Target Audience, 3. Unique Slang/Keywords, 4. Tone of Voice. Be sharp and specific. Be concise."
                         }, {"role": "user", "content": all_text[:4000]}], # Context window management
                         temperature=0.1
                     )
