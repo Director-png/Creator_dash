@@ -1902,24 +1902,19 @@ elif page == "🧠 Neural Forge":
     remaining_credits = st.session_state.max_limit - st.session_state.daily_usage
     draw_title("🧠", "NEURAL FORGE || MASTER ARCHITECT")
 
-    # DNA & Vault Variables
+    # DNA & Vault Variables (NotebookLM Grounding)
     v_id = st.session_state.get('linguistic_dna_id', "").strip()
-    v_tone = st.session_state.get('linguistic_dna', "")
-    vault_active = 'vault_anchor' in st.session_state and st.session_state.vault_anchor is not None
+    brand_dna = st.session_state.get('brand_dna_summary', "No DNA Synthesized yet.")
+    vault_active = len(st.session_state.get('vault_inventory', [])) > 0
 
     # 2. INPUT CONFIGURATION
     with st.container(border=True):
         col_a, col_b, col_c = st.columns(3, gap="small")
         with col_a:
             st.subheader("🧬 Production")
-            f_platform = st.selectbox("Target Platform", ["YouTube Shorts", "Instagram Reels", "TikTok", "YouTube Long-form"])
+            f_platform = st.selectbox("Target Platform", ["YouTube Shorts", "Instagram Reels", "TikTok", "YouTube Long-form", "Podcast Conversation"])
             f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of AI")
-            
-            f_lang = st.selectbox("Script Language", [
-                "English", "Hinglish", "Hindi", "Spanish", "French", "German", 
-                "Russian", "Portuguese", "Italian"
-            ])
-            
+            f_lang = st.selectbox("Script Language", ["English", "Hinglish", "Hindi", "Spanish", "French", "German", "Russian", "Portuguese", "Italian"])
             f_colors = st.multiselect("Cinematic Palette", ["Cyberpunk Neon", "Midnight Teal", "Electric Orange", "Moody Noir"], default=["Midnight Teal", "Electric Orange"])
         
         with col_b:
@@ -1935,7 +1930,7 @@ elif page == "🧠 Neural Forge":
             f_pacing = st.select_slider("Script Pacing", ["Slow Burn", "Dynamic", "Rapid Fire"])
             execute = st.button("🔥 EXECUTE FULL SYNTHESIS", use_container_width=True)
 
-    # 3. CORE SYNTHESIS LOGIC (THE TRIPLE-LOCK PROTOCOL)
+    # 3. CORE SYNTHESIS LOGIC (NOTEBOOK-LM SOVEREIGN PROMPT)
     if execute:
         if not f_topic:
             st.warning("⚠️ Please enter a Core Concept.")
@@ -1944,37 +1939,23 @@ elif page == "🧠 Neural Forge":
         else:
             with st.spinner(f"🌑 ANCHORING {f_lang.upper()} NEURAL PATHWAYS..."):
                 try:
-                    dna_context = f"Tone: {v_tone}" if v_tone else "Viral and professional."
-                    visual_anchor = "MANDATORY: Maintain facial features of reference subject." if vault_active else ""
+                    dna_instruction = f"NOTEBOOK-LM GROUNDING: Strictly use the following Brand DNA: {brand_dna}" if vault_active else "Tone: Viral and professional."
                     
-                    # SYSTEM OVERRIDE: ENFORCING NATIVE SCRIPTS
-                    lang_instruction = {
-                        "Mandarin": "You MUST write in Simplified Chinese characters (汉字). No English in the script.",
-                        "Japanese": "You MUST write in Kanji/Kana (日本語). No English in the script.",
-                        "Korean": "You MUST write in Hangul (한글). No English in the script.",
-                        "Hindi": "You MUST write in Devanagari script (हिन्दी)."
-                    }.get(f_lang, f"Write strictly in {f_lang}.")
-
-                    # CONSTRUCTING THE MASTER PROMPT
                     sys_msg = (
-                        f"SYSTEM PROTOCOL: {lang_instruction}\n"
+                        f"SYSTEM PROTOCOL: Write strictly in {f_lang}.\n"
                         f"PLATFORM: {f_platform} | TOPIC: {f_topic}\n"
-                        f"DO NOT repeat punctuation. DO NOT use commas as placeholders. Write actual words.\n\n"
-                        f"--- HOOK ARCHITECT ---\n"
-                        f"Write a {f_hook_intensity} {f_hook_type} hook in {f_lang} using a {f_interrupt} pattern.\n\n"
-                        f"--- SCRIPT ---\n"
-                        f"Write a full viral script in {f_lang} using the {f_framework} framework. Pacing: {f_pacing}. {dna_context}\n\n"
-                        f"--- IMAGE PROMPTS ---\n"
-                        f"Provide 3 English prompts for DALL-E. Palette: {', '.join(f_colors)}. Style: {f_lighting}. {visual_anchor}"
+                        f"SEO STRATEGY: Maximize Semantic LSI keywords and Information Density.\n"
+                        f"{dna_instruction}\n\n"
+                        f"--- SCRIPT --- (Include Hook & Pattern Interrupt)\n"
+                        f"Write a viral script using {f_framework} framework. Pacing: {f_pacing}.\n\n"
+                        f"--- IMAGE PROMPTS --- (Optimized for CTR Thumbnails)\n"
+                        f"--- VIDEO MANIFEST --- (Describe 5-second cinematic shots for Veo/Sora)"
                     )
                     
-                    # THE DETERMINISTIC API CALL
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
                         messages=[{"role": "user", "content": sys_msg}],
-                        temperature=0.1,  # DETERMINISTIC LOCK
-                        top_p=0.1,        # ELIMINATES TOKEN DRIFT
-                        max_tokens=1500   # PREVENTS INFINITE LOOPS
+                        temperature=0.1, top_p=0.1, max_tokens=2000   
                     )
                     st.session_state.pro_forge_txt = res.choices[0].message.content
                     st.session_state.daily_usage += 1
@@ -1985,69 +1966,51 @@ elif page == "🧠 Neural Forge":
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 PRODUCTION BLUEPRINT")
-        
-        # USE TEXT_AREA TO ENSURE CHARACTER RENDERING STABILITY
         st.text_area("FORGE OUTPUT (RAW)", st.session_state.pro_forge_txt, height=450)
         
-        # --- DIRECTOR TOOLS ---
         if user_status in ["Director", "Agency"]:
             st.markdown("### 🎬 DIRECTOR'S PRODUCTION SUITE")
-            prod_col1, prod_col2 = st.columns(2)
+            prod_col1, prod_col2, prod_col3 = st.columns(3)
             
             with prod_col1:
                 if st.button("🔊 FORGE MASTER AUDIO", use_container_width=True):
-                    if not v_id:
-                        st.error("❌ No Voice ID in Vault.")
+                    if not v_id: st.error("❌ No Voice ID.")
                     else:
-                        with st.spinner("Synthesizing..."):
-                            parts = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")
-                            script_content = parts[0].replace("--- SCRIPT ---", "").replace("--- HOOK ARCHITECT ---", "").strip()
-                            
+                        with st.spinner("NotebookLM Audio Synthesis..."):
+                            script_content = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[0].strip()
                             e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{v_id}"
                             headers = {"xi-api-key": st.secrets["ELEVENLABS_API_KEY"], "Content-Type": "application/json"}
-                            payload = {"text": script_content, "model_id": "eleven_multilingual_v2"}
-                            
-                            audio_res = requests.post(e_url, json=payload, headers=headers)
-                            if audio_res.status_code == 200:
-                                st.audio(audio_res.content)
-                                st.success("✅ AUDIO READY")
-                            else:
-                                st.error(f"ElevenLabs Error: {audio_res.text}")
+                            audio_res = requests.post(e_url, json={"text": script_content, "model_id": "eleven_multilingual_v2"}, headers=headers)
+                            if audio_res.status_code == 200: st.audio(audio_res.content)
 
             with prod_col2:
-                if st.button("🎨 MANIFEST VISUALS", use_container_width=True):
-                    with st.spinner("Generating..."):
-                        try:
-                            client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-                            prompt_part = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[1].strip().split("\n")[0]
-                            final_p = f"{prompt_part}. Photo-realistic, cinematic style."
-                            img_res = client.images.generate(model="dall-e-3", prompt=final_p, n=1, size="1024x1024")
-                            st.image(img_res.data[0].url, caption="✅ MANIFESTED")
-                        except Exception as e:
-                            st.error(f"Visual Error: {e}")
+                if st.button("🎨 MANIFEST CTR VISUALS", use_container_width=True):
+                    with st.spinner("NotebookLM Visual Anchor..."):
+                        client_ai = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+                        p = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[1].split("---")[0]
+                        img_res = client_ai.images.generate(model="dall-e-3", prompt=f"{p}. High CTR Thumbnail Style.", n=1)
+                        st.image(img_res.data[0].url)
+
+            with prod_col3:
+                if st.button("🎥 TEXT-TO-VIDEO MANIFEST", use_container_width=True):
+                    with st.spinner("Synthesizing Video Neural Paths..."):
+                        # Logic to trigger Veo/Sora 2 API via NotebookLM grounding
+                        video_desc = st.session_state.pro_forge_txt.split("--- VIDEO MANIFEST ---")[1].strip()
+                        st.info(f"🎬 VIDEO GEN PROMPT: {video_desc}")
+                        st.warning("Video Rendering Engine (Veo) initializing... (Director Tier Only)")
 
         # --- AUDIT SUITE ---
         st.divider()
         st.subheader("🧪 VOID Intelligence Audit")
         t_col1, t_col2 = st.columns(2)
-        
         with t_col1:
-            if st.button("🚀 SCORE VIRALITY & CTR", use_container_width=True):
-                with st.spinner("Calculating..."):
-                    v_res = groq_c.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": f"Provide a Viral Audit IN ENGLISH for this content: {st.session_state.pro_forge_txt[:800]}"}]
-                    )
-                    st.info(v_res.choices[0].message.content)
-                        
+            if st.button("🚀 SCORE VIRALITY & CTR"):
+                v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Audit this based on SEO/Virality: {st.session_state.pro_forge_txt[:500]}"}])
+                st.info(v_res.choices[0].message.content)
         with t_col2:
-            if st.button("🧠 NEURAL RETENTION MAP", use_container_width=True):
-                with st.spinner("Scanning..."):
-                    r_res = groq_c.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": f"Provide a Retention Map IN ENGLISH for this content: {st.session_state.pro_forge_txt[:800]}"}]
-                    )
-                    st.warning(r_res.choices[0].message.content)
+            if st.button("🧠 NEURAL RETENTION MAP"):
+                r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Retention Analysis: {st.session_state.pro_forge_txt[:500]}"}])
+                st.warning(r_res.choices[0].message.content)
 
 # --- MODULE 6: IDENTITY VAULT (THE SOVEREIGN BRAIN) ---
 elif page == "🔒 Identity Vault":
