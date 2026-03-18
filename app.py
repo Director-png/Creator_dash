@@ -2035,6 +2035,7 @@ elif page == "🧠 Neural Forge":
             if st.button("🧠 NEURAL RETENTION MAP"):
                 r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Retention Analysis: {st.session_state.pro_forge_txt[:500]}"}])
                 st.warning(r_res.choices[0].message.content)
+
 # --- MODULE 6: IDENTITY VAULT (THE SOVEREIGN BRAIN) ---
 elif page == "🔒 Identity Vault":
     import time
@@ -2064,14 +2065,12 @@ elif page == "🔒 Identity Vault":
         with sec_col3:
             st.metric("SESSION", "STATELESS", delta="SECURE")
         
-        st.caption("🛰️ **DPDP 2026 COMPLIANCE:** All data is processed via Zero-Knowledge protocols. AI models do not 'train' on your vault.")
+        st.caption("🛰️ **DPDP 2026 COMPLIANCE:** All data is processed via Zero-Knowledge protocols.")
 
     st.divider()
 
-    # --- 📥 SOURCE INGESTION (THE BRAIN FEED) ---
+    # --- 📥 SOURCE INGESTION ---
     st.markdown("### 📥 INGEST KNOWLEDGE SOURCES")
-    st.info("Upload PDFs, transcripts, or articles. The AI will 'Anchor' your brand facts and tone from these sources.")
-    
     uploaded_docs = st.file_uploader("Upload Master Reference Material", type=['pdf', 'txt', 'docx'], accept_multiple_files=True)
 
     if st.button("🧬 SYNCHRONIZE DNA"):
@@ -2087,14 +2086,12 @@ elif page == "🔒 Identity Vault":
                     except Exception as e:
                          st.error(f"Error reading {doc.name}: {e}")
                 
-                # THE GROQ "NOTEBOOK-LM" LOGIC
-                st.write("Extracting Brand Persona...")
                 try:
                     response = client.chat.completions.create(
                         model="llama-3.3-70b-versatile",
                         messages=[{
                             "role": "system", 
-                            "content": "You are a Brand Strategist. Analyze the provided text and extract a 'Brand DNA Profile'. Identify: 1. Core Mission, 2. Target Audience, 3. Unique Slang/Keywords, 4. Tone of Voice. Be sharp and specific. Be concise."
+                            "content": "Analyze the text and extract a 'Brand DNA Profile'. Be sharp and concise."
                         }, {"role": "user", "content": all_text[:4000]}],
                         temperature=0.1
                     )
@@ -2111,12 +2108,11 @@ elif page == "🔒 Identity Vault":
     
     with col_l:
         st.markdown("### 🧬 STORED IDENTITY PROFILE")
-        st.text_area("Current DNA Summary (Used by Forge)", st.session_state.brand_dna_summary, height=250)
+        st.text_area("Current DNA Summary", st.session_state.brand_dna_summary, height=250)
         
     with col_r:
         st.markdown("### 📊 EXECUTIVE ASSETS")
         
-        # --- VAPI ASSISTANT SPAWNER LOGIC ---
         def spawn_director_twin():
             url = "https://api.vapi.ai/assistant"
             headers = {
@@ -2124,18 +2120,17 @@ elif page == "🔒 Identity Vault":
                 "Content-Type": "application/json"
             }
             
-            # This payload uses the Identity Vault's prompt logic
             payload = {
                 "name": "VOID-OS Director Twin",
                 "firstMessage": "Director's line is active. How shall we proceed?",
                 "model": {
                     "provider": "openai",
                     "model": "gpt-4o",
-                    "systemPrompt": f"You are the Digital Twin of 'The Director'. DNA PROFILE: {st.session_state.brand_dna_summary}. You are sovereign, high-intensity, and hyper-efficient. Focus on executive briefings and deep-work protection.",
+                    "systemPrompt": f"You are 'The Director'. DNA: {st.session_state.brand_dna_summary}",
                     "temperature": 0.7
                 },
                 "voice": {
-                    "provider": "elevenlabs",
+                    "provider": "11labs",  # FIXED: Changed from 'elevenlabs' to '11labs'
                     "voiceId": "pMs7x4H69u9K864nS84a",
                     "stability": 0.5,
                     "similarityBoost": 0.8
@@ -2144,15 +2139,6 @@ elif page == "🔒 Identity Vault":
                     "provider": "deepgram",
                     "model": "nova-2",
                     "language": "en"
-                },
-                "analysisPlan": {
-                    "summaryPrompt": "Summarize the intel: 1. Key Outcome, 2. Required Action. Format for WhatsApp.",
-                    "structuredDataSchema": {
-                        "type": "object",
-                        "properties": {
-                            "priority": { "type": "string", "enum": ["Low", "High", "CRITICAL"] }
-                        }
-                    }
                 }
             }
             return requests.post(url, headers=headers, json=payload)
@@ -2171,9 +2157,6 @@ elif page == "🔒 Identity Vault":
             st.session_state.vault_inventory = []
             st.session_state.brand_dna_summary = "No DNA Synthesized yet."
             st.rerun()
-
-    st.divider()
-    st.caption("🔒 VOID-OS // IDENTITY VAULT V2.0 // NO DATA PERSISTENCE BEYOND SESSION")
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
 elif page == "💼 Client Pitcher":
