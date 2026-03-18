@@ -2131,7 +2131,7 @@ elif page == "🔒 Identity Vault":
                 },
                 "voice": {
                     "provider": "11labs",  # FIXED: Changed from 'elevenlabs' to '11labs'
-                    "voiceId": "pMs7x4H69u9K864nS84a",
+                    "voiceId": "paula",
                     "stability": 0.5,
                     "similarityBoost": 0.8
                 },
