@@ -2035,14 +2035,15 @@ elif page == "🧠 Neural Forge":
             if st.button("🧠 NEURAL RETENTION MAP"):
                 r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Retention Analysis: {st.session_state.pro_forge_txt[:500]}"}])
                 st.warning(r_res.choices[0].message.content)
-
 # --- MODULE 6: IDENTITY VAULT (THE SOVEREIGN BRAIN) ---
 elif page == "🔒 Identity Vault":
     import time
-    from groq import Groq # Ensure this is at the top of your main file
+    import requests
+    from groq import Groq
 
-    # Initialize Groq Client
+    # Initialize Clients from Secrets
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+    VAPI_KEY = st.secrets["VAPI_PRIVATE_KEY"]
 
     draw_title("🔒", "IDENTITY VAULT // DNA ANCHOR")
     
@@ -2052,13 +2053,12 @@ elif page == "🔒 Identity Vault":
     if 'brand_dna_summary' not in st.session_state:
         st.session_state.brand_dna_summary = "No DNA Synthesized yet."
 
-    # --- 🏗️ THE SECURITY DASHBOARD (IN-PAGE) ---
+    # --- 🏗️ THE SECURITY DASHBOARD ---
     with st.container(border=True):
         sec_col1, sec_col2, sec_col3 = st.columns(3)
         with sec_col1:
             st.metric("ENCRYPTION", "AES-256", delta="ACTIVE")
         with sec_col2:
-            # DNA Health calculation
             health = min(100, len(st.session_state.vault_inventory) * 25)
             st.metric("DNA HEALTH", f"{health}%", delta="STABLE")
         with sec_col3:
@@ -2095,7 +2095,7 @@ elif page == "🔒 Identity Vault":
                         messages=[{
                             "role": "system", 
                             "content": "You are a Brand Strategist. Analyze the provided text and extract a 'Brand DNA Profile'. Identify: 1. Core Mission, 2. Target Audience, 3. Unique Slang/Keywords, 4. Tone of Voice. Be sharp and specific. Be concise."
-                        }, {"role": "user", "content": all_text[:4000]}], # Context window management
+                        }, {"role": "user", "content": all_text[:4000]}],
                         temperature=0.1
                     )
                     st.session_state.brand_dna_summary = response.choices[0].message.content
@@ -2115,10 +2115,58 @@ elif page == "🔒 Identity Vault":
         
     with col_r:
         st.markdown("### 📊 EXECUTIVE ASSETS")
-        if st.button("📄 GENERATE BRAND REPORT", use_container_width=True):
-            st.write("Synthesizing Executive Briefing...")
-            # Logic for PDF report generation would go here
+        
+        # --- VAPI ASSISTANT SPAWNER LOGIC ---
+        def spawn_director_twin():
+            url = "https://api.vapi.ai/assistant"
+            headers = {
+                "Authorization": f"Bearer {VAPI_KEY}",
+                "Content-Type": "application/json"
+            }
             
+            # This payload uses the Identity Vault's prompt logic
+            payload = {
+                "name": "VOID-OS Director Twin",
+                "firstMessage": "Director's line is active. How shall we proceed?",
+                "model": {
+                    "provider": "openai",
+                    "model": "gpt-4o",
+                    "systemPrompt": f"You are the Digital Twin of 'The Director'. DNA PROFILE: {st.session_state.brand_dna_summary}. You are sovereign, high-intensity, and hyper-efficient. Focus on executive briefings and deep-work protection.",
+                    "temperature": 0.7
+                },
+                "voice": {
+                    "provider": "elevenlabs",
+                    "voiceId": "pMs7x4H69u9K864nS84a",
+                    "stability": 0.5,
+                    "similarityBoost": 0.8
+                },
+                "transcriber": {
+                    "provider": "deepgram",
+                    "model": "nova-2",
+                    "language": "en"
+                },
+                "analysisPlan": {
+                    "summaryPrompt": "Summarize the intel: 1. Key Outcome, 2. Required Action. Format for WhatsApp.",
+                    "structuredDataSchema": {
+                        "type": "object",
+                        "properties": {
+                            "priority": { "type": "string", "enum": ["Low", "High", "CRITICAL"] }
+                        }
+                    }
+                }
+            }
+            return requests.post(url, headers=headers, json=payload)
+
+        if st.button("🛰️ SPAWN DIRECTOR TWIN", use_container_width=True):
+            with st.spinner("Manifesting Digital Twin..."):
+                res = spawn_director_twin()
+                if res.status_code == 201:
+                    assistant_id = res.json().get('id')
+                    st.success(f"🔥 Twin Spawned! ID: {assistant_id}")
+                    st.code(assistant_id, language="text")
+                else:
+                    st.error(f"Vapi Error: {res.text}")
+
         if st.button("🗑️ NUKE ALL VAULT DATA", type="primary", use_container_width=True):
             st.session_state.vault_inventory = []
             st.session_state.brand_dna_summary = "No DNA Synthesized yet."
