@@ -1276,7 +1276,7 @@ with st.sidebar:
         # --- DYNAMIC MENU MAPPING ---
         if u_status == "Admin":
             options = ["🏠 Dashboard", "🔒 Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Agency Suite", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
-        elif u_status == "Agency";
+        elif u_status == "Agency":
              options = ["🏠 Dashboard", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧪 Creator Lab", "🧠 Neural Forge", "🛰️ Media Uplink", "💼 Agency Suite", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
         elif u_status == "Director":
             options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "🛰️ Media Uplink", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
