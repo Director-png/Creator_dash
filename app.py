@@ -1903,7 +1903,7 @@ elif page == "🧠 Neural Forge":
     groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
     sf_client = openai.OpenAI(
         api_key=st.secrets["SILICONFLOW_API_KEY"], 
-        base_url="https://api.siliconflow.cn/v1"
+        base_url="https://api.siliconflow.com/v1"
     )
 
     user_status = st.session_state.get('user_status', 'Director') 
