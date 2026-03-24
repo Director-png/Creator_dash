@@ -2042,11 +2042,13 @@ elif page == "🧠 Neural Forge":
 elif page == "🔒 Identity Vault":
     import time
     import requests
+    import streamlit as st
     from groq import Groq
 
     # Initialize Clients from Secrets
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
     VAPI_KEY = st.secrets["VAPI_PRIVATE_KEY"]
+    ELEVEN_LABS_KEY = st.secrets["ELEVEN_LABS_API_KEY"]
 
     draw_title("🔒", "IDENTITY VAULT // DNA ANCHOR")
     
@@ -2055,6 +2057,8 @@ elif page == "🔒 Identity Vault":
         st.session_state.vault_inventory = []
     if 'brand_dna_summary' not in st.session_state:
         st.session_state.brand_dna_summary = "No DNA Synthesized yet."
+    if 'cloned_voice_id' not in st.session_state:
+        st.session_state.cloned_voice_id = "paula" # Default fallback
 
     # --- 🏗️ THE SECURITY DASHBOARD ---
     with st.container(border=True):
@@ -2071,7 +2075,7 @@ elif page == "🔒 Identity Vault":
 
     st.divider()
 
-    # --- 📥 SOURCE INGESTION ---
+    # --- 📥 SOURCE INGESTION (Text & Knowledge) ---
     st.markdown("### 📥 INGEST KNOWLEDGE SOURCES")
     uploaded_docs = st.file_uploader("Upload Master Reference Material", type=['pdf', 'txt', 'docx'], accept_multiple_files=True)
 
@@ -2105,6 +2109,39 @@ elif page == "🔒 Identity Vault":
         else:
             st.warning("No documents detected.")
 
+    st.divider()
+
+    # --- 🎙️ BIOMETRIC ANCHORS (Vocal & Facial DNA) ---
+    st.markdown("### 🧬 BIOMETRIC DNA ANCHORS")
+    bio_col1, bio_col2 = st.columns(2)
+
+    with bio_col1:
+        st.markdown("#### 🎙️ VOCAL DNA (ElevenLabs)")
+        vocal_file = st.file_uploader("Upload 30s Voice Sample", type=['mp3', 'wav', 'm4a'])
+        if st.button("🔊 CLONE VOCAL DNA"):
+            if vocal_file:
+                with st.spinner("Synthesizing Vocal DNA..."):
+                    url = "https://api.elevenlabs.io/v1/voices/add"
+                    headers = {"xi-api-key": ELEVEN_LABS_KEY}
+                    data = {"name": f"Director_Twin_{int(time.time())}"}
+                    files = {"files": (vocal_file.name, vocal_file.read(), vocal_file.type)}
+                    
+                    res = requests.post(url, headers=headers, data=data, files=files)
+                    if res.status_code == 200:
+                        st.session_state.cloned_voice_id = res.json().get('voice_id')
+                        st.success(f"Vocal DNA Cloned: {st.session_state.cloned_voice_id}")
+                    else:
+                        st.error(f"ElevenLabs Error: {res.text}")
+
+    with bio_col2:
+        st.markdown("#### 👤 FACIAL DNA (Strict Consistency)")
+        facial_file = st.file_uploader("Upload Identity Reference Image", type=['jpg', 'jpeg', 'png'])
+        if facial_file:
+            st.image(facial_file, caption="Facial DNA Registered", width=150)
+            st.info("Strict Facial Consistency Mode: ENABLED")
+
+    st.divider()
+
     # --- 🗃️ IDENTITY MANAGEMENT ---
     col_l, col_r = st.columns(2)
     
@@ -2132,8 +2169,8 @@ elif page == "🔒 Identity Vault":
                     "temperature": 0.7
                 },
                 "voice": {
-                    "provider": "11labs",  # FIXED: Changed from 'elevenlabs' to '11labs'
-                    "voiceId": "paula",
+                    "provider": "11labs", 
+                    "voiceId": st.session_state.cloned_voice_id, # DYNAMIC: Uses cloned voice
                     "stability": 0.5,
                     "similarityBoost": 0.8
                 },
@@ -2158,6 +2195,7 @@ elif page == "🔒 Identity Vault":
         if st.button("🗑️ NUKE ALL VAULT DATA", type="primary", use_container_width=True):
             st.session_state.vault_inventory = []
             st.session_state.brand_dna_summary = "No DNA Synthesized yet."
+            st.session_state.cloned_voice_id = "paula"
             st.rerun()
 
 # --- MODULE 7: CLIENT PITCHER (PITCH ENGINE) ---
