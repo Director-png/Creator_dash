@@ -1883,19 +1883,31 @@ elif page == "⚔️ Trend Duel":
     else:
         st.error("📡 NEURAL LINK FAILURE: The function 'fetch_live_market_data' returned an empty set.")
 
-# --- MODULE 7: THE NEURAL FORGE (EXCALIBUR UPGRADE) ---
+# --- MODULE 7: THE NEURAL FORGE (PURE SILICON + EXPORT) ---
 elif page == "🧠 Neural Forge":
     import random
     import datetime
     import requests  
     import openai 
+    import streamlit as st
+    import json
+    from groq import Groq
 
-    # 1. ACCESS CONTROL & LIMITS
+    # 1. ACCESS CONTROL & CLIENT INITIALIZATION
     if not st.session_state.get('logged_in'):
         st.error("🚨 CLEARANCE REQUIRED: Access Denied.")
         st.stop()
 
-    user_status = st.session_state.get('user_status', 'Free')
+    # INITIALIZE CLIENTS
+    # Groq remains for the Brain (Speed Moat)
+    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+    # SiliconFlow replaces OpenAI for all Visuals (Cost Moat)
+    sf_client = openai.OpenAI(
+        api_key=st.secrets["SILICONFLOW_API_KEY"], 
+        base_url="https://api.siliconflow.cn/v1"
+    )
+
+    user_status = st.session_state.get('user_status', 'Director') 
     if 'daily_usage' not in st.session_state: st.session_state.daily_usage = 0
     if 'max_limit' not in st.session_state:
         limits = {"Agency": 50, "Director": 25, "Operative": 15}
@@ -1904,9 +1916,9 @@ elif page == "🧠 Neural Forge":
     remaining_credits = st.session_state.max_limit - st.session_state.daily_usage
     draw_title("🧠", "NEURAL FORGE || MASTER ARCHITECT")
 
-    # DNA & Vault Variables (NotebookLM Grounding)
-    v_id = st.session_state.get('linguistic_dna_id', "").strip()
-    brand_dna = st.session_state.get('brand_dna_summary', "No DNA Synthesized yet.")
+    # DNA & Vault Variables
+    v_id = st.session_state.get('cloned_voice_id', "").strip() 
+    brand_dna = st.session_state.get('brand_dna_summary', "Standard Viral Tone")
     vault_active = len(st.session_state.get('vault_inventory', [])) > 0
 
     # 2. INPUT CONFIGURATION
@@ -1932,55 +1944,77 @@ elif page == "🧠 Neural Forge":
             f_pacing = st.select_slider("Script Pacing", ["Slow Burn", "Dynamic", "Rapid Fire"])
             execute = st.button("🔥 EXECUTE FULL SYNTHESIS", use_container_width=True)
 
-    # 3. CORE SYNTHESIS LOGIC (NOTEBOOK-LM SOVEREIGN PROMPT)
+    # 3. CORE SYNTHESIS LOGIC (GROQ POWERED)
     if execute:
         if not f_topic:
             st.warning("⚠️ Please enter a Core Concept.")
         elif remaining_credits <= 0:
             st.error("🚨 NEURAL EXHAUSTION: Daily limit reached.")
         else:
-            with st.spinner(f"🌑 ANCHORING {f_lang.upper()} NEURAL PATHWAYS..."):
+            with st.status("🌑 ANCHORING NEURAL PATHWAYS...", expanded=True) as status:
                 try:
                     dna_instruction = f"NOTEBOOK-LM GROUNDING: Strictly use the following Brand DNA: {brand_dna}" if vault_active else "Tone: Viral and professional."
                     
                     sys_msg = (
                         f"SYSTEM PROTOCOL: Write strictly in {f_lang}.\n"
                         f"PLATFORM: {f_platform} | TOPIC: {f_topic}\n"
-                        f"SEO STRATEGY: Maximize Semantic LSI keywords and Information Density.\n"
+                        f"SEO STRATEGY: Maximize Semantic LSI keywords.\n"
                         f"{dna_instruction}\n\n"
-                        f"--- SCRIPT --- (Include Hook & Pattern Interrupt)\n"
-                        f"Write a viral script using {f_framework} framework. Pacing: {f_pacing}.\n\n"
-                        f"--- IMAGE PROMPTS --- (Optimized for CTR Thumbnails)\n"
-                        f"--- VIDEO MANIFEST --- (Describe 5-second cinematic shots for Veo/Sora)"
+                        f"--- SCRIPT ---\n"
+                        f"Write a viral script using {f_framework} framework.\n\n"
+                        f"--- IMAGE PROMPTS ---\n"
+                        f"Provide a high-detail Flux.1 image prompt.\n\n"
+                        f"--- VIDEO MANIFEST ---\n"
+                        f"Provide a prompt for Wan2.1 Video generation."
                     )
                     
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
                         messages=[{"role": "user", "content": sys_msg}],
-                        temperature=0.1, top_p=0.1, max_tokens=2000   
+                        temperature=0.1
                     )
                     st.session_state.pro_forge_txt = res.choices[0].message.content
                     st.session_state.daily_usage += 1
+                    status.update(label="✅ SYNTHESIS COMPLETE", state="complete")
                 except Exception as e:
                     st.error(f"Synthesis Error: {e}")
 
-    # 4. REVEAL & PRODUCTION SUITE
+    # 4. REVEAL & PRODUCTION SUITE (PURE SILICON + EXPORT)
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 PRODUCTION BLUEPRINT")
+        
+        # EXPORT LOGIC
+        export_data = {
+            "topic": f_topic,
+            "platform": f_platform,
+            "timestamp": str(datetime.datetime.now()),
+            "blueprint": st.session_state.pro_forge_txt
+        }
+        
+        col_export_1, col_export_2 = st.columns([4, 1])
+        with col_export_1:
+            st.info("Neural synthesis complete. Review the blueprint below and manifest assets.")
+        with col_export_2:
+            st.download_button(
+                label="📥 DOWNLOAD BLUEPRINT",
+                data=json.dumps(export_data, indent=4),
+                file_name=f"VOID_Forge_{f_topic.replace(' ', '_')}.json",
+                mime="application/json",
+                use_container_width=True
+            )
+
         st.text_area("FORGE OUTPUT (RAW)", st.session_state.pro_forge_txt, height=450)
         
         if user_status in ["Director", "Agency"]:
             st.markdown("### 🎬 DIRECTOR'S PRODUCTION SUITE")
-            
-            # --- ROW 1: Audio & Visuals ---
             prod_col1, prod_col2, prod_col3 = st.columns(3)
             
             with prod_col1:
                 if st.button("🔊 FORGE MASTER AUDIO", use_container_width=True):
-                    if not v_id: st.error("❌ No Voice ID.")
+                    if not v_id: st.error("❌ No Voice ID in Identity Vault.")
                     else:
-                        with st.spinner("NotebookLM Audio Synthesis..."):
+                        with st.spinner("Synthesizing Vocal DNA..."):
                             script_content = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[0].strip()
                             e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{v_id}"
                             headers = {"xi-api-key": st.secrets["ELEVENLABS_API_KEY"], "Content-Type": "application/json"}
@@ -1989,53 +2023,51 @@ elif page == "🧠 Neural Forge":
 
             with prod_col2:
                 if st.button("🎨 MANIFEST CTR VISUALS", use_container_width=True):
-                    with st.spinner("NotebookLM Visual Anchor..."):
-                        client_ai = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-                        p = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[1].split("---")[0]
-                        img_res = client_ai.images.generate(model="dall-e-3", prompt=f"{p}. High CTR Thumbnail Style.", n=1)
-                        st.image(img_res.data[0].url)
+                    with st.spinner("SiliconFlow Rendering (Flux.1)..."):
+                        try:
+                            # Using SiliconFlow's Flux.1 Dev for Images
+                            p = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[1].split("--- VIDEO MANIFEST ---")[0]
+                            img_res = sf_client.images.generate(
+                                model="black-forest-labs/FLUX.1-dev", 
+                                prompt=f"{p}. Style: {f_lighting}, Cinematic CTR Thumbnail.", 
+                                n=1
+                            )
+                            st.image(img_res.data[0].url, caption="Flux.1 Rendered Visual")
+                        except Exception as e: st.error(f"Image Error: {e}")
 
             with prod_col3:
-                if st.button("🎥 TEXT-TO-VIDEO MANIFEST", use_container_width=True):
-                    with st.spinner("Synthesizing Video Neural Paths..."):
-                        video_desc = st.session_state.pro_forge_txt.split("--- VIDEO MANIFEST ---")[1].strip()
-                        st.info(f"🎬 VIDEO GEN PROMPT: {video_desc}")
-                        st.warning("Video Rendering Engine (Veo) initializing... (Director Tier Only)")
-
-            # --- ROW 2: NotebookLM Specialized Podcast ---
-            st.divider()
-            pod_col1, pod_col2 = st.columns([2, 1])
-            with pod_col1:
-                st.write("🎙️ **NotebookLM Deep-Dive: Dual-Voice Podcast**")
-                st.caption("Generates a conversational AI overview between two hosts based on Vault DNA.")
-            with pod_col2:
-                if st.button("📻 GENERATE DUAL-VOICE PODCAST", use_container_width=True):
-                    with st.spinner("Initializing NotebookLM Audio Overview..."):
+                if st.button("🎥 VIDEO SYNTHESIS", use_container_width=True):
+                    with st.spinner("Executing Wan2.1 Render..."):
                         try:
-                            # NotebookLM Simulation: Using Groq to create the 2-person dialectic script
-                            pod_prompt = f"Using the Brand DNA: {brand_dna}, create a 2-person conversational podcast script (Host A & Host B) discussing: {f_topic}. Style: NotebookLM Audio Overview."
-                            pod_res = groq_c.chat.completions.create(
-                                model="llama-3.3-70b-versatile",
-                                messages=[{"role": "user", "content": pod_prompt}]
+                            video_desc = st.session_state.pro_forge_txt.split("--- VIDEO MANIFEST ---")[1].strip()
+                            # Using SiliconFlow's Wan 2.1 for Video
+                            response = sf_client.chat.completions.create(
+                                model="deepseek-ai/Wan2.1-T2V-14B",
+                                messages=[{"role": "user", "content": video_desc}]
                             )
-                            st.session_state.podcast_script = pod_res.choices[0].message.content
-                            st.success("✅ Podcast Script Synthesized.")
-                            st.text_area("PODCAST SCRIPT", st.session_state.podcast_script, height=200)
-                            st.warning("NotebookLM Voice Engine is processing the dual-stream audio... (Director Access Required)")
-                        except Exception as e:
-                            st.error(f"Podcast Synthesis Error: {e}")
+                            st.video(response.choices[0].message.content)
+                            st.success("Cinematic DNA Manifested.")
+                        except Exception as e: st.error(f"Video Error: {e}")
 
-        # --- AUDIT SUITE ---
+            # PODCAST SECTION
+            st.divider()
+            if st.button("📻 GENERATE DUAL-VOICE PODCAST", use_container_width=True):
+                with st.spinner("Initializing Audio Overview..."):
+                    pod_prompt = f"Using Brand DNA: {brand_dna}, create a 2-person podcast script for: {f_topic}."
+                    pod_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": pod_prompt}])
+                    st.text_area("PODCAST SCRIPT", pod_res.choices[0].message.content, height=200)
+
+        # AUDIT SECTION
         st.divider()
         st.subheader("🧪 VOID Intelligence Audit")
         t_col1, t_col2 = st.columns(2)
         with t_col1:
             if st.button("🚀 SCORE VIRALITY & CTR"):
-                v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Audit this based on SEO/Virality: {st.session_state.pro_forge_txt[:500]}"}])
+                v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Audit: {st.session_state.pro_forge_txt[:500]}"}])
                 st.info(v_res.choices[0].message.content)
         with t_col2:
             if st.button("🧠 NEURAL RETENTION MAP"):
-                r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Retention Analysis: {st.session_state.pro_forge_txt[:500]}"}])
+                r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Retention: {st.session_state.pro_forge_txt[:500]}"}])
                 st.warning(r_res.choices[0].message.content)
 
 # --- MODULE 6: IDENTITY VAULT (THE SOVEREIGN BRAIN) ---
