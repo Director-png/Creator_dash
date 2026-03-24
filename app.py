@@ -1883,7 +1883,7 @@ elif page == "⚔️ Trend Duel":
     else:
         st.error("📡 NEURAL LINK FAILURE: The function 'fetch_live_market_data' returned an empty set.")
 
-# --- MODULE 7: THE NEURAL FORGE (SOVEREIGN HYBRID - FINAL FIX) ---
+# --- MODULE 7: THE NEURAL FORGE (SOVEREIGN HYBRID - STABLE) ---
 elif page == "🧠 Neural Forge":
     import random
     import datetime
@@ -1893,21 +1893,18 @@ elif page == "🧠 Neural Forge":
     import json
     from groq import Groq
 
-    # 1. CLEARANCE & ENGINE INITIALIZATION
+    # 1. ACCESS CONTROL & CLIENT INITIALIZATION
     if not st.session_state.get('logged_in'):
         st.error("🚨 CLEARANCE REQUIRED: Access Denied.")
         st.stop()
 
-    # CORE ENGINES
-    # Groq: The Lightning Brain
+    # INITIALIZE CLIENTS
     groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-    # SiliconFlow: The Visual/Video Forge
     sf_client = openai.OpenAI(
         api_key=st.secrets["SILICONFLOW_API_KEY"], 
         base_url="https://api.siliconflow.cn/v1"
     )
 
-    # 2. USAGE LOGIC
     user_status = st.session_state.get('user_status', 'Director') 
     if 'daily_usage' not in st.session_state: st.session_state.daily_usage = 0
     if 'max_limit' not in st.session_state:
@@ -1917,23 +1914,23 @@ elif page == "🧠 Neural Forge":
     remaining_credits = st.session_state.max_limit - st.session_state.daily_usage
     draw_title("🧠", "NEURAL FORGE || MASTER ARCHITECT")
 
-    # IDENTITY MAPPING (Fixed Voice ID Lookup)
+    # DNA & Vault Variables (Unified Lookup)
     v_id = st.session_state.get('cloned_voice_id') or st.session_state.get('linguistic_dna_id', "").strip()
     brand_dna = st.session_state.get('brand_dna_summary', "Standard Viral Tone")
     vault_active = len(st.session_state.get('vault_inventory', [])) > 0
 
-    # 3. INPUT CONFIGURATION
+    # 2. INPUT CONFIGURATION
     with st.container(border=True):
         col_a, col_b, col_c = st.columns(3, gap="small")
         with col_a:
             st.subheader("🧬 Production")
-            f_platform = st.selectbox("Target Platform", ["YouTube Shorts", "Instagram Reels", "TikTok", "YouTube Long-form", "Podcast"])
-            f_topic = st.text_input("Core Concept", placeholder="e.g., The Future of VOID-OS")
-            f_lang = st.selectbox("Script Language", ["English", "Hinglish", "Hindi", "Spanish", "Russian"])
+            f_platform = st.selectbox("Target Platform", ["YouTube Shorts", "Instagram Reels", "TikTok", "YouTube Long-form", "Podcast Conversation"])
+            f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of AI")
+            f_lang = st.selectbox("Script Language", ["English", "Hinglish", "Hindi", "Spanish", "French", "German", "Russian", "Portuguese", "Italian"])
         
         with col_b:
             st.subheader("📡 Strategy")
-            f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock"])
+            f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock", "The 'Value-First' Pivot"])
             f_lighting = st.selectbox("Lighting Style", ["Dramatic Rim Light", "Soft Cinematic Glow", "Hard Shadows"])
         
         with col_c:
@@ -1942,7 +1939,7 @@ elif page == "🧠 Neural Forge":
             f_pacing = st.select_slider("Script Pacing", ["Slow Burn", "Dynamic", "Rapid Fire"])
             execute = st.button("🔥 EXECUTE FULL SYNTHESIS", use_container_width=True)
 
-    # 4. CORE SYNTHESIS (GROQ POWERED)
+    # 3. CORE SYNTHESIS LOGIC (GROQ POWERED)
     if execute:
         if not f_topic:
             st.warning("⚠️ Please enter a Core Concept.")
@@ -1951,31 +1948,48 @@ elif page == "🧠 Neural Forge":
         else:
             with st.status("🌑 ANCHORING NEURAL PATHWAYS...", expanded=True) as status:
                 try:
-                    dna_instruction = f"STRICT DNA GROUNDING: {brand_dna}" if vault_active else "Tone: Viral/Alpha."
+                    dna_instruction = f"NOTEBOOK-LM GROUNDING: Strictly use the following Brand DNA: {brand_dna}" if vault_active else "Tone: Viral and professional."
+                    
                     sys_msg = (
                         f"SYSTEM PROTOCOL: Write strictly in {f_lang}.\n"
                         f"PLATFORM: {f_platform} | TOPIC: {f_topic}\n"
+                        f"SEO STRATEGY: Maximize Semantic LSI keywords.\n"
                         f"{dna_instruction}\n\n"
-                        f"--- SCRIPT ---\nWrite a viral script.\n\n"
-                        f"--- IMAGE PROMPTS ---\nProvide a high-detail Flux.1 image prompt.\n\n"
-                        f"--- VIDEO MANIFEST ---\nProvide a prompt for Wan2.1 Video generation."
+                        f"--- SCRIPT ---\n"
+                        f"Write a viral script using {f_framework} framework.\n\n"
+                        f"--- IMAGE PROMPTS ---\n"
+                        f"Provide one high-detail Flux.1 image prompt.\n\n"
+                        f"--- VIDEO MANIFEST ---\n"
+                        f"Provide one prompt for Wan2.1 Video generation."
                     )
-                    res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": sys_msg}], temperature=0.2)
+                    
+                    res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": sys_msg}],
+                        temperature=0.1
+                    )
                     st.session_state.pro_forge_txt = res.choices[0].message.content
                     st.session_state.daily_usage += 1
                     status.update(label="✅ SYNTHESIS COMPLETE", state="complete")
                 except Exception as e:
                     st.error(f"Synthesis Error: {e}")
 
-    # 5. PRODUCTION SUITE (RE-MAPPED & PROTECTED)
+    # 4. REVEAL & PRODUCTION SUITE (SAFE PARSING)
     if st.session_state.get('pro_forge_txt'):
         st.divider()
         st.markdown("### 💎 PRODUCTION BLUEPRINT")
         
         col_export_1, col_export_2 = st.columns([4, 1])
-        with col_export_1: st.info("Review blueprint below and manifest assets.")
+        with col_export_1:
+            st.info("Neural synthesis complete. Review the blueprint below and manifest assets.")
         with col_export_2:
-            st.download_button("📥 DOWNLOAD", data=st.session_state.pro_forge_txt, file_name=f"VOID_{f_topic}.txt", use_container_width=True)
+            st.download_button(
+                label="📥 DOWNLOAD",
+                data=st.session_state.pro_forge_txt,
+                file_name=f"VOID_Forge_{f_topic.replace(' ', '_')}.txt",
+                mime="text/plain",
+                use_container_width=True
+            )
 
         st.text_area("FORGE OUTPUT (RAW)", st.session_state.pro_forge_txt, height=400)
         
@@ -1985,56 +1999,74 @@ elif page == "🧠 Neural Forge":
             
             with prod_col1:
                 if st.button("🔊 FORGE MASTER AUDIO", use_container_width=True):
-                    if not v_id: st.error("❌ No Voice ID found in Vault.")
+                    if not v_id: st.error("❌ No Voice ID in Identity Vault.")
                     else:
-                        with st.spinner("Vocal DNA Synthesis..."):
-                            script_content = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[0].strip()
-                            e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{v_id}"
-                            headers = {"xi-api-key": st.secrets["ELEVENLABS_API_KEY"], "Content-Type": "application/json"}
-                            audio_res = requests.post(e_url, json={"text": script_content, "model_id": "eleven_multilingual_v2"}, headers=headers)
-                            if audio_res.status_code == 200: st.audio(audio_res.content)
-                            else: st.error(f"Audio Error: {audio_res.status_code}")
+                        with st.spinner("Synthesizing Vocal DNA..."):
+                            try:
+                                script_content = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[0].replace("--- SCRIPT ---", "").strip()
+                                e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{v_id}"
+                                headers = {"xi-api-key": st.secrets["ELEVENLABS_API_KEY"], "Content-Type": "application/json"}
+                                audio_res = requests.post(e_url, json={"text": script_content, "model_id": "eleven_multilingual_v2"}, headers=headers)
+                                if audio_res.status_code == 200: 
+                                    st.audio(audio_res.content)
+                                else:
+                                    st.error(f"Audio API Error: {audio_res.status_code}")
+                            except Exception as e: st.error(f"Parsing Error: {e}")
 
             with prod_col2:
                 if st.button("🎨 MANIFEST CTR VISUALS", use_container_width=True):
                     with st.spinner("SiliconFlow (Flux.1)..."):
                         try:
-                            p_extract = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[1].split("--- VIDEO MANIFEST ---")[0]
-                            img_res = sf_client.images.generate(model="black-forest-labs/FLUX.1-dev", prompt=f"{p_extract}. {f_lighting}", n=1)
-                            
-                            # PROTECTED ACCESS CHECK
-                            if hasattr(img_res, 'data') and len(img_res.data) > 0:
-                                st.image(img_res.data[0].url)
+                            # SAFE EXTRACTION OF IMAGE PROMPT
+                            parts = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")
+                            if len(parts) > 1:
+                                p_main = parts[1].split("--- VIDEO MANIFEST ---")[0].strip()
+                                img_res = sf_client.images.generate(
+                                    model="black-forest-labs/FLUX.1-dev", 
+                                    prompt=f"{p_main}. Style: {f_lighting}, Cinematic Thumbnail.", 
+                                    n=1
+                                )
+                                # FIXED: Checking for data existence before accessing index
+                                if hasattr(img_res, 'data') and len(img_res.data) > 0:
+                                    st.image(img_res.data[0].url, caption="Flux.1 Render")
+                                else:
+                                    st.error("SiliconFlow returned no image data. Check credit balance.")
                             else:
-                                st.error("Image Gen failed: API returned empty list.")
+                                st.error("Could not find '--- IMAGE PROMPTS ---' in the output.")
                         except Exception as e: st.error(f"Image Error: {e}")
 
             with prod_col3:
                 if st.button("🎥 VIDEO SYNTHESIS", use_container_width=True):
-                    with st.spinner("Wan 2.1 Engine..."):
+                    with st.spinner("Wan2.1 Render..."):
                         try:
-                            video_desc = st.session_state.pro_forge_txt.split("--- VIDEO MANIFEST ---")[1].strip()
-                            v_res = sf_client.chat.completions.create(
-                                model="deepseek-ai/Wan2.1-T2V-14B",
-                                messages=[{"role": "user", "content": video_desc}]
-                            )
-                            # PROTECTED ACCESS CHECK
-                            if v_res.choices and len(v_res.choices) > 0:
-                                st.video(v_res.choices[0].message.content)
+                            v_parts = st.session_state.pro_forge_txt.split("--- VIDEO MANIFEST ---")
+                            if len(v_parts) > 1:
+                                video_desc = v_parts[1].strip()
+                                response = sf_client.chat.completions.create(
+                                    model="deepseek-ai/Wan2.1-T2V-14B",
+                                    messages=[{"role": "user", "content": video_desc}]
+                                )
+                                # FIXED: Safe access to choices list
+                                if response.choices and len(response.choices) > 0:
+                                    st.video(response.choices[0].message.content)
+                                    st.success("Cinematic DNA Manifested.")
+                                else:
+                                    st.error("SiliconFlow returned no video data.")
                             else:
-                                st.error("Video Gen failed: No choice returned.")
+                                st.error("Could not find '--- VIDEO MANIFEST ---' in output.")
                         except Exception as e: st.error(f"Video Error: {e}")
 
-        # 6. AUDIT SUITE
+        # --- AUDIT SUITE ---
         st.divider()
+        st.subheader("🧪 VOID Intelligence Audit")
         t_col1, t_col2 = st.columns(2)
         with t_col1:
             if st.button("🚀 SCORE VIRALITY"):
-                v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Audit Virality: {st.session_state.pro_forge_txt[:500]}"}])
+                v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Score Virality: {st.session_state.pro_forge_txt[:500]}"}])
                 st.info(v_res.choices[0].message.content)
         with t_col2:
             if st.button("🧠 RETENTION MAP"):
-                r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Audit Retention: {st.session_state.pro_forge_txt[:500]}"}])
+                r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Retention Map: {st.session_state.pro_forge_txt[:500]}"}])
                 st.warning(r_res.choices[0].message.content)
 
 # --- MODULE 6: IDENTITY VAULT (THE SOVEREIGN BRAIN) ---
