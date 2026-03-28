@@ -1275,11 +1275,11 @@ with st.sidebar:
 
         # --- DYNAMIC MENU MAPPING ---
         if u_status == "Admin":
-            options = ["🏠 Dashboard", "🔒 Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🎙️ VOID-RADIO", "🛰️ Media Uplink", "💼 Agency Suite", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+            options = ["🏠 Dashboard", "🔒 Identity Vault", "🌐 Global Pulse", "🛡️ Admin Console", "⚔️ Trend Duel", "🧪 Creator Lab", "🏗️ Script Architect", "🧠 Neural Forge", "🎙️ VOID Radio", "🛰️ Media Uplink", "💼 Agency Suite", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
         elif u_status == "Agency":
-             options = ["🏠 Dashboard", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧪 Creator Lab", "🧠 Neural Forge", "🎙️ VOID-RADIO", "🛰️ Media Uplink", "💼 Agency Suite", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
+             options = ["🏠 Dashboard", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧪 Creator Lab", "🧠 Neural Forge", "🎙️ VOID Radio", "🛰️ Media Uplink", "💼 Agency Suite", "⚖️ Legal Archive", "📜 History", "⚙️ Settings"]
         elif u_status == "Director":
-            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🎙️ VOID-RADIO", "🧪 Creator Lab", "🛰️ Media Uplink", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
+            options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🎙️ VOID Radio", "🧪 Creator Lab", "🛰️ Media Uplink", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
         elif u_status == "Operative":
             options = ["📡 My Growth Hub", "🔒 Identity Vault", "🌐 Global Pulse", "⚔️ Trend Duel", "🧠 Neural Forge", "🧪 Creator Lab", "⚖️ Legal Archive", "📜 History", "⚡ Upgrade Authority", "⚙️ Settings"]
         else:
@@ -2025,7 +2025,7 @@ elif page == "🧠 Neural Forge":
                 st.warning(r_res.choices[0].message.content)
 
 
-# --- MODULE 8:🎙️ VOID-RADIO (NOTEBOOK-LM EVOLUTION) ---
+# --- MODULE 8: VOID-RADIO (NOTEBOOK-LM EVOLUTION) ---
 elif page == "🎙️ VOID Radio":
     import re
     import requests
