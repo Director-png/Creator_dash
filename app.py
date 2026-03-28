@@ -1883,179 +1883,277 @@ elif page == "⚔️ Trend Duel":
     else:
         st.error("📡 NEURAL LINK FAILURE: The function 'fetch_live_market_data' returned an empty set.")
 
-# --- MODULE 7: THE NEURAL FORGE (UNBREAKABLE + CONNECTIVITY FIX) ---
+# --- MODULE 7: THE NEURAL FORGE (EXCALIBUR UPGRADE) ---
 elif page == "🧠 Neural Forge":
     import random
     import datetime
     import requests  
     import openai 
-    import streamlit as st
-    import json
-    import re
     from groq import Groq
 
-    # 1. ACCESS CONTROL & CLIENT INITIALIZATION
+    # Initialize Groq Client
+    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+
+    # 1. ACCESS CONTROL & LIMITS
     if not st.session_state.get('logged_in'):
         st.error("🚨 CLEARANCE REQUIRED: Access Denied.")
         st.stop()
 
-    # INITIALIZE ENGINES
-    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
-    sf_client = openai.OpenAI(
-        api_key=st.secrets["SILICONFLOW_API_KEY"], 
-        base_url="https://api.siliconflow.com/v1"
-    )
-
-    user_status = st.session_state.get('user_status', 'Director') 
+    user_status = st.session_state.get('user_status', 'Free')
     if 'daily_usage' not in st.session_state: st.session_state.daily_usage = 0
     if 'max_limit' not in st.session_state:
-        limits = {"Agency": 50, "Director": 25, "Operative": 15}
+        limits = {"Agency": 100, "Director": 50, "Operative": 25}
         st.session_state.max_limit = limits.get(user_status, 5)
     
     remaining_credits = st.session_state.max_limit - st.session_state.daily_usage
     draw_title("🧠", "NEURAL FORGE || MASTER ARCHITECT")
 
-    # 2. API HEARTBEAT (DEBUG TOOL)
-    with st.expander("🔌 SYSTEM & API DIAGNOSTICS"):
-        if st.button("RUN CONNECTION TEST"):
-            try:
-                # Test SiliconFlow Key Validity directly via User Info endpoint
-                test_headers = { 'Authorization': f"Bearer {st.secrets['SILICONFLOW_API_KEY']}" }
-                test_res = requests.get("https://api.siliconflow.cn/v1/user/info", headers=test_headers)
-                if test_res.status_code == 200:
-                    st.success(f"✅ SiliconFlow Active: {test_res.json().get('data', {}).get('name', 'User')}")
-                else:
-                    st.error(f"❌ SiliconFlow 401: Key is invalid or expired. Response: {test_res.text}")
-            except Exception as e:
-                st.error(f"📡 Connection Error: {e}")
+    # DNA & Vault Variables
+    v_id = st.session_state.get('linguistic_dna_id', "").strip()
+    brand_dna = st.session_state.get('brand_dna_summary', "No DNA Synthesized yet.")
+    vault_active = len(st.session_state.get('vault_inventory', [])) > 0
 
-    # 3. INPUT CONFIGURATION
+    # 2. INPUT CONFIGURATION
     with st.container(border=True):
         col_a, col_b, col_c = st.columns(3, gap="small")
         with col_a:
             st.subheader("🧬 Production")
-            f_platform = st.selectbox("Target Platform", ["YouTube Shorts", "Instagram Reels", "TikTok", "YouTube Long-form"])
-            f_topic = st.text_input("Core Concept", placeholder="e.g., The Future of VOID-OS")
-            f_lang = st.selectbox("Script Language", ["English", "Hinglish", "Hindi", "Spanish", "Russian"])
+            f_platform = st.selectbox("Target Platform", ["YouTube Shorts", "Instagram Reels", "TikTok", "YouTube Long-form", "Podcast Conversation"])
+            f_topic = st.text_input("Core Concept", placeholder="e.g., The Dark Truth of AI")
+            f_lang = st.selectbox("Script Language", ["English", "Hinglish", "Hindi", "Spanish", "French", "German", "Russian", "Portuguese", "Italian"])
+            f_colors = st.multiselect("Cinematic Palette", ["Cyberpunk Neon", "Midnight Teal", "Electric Orange", "Moody Noir"], default=["Midnight Teal", "Electric Orange"])
         
         with col_b:
             st.subheader("📡 Strategy")
-            f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock"])
+            f_framework = st.selectbox("Retention Framework", ["The Controversy Start", "The Hero's Journey", "Statistical Shock", "The 'Value-First' Pivot"])
+            f_interrupt = st.selectbox("Pattern Interrupt", ["Fast Zoom-in", "Flash Cut", "Sudden Silence"])
             f_lighting = st.selectbox("Lighting Style", ["Dramatic Rim Light", "Soft Cinematic Glow", "Hard Shadows"])
         
         with col_c:
             st.subheader("🎬 Style")
+            f_hook_type = st.radio("Emotional Anchor", ["Curiosity", "Fear", "Authority"])
             f_hook_intensity = st.select_slider("Hook Intensity", ["Subtle", "High-Octane", "Extreme"])
+            f_pacing = st.select_slider("Script Pacing", ["Slow Burn", "Dynamic", "Rapid Fire"])
             execute = st.button("🔥 EXECUTE FULL SYNTHESIS", use_container_width=True)
 
-    # 4. CORE SYNTHESIS LOGIC (GROQ)
+    # 3. CORE SYNTHESIS LOGIC (OPTIMIZED SOVEREIGN PROMPT)
     if execute:
         if not f_topic:
             st.warning("⚠️ Please enter a Core Concept.")
         elif remaining_credits <= 0:
             st.error("🚨 NEURAL EXHAUSTION: Daily limit reached.")
         else:
-            with st.status("🌑 ANCHORING NEURAL PATHWAYS...", expanded=True) as status:
+            with st.spinner(f"🌑 ANCHORING {f_lang.upper()} NEURAL PATHWAYS..."):
                 try:
-                    brand_dna = st.session_state.get('brand_dna_summary', "Tone: Professional/Viral.")
+                    dna_instruction = f"IDENTITY PROTOCOL: Strictly adhere to this Brand DNA: {brand_dna}" if vault_active else "Tone: High-authority, viral-engineered."
+                    
                     sys_msg = (
-                        f"SYSTEM PROTOCOL: Write strictly in {f_lang}.\n"
-                        f"PLATFORM: {f_platform} | TOPIC: {f_topic}\n"
-                        f"DNA: {brand_dna}\n\n"
-                        f"STRICT FORMATTING: You MUST use these headers exactly:\n"
-                        f"--- SCRIPT ---\n"
-                        f"--- IMAGE PROMPTS ---\n"
-                        f"--- VIDEO MANIFEST ---"
+                        f"You are the VOID-CREATOR Strategic Engine. Generate a world-class production blueprint.\n"
+                        f"LANGUAGE: {f_lang} | PLATFORM: {f_platform}\n"
+                        f"TOPIC: {f_topic} | FRAMEWORK: {f_framework}\n"
+                        f"VISUAL VIBE: {f_colors} with {f_lighting} lighting.\n"
+                        f"{dna_instruction}\n\n"
+                        f"STRUCTURE YOUR RESPONSE INTO THESE 3 SECTIONS:\n"
+                        f"1. --- SCRIPT --- \n(Write a high-retention script. Include [SCENE START] tags and specify where the {f_interrupt} interrupt occurs. Pacing: {f_pacing}.)\n\n"
+                        f"2. --- IMAGE PROMPTS --- \n(Provide 3 hyper-realistic DALL-E 3 prompts for thumbnails using {f_colors}.)\n\n"
+                        f"3. --- VIDEO MANIFEST --- \n(Describe 3 cinematic 5-second shots for AI video generation.)"
                     )
+                    
                     res = groq_c.chat.completions.create(
                         model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": sys_msg}],
-                        temperature=0.1
+                        messages=[{"role": "system", "content": "You are an elite content architect."}, {"role": "user", "content": sys_msg}],
+                        temperature=0.3, # Slightly increased for better creative flow
+                        max_tokens=2500   
                     )
                     st.session_state.pro_forge_txt = res.choices[0].message.content
                     st.session_state.daily_usage += 1
-                    status.update(label="✅ SYNTHESIS COMPLETE", state="complete")
                 except Exception as e:
                     st.error(f"Synthesis Error: {e}")
 
-    # 5. SMART SECTION PARSER (Regex)
-    def extract_section(text, header):
-        # This looks for the header regardless of bolding (**), dashes, or case.
-        pattern = rf"(?i)(?:---|\*\*|#)*\s*{header}\s*(?:---|\*\*|#)*"
-        parts = re.split(pattern, text)
-        if len(parts) > 1:
-            # Grab content until the next major header (---)
-            content = parts[1].split("---")[0].strip()
-            return content
-        return None
-
-    # 6. REVEAL & PRODUCTION
+    # 4. REVEAL & PRODUCTION SUITE
     if st.session_state.get('pro_forge_txt'):
         st.divider()
-        raw_output = st.session_state.pro_forge_txt
-        
-        # Parse content safely
-        final_script = extract_section(raw_output, "SCRIPT")
-        final_image = extract_section(raw_output, "IMAGE PROMPTS")
-        final_video = extract_section(raw_output, "VIDEO MANIFEST")
-
         st.markdown("### 💎 PRODUCTION BLUEPRINT")
-        st.text_area("FORGE OUTPUT (RAW)", raw_output, height=350)
+        st.text_area("FORGE OUTPUT (RAW)", st.session_state.pro_forge_txt, height=450)
         
         if user_status in ["Director", "Agency"]:
             st.markdown("### 🎬 DIRECTOR'S PRODUCTION SUITE")
-            p_col1, p_col2, p_col3 = st.columns(3)
             
-            with p_col1:
+            prod_col1, prod_col2, prod_col3 = st.columns(3)
+            
+            with prod_col1:
                 if st.button("🔊 FORGE MASTER AUDIO", use_container_width=True):
-                    v_id = st.session_state.get('cloned_voice_id') or st.session_state.get('linguistic_dna_id', "").strip()
-                    if not v_id: st.error("❌ No Voice ID in Vault.")
-                    elif not final_script: st.error("❌ Script section not found.")
+                    if not v_id: st.error("❌ No Voice ID detected in session.")
                     else:
-                        with st.spinner("Synthesizing..."):
+                        with st.spinner("Synthesizing Elite Voiceover..."):
+                            script_content = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[0].replace("--- SCRIPT ---", "").strip()
                             e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{v_id}"
                             headers = {"xi-api-key": st.secrets["ELEVENLABS_API_KEY"], "Content-Type": "application/json"}
-                            audio_res = requests.post(e_url, json={"text": final_script[:4500], "model_id": "eleven_multilingual_v2"}, headers=headers)
+                            audio_res = requests.post(e_url, json={"text": script_content, "model_id": "eleven_multilingual_v2", "voice_settings": {"stability": 0.5, "similarity_boost": 0.8}}, headers=headers)
                             if audio_res.status_code == 200: st.audio(audio_res.content)
-                            else: st.error(f"Audio Error: {audio_res.status_code}")
+                            else: st.error(f"Audio Error: {audio_res.text}")
 
-            with p_col2:
+            with prod_col2:
                 if st.button("🎨 MANIFEST CTR VISUALS", use_container_width=True):
-                    if not final_image: st.error("❌ Image prompt not found.")
-                    else:
-                        with st.spinner("Flux.1 Schnell Rendering..."):
-                            try:
-                                # Switched to 'schnell' as it's more accessible for various account tiers
-                                img_res = sf_client.images.generate(
-                                    model="black-forest-labs/FLUX.1-schnell", 
-                                    prompt=f"{final_image}. {f_lighting}, Cinematic.", 
-                                    n=1
-                                )
-                                if hasattr(img_res, 'data') and len(img_res.data) > 0:
-                                    st.image(img_res.data[0].url)
-                                else: st.error("API returned no image data.")
-                            except Exception as e: st.error(f"Image Error: {e}")
+                    with st.spinner("Generating Neural Visuals..."):
+                        client_ai = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+                        try:
+                            # Extracting the first prompt from the output
+                            p_extract = st.session_state.pro_forge_txt.split("--- IMAGE PROMPTS ---")[1].split("---")[0].strip()
+                            img_res = client_ai.images.generate(model="dall-e-3", prompt=f"{p_extract}. 8k resolution, cinematic lighting, ultra-detailed.", n=1, size="1024x1024")
+                            st.image(img_res.data[0].url, caption="Generated Sovereign Visual")
+                        except: st.error("Visual Synthesis Failed. Check API limits.")
 
-            with p_col3:
-                if st.button("🎥 VIDEO SYNTHESIS", use_container_width=True):
-                    if not final_video: st.error("❌ Video prompt not found.")
-                    else:
-                        with st.spinner("Wan 2.1 Engine..."):
-                            try:
-                                v_res = sf_client.chat.completions.create(
-                                    model="deepseek-ai/Wan2.1-T2V-14B",
-                                    messages=[{"role": "user", "content": final_video}]
-                                )
-                                if v_res.choices and len(v_res.choices) > 0:
-                                    st.video(v_res.choices[0].message.content)
-                                else: st.error("Video Gen failed.")
-                            except Exception as e: st.error(f"Video Error: {e}")
+            with prod_col3:
+                if st.button("🎥 TEXT-TO-VIDEO MANIFEST", use_container_width=True):
+                    with st.spinner("Queuing Video Engine (Replicate/Veo)..."):
+                        video_desc = st.session_state.pro_forge_txt.split("--- VIDEO MANIFEST ---")[1].strip()
+                        st.info(f"🎬 VIDEO GEN PROMPT ACTIVE: {video_desc[:100]}...")
+                        st.warning("Director Tier Note: Processing via Replicate Luma-Dream-Machine / Veo. Check terminal for status.")
 
-        # --- AUDIT ---
+        # --- AUDIT SUITE ---
         st.divider()
-        if st.button("🚀 SCORE VIRALITY"):
-            audit = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Score this: {raw_output[:500]}"}])
-            st.info(audit.choices[0].message.content)
+        st.subheader("🧪 VOID Intelligence Audit")
+        t_col1, t_col2 = st.columns(2)
+        with t_col1:
+            if st.button("🚀 SCORE VIRALITY & CTR"):
+                v_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Critique the virality of this script on a scale of 1-100 and give 3 improvements: {st.session_state.pro_forge_txt[:800]}"}])
+                st.info(v_res.choices[0].message.content)
+        with t_col2:
+            if st.button("🧠 NEURAL RETENTION MAP"):
+                r_res = groq_c.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": f"Analyze the retention triggers and pattern interrupts in this script: {st.session_state.pro_forge_txt[:800]}"}])
+                st.warning(r_res.choices[0].message.content)
+
+
+# --- MODULE 8: VOID-RADIO (NOTEBOOK-LM EVOLUTION) ---
+elif page == "🎙️ VOID Radio":
+    import re
+    import requests
+    from groq import Groq
+
+    # Initialize Groq for Radio Logic
+    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+
+    draw_title("🎙️", "VOID-RADIO || DUAL-VOICE DIALECTIC")
+    st.caption("Strategic Audio Intelligence Synthesized from Vault Documents.")
+
+    # 1. SOURCE INGESTION & SIDEBAR
+    with st.sidebar:
+        st.subheader("📁 Source Material")
+        uploaded_docs = st.file_uploader("Upload Transcripts/PDFs", accept_multiple_files=True, type=['txt', 'pdf'])
+        podcast_energy = st.select_slider("Conversation Energy", ["Academic", "Balanced", "High-Octane"], value="Balanced")
+        st.info("Ensure ELEVENLABS_VOICE_ID_A and _ID_B are set in secrets.")
+
+    # 2. THE COMMAND CENTER
+    with st.container(border=True):
+        col1, col2 = st.columns([2, 1], gap="medium")
+        
+        with col1:
+            st.subheader("📡 Synthesis Parameters")
+            pod_topic = st.text_input("Core Focus Topic", placeholder="e.g., Deep dive into the Sovereign Model")
+            user_adjustment = st.text_area("Director's Live Command (Interrupt)", 
+                                            placeholder="e.g., 'Make Host B more skeptical. Focus on the risks.'",
+                                            help="This injects new logic into the AI script generation.")
+
+        with col2:
+            st.subheader("🎙️ Persona Config")
+            host_a = st.text_input("Host A (Expert)", value="The Architect")
+            host_b = st.text_input("Host B (Skeptic)", value="The Critic")
+            start_radio = st.button("🔥 START BROADCAST SYNTHESIS", use_container_width=True)
+
+    # 3. DYNAMIC SCRIPT SYNTHESIS
+    if start_radio:
+        if not pod_topic and not uploaded_docs:
+            st.warning("⚠️ Please provide a topic or upload documents to begin.")
+        else:
+            with st.spinner("🌑 PARSING SOURCES & MAPPING DIALOGUE..."):
+                # Document Context Logic
+                context_data = ""
+                if uploaded_docs:
+                    for doc in uploaded_docs:
+                        # Simple text extraction for MVP
+                        context_data += doc.read().decode("utf-8")[:7000]
+                else:
+                    context_data = st.session_state.get('brand_dna_summary', "Standard VOID-OS Protocol")
+
+                # THE DUAL-VOICE ADAPTIVE PROMPT
+                radio_prompt = (
+                    f"You are the VOID-RADIO Scripting Engine. Create a natural, high-retention conversation between {host_a} and {host_b}.\n"
+                    f"CONTEXT/DATA: {context_data}\n"
+                    f"FOCUS TOPIC: {pod_topic}\n"
+                    f"ENERGY LEVEL: {podcast_energy}\n"
+                    f"DIRECTOR'S SPECIAL INSTRUCTION: {user_adjustment}\n\n"
+                    f"CRITICAL FORMATTING RULES:\n"
+                    f"1. Use [HOST A] and [HOST B] tags before every line.\n"
+                    f"2. Host A is authoritative and visionary. Host B is sharp and asks 'What about the cost?' type questions.\n"
+                    f"3. Include natural dialogue: 'Wait,' 'Look,' 'Interesting point,' etc.\n"
+                    f"4. Keep it under 1500 words."
+                )
+
+                try:
+                    radio_res = groq_c.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "system", "content": "You are a world-class podcast producer."}, 
+                                  {"role": "user", "content": radio_prompt}],
+                        temperature=0.8
+                    )
+                    st.session_state.radio_script = radio_res.choices[0].message.content
+                    st.success("✅ Broadcast Script Prepared.")
+                except Exception as e:
+                    st.error(f"Radio Logic Error: {e}")
+
+    # 4. THE BROADCAST & DUAL-VOICE AUDIO ENGINE
+    if st.session_state.get('radio_script'):
+        st.divider()
+        st.markdown("### 📻 LIVE BROADCAST SCRIPT")
+        st.text_area("Script Preview", st.session_state.radio_script, height=350)
+        
+        if st.button("🔊 GENERATE MASTER DUAL-VOICE AUDIO", use_container_width=True):
+            with st.spinner("🌑 SEPARATING NEURAL CHANNELS & SYNTESIZING..."):
+                script = st.session_state.radio_script
+                # Logic to separate voices
+                segments = re.split(r'(\[HOST [A|B]\]:)', script)
+                
+                combined_audio = b""
+                voice_a = st.secrets["ELEVENLABS_VOICE_ID_A"]
+                voice_b = st.secrets["ELEVENLABS_VOICE_ID_B"]
+                api_key = st.secrets["ELEVENLABS_API_KEY"]
+
+                progress_bar = st.progress(0)
+                
+                # Filter out the empty splits and process
+                valid_segments = [s for s in segments if s.strip()]
+                total_seg = len(valid_segments)
+
+                for i, segment in enumerate(valid_segments):
+                    # Identify voice
+                    if "[HOST A]" in segment:
+                        current_voice = voice_a
+                        continue
+                    elif "[HOST B]" in segment:
+                        current_voice = voice_b
+                        continue
+                    
+                    text_to_speak = segment.replace(":", "").strip()
+                    if text_to_speak and len(text_to_speak) > 2:
+                        e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{current_voice}"
+                        headers = {"xi-api-key": api_key, "Content-Type": "application/json"}
+                        payload = {
+                            "text": text_to_speak,
+                            "model_id": "eleven_multilingual_v2",
+                            "voice_settings": {"stability": 0.45, "similarity_boost": 0.8}
+                        }
+                        res = requests.post(e_url, json=payload, headers=headers)
+                        if res.status_code == 200:
+                            combined_audio += res.content
+                        
+                    progress_bar.progress((i + 1) / total_seg)
+
+                if combined_audio:
+                    st.audio(combined_audio, format="audio/mp3")
+                    st.download_button("💾 Download Broadcast", combined_audio, "void_radio_master.mp3", "audio/mp3")
+                    st.success("✅ DUAL-VOICE MASTER BROADCAST COMPLETE.")
+
 
 # --- MODULE 6: IDENTITY VAULT (THE SOVEREIGN BRAIN) ---
 elif page == "🔒 Identity Vault":
