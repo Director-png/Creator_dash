@@ -2025,135 +2025,153 @@ elif page == "🧠 Neural Forge":
                 st.warning(r_res.choices[0].message.content)
 
 
-# --- MODULE 8: VOID-RADIO (NOTEBOOK-LM EVOLUTION) ---
+# --- MODULE 8: VOID-RADIO (GPT-4 SOVEREIGN UPGRADE) ---
 elif page == "🎙️ VOID Radio":
     import re
     import requests
-    from groq import Groq
+    import openai
 
-    # Initialize Groq for Radio Logic
-    groq_c = Groq(api_key=st.secrets["GROQ_API_KEY"])
+    # Initialize OpenAI Client (Ensure OPENAI_API_KEY is in secrets)
+    client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-    draw_title("🎙️", "VOID-RADIO || DUAL-VOICE DIALECTIC")
-    st.caption("Strategic Audio Intelligence Synthesized from Vault Documents.")
+    draw_title("🎙️", "VOID-RADIO || GPT-4 DIALECTIC")
+    
+    # --- ADMIN / POWER CHECK ---
+    if 'void_credits' not in st.session_state:
+        st.session_state.void_credits = 100.0  # Initial Power Level
 
-    # 1. SOURCE INGESTION & SIDEBAR
     with st.sidebar:
-        st.subheader("📁 Source Material")
-        uploaded_docs = st.file_uploader("Upload Transcripts/PDFs", accept_multiple_files=True, type=['txt', 'pdf'])
-        podcast_energy = st.select_slider("Conversation Energy", ["Academic", "Balanced", "High-Octane"], value="Balanced")
-        st.info("Ensure ELEVENLABS_VOICE_ID_A and _ID_B are set in secrets.")
+        st.divider()
+        st.subheader("⚡ VOID POWER CORE")
+        st.progress(min(max(st.session_state.void_credits / 100, 0.0), 1.0))
+        st.caption(f"Neural Power Remaining: {st.session_state.void_credits:.2f}%")
+        if st.session_state.void_credits < 15:
+            st.warning("🚨 LOW POWER: GPT-4 Channels unstable.")
 
-    # 2. THE COMMAND CENTER
+    # 1. INTELLIGENCE INGESTION (Main Tab)
+    with st.container(border=True):
+        st.subheader("📁 Intelligence Ingestion")
+        uploaded_docs = st.file_uploader("Upload Source Material (PDF/TXT) for Dialectic Analysis", accept_multiple_files=True)
+        
+        sub_col1, sub_col2 = st.columns(2)
+        with sub_col1:
+            podcast_energy = st.select_slider("Conversation Energy", ["Academic", "Balanced", "High-Octane"], value="Balanced")
+        with sub_col2:
+            st.info("🎯 ENGINE: GPT-4o Active | ElevenLabs Dual-Channel Ready")
+
+    # 2. THE COMMAND CENTER (DIRECTOR OVERRIDE)
     with st.container(border=True):
         col1, col2 = st.columns([2, 1], gap="medium")
         
         with col1:
-            st.subheader("📡 Synthesis Parameters")
-            pod_topic = st.text_input("Core Focus Topic", placeholder="e.g., Deep dive into the Sovereign Model")
-            user_adjustment = st.text_area("Director's Live Command (Interrupt)", 
-                                            placeholder="e.g., 'Make Host B more skeptical. Focus on the risks.'",
-                                            help="This injects new logic into the AI script generation.")
+            st.subheader("📡 Synthesis & Interrupt")
+            pod_topic = st.text_input("Core Focus Topic", placeholder="e.g., The Ethics of AI Sovereignty")
+            user_adjustment = st.text_area("🔴 DIRECTOR INTERRUPT (Real-time Command)", 
+                                            placeholder="e.g., 'Host B, play devil's advocate. Challenge Host A on the revenue numbers.'")
 
         with col2:
             st.subheader("🎙️ Persona Config")
-            host_a = st.text_input("Host A (Expert)", value="The Architect")
-            host_b = st.text_input("Host B (Skeptic)", value="The Critic")
-            start_radio = st.button("🔥 START BROADCAST SYNTHESIS", use_container_width=True)
+            h_a_name = st.text_input("Host A (Expert)", value="The Architect")
+            h_b_name = st.text_input("Host B (Skeptic)", value="The Critic")
+            
+            # THE EXECUTION BUTTON
+            if st.session_state.void_credits > 5:
+                start_radio = st.button("🔥 EXECUTE GPT-4 SYNTHESIS", use_container_width=True)
+            else:
+                st.error("INSUFFICIENT POWER")
+                start_radio = False
 
-    # 3. DYNAMIC SCRIPT SYNTHESIS
+    # 3. GPT-4 DYNAMIC SCRIPTING LOGIC
     if start_radio:
-        if not pod_topic and not uploaded_docs:
-            st.warning("⚠️ Please provide a topic or upload documents to begin.")
-        else:
-            with st.spinner("🌑 PARSING SOURCES & MAPPING DIALOGUE..."):
-                # Document Context Logic
-                context_data = ""
-                if uploaded_docs:
-                    for doc in uploaded_docs:
-                        # Simple text extraction for MVP
-                        context_data += doc.read().decode("utf-8")[:7000]
-                else:
-                    context_data = st.session_state.get('brand_dna_summary', "Standard VOID-OS Protocol")
+        with st.spinner("🌑 GPT-4 NEURAL MAPPING IN PROGRESS..."):
+            # 3a. Context Extraction
+            context_data = ""
+            if uploaded_docs:
+                for doc in uploaded_docs:
+                    context_data += doc.read().decode("utf-8")[:12000] # GPT-4o supports high context
+            else:
+                context_data = st.session_state.get('brand_dna_summary', "Standard VOID-OS Strategic Protocol")
 
-                # THE DUAL-VOICE ADAPTIVE PROMPT
-                radio_prompt = (
-                    f"You are the VOID-RADIO Scripting Engine. Create a natural, high-retention conversation between {host_a} and {host_b}.\n"
-                    f"CONTEXT/DATA: {context_data}\n"
-                    f"FOCUS TOPIC: {pod_topic}\n"
-                    f"ENERGY LEVEL: {podcast_energy}\n"
-                    f"DIRECTOR'S SPECIAL INSTRUCTION: {user_adjustment}\n\n"
-                    f"CRITICAL FORMATTING RULES:\n"
-                    f"1. Use [HOST A] and [HOST B] tags before every line.\n"
-                    f"2. Host A is authoritative and visionary. Host B is sharp and asks 'What about the cost?' type questions.\n"
-                    f"3. Include natural dialogue: 'Wait,' 'Look,' 'Interesting point,' etc.\n"
-                    f"4. Keep it under 1500 words."
+            # 3b. The Sovereign Dialectic Prompt
+            radio_prompt = (
+                f"You are the VOID-RADIO Scripting Engine. Create a deep-dive, human-level conversation between {h_a_name} and {h_b_name}.\n"
+                f"CONTEXT DATA: {context_data}\n"
+                f"TOPIC: {pod_topic}\n"
+                f"ENERGY: {podcast_energy}\n"
+                f"DIRECTOR INTERRUPT: {user_adjustment}\n\n"
+                f"RULES:\n"
+                f"1. Format strictly as [HOST A]: and [HOST B]:\n"
+                f"2. Host A is visionary and deep. Host B is sharp, critical, and looks for flaws.\n"
+                f"3. Make them talk like real people (interrupting each other, using 'Right,' 'Exactly,' 'Wait a minute').\n"
+                f"4. Address the Director's interrupt directly if provided."
+            )
+
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4o", # High reasoning for best dialectic
+                    messages=[{"role": "system", "content": "You are a world-class podcast producer and strategist."}, 
+                              {"role": "user", "content": radio_prompt}],
+                    temperature=0.85
                 )
+                st.session_state.radio_script = response.choices[0].message.content
+                st.session_state.void_credits -= 5.0 # Deduct for GPT-4 usage
+                st.success("✅ Neural Script Synthesized.")
+            except Exception as e:
+                st.error(f"GPT-4 Neural Error: {e}")
 
-                try:
-                    radio_res = groq_c.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=[{"role": "system", "content": "You are a world-class podcast producer."}, 
-                                  {"role": "user", "content": radio_prompt}],
-                        temperature=0.8
-                    )
-                    st.session_state.radio_script = radio_res.choices[0].message.content
-                    st.success("✅ Broadcast Script Prepared.")
-                except Exception as e:
-                    st.error(f"Radio Logic Error: {e}")
-
-    # 4. THE BROADCAST & DUAL-VOICE AUDIO ENGINE
+    # 4. BROADCAST & AUDIO ENGINE
     if st.session_state.get('radio_script'):
         st.divider()
-        st.markdown("### 📻 LIVE BROADCAST SCRIPT")
-        st.text_area("Script Preview", st.session_state.radio_script, height=350)
+        st.markdown(f"### 📻 LIVE BROADCAST: {pod_topic.upper() if pod_topic else 'SOVEREIGN FEED'}")
+        st.text_area("Live Script Feed", st.session_state.radio_script, height=300)
         
-        if st.button("🔊 GENERATE MASTER DUAL-VOICE AUDIO", use_container_width=True):
-            with st.spinner("🌑 SEPARATING NEURAL CHANNELS & SYNTESIZING..."):
-                script = st.session_state.radio_script
-                # Logic to separate voices
-                segments = re.split(r'(\[HOST [A|B]\]:)', script)
-                
-                combined_audio = b""
-                voice_a = st.secrets["ELEVENLABS_VOICE_ID_A"]
-                voice_b = st.secrets["ELEVENLABS_VOICE_ID_B"]
-                api_key = st.secrets["ELEVENLABS_API_KEY"]
-
-                progress_bar = st.progress(0)
-                
-                # Filter out the empty splits and process
-                valid_segments = [s for s in segments if s.strip()]
-                total_seg = len(valid_segments)
-
-                for i, segment in enumerate(valid_segments):
-                    # Identify voice
-                    if "[HOST A]" in segment:
-                        current_voice = voice_a
-                        continue
-                    elif "[HOST B]" in segment:
-                        current_voice = voice_b
-                        continue
+        # Action Row
+        a_col1, a_col2 = st.columns(2)
+        
+        with a_col1:
+            if st.button("🔊 GENERATE MASTER DUAL-VOICE AUDIO"):
+                with st.spinner("🌑 SEPARATING NEURAL CHANNELS..."):
+                    script = st.session_state.radio_script
+                    segments = re.split(r'(\[HOST [A|B]\]:)', script)
                     
-                    text_to_speak = segment.replace(":", "").strip()
-                    if text_to_speak and len(text_to_speak) > 2:
-                        e_url = f"https://api.elevenlabs.io/v1/text-to-speech/{current_voice}"
-                        headers = {"xi-api-key": api_key, "Content-Type": "application/json"}
-                        payload = {
-                            "text": text_to_speak,
-                            "model_id": "eleven_multilingual_v2",
-                            "voice_settings": {"stability": 0.45, "similarity_boost": 0.8}
-                        }
-                        res = requests.post(e_url, json=payload, headers=headers)
-                        if res.status_code == 200:
-                            combined_audio += res.content
+                    combined_audio = b""
+                    v_a = st.secrets["ELEVENLABS_VOICE_ID_A"]
+                    v_b = st.secrets["ELEVENLABS_VOICE_ID_B"]
+                    api_key = st.secrets["ELEVENLABS_API_KEY"]
+
+                    valid_segments = [s for s in segments if s.strip()]
+                    for segment in valid_segments:
+                        if "[HOST A]" in segment:
+                            current_voice = v_a
+                            continue
+                        elif "[HOST B]" in segment:
+                            current_voice = v_b
+                            continue
                         
-                    progress_bar.progress((i + 1) / total_seg)
+                        text = segment.replace(":", "").strip()
+                        if text and len(text) > 2:
+                            res = requests.post(
+                                f"https://api.elevenlabs.io/v1/text-to-speech/{current_voice}",
+                                json={"text": text, "model_id": "eleven_multilingual_v2", "voice_settings": {"stability": 0.4, "similarity_boost": 0.8}},
+                                headers={"xi-api-key": api_key, "Content-Type": "application/json"}
+                            )
+                            if res.status_code == 200: combined_audio += res.content
 
-                if combined_audio:
-                    st.audio(combined_audio, format="audio/mp3")
-                    st.download_button("💾 Download Broadcast", combined_audio, "void_radio_master.mp3", "audio/mp3")
-                    st.success("✅ DUAL-VOICE MASTER BROADCAST COMPLETE.")
+                    if combined_audio:
+                        st.audio(combined_audio, format="audio/mp3")
+                        st.session_state.void_credits -= 2.0 # Deduct for ElevenLabs usage
+                        st.success("✅ BROADCAST MASTERED.")
 
+        with a_col2:
+            if st.button("🎨 GENERATE BROADCAST ART (DALL-E 3)"):
+                with st.spinner("Visualizing Podcast Aesthetic..."):
+                    img_res = client.images.generate(
+                        model="dall-e-3",
+                        prompt=f"Cinematic podcast cover art, title '{pod_topic}', moody lighting, cyberpunk aesthetic, high detail.",
+                        size="1024x1024"
+                    )
+                    st.image(img_res.data[0].url, caption="Sovereign Broadcast Art")
+                    st.session_state.void_credits -= 3.0 # Deduct for DALL-E usage
 
 # --- MODULE 6: IDENTITY VAULT (THE SOVEREIGN BRAIN) ---
 elif page == "🔒 Identity Vault":
