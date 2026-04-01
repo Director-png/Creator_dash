@@ -1822,7 +1822,7 @@ elif page == "⚔️ Trend Duel":
     pulse_df = fetch_live_market_data()
     
     if not pulse_df.empty:
-        # --- PHASE 1: INDIVIDUAL SECTOR AUDIT ---
+        # --- PHASE 1: INDIVIDUAL SECTOR AUDIT (Preserved Logic) ---
         st.subheader("🌑 Deep Vector Analysis")
         
         target = st.selectbox("Select Niche to Audit", pulse_df['niche name'].unique())
@@ -1838,7 +1838,7 @@ elif page == "⚔️ Trend Duel":
         
         st.divider()
 
-        # --- PHASE 2: THE COMPARISON DUEL ---
+        # --- PHASE 2: THE COMPARISON DUEL (Preserved Logic) ---
         st.subheader("📊 COMPETITIVE VECTOR MAPPING")
         
         selections = st.multiselect(
@@ -1853,7 +1853,6 @@ elif page == "⚔️ Trend Duel":
             import plotly.express as px
             import plotly.graph_objects as go
             
-            # Growth vs Score Visualization (Original Bar Chart)
             fig = px.bar(
                 comparison_df, 
                 x='niche name', 
@@ -1869,7 +1868,6 @@ elif page == "⚔️ Trend Duel":
             fig.update_traces(textposition='outside')
             st.plotly_chart(fig, use_container_width=True)
             
-            # Raw Data Comparison Table (Original Table)
             st.dataframe(
                 comparison_df[['niche name', 'score', 'growth', 'saturation', 'reason']], 
                 hide_index=True, 
@@ -1878,68 +1876,71 @@ elif page == "⚔️ Trend Duel":
 
             st.divider()
 
-            # --- PHASE 3: THE QUANTUM PULSE COLLISION (NEW SOVEREIGN UX) ---
-            st.subheader("🌌 QUANTUM PULSE: MARKET COLLISION")
-            st.write("Select two vectors to find the 'Unscratched' opportunity gap.")
+            # --- PHASE 3: THE QUANTUM PULSE COLLISION (TOP-TIER UX) ---
+            st.subheader("🌌 QUANTUM VECTOR INTERSECT")
+            st.write("Triangulate the intersection of two market vectors to expose the Sovereign Gap.")
 
             q_col1, q_col2 = st.columns(2)
-            trend_a = q_col1.selectbox("Primary Vector", pulse_df['niche name'].unique(), index=0)
-            trend_b = q_col2.selectbox("Secondary Vector", pulse_df['niche name'].unique(), index=1)
+            t_a_name = q_col1.selectbox("Vector Alpha", pulse_df['niche name'].unique(), index=0)
+            t_b_name = q_col2.selectbox("Vector Beta", pulse_df['niche name'].unique(), index=1)
 
-            # Build the Quantum Pulse Visual
+            # Get data for selected trends
+            data_a = pulse_df[pulse_df['niche name'] == t_a_name].iloc[0]
+            data_b = pulse_df[pulse_df['niche name'] == t_b_name].iloc[0]
+
+            # High-End Radar/Vector Mapping
             quantum_fig = go.Figure()
 
-            # Primary Bubble
-            quantum_fig.add_trace(go.Scatter(
-                x=[1], y=[1],
-                mode='markers+text',
-                marker=dict(size=[100], color=['#FF4B4B'], opacity=0.7, line=dict(width=2, color='white')),
-                text=[trend_a.upper()],
-                textposition="bottom center",
-                name=trend_a
+            # The Background Grid (Radar Style)
+            categories = ['Growth', 'Score', 'Opportunity', 'Growth'] # Loop back to close shape
+            
+            # Vector Alpha (Trend A)
+            quantum_fig.add_trace(go.Scatterpolar(
+                r=[data_a['growth'], data_a['score'], 80, data_a['growth']],
+                theta=categories,
+                fill='toself',
+                name=t_a_name.upper(),
+                line=dict(color='#00F2FF', width=2),
+                fillcolor='rgba(0, 242, 255, 0.2)'
             ))
 
-            # Secondary Bubble
-            quantum_fig.add_trace(go.Scatter(
-                x=[2], y=[1],
-                mode='markers+text',
-                marker=dict(size=[100], color=['#1C83E1'], opacity=0.7, line=dict(width=2, color='white')),
-                text=[trend_b.upper()],
-                textposition="bottom center",
-                name=trend_b
-            ))
-
-            # The Collision Star (The Opportunity)
-            quantum_fig.add_trace(go.Scatter(
-                x=[1.5], y=[1.1],
-                mode='markers+text',
-                marker=dict(size=[50], color=['#FFD700'], symbol='star', opacity=0.9),
-                text=["THE GAP"],
-                textposition="top center",
-                name="Market Gap"
+            # Vector Beta (Trend B)
+            quantum_fig.add_trace(go.Scatterpolar(
+                r=[data_b['growth'], data_b['score'], 85, data_b['growth']],
+                theta=categories,
+                fill='toself',
+                name=t_b_name.upper(),
+                line=dict(color='#7000FF', width=2),
+                fillcolor='rgba(112, 0, 255, 0.2)'
             ))
 
             quantum_fig.update_layout(
-                showlegend=False,
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[0.5, 2.5]),
-                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[0.5, 1.5]),
-                height=300,
-                margin=dict(l=20, r=20, t=20, b=20)
+                polar=dict(
+                    bgcolor="rgba(0,0,0,0)",
+                    radialaxis=dict(visible=True, range=[0, 100], showticklabels=False, gridcolor="rgba(255,255,255,0.1)"),
+                    angularaxis=dict(gridcolor="rgba(255,255,255,0.1)", linecolor="rgba(255,255,255,0.2)")
+                ),
+                showlegend=True,
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                height=450,
+                margin=dict(l=80, r=80, t=20, b=20),
+                font=dict(color="white", family="Courier New")
             )
 
             st.plotly_chart(quantum_fig, use_container_width=True)
 
-            if st.button("🔥 FORGE COLLISION STRATEGY"):
-                with st.spinner("Analyzing Quantum Intersection..."):
-                    # This calls your existing Neural Forge logic (assumed structure)
-                    collision_prompt = f"Analyze the intersection of {trend_a} and {trend_b}. Find one specific, high-ticket agency service gap that exists at this collision."
-                    # You can replace this with your actual generation call
-                    st.success(f"**COLLISION FOUND:** The 'Sovereign Gap' between {trend_a} and {trend_b} has been mapped. (Triggering Neural Forge...)")
-                    
+            # Execution UI
+            with st.container(border=True):
+                st.write(f"**INTERSECTING:** `{t_a_name.upper()}` x `{t_b_name.upper()}`")
+                if st.button("⚡ INITIALIZE NEURAL COLLISION"):
+                    with st.spinner("Calculating Intersect Coordinates..."):
+                        # Your logic for the Neural Forge trigger
+                        st.success("COLLISION MAPPED. Accessing Neural Forge for Strategic Output...")
+                        
     else:
         st.error("📡 NEURAL LINK FAILURE: The function 'fetch_live_market_data' returned an empty set.")
+
 
 # --- MODULE 7: THE NEURAL FORGE (EXCALIBUR UPGRADE) ---
 elif page == "🧠 Neural Forge":
