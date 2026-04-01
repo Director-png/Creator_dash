@@ -1852,6 +1852,7 @@ elif page == "⚔️ Trend Duel":
         if not comparison_df.empty: 
             import plotly.express as px
             import plotly.graph_objects as go
+            from groq import Groq # Ensure you have 'groq' in requirements.txt
             
             fig = px.bar(
                 comparison_df, 
@@ -1876,7 +1877,7 @@ elif page == "⚔️ Trend Duel":
 
             st.divider()
 
-            # --- PHASE 3: THE QUANTUM PULSE COLLISION (TOP-TIER UX) ---
+            # --- PHASE 3: THE QUANTUM PULSE COLLISION ---
             st.subheader("🌌 QUANTUM VECTOR INTERSECT")
             st.write("Triangulate the intersection of two market vectors to expose the Sovereign Gap.")
 
@@ -1884,41 +1885,38 @@ elif page == "⚔️ Trend Duel":
             t_a_name = q_col1.selectbox("Vector Alpha", pulse_df['niche name'].unique(), index=0)
             t_b_name = q_col2.selectbox("Vector Beta", pulse_df['niche name'].unique(), index=1)
 
-            # Get data for selected trends
             data_a = pulse_df[pulse_df['niche name'] == t_a_name].iloc[0]
             data_b = pulse_df[pulse_df['niche name'] == t_b_name].iloc[0]
 
-            # High-End Radar/Vector Mapping
+            # High-End Radar Mapping
             quantum_fig = go.Figure()
-
-            # The Background Grid (Radar Style)
-            categories = ['Growth', 'Score', 'Opportunity', 'Growth'] # Loop back to close shape
+            categories = ['Growth', 'Score', 'Opportunity', 'Market Heat', 'Growth'] 
             
-            # Vector Alpha (Trend A)
+            # Vector Alpha
             quantum_fig.add_trace(go.Scatterpolar(
-                r=[data_a['growth'], data_a['score'], 80, data_a['growth']],
+                r=[data_a['growth'], data_a['score'], 80, 70, data_a['growth']],
                 theta=categories,
                 fill='toself',
                 name=t_a_name.upper(),
                 line=dict(color='#00F2FF', width=2),
-                fillcolor='rgba(0, 242, 255, 0.2)'
+                fillcolor='rgba(0, 242, 255, 0.15)'
             ))
 
-            # Vector Beta (Trend B)
+            # Vector Beta
             quantum_fig.add_trace(go.Scatterpolar(
-                r=[data_b['growth'], data_b['score'], 85, data_b['growth']],
+                r=[data_b['growth'], data_b['score'], 85, 60, data_b['growth']],
                 theta=categories,
                 fill='toself',
                 name=t_b_name.upper(),
                 line=dict(color='#7000FF', width=2),
-                fillcolor='rgba(112, 0, 255, 0.2)'
+                fillcolor='rgba(112, 0, 255, 0.15)'
             ))
 
             quantum_fig.update_layout(
                 polar=dict(
                     bgcolor="rgba(0,0,0,0)",
-                    radialaxis=dict(visible=True, range=[0, 100], showticklabels=False, gridcolor="rgba(255,255,255,0.1)"),
-                    angularaxis=dict(gridcolor="rgba(255,255,255,0.1)", linecolor="rgba(255,255,255,0.2)")
+                    radialaxis=dict(visible=True, range=[0, 100], showticklabels=False, gridcolor="rgba(255,255,255,0.05)"),
+                    angularaxis=dict(gridcolor="rgba(255,255,255,0.05)", linecolor="rgba(255,255,255,0.2)")
                 ),
                 showlegend=True,
                 paper_bgcolor="rgba(0,0,0,0)",
@@ -1930,17 +1928,56 @@ elif page == "⚔️ Trend Duel":
 
             st.plotly_chart(quantum_fig, use_container_width=True)
 
-            # Execution UI
+            # --- PHASE 4: NEURAL SYNTHESIS (GROQ INTEGRATION) ---
             with st.container(border=True):
-                st.write(f"**INTERSECTING:** `{t_a_name.upper()}` x `{t_b_name.upper()}`")
+                st.write(f"**READY FOR COLLISION:** `{t_a_name.upper()}` x `{t_b_name.upper()}`")
+                
                 if st.button("⚡ INITIALIZE NEURAL COLLISION"):
-                    with st.spinner("Calculating Intersect Coordinates..."):
-                        # Your logic for the Neural Forge trigger
-                        st.success("COLLISION MAPPED. Accessing Neural Forge for Strategic Output...")
+                    try:
+                        # Initialize Groq Client
+                        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                        
+                        with st.status("Performing Quantum Synthesis...", expanded=True) as status:
+                            st.write("Triangulating Market Vectors...")
+                            st.write("Calculating Sustainability Coefficients...")
+                            
+                            prompt = f"""
+                            SYSTEM: You are the VOID-OS Strategic Logic Engine.
+                            TASK: Analyze the collision of two market trends.
+                            TREND A: {t_a_name} (Growth: {data_a['growth']}%, Score: {data_a['score']}/100)
+                            TREND B: {t_b_name} (Growth: {data_b['growth']}%, Score: {data_b['score']}/100)
+                            
+                            REPORT REQUIREMENTS:
+                            1. SOVEREIGN GAP: Define the specific new niche created at this intersection.
+                            2. GROWTH PREDICTION: How will this collision perform in the next 12 months?
+                            3. SUSTAINABILITY AUDIT: Is this a temporary hype or a structural shift?
+                            4. REVENUE ARCHITECTURE: Suggest one high-ticket agency offer for this gap.
+                            
+                            Format the output with professional headers and clear, aggressive strategic insights.
+                            """
+                            
+                            chat_completion = client.chat.completions.create(
+                                messages=[{"role": "user", "content": prompt}],
+                                model="llama-3.3-70b-versatile", # High-quality Groq model
+                            )
+                            
+                            report = chat_completion.choices[0].message.content
+                            status.update(label="Collision Successful!", state="complete", expanded=False)
+
+                        st.subheader("📋 SOVEREIGN COLLISION REPORT")
+                        st.markdown(report)
+                        
+                        # Sustainable Growth Metric Mockup (Logic enhancement)
+                        st.divider()
+                        st.caption("Quantum Sustainability Index")
+                        avg_growth = (data_a['growth'] + data_a['growth']) / 2
+                        st.progress(min(avg_growth/100, 1.0), text=f"Stability Matrix: {avg_growth}%")
+
+                    except Exception as e:
+                        st.error(f"NEURAL LINK FAILED: Ensure 'GROQ_API_KEY' is set in Streamlit Secrets. Error: {e}")
                         
     else:
-        st.error("📡 NEURAL LINK FAILURE: The function 'fetch_live_market_data' returned an empty set.")
-
+        st.error("📡 NEURAL LINK FAILURE: Market data stream is empty.")
 
 # --- MODULE 7: THE NEURAL FORGE (EXCALIBUR UPGRADE) ---
 elif page == "🧠 Neural Forge":
