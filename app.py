@@ -174,143 +174,128 @@ NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
 
 import streamlit as st
+import streamlit.components.v1 as components
 import time
 
 def show_vortex_intro():
+    # 1. Create a full-screen container
     placeholder = st.empty()
     
-    # We use a raw string r""" to prevent any backslash escaping issues
-    vortex_html = r"""
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@200&display=swap');
-        
-        .vortex-container {
-            background: #000;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: fixed;
-            top: 0; left: 0; z-index: 9999;
-            overflow: hidden;
-            color: white;
-        }
+    # 2. The Raw Logic: Bigger circles, No center text, Tagline included, High-speed spin
+    vortex_code = r"""
+    <div id="vortex-root">
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@200&display=swap');
+            
+            body { margin: 0; background: #000; overflow: hidden; }
+            
+            .container {
+                height: 100vh; width: 100vw;
+                display: flex; flex-direction: column;
+                justify-content: center; align-items: center;
+                background: radial-gradient(circle at center, #050505 0%, #000 100%);
+            }
 
-        /* --- STARFIELD --- */
-        .star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle var(--d) infinite ease-in-out;
-        }
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.2; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.5); }
-        }
+            /* --- STARFIELD --- */
+            .star { position: absolute; background: white; border-radius: 50%; opacity: 0.4; animation: twinkle var(--d) infinite; }
+            @keyframes twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; transform: scale(1.2); } }
 
-        /* --- THE VORTEX ENGINE --- */
-        .boundary-circle {
-            position: relative;
-            width: 360px; height: 360px;
-            border: 4.5px solid #C0C0C2;
-            border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            animation: spin 1s linear infinite;
-        }
+            /* --- THE CENTRIFUGE --- */
+            .boundary {
+                position: relative;
+                width: 380px; height: 380px;
+                border: 4px solid #C0C0C2;
+                border-radius: 50%;
+                display: flex; justify-content: center; align-items: center;
+                animation: spin 1s linear infinite;
+            }
 
-        .static-core {
-            position: absolute;
-            width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
-            animation: counter-spin 1s linear infinite;
-        }
+            .core {
+                position: absolute;
+                width: 100%; height: 100%;
+                display: flex; justify-content: center; align-items: center;
+                animation: counter-spin 1s linear infinite;
+            }
 
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes counter-spin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+            @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            @keyframes counter-spin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
 
-        .gear-circle {
-            position: absolute;
-            width: 170px; height: 170px; /* Bigger circles as requested */
-            border: 3.5px solid #C0C0C2;
-            border-radius: 50%;
-        }
+            .inner-circle {
+                position: absolute;
+                width: 180px; height: 180px; /* Max Size Increase */
+                border: 3px solid #C0C0C2;
+                border-radius: 50%;
+            }
 
-        /* Hexagonal Alignment */
-        .gear-circle:nth-child(1) { transform: translate(0, -100px); }
-        .gear-circle:nth-child(2) { transform: translate(86px, -50px); }
-        .gear-circle:nth-child(3) { transform: translate(86px, 50px); }
-        .gear-circle:nth-child(4) { transform: translate(0, 100px); }
-        .gear-circle:nth-child(5) { transform: translate(-86px, 50px); }
-        .gear-circle:nth-child(6) { transform: translate(-86px, -50px); }
+            /* Hexagonal Pattern */
+            .inner-circle:nth-child(1) { transform: translate(0, -110px); }
+            .inner-circle:nth-child(2) { transform: translate(95px, -55px); }
+            .inner-circle:nth-child(3) { transform: translate(95px, 55px); }
+            .inner-circle:nth-child(4) { transform: translate(0, 110px); }
+            .inner-circle:nth-child(5) { transform: translate(-95px, 55px); }
+            .inner-circle:nth-child(6) { transform: translate(-95px, -55px); }
 
-        /* --- TEXT & LOADING --- */
-        .logo-title {
-            font-family: 'Syncopate', sans-serif;
-            font-size: 5.2rem;
-            letter-spacing: 35px;
-            margin: 40px 0 0 35px;
-            text-align: center;
-        }
+            .title {
+                font-family: 'Syncopate', sans-serif;
+                color: #FFF; font-size: 5rem;
+                letter-spacing: 35px; margin-top: 50px;
+                text-indent: 35px; /* Centers the letter-spacing */
+            }
 
-        .tagline {
-            font-family: 'Inter', sans-serif;
-            color: #00F2FF;
-            font-size: 0.75rem;
-            letter-spacing: 10px;
-            margin-top: 15px;
-            text-transform: uppercase;
-        }
+            .tagline {
+                font-family: 'Inter', sans-serif;
+                color: #00F2FF; font-size: 0.8rem;
+                letter-spacing: 12px; margin-top: 10px;
+                text-transform: uppercase; opacity: 0.8;
+            }
 
-        .progress-tray {
-            width: 600px; height: 2px;
-            background: rgba(255,255,255,0.1);
-            margin-top: 60px;
-            position: relative;
-        }
+            .progress-bar {
+                width: 600px; height: 2px;
+                background: rgba(255,255,255,0.1);
+                margin-top: 60px; position: relative;
+            }
 
-        .progress-fill {
-            width: 0%; height: 100%;
-            background: #00F2FF;
-            box-shadow: 0 0 20px #00F2FF;
-            animation: load 6s linear forwards;
-        }
-        @keyframes load { to { width: 100%; } }
-    </style>
+            .fill {
+                width: 0%; height: 100%;
+                background: #00F2FF;
+                box-shadow: 0 0 20px #00F2FF;
+                animation: load 6s linear forwards;
+            }
+            @keyframes load { to { width: 100%; } }
+        </style>
 
-    <div class="vortex-container">
-        <div class="star" style="top:15%; left:25%; width:2px; height:2px; --d:3s;"></div>
-        <div class="star" style="top:45%; left:85%; width:1px; height:1px; --d:5s;"></div>
-        <div class="star" style="top:75%; left:35%; width:3px; height:3px; --d:4s;"></div>
-        <div class="star" style="top:10%; left:65%; width:1.5px; height:1.5px; --d:6s;"></div>
-
-        <div class="boundary-circle">
-            <div class="static-core">
-                <div class="gear-circle"></div>
-                <div class="gear-circle"></div>
-                <div class="gear-circle"></div>
-                <div class="gear-circle"></div>
-                <div class="gear-circle"></div>
-                <div class="gear-circle"></div>
+        <div class="container">
+            <div class="star" style="top:10%; left:20%; width:2px; height:2px; --d:3s;"></div>
+            <div class="star" style="top:40%; left:80%; width:1px; height:1px; --d:5s;"></div>
+            <div class="star" style="top:70%; left:30%; width:3px; height:3px; --d:4s;"></div>
+            
+            <div class="boundary">
+                <div class="core">
+                    <div class="inner-circle"></div>
+                    <div class="inner-circle"></div>
+                    <div class="inner-circle"></div>
+                    <div class="inner-circle"></div>
+                    <div class="inner-circle"></div>
+                    <div class="inner-circle"></div>
+                </div>
             </div>
-        </div>
 
-        <h1 class="logo-title">VOID-OS</h1>
-        <div class="tagline">Intelligence Access Protocol v4.0</div>
-
-        <div class="progress-tray">
-            <div class="progress-fill"></div>
+            <div class="title">VOID-OS</div>
+            <div class="tagline">Intelligence Access Protocol v4.0</div>
+            
+            <div class="progress-bar"><div class="fill"></div></div>
         </div>
     </div>
     """
+
+    # Using components.html forces the browser to render the CSS/JS perfectly
+    with placeholder:
+        components.html(vortex_code, height=1000)
     
-    # Passing the raw string directly
-    placeholder.markdown(vortex_html, unsafe_allow_html=True)
     time.sleep(6.5)
     placeholder.empty()
 
-# Initialization Logic
+# --- STARTUP ---
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
