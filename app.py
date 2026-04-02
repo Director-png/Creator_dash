@@ -177,17 +177,15 @@ import streamlit as st
 import time
 
 def show_vortex_intro():
-    # Use a single placeholder to prevent ghosting or layout shifts
     intro_placeholder = st.empty()
     
-    # CSS for the realistic starfield and the high-speed centrifuge
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
         
-        /* --- REAL SKY STARFIELD --- */
+        /* --- DYNAMIC STARFIELD --- */
         .vortex-container {
-            background: radial-gradient(circle at center, #000814 0%, #000000 100%);
+            background: #000;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -198,10 +196,9 @@ def show_vortex_intro():
             overflow: hidden;
         }
 
-        /* Dynamic, twinkling stars with different sizes and speeds */
         .star {
             position: absolute;
-            background: white;
+            background: #FFFFFF;
             border-radius: 50%;
             opacity: 0.5;
             animation: twinkle var(--duration) infinite ease-in-out;
@@ -209,31 +206,30 @@ def show_vortex_intro():
 
         @keyframes twinkle {
             0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 8px #fff; }
+            50% { opacity: 1; transform: scale(1.4); box-shadow: 0 0 10px #FFF; }
         }
 
-        /* --- THE CENTRIFUGE VORTEX SYSTEM --- */
+        /* --- THE CENTRIFUGE VORTEX --- */
         .boundary-circle {
             position: relative;
-            width: 320px;
-            height: 320px;
-            border: 4px solid #C0C0C2; /* Bold Silver Boundary */
+            width: 340px;
+            height: 340px;
+            border: 4px solid #C0C0C2; /* Silver Bold Outline */
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 40px;
-            box-shadow: 0 0 30px rgba(192, 192, 194, 0.2);
-            /* HIGH-SPEED BOUNDARY ROTATION (1.2 seconds) */
-            animation: centrifuge-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            /* HIGH SPEED SPIN */
+            animation: vortex-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            box-shadow: 0 0 40px rgba(192, 192, 194, 0.2);
         }
 
-        @keyframes centrifuge-spin {
+        @keyframes vortex-spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
 
-        /* The core remains UP-RIGHT while the boundary spins around it */
         .static-core {
             position: absolute;
             width: 100%;
@@ -241,77 +237,71 @@ def show_vortex_intro():
             display: flex;
             justify-content: center;
             align-items: center;
-            /* This counter-rotates to keep the core upright */
-            animation: core-counter-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            /* Counter-rotation to keep the inside static */
+            animation: counter-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
-        @keyframes core-counter-spin {
+        @keyframes counter-spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(-360deg); }
         }
 
-        /* The Inner overlapping circles (Gears are gone, these are static cores) */
         .gear-circle {
             position: absolute;
-            width: 130px;
-            height: 130px;
-            border: 3px solid #C0C0C2; /* Bold Silver */
+            width: 135px;
+            height: 135px;
+            border: 3.5px solid #C0C0C2; /* High-Contrast Silver */
             border-radius: 50%;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
-            /* They DO NOT rotate anymore */
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
         }
 
-        /* 6 Inner Circles locked in a Hexagonal Pattern (Creating the vortex core) */
-        .gear-circle:nth-child(1) { transform: translate(0, -85px); }
-        .gear-circle:nth-child(2) { transform: translate(74px, -42px); }
-        .gear-circle:nth-child(3) { transform: translate(74px, 42px); }
-        .gear-circle:nth-child(4) { transform: translate(0, 85px); }
-        .gear-circle:nth-child(5) { transform: translate(-74px, 42px); }
-        .gear-circle:nth-child(6) { transform: translate(-74px, -42px); }
+        /* Hexagonal Static Alignment */
+        .gear-circle:nth-child(1) { transform: translate(0, -90px); }
+        .gear-circle:nth-child(2) { transform: translate(78px, -45px); }
+        .gear-circle:nth-child(3) { transform: translate(78px, 45px); }
+        .gear-circle:nth-child(4) { transform: translate(0, 90px); }
+        .gear-circle:nth-child(5) { transform: translate(-78px, 45px); }
+        .gear-circle:nth-child(6) { transform: translate(-78px, -45px); }
 
-        /* --- TYPOGRAPHY --- */
+        /* --- TYPOGRAPHY & LOADING --- */
         .logo-title {
             font-family: 'Syncopate', sans-serif;
-            color: #ffffff;
-            font-size: 4.8rem;
-            letter-spacing: 32px;
-            margin: 20px 0 0 32px;
-            background: linear-gradient(to bottom, #FFFFFF 50%, #444444 100%);
+            color: #FFFFFF;
+            font-size: 5rem;
+            letter-spacing: 35px;
+            margin: 20px 0 0 35px;
+            background: linear-gradient(to bottom, #FFF 50%, #444 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             z-index: 20;
-            text-shadow: 0 0 20px rgba(255,255,255,0.1);
         }
 
-        /* --- LOADING TRAY --- */
         .progress-tray {
-            width: 550px;
-            height: 1px;
+            width: 600px;
+            height: 2px;
             background: rgba(255,255,255,0.05);
             margin-top: 80px;
             position: relative;
             overflow: hidden;
-            z-index: 20;
         }
 
         .progress-fill {
             width: 0%;
             height: 100%;
             background: #00F2FF;
-            box-shadow: 0 0 20px #00F2FF, 0 0 40px rgba(0, 242, 255, 0.5);
-            animation: fill-up 6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+            box-shadow: 0 0 30px #00F2FF;
+            animation: fill-up 6.5s cubic-bezier(0.85, 0, 0.15, 1) forwards;
         }
 
-        @keyframes fill-up { from { width: 0%; } to { width: 100%; } }
+        @keyframes fill-up { to { width: 100%; } }
         </style>
         
         <div class="vortex-container">
-            <div class="star" style="top:10%; left:20%; width:1px; height:1px; --duration:3s;"></div>
-            <div class="star" style="top:40%; left:80%; width:2px; height:2px; --duration:5s;"></div>
-            <div class="star" style="top:70%; left:40%; width:1px; height:1px; --duration:4s;"></div>
-            <div class="star" style="top:15%; left:65%; width:2.5px; height:2.5px; --duration:6s;"></div>
+            <div class="star" style="top:15%; left:25%; width:1px; height:1px; --duration:3s;"></div>
+            <div class="star" style="top:45%; left:85%; width:2.5px; height:2.5px; --duration:5s;"></div>
+            <div class="star" style="top:75%; left:35%; width:1px; height:1px; --duration:4s;"></div>
+            <div class="star" style="top:25%; left:65%; width:3px; height:3px; --duration:6s;"></div>
             <div class="star" style="top:85%; left:15%; width:1.5px; height:1.5px; --duration:4.5s;"></div>
-            <div class="star" style="top:55%; left:90%; width:1px; height:1px; --duration:7s;"></div>
             
             <div class="boundary-circle">
                 <div class="static-core">
@@ -321,7 +311,7 @@ def show_vortex_intro():
                     <div class="gear-circle"></div>
                     <div class="gear-circle"></div>
                     <div class="gear-circle"></div>
-                    <div style="color:rgba(255,255,255,0.15); font-family:monospace; font-size:0.6rem; letter-spacing:1px; z-index:15;">
+                    <div style="color:rgba(255,255,255,0.25); font-family:monospace; font-size:0.7rem; letter-spacing:3px; z-index:15;">
                         [ SOVEREIGN_CORE ]
                     </div>
                 </div>
@@ -335,20 +325,10 @@ def show_vortex_intro():
         </div>
     """, unsafe_allow_html=True)
 
-    status_slot = st.empty()
-    steps = ["ENGAGING GEAR LOGIC...", "CALIBRATING STARFIELD...", "VOID-OS v4.0 ONLINE."]
-    
-    for step in steps:
-        status_slot.markdown(f"""
-            <div style="position: fixed; top: 80%; left: 50%; transform: translateX(-50%); z-index: 10000;">
-                <p style="color: rgba(0, 242, 255, 0.4); font-family: monospace; font-size: 0.75rem; letter-spacing: 7px; text-align: center;">{step}</p>
-            </div>
-        """, unsafe_allow_html=True)
-        time.sleep(1.8)
-        
+    # Boot Sequence Simulation
+    time.sleep(6.5)
     intro_placeholder.empty()
 
-# --- TRIGGER ---
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
