@@ -179,10 +179,8 @@ import base64
 import os
 
 def get_base64_image():
-    """Extracts the image data using the robust absolute path provided."""
-    # Your specific Windows path from the reference
+    """Extracts the image data using the robust absolute path."""
     path = r"C:\Users\hp\OneDrive\Pictures\Screenshots\Screenshot 2026-04-02 130156.png"
-    
     try:
         if os.path.exists(path):
             with open(path, "rb") as img_file:
@@ -201,9 +199,9 @@ def show_vortex_intro():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
         
-        /* --- REALISTIC SHIMMERING STARFIELD --- */
+        /* --- HIGH-VELOCITY STARFIELD --- */
         .vortex-container {{
-            background: radial-gradient(circle at center, #000814 0%, #000000 100%);
+            background: #000;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -214,63 +212,82 @@ def show_vortex_intro():
             overflow: hidden;
         }}
 
-        .star {{
+        .star-field {{
             position: absolute;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.4;
-            animation: twinkle var(--duration) infinite ease-in-out;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                radial-gradient(1px 1px at 20% 30%, #fff, transparent),
+                radial-gradient(1.5px 1.5px at 70% 70%, #fff, transparent),
+                radial-gradient(1px 1px at 40% 80%, #ddd, transparent),
+                radial-gradient(2px 2px at 10% 90%, #fff, transparent);
+            background-size: 500px 500px;
+            animation: sky-spin 100s linear infinite; /* Subtle background drift */
         }}
 
-        @keyframes twinkle {{
-            0%, 100% {{ opacity: 0.2; transform: scale(1); }}
-            50% {{ opacity: 1; transform: scale(1.3); box-shadow: 0 0 10px #fff; }}
-        }}
+        @keyframes sky-spin {{ from {{ transform: rotate(0deg); }} to {{ transform: rotate(360deg); }} }}
 
-        /* --- THE INFINITY GEAR VORTEX (6-GEAR SYSTEM) --- */
-        .gear-system {{
+        /* --- THE CENTRIFUGE SYSTEM --- */
+        .boundary-circle {{
             position: relative;
             width: 320px;
             height: 320px;
-            border: 2px solid rgba(192, 192, 194, 0.2); 
+            border: 4px double rgba(192, 192, 194, 0.4); /* Double line for tech look */
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 40px;
+            /* HIGH SPEED ROTATION */
+            animation: boundary-spin 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.1);
         }}
 
-        .main-logo {{
-            width: 150px; 
-            z-index: 10;
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
-            border-radius: 50%;
+        @keyframes boundary-spin {{
+            from {{ transform: rotate(0deg); }}
+            to {{ transform: rotate(360deg); }}
+        }}
+
+        .static-core {{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* This counter-rotates so the core stays upright while the boundary spins */
+            animation: counter-spin 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }}
+
+        @keyframes counter-spin {{
+            from {{ transform: rotate(0deg); }}
+            to {{ transform: rotate(-360deg); }}
         }}
 
         .gear-circle {{
             position: absolute;
-            width: 140px;
-            height: 140px;
-            border: 3.5px solid #FFFFFF; /* Bold Popping Outlines */
+            width: 130px;
+            height: 130px;
+            border: 3px solid #FFFFFF;
             border-radius: 50%;
-            transform-origin: center center;
-            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
         }}
 
-        /* Staggered Orbital Mechanics for the 6-Gear Vortex */
-        .gear-circle:nth-child(1) {{ animation: orbit 4s linear infinite; }}
-        .gear-circle:nth-child(2) {{ animation: orbit 5s linear infinite; animation-delay: -0.8s; }}
-        .gear-circle:nth-child(3) {{ animation: orbit 6s linear infinite; animation-delay: -1.6s; }}
-        .gear-circle:nth-child(4) {{ animation: orbit 7s linear infinite; animation-delay: -2.4s; }}
-        .gear-circle:nth-child(5) {{ animation: orbit 8s linear infinite; animation-delay: -3.2s; }}
-        .gear-circle:nth-child(6) {{ animation: orbit 9s linear infinite; animation-delay: -4.0s; }}
+        /* Hexagonal Static Positioning */
+        .gear-circle:nth-child(1) {{ transform: translate(0, -90px); }}
+        .gear-circle:nth-child(2) {{ transform: translate(78px, -45px); }}
+        .gear-circle:nth-child(3) {{ transform: translate(78px, 45px); }}
+        .gear-circle:nth-child(4) {{ transform: translate(0, 90px); }}
+        .gear-circle:nth-child(5) {{ transform: translate(-78px, 45px); }}
+        .gear-circle:nth-child(6) {{ transform: translate(-78px, -45px); }}
 
-        @keyframes orbit {{
-            from {{ transform: rotate(0deg) translateX(90px); }}
-            to {{ transform: rotate(360deg) translateX(90px); }}
+        .main-logo {{
+            width: 150px; 
+            z-index: 10;
+            filter: drop-shadow(0 0 25px rgba(255,255,255,0.2));
+            border-radius: 50%;
         }}
 
-        /* --- TYPOGRAPHY --- */
         .logo-title {{
             font-family: 'Syncopate', sans-serif;
             color: #ffffff;
@@ -281,10 +298,8 @@ def show_vortex_intro():
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             z-index: 20;
-            text-align: center;
         }}
 
-        /* --- LOADING BAR --- */
         .progress-tray {{
             width: 600px;
             height: 2px;
@@ -300,27 +315,25 @@ def show_vortex_intro():
             height: 100%;
             background: #00F2FF;
             box-shadow: 0 0 30px #00F2FF;
-            animation: fill-up 6.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+            animation: fill-up 6.5s linear forwards;
         }}
 
         @keyframes fill-up {{ to {{ width: 100%; }} }}
         </style>
         
         <div class="vortex-container">
-            <div class="star" style="top:10%; left:20%; width:1px; height:1px; --duration:3s;"></div>
-            <div class="star" style="top:40%; left:80%; width:2px; height:2px; --duration:5s;"></div>
-            <div class="star" style="top:70%; left:30%; width:1px; height:1px; --duration:4s;"></div>
-            <div class="star" style="top:20%; left:60%; width:2.5px; height:2.5px; --duration:6s;"></div>
-            <div class="star" style="top:80%; left:15%; width:1.5px; height:1.5px; --duration:4.5s;"></div>
+            <div class="star-field"></div>
             
-            <div class="gear-system">
-                <div class="gear-circle"></div>
-                <div class="gear-circle"></div>
-                <div class="gear-circle"></div>
-                <div class="gear-circle"></div>
-                <div class="gear-circle"></div>
-                <div class="gear-circle"></div>
-                {f'<img src="{logo_html}" class="main-logo">' if logo_html else '<div style="color:rgba(255,255,255,0.1); font-family:monospace; font-size:0.5rem;">[ OFFLINE_CORE ]</div>'}
+            <div class="boundary-circle">
+                <div class="static-core">
+                    <div class="gear-circle"></div>
+                    <div class="gear-circle"></div>
+                    <div class="gear-circle"></div>
+                    <div class="gear-circle"></div>
+                    <div class="gear-circle"></div>
+                    <div class="gear-circle"></div>
+                    {f'<img src="{logo_html}" class="main-logo">' if logo_html else '<div style="color:rgba(255,255,255,0.2); font-family:monospace; font-size:0.6rem;">[ OFFLINE_CORE ]</div>'}
+                </div>
             </div>
 
             <h1 class="logo-title">VOID-OS</h1>
@@ -332,22 +345,22 @@ def show_vortex_intro():
     """, unsafe_allow_html=True)
 
     status_slot = st.empty()
-    steps = ["ENGAGING GEAR LOGIC...", "CALIBRATING STARFIELD...", "VOID-OS v4.0 ONLINE."]
+    steps = ["STABILIZING CORE...", "ACCELERATING BOUNDARY...", "VOID-OS ONLINE."]
     
     for step in steps:
         status_slot.markdown(f"""
             <div style="position: fixed; top: 80%; left: 50%; transform: translateX(-50%); z-index: 10000;">
-                <p style="color: rgba(0, 242, 255, 0.5); font-family: monospace; font-size: 0.75rem; letter-spacing: 7px; text-align: center;">{step}</p>
+                <p style="color: rgba(0, 242, 255, 0.5); font-family: monospace; font-size: 0.7rem; letter-spacing: 7px; text-align: center;">{step}</p>
             </div>
         """, unsafe_allow_html=True)
-        time.sleep(2.1) # Matches the 6.5s animation duration
+        time.sleep(2.1)
         
     intro_placeholder.empty()
 
-# --- TRIGGER ---
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
+
 
 def draw_title(emoji, text):
     st.markdown(f"""
