@@ -55,67 +55,6 @@ def initiate_teleport(target_page):
 
 # This defines 'conn' so the rest of the app can see it
 conn = st.connection("gsheets", type=GSheetsConnection)
-def ignition_sequence():
-    if 'ignition_complete' not in st.session_state:
-        # Create a placeholder that disappears once done
-        placeholder = st.empty()
-        
-        with placeholder.container():
-            st.markdown("""
-                <style>
-                /* FORCE FULL SCREEN OVERLAY */
-                .ignition-overlay {
-                    position: fixed;
-                    top: 0; left: 0; width: 100%; height: 100%;
-                    background: black !important;
-                    z-index: 999999 !important; /* Extremely high to beat default spinners */
-                    display: flex; flex-direction: column;
-                    align-items: center; justify-content: center;
-                }
-
-                /* THE ROTATING CORE */
-                .engine-ring {
-                    width: 120px; height: 120px;
-                    border: 4px solid rgba(0, 255, 65, 0.1);
-                    border-top: 4px solid #00ff41;
-                    border-radius: 50%;
-                    animation: spin-engine 1.2s linear infinite;
-                    box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
-                }
-
-                .void-label {
-                    margin-top: 30px;
-                    color: #00ff41;
-                    font-family: 'Courier New', monospace;
-                    font-size: 32px;
-                    font-weight: bold;
-                    letter-spacing: 8px;
-                    animation: glow-fade 2s ease-in-out forwards;
-                }
-
-                @keyframes spin-engine {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-
-                @keyframes glow-fade {
-                    0% { opacity: 0; filter: blur(10px); }
-                    100% { opacity: 1; filter: blur(0); }
-                }
-                </style>
-
-                <div class="ignition-overlay">
-                    <div class="engine-ring"></div>
-                    <div class="void-label">VOID-OS</div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # This sleep MUST happen while the markdown is active
-            time.sleep(3)
-            
-        placeholder.empty()
-        st.session_state.ignition_complete = True
-        st.rerun() # Forces the app to clear the overlay and start the real UI
 
 # --- INITIALIZE STATE (Place this near the top of your script) ---
 if "current_page" not in st.session_state:
