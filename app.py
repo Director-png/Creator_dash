@@ -172,101 +172,114 @@ FEEDBACK_API_URL = get_void_secret("FEEDBACK_API_URL", "RESTRICTED")
 NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
 NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
-import streamlit as st
-import time
 
 import streamlit as st
 import time
 
-def show_cinematic_intro():
+def show_hyper_ai_intro():
     intro_placeholder = st.empty()
     
-    # CSS for the "Scanned" Terminal look
+    # CSS for the "Liquid AI" Aesthetic
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;400;900&display=swap');
         
-        .boot-container {
-            background-color: #050505;
+        .hyper-container {
+            background: radial-gradient(circle at center, #1a1a2e 0%, #050505 100%);
             height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-family: 'Share Tech Mono', monospace;
+            font-family: 'Inter', sans-serif;
             position: fixed;
             top: 0; left: 0; width: 100%; z-index: 9999;
+            overflow: hidden;
         }
         
-        .logo-text {
-            color: #00F2FF;
-            font-size: 4rem;
-            letter-spacing: 15px;
-            text-shadow: 0 0 20px #00F2FF;
-            animation: flicker 0.1s infinite;
+        /* The Pulsing Neural Core */
+        .ai-core {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(45deg, #00f2ff, #7000ff);
+            border-radius: 50%;
+            filter: blur(20px);
+            opacity: 0.8;
+            animation: core-pulse 3s ease-in-out infinite;
+            position: relative;
         }
-        
-        .scan-line {
-            width: 100%;
-            height: 2px;
-            background: rgba(0, 242, 255, 0.5);
+
+        .ai-core::after {
+            content: '';
             position: absolute;
-            top: 0;
-            box-shadow: 0 0 15px #00F2FF;
-            animation: scan 2s linear infinite;
+            top: -10px; left: -10px; right: -10px; bottom: -10px;
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            border-radius: 50%;
+            animation: orbit 5s linear infinite;
+        }
+        
+        .logo-main {
+            color: #ffffff;
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: 20px;
+            margin-top: -100px;
+            z-index: 10;
+            background: -webkit-linear-gradient(white, #38495a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
         }
 
-        @keyframes scan {
-            0% { top: 0%; }
-            100% { top: 100%; }
+        @keyframes core-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; filter: blur(20px); }
+            50% { transform: scale(1.4); opacity: 0.8; filter: blur(40px); }
         }
 
-        @keyframes flicker {
-            0% { opacity: 0.9; }
-            50% { opacity: 1; }
-            100% { opacity: 0.9; }
+        @keyframes orbit {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
-        .status-msg {
-            color: #7000FF;
-            margin-top: 20px;
-            font-size: 0.9rem;
+        .loading-text {
+            color: rgba(255,255,255,0.6);
+            margin-top: 40px;
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            font-weight: 400;
             text-transform: uppercase;
         }
         </style>
     """, unsafe_allow_html=True)
 
     with intro_placeholder.container():
-        # The HTML Structure
         st.markdown("""
-            <div class="boot-container">
-                <div class="scan-line"></div>
-                <div class="logo-text">VOID-OS</div>
-                <div id="dynamic-status" class="status-msg">BYPASSING MARKET NOISE...</div>
+            <div class="hyper-container">
+                <div class="ai-core"></div>
+                <div class="logo-main">VOID-OS</div>
+                <div class="loading-text" id="ai-status">NEURAL SYNTHESIS IN PROGRESS</div>
             </div>
         """, unsafe_allow_html=True)
         
-        # The Sequence (This is what they see in your video)
-        boot_steps = [
-            "Initializing Sovereign Core...",
-            "Syncing Global Pulse Nodes...",
-            "Calibrating Quantum Intersect...",
-            "Logic Layer: ACTIVE",
-            "Accessing Solo Agency Vault..."
+        # Simulated AI Calibration (Fast & Smooth)
+        status_placeholder = st.empty()
+        steps = [
+            "Syncing Global Datastream...",
+            "Activating Logic Layer...",
+            "Quantum Intersect Online.",
+            "Ready to Conquer."
         ]
         
-        status_area = st.empty()
-        for step in boot_steps:
-            # We use an empty area to update the text under the big logo
-            status_area.markdown(f"<p style='text-align:center; color:#7000FF; font-family:monospace;'>{step}</p>", unsafe_allow_html=True)
-            time.sleep(0.6) # The "Calculated" delay
+        for step in steps:
+            status_placeholder.markdown(f"<p style='text-align:center; color:rgba(255,255,255,0.4); font-size:0.8rem; letter-spacing:3px; margin-top:-250px; z-index:100; position:relative;'>{step}</p>", unsafe_allow_html=True)
+            time.sleep(0.7)
             
     intro_placeholder.empty()
 
-# Trigger the boot sequence only once per session
 if 'booted' not in st.session_state:
-    show_cinematic_intro()
+    show_hyper_ai_intro()
     st.session_state.booted = True
+
 
 def draw_title(emoji, text):
     st.markdown(f"""
