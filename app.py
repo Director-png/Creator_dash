@@ -183,12 +183,15 @@ def show_vortex_intro():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
         
+        /* --- DEEP SPACE BACKGROUND --- */
         .vortex-container {
-            /* Black Marble Aesthetic Background */
             background-color: #000000;
             background-image: 
-                radial-gradient(circle at 50% 50%, rgba(20, 20, 25, 0.9) 0%, rgba(0,0,0,1) 100%),
-                url('https://www.transparenttextures.com/patterns/black-mamba.png'); /* Subtle marble texture */
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0));
+            background-size: 200px 200px;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -197,48 +200,70 @@ def show_vortex_intro():
             position: fixed;
             top: 0; left: 0; width: 100%; z-index: 9999;
             overflow: hidden;
+            animation: space-drift 100s linear infinite;
         }
 
-        /* --- THE SILVER VORTEX CORE (CSS REPLICA) --- */
-        .silver-vortex {
+        @keyframes space-drift {
+            from { background-position: 0 0; }
+            to { background-position: 1000px 1000px; }
+        }
+
+        /* --- THE VORTEX EYE LOGO --- */
+        .eye-vortex {
             position: relative;
             width: 180px;
             height: 180px;
-            margin-bottom: 20px;
+            border: 3px solid #C0C0C2; /* Main Silver Boundary */
+            border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            animation: silver-swirl 8s linear infinite;
+            box-shadow: 0 0 30px rgba(192, 192, 194, 0.2);
+            margin-bottom: 20px;
         }
 
-        .swirl-ring {
+        /* The Internal Co-Centric Circles */
+        .inner-circle {
             position: absolute;
-            border: 2px solid transparent;
-            border-top: 2px solid #C0C0C2; /* Silver base */
+            border: 1.5px solid rgba(192, 192, 194, 0.6);
             border-radius: 50%;
-            filter: drop-shadow(0 0 5px rgba(192, 192, 194, 0.4));
+            transform-origin: center;
         }
 
-        /* Generating the layered silver swirl effect */
-        .swirl-ring:nth-child(1) { width: 100%; height: 100%; animation: rotate-ccw 4s linear infinite; opacity: 0.8; }
-        .swirl-ring:nth-child(2) { width: 85%; height: 85%; animation: rotate-cw 3s linear infinite; opacity: 0.6; border-top: 2px solid #E8E8E8; }
-        .swirl-ring:nth-child(3) { width: 70%; height: 70%; animation: rotate-ccw 5s linear infinite; opacity: 0.9; }
-        .swirl-ring:nth-child(4) { width: 55%; height: 55%; animation: rotate-cw 2s linear infinite; opacity: 0.7; border-top: 2px solid #A9A9A9; }
-        .swirl-ring:nth-child(5) { width: 40%; height: 40%; animation: rotate-ccw 6s linear infinite; opacity: 1; border-top: 2px solid #FFFFFF; }
+        /* Circles touching the boundary and rotating */
+        .inner-circle:nth-child(1) { width: 90%; height: 90%; animation: rotate-eye 4s linear infinite; }
+        .inner-circle:nth-child(2) { width: 75%; height: 75%; animation: rotate-eye 6s linear reverse infinite; }
+        .inner-circle:nth-child(3) { width: 60%; height: 60%; animation: rotate-eye 3s linear infinite; }
+        
+        /* The Center "Eye" Space */
+        .eye-center {
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle, #00F2FF 0%, transparent 80%);
+            border-radius: 50%;
+            box-shadow: 0 0 15px #00F2FF;
+            animation: blink 2s ease-in-out infinite;
+        }
 
-        @keyframes rotate-cw { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes rotate-ccw { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-        @keyframes silver-swirl { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.3); } }
+        @keyframes rotate-eye {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
 
         /* Typography */
         .logo-title {
             font-family: 'Syncopate', sans-serif;
             color: #ffffff;
-            font-size: 4rem;
+            font-size: 3.8rem;
             font-weight: 700;
-            letter-spacing: 25px;
-            margin: 15px 0 5px 25px; /* Offset for letter spacing */
-            background: linear-gradient(to bottom, #FFFFFF 50%, #8E8E8E 100%);
+            letter-spacing: 22px;
+            margin: 15px 0 5px 22px;
+            background: linear-gradient(to bottom, #FFFFFF 60%, #444444 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-align: center;
@@ -248,16 +273,16 @@ def show_vortex_intro():
             font-family: 'Inter', sans-serif;
             color: #00F2FF;
             font-size: 0.75rem;
-            letter-spacing: 14px;
+            letter-spacing: 12px;
             font-weight: 100;
             opacity: 0.8;
             text-align: center;
             text-transform: uppercase;
         }
 
-        /* The Neon Cyan Loading Bar */
+        /* --- THE LOADING BAR --- */
         .progress-tray {
-            width: 450px;
+            width: 400px;
             height: 1px;
             background: rgba(255,255,255,0.05);
             margin-top: 60px;
@@ -269,32 +294,27 @@ def show_vortex_intro():
             width: 0%;
             height: 100%;
             background: #00F2FF;
-            box-shadow: 0 0 20px #00F2FF, 0 0 40px rgba(0, 242, 255, 0.5);
-            animation: fill-up 5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+            box-shadow: 0 0 15px #00F2FF;
+            animation: fill-up 5.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
         }
 
         @keyframes fill-up {
-            0% { width: 0%; }
-            100% { width: 100%; }
+            from { width: 0%; }
+            to { width: 100%; }
         }
 
-        .status-text {
+        .status-msg-container {
             margin-top: 20px;
-            color: rgba(255,255,255,0.2);
-            font-family: monospace;
-            font-size: 0.6rem;
-            letter-spacing: 5px;
-            text-transform: uppercase;
+            height: 20px;
         }
         </style>
         
         <div class="vortex-container">
-            <div class="silver-vortex">
-                <div class="swirl-ring"></div>
-                <div class="swirl-ring"></div>
-                <div class="swirl-ring"></div>
-                <div class="swirl-ring"></div>
-                <div class="swirl-ring"></div>
+            <div class="eye-vortex">
+                <div class="inner-circle"></div>
+                <div class="inner-circle"></div>
+                <div class="inner-circle"></div>
+                <div class="eye-center"></div>
             </div>
             <h1 class="logo-title">VOID-OS</h1>
             <p class="tagline-sub">Predict. Integrate. Conquer.</p>
@@ -302,23 +322,30 @@ def show_vortex_intro():
             <div class="progress-tray">
                 <div class="progress-fill"></div>
             </div>
-            <div id="status-update" class="status-text">CALIBRATING NEURAL NODES...</div>
+            <div id="status-text" style="margin-top:20px;"></div>
         </div>
     """, unsafe_allow_html=True)
 
-    # 5-Second Tactical Sequence
-    status_area = st.empty()
+    # Tactical sequence logic handled via Streamlit Empty for better stability
+    status_slot = st.empty()
     steps = [
         "INITIALIZING SOVEREIGN CORE...", 
-        "UPLINKING GLOBAL PULSE...", 
-        "INTEGRATING VECTOR LOGIC...", 
-        "BYPASSING MARKET NOISE...", 
-        "VOID-OS v4.0 ONLINE."
+        "UPLINKING TO GLOBAL PULSE...", 
+        "CALIBRATING NEURAL VECTORS...", 
+        "INTEGRATING LOGIC LAYERS...", 
+        "VOID-OS ONLINE: WELCOME DIRECTOR."
     ]
     
     for step in steps:
-        # We update the status message dynamically
-        st.markdown(f"<style>.status-text::after {{ content: ' {step}'; }}</style>", unsafe_allow_html=True)
+        # Pushes status below the bar with absolute positioning to stay on top
+        status_slot.markdown(f"""
+            <div style="position: fixed; top: 78%; left: 50%; transform: translateX(-50%); z-index: 10000;">
+                <p style="color: rgba(0, 242, 255, 0.5); font-family: monospace; 
+                          font-size: 0.6rem; letter-spacing: 4px; text-align: center;">
+                    {step}
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
         time.sleep(1.1)
         
     intro_placeholder.empty()
@@ -327,7 +354,6 @@ def show_vortex_intro():
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
-
 
 def draw_title(emoji, text):
     st.markdown(f"""
