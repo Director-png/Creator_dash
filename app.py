@@ -172,23 +172,20 @@ FEEDBACK_API_URL = get_void_secret("FEEDBACK_API_URL", "RESTRICTED")
 NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
 NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
+
 import streamlit as st
 import time
 
 def show_future_intercept_intro():
     intro_placeholder = st.empty()
     
+    # MASTER BUILD: Integrating Dynamic Starfield with Syncopate Branding
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;900&display=swap');
         
         .intercept-container {
             background: #000000;
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(0, 242, 255, 0.05) 0%, transparent 50%),
-                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 100% 100%, 30px 30px, 30px 30px;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -199,9 +196,34 @@ def show_future_intercept_intro():
             overflow: hidden;
         }
 
+        /* --- DYNAMIC MOVING STARFIELD --- */
+        .intercept-container::before {
+            content: "";
+            position: absolute;
+            width: 200%; height: 200%;
+            top: -50%; left: -50%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 160px 120px, #eee, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: star-glide 100s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes star-glide {
+            from { transform: translateY(0); }
+            to { transform: translateY(200px); }
+        }
+
         .logo-box {
             position: relative;
             text-align: center;
+            z-index: 10; /* Keeps logo above stars */
         }
 
         .main-title {
@@ -215,6 +237,7 @@ def show_future_intercept_intro():
             background: linear-gradient(to bottom, #fff 40%, #666 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
         }
 
         .tagline {
@@ -246,14 +269,6 @@ def show_future_intercept_intro():
             0% { transform: translateY(20px); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
         }
-
-        .neural-bit {
-            position: absolute;
-            color: #7000FF;
-            font-family: monospace;
-            font-size: 10px;
-            opacity: 0.3;
-        }
         </style>
     """, unsafe_allow_html=True)
 
@@ -268,9 +283,7 @@ def show_future_intercept_intro():
             </div>
         """, unsafe_allow_html=True)
         
-        # Tactical Progress (Ultra-Fast, High-Stakes)
         status_placeholder = st.empty()
-        status_placeholder.markdown("<div style='height:200px;'></div>", unsafe_allow_html=True) # Spacer
         
         tactical_steps = [
             "SCANNING TEMPORAL VECTORS...",
@@ -279,21 +292,23 @@ def show_future_intercept_intro():
             "VOID-OS v4.0 ONLINE."
         ]
         
+        # Extended timing (approx 5.5s total) to allow starfield immersion
         for step in tactical_steps:
             status_placeholder.markdown(f"""
-                <p style='text-align:center; color:rgba(0, 242, 255, 0.4); 
-                font-family:monospace; font-size:0.7rem; letter-spacing:5px;'>
-                {step}
-                </p>
+                <div style='position:fixed; bottom:15%; width:100%; left:0; z-index:10000;'>
+                    <p style='text-align:center; color:rgba(0, 242, 255, 0.4); 
+                    font-family:monospace; font-size:0.7rem; letter-spacing:5px;'>
+                    {step}
+                    </p>
+                </div>
             """, unsafe_allow_html=True)
-            time.sleep(0.6)
+            time.sleep(1.4)
             
     intro_placeholder.empty()
 
 if 'booted' not in st.session_state:
     show_future_intercept_intro()
     st.session_state.booted = True
-
 
 def draw_title(emoji, text):
     st.markdown(f"""
