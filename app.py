@@ -175,18 +175,34 @@ NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 
 import streamlit as st
 import time
+import base64
+import os
+
+def get_base64_image(file_name):
+    """Encodes the local LOGO.png into a string Streamlit can read."""
+    # Finds the directory where this script is saved
+    script_dir = os.path.dirname(__file__) 
+    full_path = os.path.join(script_dir, file_name)
+    
+    if os.path.exists(full_path):
+        with open(full_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode()
+    return None
 
 def show_vortex_intro():
+    # --- ASSET RETRIEVAL ---
+    img_base64 = get_base64_image("LOGO.png")
+    logo_html = f"data:image/png;base64,{img_base64}" if img_base64 else None
+
     intro_placeholder = st.empty()
     
-    st.markdown("""
+    st.markdown(f"""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
         
-        /* --- THE REAL STARFIELD (High-Density Box Shadows) --- */
-        .vortex-container {
-            background: #00050a;
-            background: radial-gradient(circle at center, #001220 0%, #000000 100%);
+        /* --- REAL STARFIELD BACKGROUND --- */
+        .vortex-container {{
+            background: radial-gradient(ellipse at bottom, #00050a 0%, #000000 100%);
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -195,126 +211,120 @@ def show_vortex_intro():
             position: fixed;
             top: 0; left: 0; width: 100%; z-index: 9999;
             overflow: hidden;
-        }
+        }}
 
-        /* Generating sharp, realistic stars */
-        .star-layer {
+        /* Sharp Star Layers */
+        .stars-static {{
             position: absolute;
-            top: 0; left: 0;
-            width: 2px; height: 2px;
-            background: transparent;
-            /* Thousands of stars generated via shadow math */
-            box-shadow: 200px 300px #FFF, 500px 100px #FFF, 800px 500px #DDD, 1200px 200px #FFF, 1500px 800px #EEE, 400px 900px #FFF, 100px 600px #DDD, 1800px 400px #FFF, 900px 100px #FFF, 50px 50px #FFF, 1100px 700px #DDD;
-            animation: twinkle 5s infinite ease-in-out;
-        }
-
-        .star-layer-2 {
             width: 1px; height: 1px;
-            box-shadow: 150px 450px #FFF, 600px 250px #FFF, 950px 150px #DDD, 1300px 600px #FFF, 1700px 300px #EEE, 350px 850px #FFF, 50px 750px #DDD, 1900px 100px #FFF;
-            animation: twinkle 3s infinite ease-in-out reverse;
-        }
+            background: transparent;
+            box-shadow: 145px 234px #FFF, 890px 456px #DDD, 1200px 100px #FFF, 400px 900px #EEE, 1700px 300px #FFF, 200px 700px #FFF, 1400px 800px #DDD;
+            animation: twinkle 4s infinite ease-in-out;
+        }}
 
-        @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        .stars-moving {{
+            position: absolute;
+            width: 2px; height: 2px;
+            box-shadow: 500px 100px #FFF, 1100px 800px #FFF, 300px 400px #DDD, 1600px 200px #FFF;
+            animation: space-drift 180s linear infinite;
+        }}
 
-        /* --- THE GEAR-VORTEX MECHANICS --- */
-        .gear-system {
+        @keyframes twinkle {{ 0%, 100% {{ opacity: 0.3; }} 50% {{ opacity: 1; }} }}
+        @keyframes space-drift {{ from {{ transform: translateY(0); }} to {{ transform: translateY(-2000px); }} }}
+
+        /* --- THE GEAR-VORTEX LOGO --- */
+        .gear-system {{
             position: relative;
-            width: 240px;
-            height: 240px;
+            width: 220px;
+            height: 220px;
             border: 1px solid rgba(192, 192, 194, 0.2); /* Silver Boundary */
             border-radius: 50%;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             display: flex;
             justify-content: center;
             align-items: center;
-        }
+        }}
 
-        .gear {
+        .main-logo {{
+            width: 120px;
+            z-index: 10;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
+        }}
+
+        /* The Overlapping Gear Circles */
+        .gear-orbit {{
             position: absolute;
-            width: 100px;
-            height: 100px;
-            border: 1.5px solid #C0C0C2; /* Silver */
+            width: 90px;
+            height: 90px;
+            border: 1px solid rgba(192, 192, 194, 0.5);
             border-radius: 50%;
-            /* Orbiting touching the boundary */
             transform-origin: center center;
-        }
+        }}
 
-        /* Gear 1 Orbit */
-        .gear:nth-child(1) { animation: orbit-gear-1 8s linear infinite; }
-        /* Gear 2 Orbit */
-        .gear:nth-child(2) { animation: orbit-gear-2 10s linear infinite; }
-        /* Gear 3 Orbit */
-        .gear:nth-child(3) { animation: orbit-gear-3 12s linear infinite; }
+        .gear-orbit:nth-child(1) {{ animation: orbit-1 10s linear infinite; }}
+        .gear-orbit:nth-child(2) {{ animation: orbit-2 12s linear infinite; }}
+        .gear-orbit:nth-child(3) {{ animation: orbit-3 15s linear infinite; }}
 
-        @keyframes orbit-gear-1 { 
-            from { transform: rotate(0deg) translateX(70px) rotate(0deg); } 
-            to { transform: rotate(360deg) translateX(70px) rotate(-360deg); } 
-        }
-        @keyframes orbit-gear-2 { 
-            from { transform: rotate(120deg) translateX(70px) rotate(0deg); } 
-            to { transform: rotate(480deg) translateX(70px) rotate(-360deg); } 
-        }
-        @keyframes orbit-gear-3 { 
-            from { transform: rotate(240deg) translateX(70px) rotate(0deg); } 
-            to { transform: rotate(600deg) translateX(70px) rotate(-360deg); } 
-        }
+        @keyframes orbit-1 {{ from {{ transform: rotate(0deg) translateX(65px); }} to {{ transform: rotate(360deg) translateX(65px); }} }}
+        @keyframes orbit-2 {{ from {{ transform: rotate(120deg) translateX(65px); }} to {{ transform: rotate(480deg) translateX(65px); }} }}
+        @keyframes orbit-3 {{ from {{ transform: rotate(240deg) translateX(65px); }} to {{ transform: rotate(600deg) translateX(65px); }} }}
 
-        /* Typography & Layout */
-        .logo-title {
+        /* --- TYPOGRAPHY --- */
+        .logo-title {{
             font-family: 'Syncopate', sans-serif;
             color: #ffffff;
-            font-size: 4rem;
+            font-size: 3.8rem;
             font-weight: 700;
-            letter-spacing: 25px;
-            margin: 20px 0 5px 25px;
+            letter-spacing: 22px;
+            margin: 20px 0 5px 22px;
             background: linear-gradient(to bottom, #FFFFFF 60%, #444444 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            z-index: 10;
-        }
+            z-index: 20;
+        }}
 
-        .tagline-sub {
+        .tagline-sub {{
             font-family: 'Inter', sans-serif;
             color: #00F2FF;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             letter-spacing: 14px;
-            font-weight: 100;
             opacity: 0.8;
             text-align: center;
             text-transform: uppercase;
-            z-index: 10;
-        }
+            z-index: 20;
+        }}
 
-        /* --- LOADING BAR --- */
-        .progress-tray {
+        /* --- THE LOADING TRAY --- */
+        .progress-tray {{
             width: 450px;
             height: 1px;
             background: rgba(255,255,255,0.05);
             margin-top: 60px;
             position: relative;
             overflow: hidden;
-            z-index: 10;
-        }
+            z-index: 20;
+        }}
 
-        .progress-fill {
+        .progress-fill {{
             width: 0%;
             height: 100%;
             background: #00F2FF;
             box-shadow: 0 0 15px #00F2FF;
             animation: fill-up 6.5s linear forwards;
-        }
+        }}
 
-        @keyframes fill-up { from { width: 0%; } to { width: 100%; } }
+        @keyframes fill-up {{ from {{ width: 0%; }} to {{ width: 100%; }} }}
         </style>
         
         <div class="vortex-container">
-            <div class="star-layer"></div>
-            <div class="star-layer-2"></div>
+            <div class="stars-static"></div>
+            <div class="stars-moving"></div>
             
             <div class="gear-system">
-                <div class="gear"></div>
-                <div class="gear"></div>
-                <div class="gear"></div>
+                <div class="gear-orbit"></div>
+                <div class="gear-orbit"></div>
+                <div class="gear-orbit"></div>
+                {f'<img src="{logo_html}" class="main-logo">' if logo_html else ''}
             </div>
             
             <h1 class="logo-title">VOID-OS</h1>
@@ -326,20 +336,19 @@ def show_vortex_intro():
         </div>
     """, unsafe_allow_html=True)
 
-    # Tactical sequence logic (Fixed Slot to prevent code-display error)
+    # Tactical Sequence
     status_slot = st.empty()
     steps = [
-        "INITIALIZING STARFIELD ENGINE...", 
+        "MAPPING STARFIELD VECTORS...", 
         "UPLINKING SOVEREIGN NODES...", 
         "SYNCHRONIZING GEAR LOGIC...", 
-        "VOID-OS v4.0 ONLINE."
+        "VOID-OS v1.0 ONLINE."
     ]
     
     for step in steps:
-        # We use fixed positioning to keep it on top of the container
         status_slot.markdown(f"""
             <div style="position: fixed; top: 78%; left: 50%; transform: translateX(-50%); z-index: 10000;">
-                <p style="color: rgba(0, 242, 255, 0.5); font-family: monospace; 
+                <p style="color: rgba(0, 242, 255, 0.4); font-family: monospace; 
                           font-size: 0.6rem; letter-spacing: 5px; text-align: center;">
                     {step}
                 </p>
@@ -349,10 +358,11 @@ def show_vortex_intro():
         
     intro_placeholder.empty()
 
-# --- TRIGGER ---
+# --- EXECUTION ---
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
+
 
 def draw_title(emoji, text):
     st.markdown(f"""
