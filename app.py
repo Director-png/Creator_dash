@@ -176,110 +176,124 @@ NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 import streamlit as st
 import time
 
-def show_hyper_ai_intro():
+def show_future_intercept_intro():
     intro_placeholder = st.empty()
     
-    # CSS for the "Liquid AI" Aesthetic
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;400;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;900&display=swap');
         
-        .hyper-container {
-            background: radial-gradient(circle at center, #1a1a2e 0%, #050505 100%);
+        .intercept-container {
+            background: #000000;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 242, 255, 0.05) 0%, transparent 50%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
             height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-family: 'Inter', sans-serif;
             position: fixed;
             top: 0; left: 0; width: 100%; z-index: 9999;
             overflow: hidden;
         }
-        
-        /* The Pulsing Neural Core */
-        .ai-core {
-            width: 150px;
-            height: 150px;
-            background: linear-gradient(45deg, #00f2ff, #7000ff);
-            border-radius: 50%;
-            filter: blur(20px);
-            opacity: 0.8;
-            animation: core-pulse 3s ease-in-out infinite;
+
+        .logo-box {
             position: relative;
+            text-align: center;
         }
 
-        .ai-core::after {
-            content: '';
-            position: absolute;
-            top: -10px; left: -10px; right: -10px; bottom: -10px;
-            border: 1px solid rgba(0, 242, 255, 0.2);
-            border-radius: 50%;
-            animation: orbit 5s linear infinite;
-        }
-        
-        .logo-main {
+        .main-title {
+            font-family: 'Syncopate', sans-serif;
             color: #ffffff;
-            font-size: 3.5rem;
-            font-weight: 900;
-            letter-spacing: 20px;
-            margin-top: -100px;
-            z-index: 10;
-            background: -webkit-linear-gradient(white, #38495a);
+            font-size: 4.5rem;
+            font-weight: 700;
+            letter-spacing: 25px;
+            margin: 0;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #fff 40%, #666 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
         }
 
-        @keyframes core-pulse {
-            0%, 100% { transform: scale(1); opacity: 0.5; filter: blur(20px); }
-            50% { transform: scale(1.4); opacity: 0.8; filter: blur(40px); }
-        }
-
-        @keyframes orbit {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            color: rgba(255,255,255,0.6);
-            margin-top: 40px;
-            font-size: 0.7rem;
-            letter-spacing: 5px;
-            font-weight: 400;
+        .tagline {
+            font-family: 'Inter', sans-serif;
+            color: #00F2FF;
+            font-size: 0.8rem;
+            letter-spacing: 12px;
+            margin-top: 20px;
+            font-weight: 100;
             text-transform: uppercase;
+            opacity: 0;
+            animation: slideUp 2s ease-out forwards 1s;
+        }
+
+        .glitch-line {
+            width: 0%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #00F2FF, transparent);
+            margin-top: 10px;
+            animation: expand 1.5s ease-in-out forwards;
+        }
+
+        @keyframes expand {
+            0% { width: 0%; opacity: 0; }
+            100% { width: 100%; opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .neural-bit {
+            position: absolute;
+            color: #7000FF;
+            font-family: monospace;
+            font-size: 10px;
+            opacity: 0.3;
         }
         </style>
     """, unsafe_allow_html=True)
 
     with intro_placeholder.container():
         st.markdown("""
-            <div class="hyper-container">
-                <div class="ai-core"></div>
-                <div class="logo-main">VOID-OS</div>
-                <div class="loading-text" id="ai-status">NEURAL SYNTHESIS IN PROGRESS</div>
+            <div class="intercept-container">
+                <div class="logo-box">
+                    <h1 class="main-title">VOID-OS</h1>
+                    <div class="glitch-line"></div>
+                    <p class="tagline">PREDICT. INTEGRATE. CONQUER.</p>
+                </div>
             </div>
         """, unsafe_allow_html=True)
         
-        # Simulated AI Calibration (Fast & Smooth)
+        # Tactical Progress (Ultra-Fast, High-Stakes)
         status_placeholder = st.empty()
-        steps = [
-            "Syncing Global Datastream...",
-            "Activating Logic Layer...",
-            "Quantum Intersect Online.",
-            "Ready to Conquer."
+        status_placeholder.markdown("<div style='height:200px;'></div>", unsafe_allow_html=True) # Spacer
+        
+        tactical_steps = [
+            "SCANNING TEMPORAL VECTORS...",
+            "SYNTHESIZING MARKET LOGIC...",
+            "ESTABLISHING SOVEREIGN UPLINK...",
+            "VOID-OS v4.0 ONLINE."
         ]
         
-        for step in steps:
-            status_placeholder.markdown(f"<p style='text-align:center; color:rgba(255,255,255,0.4); font-size:0.8rem; letter-spacing:3px; margin-top:-250px; z-index:100; position:relative;'>{step}</p>", unsafe_allow_html=True)
-            time.sleep(0.7)
+        for step in tactical_steps:
+            status_placeholder.markdown(f"""
+                <p style='text-align:center; color:rgba(0, 242, 255, 0.4); 
+                font-family:monospace; font-size:0.7rem; letter-spacing:5px;'>
+                {step}
+                </p>
+            """, unsafe_allow_html=True)
+            time.sleep(0.6)
             
     intro_placeholder.empty()
 
 if 'booted' not in st.session_state:
-    show_hyper_ai_intro()
+    show_future_intercept_intro()
     st.session_state.booted = True
-
 
 def draw_title(emoji, text):
     st.markdown(f"""
