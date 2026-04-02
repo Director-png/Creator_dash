@@ -196,14 +196,7 @@ def show_vortex_intro():
             overflow: hidden;
         }}
 
-        /* Layers of stars with different sizes and twinkle speeds */
-        .stars-container {{
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-        }}
-
+        /* Individual Twinkling Stars */
         .star {{
             position: absolute;
             background: white;
@@ -222,7 +215,7 @@ def show_vortex_intro():
             position: relative;
             width: 280px;
             height: 280px;
-            border: 2px solid rgba(192, 192, 194, 0.4); /* Thicker Silver Boundary */
+            border: 2px solid rgba(192, 192, 194, 0.4); 
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -235,13 +228,13 @@ def show_vortex_intro():
             position: absolute;
             width: 120px;
             height: 120px;
-            border: 2.5px solid #FFFFFF; /* Bold, Popping Outlines */
+            border: 2.5px solid #FFFFFF; /* Bold Popping Outlines */
             border-radius: 50%;
             transform-origin: center center;
             filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
         }}
 
-        /* 6 Gears with Increased Speed (5s to 10s cycles) */
+        /* 6 Gears with Increased Speed and Staggered Delays */
         .gear-circle:nth-child(1) {{ animation: orbit 5s linear infinite; }}
         .gear-circle:nth-child(2) {{ animation: orbit 6s linear infinite; animation-delay: -1s; }}
         .gear-circle:nth-child(3) {{ animation: orbit 7s linear infinite; animation-delay: -2s; }}
@@ -265,12 +258,11 @@ def show_vortex_intro():
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             z-index: 20;
-            text-shadow: 0 0 20px rgba(255,255,255,0.1);
         }}
 
         .progress-tray {{
             width: 500px;
-            height: 2px; /* Slightly thicker bar */
+            height: 2px;
             background: rgba(255,255,255,0.05);
             margin-top: 70px;
             position: relative;
@@ -282,7 +274,7 @@ def show_vortex_intro():
             width: 0%;
             height: 100%;
             background: #00F2FF;
-            box-shadow: 0 0 20px #00F2FF, 0 0 40px rgba(0, 242, 255, 0.5);
+            box-shadow: 0 0 20px #00F2FF;
             animation: fill-up 6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
         }}
 
@@ -290,15 +282,12 @@ def show_vortex_intro():
         </style>
         
         <div class="vortex-container">
-            <div class="stars-container">
-                <div class="star" style="top:10%; left:20%; width:1px; height:1px; --duration:3s;"></div>
-                <div class="star" style="top:30%; left:80%; width:2px; height:2px; --duration:5s;"></div>
-                <div class="star" style="top:70%; left:40%; width:1px; height:1px; --duration:4s;"></div>
-                <div class="star" style="top:50%; left:10%; width:2px; height:2px; --duration:6s;"></div>
-                <div class="star" style="top:85%; left:85%; width:1.5px; height:1.5px; --duration:4.5s;"></div>
-                <div class="star" style="top:15%; left:65%; width:1px; height:1px; --duration:7s;"></div>
-            </div>
-
+            <div class="star" style="top:15%; left:15%; width:1px; height:1px; --duration:3s;"></div>
+            <div class="star" style="top:45%; left:85%; width:2px; height:2px; --duration:5s;"></div>
+            <div class="star" style="top:75%; left:35%; width:1px; height:1px; --duration:4s;"></div>
+            <div class="star" style="top:25%; left:65%; width:2px; height:2px; --duration:6s;"></div>
+            <div class="star" style="top:85%; left:20%; width:1.5px; height:1.5px; --duration:4.5s;"></div>
+            
             <div class="gear-system">
                 <div class="gear-circle"></div>
                 <div class="gear-circle"></div>
