@@ -111,14 +111,6 @@ def fetch_vault_data(sheet_name):
     except:
         return pd.DataFrame()
 
-def load_lottieurl(url: str):
-    try:
-        r = requests.get(url)
-        return r.json() if r.status_code == 200 else None
-    except: return None
-
-lottie_loading = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_fcfjwiyb.json")
-
 # --- 1. SESSION STATE (CRITICAL INITIALIZATION) ---
 if 'found_leads' not in st.session_state:
     st.session_state.found_leads = pd.DataFrame()
@@ -305,7 +297,7 @@ def show_future_intercept_intro():
             "SYNTHESIZING MARKET LOGIC...",
             "DECRYPTING COMPETITOR STACKS...",
             "ESTABLISHING SOVEREIGN UPLINK...",
-            "INJECTING VOID-CORE v4.0...",
+            "INJECTING VOID-CORE v1.0...",
             "SYSTEMS ONLINE."
         ]
         
