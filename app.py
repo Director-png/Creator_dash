@@ -179,13 +179,16 @@ import base64
 import os
 
 def get_base64_image():
-    """Directly pulls the image from your specific Windows path."""
-    # PASTE YOUR FULL PATH BETWEEN THE QUOTES BELOW
+    """Extracts the image data using a robust absolute path."""
+    # Using 'r' for raw string to handle Windows backslashes correctly
     path = r"C:\Users\hp\OneDrive\Pictures\Screenshots\Screenshot 2026-04-02 130156.png"
     
-    if os.path.exists(path):
-        with open(path, "rb") as img_file:
-            return base64.b64encode(img_file.read()).decode()
+    try:
+        if os.path.exists(path):
+            with open(path, "rb") as img_file:
+                return base64.b64encode(img_file.read()).decode()
+    except Exception:
+        return None
     return None
 
 def show_vortex_intro():
@@ -200,13 +203,14 @@ def show_vortex_intro():
         
         .vortex-container {{
             background: #000;
-            /* Ultra-Sharp Starfield */
+            /* Ultra-Realistic Starfield using sharp radial gradients */
             background-image: 
-                radial-gradient(1px 1px at 10% 10%, #fff, transparent),
-                radial-gradient(1px 1px at 50% 50%, #fff, transparent),
-                radial-gradient(1.5px 1.5px at 80% 20%, #fff, transparent),
-                radial-gradient(1px 1px at 30% 80%, #ddd, transparent);
-            background-size: 400px 400px;
+                radial-gradient(1px 1px at 15% 15%, #fff, transparent),
+                radial-gradient(1px 1px at 85% 85%, #fff, transparent),
+                radial-gradient(1.5px 1.5px at 50% 20%, #fff, transparent),
+                radial-gradient(1px 1px at 30% 70%, #ddd, transparent),
+                radial-gradient(2px 2px at 70% 40%, #fff, transparent);
+            background-size: 600px 600px;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -217,57 +221,60 @@ def show_vortex_intro():
             overflow: hidden;
         }}
 
+        /* GEAR-VORTEX SYSTEM */
         .gear-system {{
             position: relative;
-            width: 240px;
-            height: 240px;
-            border: 1px solid rgba(192, 192, 194, 0.2);
+            width: 260px;
+            height: 260px;
+            border: 1px solid rgba(192, 192, 194, 0.15); /* Minimal Outer Boundary */
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }}
 
         .main-logo {{
-            width: 140px;
+            width: 150px; /* Adjusted for your screenshot size */
             z-index: 10;
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
+            filter: drop-shadow(0 0 25px rgba(255,255,255,0.15));
+            border-radius: 50%; /* Smooths out screenshot edges if needed */
         }}
 
         .gear-orbit {{
             position: absolute;
-            width: 100px;
-            height: 100px;
-            border: 1.2px solid rgba(192, 192, 194, 0.4);
+            width: 110px;
+            height: 110px;
+            border: 1px solid rgba(192, 192, 194, 0.3);
             border-radius: 50%;
         }}
 
-        /* Orbital Gear Mechanics */
-        .gear-orbit:nth-child(1) {{ animation: orbit-1 8s linear infinite; }}
-        .gear-orbit:nth-child(2) {{ animation: orbit-2 10s linear infinite; }}
-        .gear-orbit:nth-child(3) {{ animation: orbit-3 12s linear infinite; }}
+        /* Synchronized Gear Rotation */
+        .gear-orbit:nth-child(1) {{ animation: orbit-1 12s linear infinite; }}
+        .gear-orbit:nth-child(2) {{ animation: orbit-2 15s linear infinite; }}
+        .gear-orbit:nth-child(3) {{ animation: orbit-3 18s linear infinite; }}
 
-        @keyframes orbit-1 {{ from {{ transform: rotate(0deg) translateX(70px); }} to {{ transform: rotate(360deg) translateX(70px); }} }}
-        @keyframes orbit-2 {{ from {{ transform: rotate(120deg) translateX(70px); }} to {{ transform: rotate(480deg) translateX(70px); }} }}
-        @keyframes orbit-3 {{ from {{ transform: rotate(240deg) translateX(70px); }} to {{ transform: rotate(600deg) translateX(70px); }} }}
+        @keyframes orbit-1 {{ from {{ transform: rotate(0deg) translateX(75px); }} to {{ transform: rotate(360deg) translateX(75px); }} }}
+        @keyframes orbit-2 {{ from {{ transform: rotate(120deg) translateX(75px); }} to {{ transform: rotate(480deg) translateX(75px); }} }}
+        @keyframes orbit-3 {{ from {{ transform: rotate(240deg) translateX(75px); }} to {{ transform: rotate(600deg) translateX(75px); }} }}
 
         .logo-title {{
             font-family: 'Syncopate', sans-serif;
             color: #ffffff;
-            font-size: 3.8rem;
-            letter-spacing: 22px;
-            margin: 20px 0 0 22px;
-            background: linear-gradient(to bottom, #FFF 60%, #444 100%);
+            font-size: 4rem;
+            letter-spacing: 25px;
+            margin: 20px 0 0 25px;
+            background: linear-gradient(to bottom, #FFF 50%, #444 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-align: center;
         }}
 
         .progress-tray {{
-            width: 450px;
+            width: 500px;
             height: 1px;
             background: rgba(255,255,255,0.05);
-            margin-top: 60px;
+            margin-top: 70px;
             position: relative;
             overflow: hidden;
         }}
@@ -276,8 +283,8 @@ def show_vortex_intro():
             width: 0%;
             height: 100%;
             background: #00F2FF;
-            box-shadow: 0 0 15px #00F2FF;
-            animation: fill-up 6s linear forwards;
+            box-shadow: 0 0 20px #00F2FF;
+            animation: fill-up 6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }}
 
         @keyframes fill-up {{ to {{ width: 100%; }} }}
@@ -287,8 +294,8 @@ def show_vortex_intro():
             <div class="gear-system">
                 <div class="gear-orbit"></div>
                 <div class="gear-orbit"></div>
-                <div class="gear-orbit"></div>
-                {f'<img src="{logo_html}" class="main-logo">' if logo_html else '<div style="color:red;">IMAGE_NOT_FOUND</div>'}
+                <div class="gear-orbit:"></div>
+                {f'<img src="{logo_html}" class="main-logo">' if logo_html else '<div style="color:rgba(255,255,255,0.1); font-family:monospace; font-size:0.5rem;">[ OFFLINE_CORE ]</div>'}
             </div>
             <h1 class="logo-title">VOID-OS</h1>
             <div class="progress-tray">
@@ -303,16 +310,18 @@ def show_vortex_intro():
     for step in steps:
         status_slot.markdown(f"""
             <div style="position: fixed; top: 78%; left: 50%; transform: translateX(-50%); z-index: 10000;">
-                <p style="color: rgba(0, 242, 255, 0.4); font-family: monospace; font-size: 0.6rem; letter-spacing: 5px;">{step}</p>
+                <p style="color: rgba(0, 242, 255, 0.4); font-family: monospace; font-size: 0.6rem; letter-spacing: 5px; text-align: center;">{step}</p>
             </div>
         """, unsafe_allow_html=True)
         time.sleep(1.8)
         
     intro_placeholder.empty()
 
+# --- TRIGGER ---
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
+
 
 def draw_title(emoji, text):
     st.markdown(f"""
