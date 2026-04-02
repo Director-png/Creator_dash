@@ -183,7 +183,7 @@ def show_vortex_intro():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
         
-        /* --- GAUSSIAN STARFIELD --- */
+        /* --- GAUSSIAN SHIMMER STARFIELD --- */
         .vortex-container {{
             background: radial-gradient(circle at center, #000814 0%, #000000 100%);
             height: 100vh;
@@ -196,6 +196,7 @@ def show_vortex_intro():
             overflow: hidden;
         }}
 
+        /* Realistic Individual Twinkling Stars */
         .star {{
             position: absolute;
             background: white;
@@ -214,7 +215,7 @@ def show_vortex_intro():
             position: relative;
             width: 300px;
             height: 300px;
-            border: 2px solid rgba(192, 192, 194, 0.3); 
+            border: 2px solid rgba(192, 192, 194, 0.2); 
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -224,25 +225,25 @@ def show_vortex_intro():
 
         .gear-circle {{
             position: absolute;
-            width: 130px;
-            height: 130px;
-            border: 3px solid #FFFFFF; /* Bold Popping Outlines */
+            width: 135px;
+            height: 135px;
+            border: 3px solid #FFFFFF; /* High-Contrast Popping Outlines */
             border-radius: 50%;
             transform-origin: center center;
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
         }}
 
-        /* Staggered Orbital Mechanics */
-        .gear-circle:nth-child(1) {{ animation: orbit 4s linear infinite; }}
-        .gear-circle:nth-child(2) {{ animation: orbit 5s linear infinite; animation-delay: -0.8s; }}
-        .gear-circle:nth-child(3) {{ animation: orbit 6s linear infinite; animation-delay: -1.6s; }}
-        .gear-circle:nth-child(4) {{ animation: orbit 7s linear infinite; animation-delay: -2.4s; }}
-        .gear-circle:nth-child(5) {{ animation: orbit 8s linear infinite; animation-delay: -3.2s; }}
-        .gear-circle:nth-child(6) {{ animation: orbit 9s linear infinite; animation-delay: -4.0s; }}
+        /* Staggered Orbital Mechanics for Vortex Effect */
+        .gear-circle:nth-child(1) {{ animation: orbit 4.5s linear infinite; }}
+        .gear-circle:nth-child(2) {{ animation: orbit 5.5s linear infinite; animation-delay: -1s; }}
+        .gear-circle:nth-child(3) {{ animation: orbit 6.5s linear infinite; animation-delay: -2s; }}
+        .gear-circle:nth-child(4) {{ animation: orbit 7.5s linear infinite; animation-delay: -3s; }}
+        .gear-circle:nth-child(5) {{ animation: orbit 8.5s linear infinite; animation-delay: -4s; }}
+        .gear-circle:nth-child(6) {{ animation: orbit 9.5s linear infinite; animation-delay: -5s; }}
 
         @keyframes orbit {{
-            from {{ transform: rotate(0deg) translateX(85px); }}
-            to {{ transform: rotate(360deg) translateX(85px); }}
+            from {{ transform: rotate(0deg) translateX(82px); }}
+            to {{ transform: rotate(360deg) translateX(82px); }}
         }}
 
         /* --- TYPOGRAPHY --- */
@@ -258,6 +259,7 @@ def show_vortex_intro():
             z-index: 20;
         }}
 
+        /* --- PROGRESSION UI --- */
         .progress-tray {{
             width: 550px;
             height: 2px;
@@ -272,7 +274,7 @@ def show_vortex_intro():
             width: 0%;
             height: 100%;
             background: #00F2FF;
-            box-shadow: 0 0 25px #00F2FF;
+            box-shadow: 0 0 25px #00F2FF, 0 0 50px rgba(0, 242, 255, 0.3);
             animation: fill-up 6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
         }}
 
@@ -280,11 +282,12 @@ def show_vortex_intro():
         </style>
         
         <div class="vortex-container">
-            <div class="star" style="top:12%; left:22%; width:1px; height:1px; --duration:3.2s;"></div>
-            <div class="star" style="top:38%; left:88%; width:2px; height:2px; --duration:4.8s;"></div>
-            <div class="star" style="top:72%; left:42%; width:1px; height:1px; --duration:4.1s;"></div>
-            <div class="star" style="top:55%; left:12%; width:2.5px; height:2.5px; --duration:5.5s;"></div>
-            <div class="star" style="top:82%; left:75%; width:1.5px; height:1.5px; --duration:3.7s;"></div>
+            <div class="star" style="top:10%; left:25%; width:1px; height:1px; --duration:3s;"></div>
+            <div class="star" style="top:40%; left:80%; width:2px; height:2px; --duration:5s;"></div>
+            <div class="star" style="top:70%; left:30%; width:1px; height:1px; --duration:4s;"></div>
+            <div class="star" style="top:20%; left:60%; width:2.5px; height:2.5px; --duration:6s;"></div>
+            <div class="star" style="top:80%; left:15%; width:1.5px; height:1.5px; --duration:4.5s;"></div>
+            <div class="star" style="top:50%; left:90%; width:1px; height:1px; --duration:7s;"></div>
             
             <div class="gear-system">
                 <div class="gear-circle"></div>
@@ -304,7 +307,7 @@ def show_vortex_intro():
     """, unsafe_allow_html=True)
 
     status_slot = st.empty()
-    steps = ["ENGAGING GEAR LOGIC...", "CALIBRATING STARFIELD...", "VOID-OS v4.0 ONLINE."]
+    steps = ["INITIATING GEAR LOGIC...", "CALIBRATING STARFIELD...", "VOID-OS v4.0 ONLINE."]
     
     for step in steps:
         status_slot.markdown(f"""
@@ -320,7 +323,6 @@ def show_vortex_intro():
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
-
 
 def draw_title(emoji, text):
     st.markdown(f"""
