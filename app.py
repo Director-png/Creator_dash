@@ -179,8 +179,8 @@ import time
 def show_vortex_intro():
     placeholder = st.empty()
     
-    # Using a single block of HTML/CSS to prevent Streamlit from escaping characters
-    vortex_html = """
+    # We use a raw string r""" to prevent any backslash escaping issues
+    vortex_html = r"""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@200&display=swap');
         
@@ -195,65 +195,49 @@ def show_vortex_intro():
             position: fixed;
             top: 0; left: 0; z-index: 9999;
             overflow: hidden;
+            color: white;
         }
 
-        /* --- THE DYNAMIC STARFIELD --- */
+        /* --- STARFIELD --- */
         .star {
             position: absolute;
             background: white;
             border-radius: 50%;
-            opacity: 0.5;
             animation: twinkle var(--d) infinite ease-in-out;
         }
         @keyframes twinkle {
             0%, 100% { opacity: 0.2; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.5); }
+            50% { opacity: 0.8; transform: scale(1.5); }
         }
 
-        /* --- THE SPINNING BOUNDARY --- */
+        /* --- THE VORTEX ENGINE --- */
         .boundary-circle {
             position: relative;
-            width: 360px;
-            height: 360px;
-            border: 4.5px solid #C0C0C2; /* Thicker Silver */
+            width: 360px; height: 360px;
+            border: 4.5px solid #C0C0C2;
             border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* FAST SPIN */
-            animation: spin-vortex 1s linear infinite; 
-            box-shadow: 0 0 40px rgba(192, 192, 194, 0.2);
+            display: flex; justify-content: center; align-items: center;
+            animation: spin 1s linear infinite;
         }
 
-        @keyframes spin-vortex {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* --- THE STATIC INNER CORE --- */
         .static-core {
             position: absolute;
             width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
-            /* COUNTER-SPIN TO STAY STILL */
-            animation: counter-spin-vortex 1s linear infinite;
+            animation: counter-spin 1s linear infinite;
         }
 
-        @keyframes counter-spin-vortex {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(-360deg); }
-        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes counter-spin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
 
         .gear-circle {
             position: absolute;
-            width: 160px; /* Increased size as requested */
-            height: 160px;
+            width: 170px; height: 170px; /* Bigger circles as requested */
             border: 3.5px solid #C0C0C2;
             border-radius: 50%;
-            background: transparent;
         }
 
-        /* Hexagonal Static Positioning */
+        /* Hexagonal Alignment */
         .gear-circle:nth-child(1) { transform: translate(0, -100px); }
         .gear-circle:nth-child(2) { transform: translate(86px, -50px); }
         .gear-circle:nth-child(3) { transform: translate(86px, 50px); }
@@ -261,48 +245,45 @@ def show_vortex_intro():
         .gear-circle:nth-child(5) { transform: translate(-86px, 50px); }
         .gear-circle:nth-child(6) { transform: translate(-86px, -50px); }
 
-        /* --- TYPOGRAPHY --- */
+        /* --- TEXT & LOADING --- */
         .logo-title {
             font-family: 'Syncopate', sans-serif;
-            color: #FFF;
             font-size: 5.2rem;
             letter-spacing: 35px;
             margin: 40px 0 0 35px;
+            text-align: center;
         }
 
         .tagline {
             font-family: 'Inter', sans-serif;
             color: #00F2FF;
-            font-size: 0.7rem;
-            letter-spacing: 8px;
+            font-size: 0.75rem;
+            letter-spacing: 10px;
             margin-top: 15px;
-            opacity: 0.8;
             text-transform: uppercase;
         }
 
         .progress-tray {
             width: 600px; height: 2px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.1);
             margin-top: 60px;
             position: relative;
-            overflow: hidden;
         }
 
         .progress-fill {
             width: 0%; height: 100%;
             background: #00F2FF;
-            box-shadow: 0 0 25px #00F2FF;
-            animation: fill-bar 6s linear forwards;
+            box-shadow: 0 0 20px #00F2FF;
+            animation: load 6s linear forwards;
         }
-        @keyframes fill-bar { to { width: 100%; } }
+        @keyframes load { to { width: 100%; } }
     </style>
 
     <div class="vortex-container">
-        <div class="star" style="top:20%; left:30%; width:2px; height:2px; --d:3s;"></div>
-        <div class="star" style="top:60%; left:80%; width:1px; height:1px; --d:5s;"></div>
-        <div class="star" style="top:10%; left:70%; width:3px; height:3px; --d:4s;"></div>
-        <div class="star" style="top:80%; left:20%; width:1.5px; height:1.5px; --d:6s;"></div>
-        <div class="star" style="top:40%; left:10%; width:2px; height:2px; --d:2.5s;"></div>
+        <div class="star" style="top:15%; left:25%; width:2px; height:2px; --d:3s;"></div>
+        <div class="star" style="top:45%; left:85%; width:1px; height:1px; --d:5s;"></div>
+        <div class="star" style="top:75%; left:35%; width:3px; height:3px; --d:4s;"></div>
+        <div class="star" style="top:10%; left:65%; width:1.5px; height:1.5px; --d:6s;"></div>
 
         <div class="boundary-circle">
             <div class="static-core">
@@ -324,11 +305,12 @@ def show_vortex_intro():
     </div>
     """
     
+    # Passing the raw string directly
     placeholder.markdown(vortex_html, unsafe_allow_html=True)
     time.sleep(6.5)
     placeholder.empty()
 
-# Trigger
+# Initialization Logic
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
