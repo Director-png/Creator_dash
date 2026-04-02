@@ -178,17 +178,6 @@ import time
 import base64
 import os
 
-def get_base64_image():
-    """Extracts the image data using the robust absolute path."""
-    path = r"C:\Users\hp\OneDrive\Pictures\Screenshots\Screenshot 2026-04-02 130156.png"
-    try:
-        if os.path.exists(path):
-            with open(path, "rb") as img_file:
-                return base64.b64encode(img_file.read()).decode()
-    except Exception:
-        return None
-    return None
-
 def show_vortex_intro():
     img_base64 = get_base64_image()
     logo_html = f"data:image/png;base64,{img_base64}" if img_base64 else None
@@ -222,7 +211,7 @@ def show_vortex_intro():
                 radial-gradient(1px 1px at 40% 80%, #ddd, transparent),
                 radial-gradient(2px 2px at 10% 90%, #fff, transparent);
             background-size: 500px 500px;
-            animation: sky-spin 100s linear infinite; /* Subtle background drift */
+            animation: sky-spin 100s linear infinite;
         }}
 
         @keyframes sky-spin {{ from {{ transform: rotate(0deg); }} to {{ transform: rotate(360deg); }} }}
@@ -232,15 +221,15 @@ def show_vortex_intro():
             position: relative;
             width: 320px;
             height: 320px;
-            border: 4px double rgba(192, 192, 194, 0.4); /* Double line for tech look */
+            border: 4px double rgba(192, 192, 194, 0.4); /* High-tech double line */
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 40px;
-            /* HIGH SPEED ROTATION */
-            animation: boundary-spin 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            box-shadow: 0 0 40px rgba(0, 242, 255, 0.1);
+            /* ACCELERATED ROTATION */
+            animation: boundary-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            box-shadow: 0 0 50px rgba(0, 242, 255, 0.1);
         }}
 
         @keyframes boundary-spin {{
@@ -255,8 +244,8 @@ def show_vortex_intro():
             display: flex;
             justify-content: center;
             align-items: center;
-            /* This counter-rotates so the core stays upright while the boundary spins */
-            animation: counter-spin 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            /* Counter-rotation to keep inner elements upright */
+            animation: counter-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }}
 
         @keyframes counter-spin {{
@@ -268,33 +257,33 @@ def show_vortex_intro():
             position: absolute;
             width: 130px;
             height: 130px;
-            border: 3px solid #FFFFFF;
+            border: 3.5px solid #FFFFFF; /* Bolder outlines for pop */
             border-radius: 50%;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
         }}
 
-        /* Hexagonal Static Positioning */
-        .gear-circle:nth-child(1) {{ transform: translate(0, -90px); }}
-        .gear-circle:nth-child(2) {{ transform: translate(78px, -45px); }}
-        .gear-circle:nth-child(3) {{ transform: translate(78px, 45px); }}
-        .gear-circle:nth-child(4) {{ transform: translate(0, 90px); }}
-        .gear-circle:nth-child(5) {{ transform: translate(-78px, 45px); }}
-        .gear-circle:nth-child(6) {{ transform: translate(-78px, -45px); }}
+        /* Precision Hexagonal Alignment */
+        .gear-circle:nth-child(1) {{ transform: translate(0, -95px); }}
+        .gear-circle:nth-child(2) {{ transform: translate(82px, -48px); }}
+        .gear-circle:nth-child(3) {{ transform: translate(82px, 48px); }}
+        .gear-circle:nth-child(4) {{ transform: translate(0, 95px); }}
+        .gear-circle:nth-child(5) {{ transform: translate(-82px, 48px); }}
+        .gear-circle:nth-child(6) {{ transform: translate(-82px, -48px); }}
 
         .main-logo {{
-            width: 150px; 
+            width: 155px; 
             z-index: 10;
-            filter: drop-shadow(0 0 25px rgba(255,255,255,0.2));
+            filter: drop-shadow(0 0 30px rgba(255,255,255,0.25));
             border-radius: 50%;
         }}
 
         .logo-title {{
             font-family: 'Syncopate', sans-serif;
             color: #ffffff;
-            font-size: 4.8rem;
-            letter-spacing: 32px;
-            margin: 20px 0 0 32px;
-            background: linear-gradient(to bottom, #FFFFFF 50%, #333333 100%);
+            font-size: 5rem;
+            letter-spacing: 35px;
+            margin: 20px 0 0 35px;
+            background: linear-gradient(to bottom, #FFFFFF 50%, #222 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             z-index: 20;
@@ -314,7 +303,7 @@ def show_vortex_intro():
             width: 0%;
             height: 100%;
             background: #00F2FF;
-            box-shadow: 0 0 30px #00F2FF;
+            box-shadow: 0 0 35px #00F2FF;
             animation: fill-up 6.5s linear forwards;
         }}
 
@@ -332,7 +321,7 @@ def show_vortex_intro():
                     <div class="gear-circle"></div>
                     <div class="gear-circle"></div>
                     <div class="gear-circle"></div>
-                    {f'<img src="{logo_html}" class="main-logo">' if logo_html else '<div style="color:rgba(255,255,255,0.2); font-family:monospace; font-size:0.6rem;">[ OFFLINE_CORE ]</div>'}
+                    {f'<img src="{logo_html}" class="main-logo">' if logo_html else '<div style="color:rgba(255,255,255,0.3); font-family:monospace; font-size:0.7rem; letter-spacing:2px;">[ OFFLINE_CORE ]</div>'}
                 </div>
             </div>
 
@@ -349,14 +338,15 @@ def show_vortex_intro():
     
     for step in steps:
         status_slot.markdown(f"""
-            <div style="position: fixed; top: 80%; left: 50%; transform: translateX(-50%); z-index: 10000;">
-                <p style="color: rgba(0, 242, 255, 0.5); font-family: monospace; font-size: 0.7rem; letter-spacing: 7px; text-align: center;">{step}</p>
+            <div style="position: fixed; top: 82%; left: 50%; transform: translateX(-50%); z-index: 10000;">
+                <p style="color: rgba(0, 242, 255, 0.6); font-family: monospace; font-size: 0.8rem; letter-spacing: 8px; text-align: center;">{step}</p>
             </div>
         """, unsafe_allow_html=True)
         time.sleep(2.1)
         
     intro_placeholder.empty()
 
+# --- TRIGGER ---
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
