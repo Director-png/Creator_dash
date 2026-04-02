@@ -176,20 +176,19 @@ NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 import streamlit as st
 import time
 
-def show_future_intercept_intro():
+def show_vortex_intro():
     intro_placeholder = st.empty()
     
-    st.markdown("""
+    # Replace 'YOUR_LOGO_URL' with the actual path to your logo image
+    logo_url = "https://raw.githubusercontent.com/your-repo/main/logo.png" 
+
+    st.markdown(f"""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
         
-        .intercept-container {
+        .vortex-container {{
             background: #000000;
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(0, 242, 255, 0.05) 0%, transparent 50%),
-                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 100% 100%, 30px 30px, 30px 30px;
+            background-image: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000 70%);
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -197,102 +196,94 @@ def show_future_intercept_intro():
             align-items: center;
             position: fixed;
             top: 0; left: 0; width: 100%; z-index: 9999;
-            overflow: hidden;
-        }
+        }}
 
-        .logo-box {
-            position: relative;
-            text-align: center;
-        }
+        /* The Rolling Vortex Logo */
+        .vortex-logo {{
+            width: 180px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.2));
+            animation: rolling-vortex 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }}
 
-        .main-title {
+        @keyframes rolling-vortex {{
+            0% {{ transform: rotate(0deg) scale(0.95); filter: brightness(0.8); }}
+            50% {{ transform: rotate(180deg) scale(1.05); filter: brightness(1.2) drop-shadow(0 0 30px rgba(0, 242, 255, 0.3)); }}
+            100% {{ transform: rotate(360deg) scale(0.95); filter: brightness(0.8); }}
+        }}
+
+        .logo-title {{
             font-family: 'Syncopate', sans-serif;
             color: #ffffff;
-            font-size: 4.5rem;
+            font-size: 3.5rem;
             font-weight: 700;
-            letter-spacing: 25px;
-            margin: 0;
-            text-transform: uppercase;
-            background: linear-gradient(to bottom, #fff 40%, #666 100%);
+            letter-spacing: 20px;
+            margin: 10px 0;
+            background: linear-gradient(to bottom, #ffffff 50%, #777777 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
+        }}
 
-        .tagline {
+        .tagline-sub {{
             font-family: 'Inter', sans-serif;
             color: #00F2FF;
-            font-size: 0.8rem;
-            letter-spacing: 12px;
-            margin-top: 20px;
+            font-size: 0.7rem;
+            letter-spacing: 10px;
             font-weight: 100;
-            text-transform: uppercase;
-            opacity: 0;
-            animation: slideUp 2s ease-out forwards 1s;
-        }
+            opacity: 0.8;
+        }}
 
-        .glitch-line {
+        .progress-tray {{
+            width: 300px;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            margin-top: 40px;
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .progress-fill {{
             width: 0%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #00F2FF, transparent);
-            margin-top: 10px;
-            animation: expand 1.5s ease-in-out forwards;
-        }
+            height: 100%;
+            background: #00F2FF;
+            box-shadow: 0 0 10px #00F2FF;
+            animation: fill-up 5s linear forwards;
+        }}
 
-        @keyframes expand {
-            0% { width: 0%; opacity: 0; }
-            100% { width: 100%; opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            0% { transform: translateY(20px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-
-        .neural-bit {
-            position: absolute;
-            color: #7000FF;
-            font-family: monospace;
-            font-size: 10px;
-            opacity: 0.3;
-        }
+        @keyframes fill-up {{
+            0% {{ width: 0%; }}
+            100% {{ width: 100%; }}
+        }}
         </style>
+        
+        <div class="vortex-container">
+            <img src="{logo_url}" class="vortex-logo">
+            <h1 class="logo-title">VOID-OS</h1>
+            <p class="tagline-sub">PREDICT. INTEGRATE. CONQUER.</p>
+            <div class="progress-tray">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
     """, unsafe_allow_html=True)
 
-    with intro_placeholder.container():
-        st.markdown("""
-            <div class="intercept-container">
-                <div class="logo-box">
-                    <h1 class="main-title">VOID-OS</h1>
-                    <div class="glitch-line"></div>
-                    <p class="tagline">PREDICT. INTEGRATE. CONQUER.</p>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+    # 5-Second Tactical Sequence
+    status_area = st.empty()
+    steps = [
+        "BOOTING SOVEREIGN CORE...", 
+        "ANALYZING GLOBAL VECTORS...", 
+        "INTEGRATING NEURAL NODES...", 
+        "BYPASSING MARKET NOISE...", 
+        "VOID-OS v4.0 ONLINE."
+    ]
+    
+    for step in steps:
+        status_area.markdown(f"<p style='text-align:center; color:gray; font-family:monospace; font-size:0.6rem; letter-spacing:3px; margin-top:10px;'>{step}</p>", unsafe_allow_html=True)
+        time.sleep(1.0) # Total 5 seconds
         
-        # Tactical Progress (Ultra-Fast, High-Stakes)
-        status_placeholder = st.empty()
-        status_placeholder.markdown("<div style='height:200px;'></div>", unsafe_allow_html=True) # Spacer
-        
-        tactical_steps = [
-            "SCANNING TEMPORAL VECTORS...",
-            "SYNTHESIZING MARKET LOGIC...",
-            "ESTABLISHING SOVEREIGN UPLINK...",
-            "VOID-OS v4.0 ONLINE."
-        ]
-        
-        for step in tactical_steps:
-            status_placeholder.markdown(f"""
-                <p style='text-align:center; color:rgba(0, 242, 255, 0.4); 
-                font-family:monospace; font-size:0.7rem; letter-spacing:5px;'>
-                {step}
-                </p>
-            """, unsafe_allow_html=True)
-            time.sleep(0.6)
-            
     intro_placeholder.empty()
 
 if 'booted' not in st.session_state:
-    show_future_intercept_intro()
+    show_vortex_intro()
     st.session_state.booted = True
 
 def draw_title(emoji, text):
