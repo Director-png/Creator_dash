@@ -176,14 +176,17 @@ NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 import streamlit as st
 import time
 
+# --- STAGE 1: BOOT LOGIC ---
 def show_vortex_intro():
-    intro_placeholder = st.empty()
+    # Use a single placeholder to prevent ghosting or layout shifts
+    vortex_placeholder = st.empty()
     
-    st.markdown(f"""
+    # Inline CSS & HTML for the 6-Gear Infinity Vortex
+    vortex_placeholder.markdown(f"""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
         
-        /* --- GAUSSIAN SHIMMER STARFIELD --- */
+        /* --- REAL SKY STARFIELD --- */
         .vortex-container {{
             background: radial-gradient(circle at center, #000814 0%, #000000 100%);
             height: 100vh;
@@ -196,25 +199,24 @@ def show_vortex_intro():
             overflow: hidden;
         }}
 
-        /* Realistic Individual Twinkling Stars */
         .star {{
             position: absolute;
             background: white;
             border-radius: 50%;
-            opacity: 0.5;
+            opacity: 0.4;
             animation: twinkle var(--duration) infinite ease-in-out;
         }}
 
         @keyframes twinkle {{
-            0%, 100% {{ opacity: 0.3; transform: scale(1); }}
-            50% {{ opacity: 1; transform: scale(1.2); box-shadow: 0 0 8px #fff; }}
+            0%, 100% {{ opacity: 0.2; transform: scale(1); }}
+            50% {{ opacity: 1; transform: scale(1.3); box-shadow: 0 0 10px #fff; }}
         }}
 
-        /* --- THE INFINITY VORTEX (6-GEAR SYSTEM) --- */
+        /* --- THE INFINITY GEAR VORTEX --- */
         .gear-system {{
             position: relative;
-            width: 300px;
-            height: 300px;
+            width: 320px;
+            height: 320px;
             border: 2px solid rgba(192, 192, 194, 0.2); 
             border-radius: 50%;
             display: flex;
@@ -225,43 +227,44 @@ def show_vortex_intro():
 
         .gear-circle {{
             position: absolute;
-            width: 135px;
-            height: 135px;
-            border: 3px solid #FFFFFF; /* High-Contrast Popping Outlines */
+            width: 140px;
+            height: 140px;
+            border: 3.5px solid #FFFFFF; /* High-Contrast Bold Outlines */
             border-radius: 50%;
             transform-origin: center center;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
         }}
 
-        /* Staggered Orbital Mechanics for Vortex Effect */
-        .gear-circle:nth-child(1) {{ animation: orbit 4.5s linear infinite; }}
-        .gear-circle:nth-child(2) {{ animation: orbit 5.5s linear infinite; animation-delay: -1s; }}
-        .gear-circle:nth-child(3) {{ animation: orbit 6.5s linear infinite; animation-delay: -2s; }}
-        .gear-circle:nth-child(4) {{ animation: orbit 7.5s linear infinite; animation-delay: -3s; }}
-        .gear-circle:nth-child(5) {{ animation: orbit 8.5s linear infinite; animation-delay: -4s; }}
-        .gear-circle:nth-child(6) {{ animation: orbit 9.5s linear infinite; animation-delay: -5s; }}
+        /* 6 Gears: Staggered Timing for Vortex Effect */
+        .gear-circle:nth-child(1) {{ animation: orbit 4s linear infinite; }}
+        .gear-circle:nth-child(2) {{ animation: orbit 5s linear infinite; animation-delay: -0.8s; }}
+        .gear-circle:nth-child(3) {{ animation: orbit 6s linear infinite; animation-delay: -1.6s; }}
+        .gear-circle:nth-child(4) {{ animation: orbit 7s linear infinite; animation-delay: -2.4s; }}
+        .gear-circle:nth-child(5) {{ animation: orbit 8s linear infinite; animation-delay: -3.2s; }}
+        .gear-circle:nth-child(6) {{ animation: orbit 9s linear infinite; animation-delay: -4.0s; }}
 
         @keyframes orbit {{
-            from {{ transform: rotate(0deg) translateX(82px); }}
-            to {{ transform: rotate(360deg) translateX(82px); }}
+            from {{ transform: rotate(0deg) translateX(90px); }}
+            to {{ transform: rotate(360deg) translateX(90px); }}
         }}
 
         /* --- TYPOGRAPHY --- */
         .logo-title {{
             font-family: 'Syncopate', sans-serif;
             color: #ffffff;
-            font-size: 4.5rem;
-            letter-spacing: 30px;
-            margin: 20px 0 0 30px;
-            background: linear-gradient(to bottom, #FFFFFF 50%, #444444 100%);
+            font-size: 4.8rem;
+            letter-spacing: 32px;
+            margin: 20px 0 0 32px;
+            background: linear-gradient(to bottom, #FFFFFF 50%, #333333 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             z-index: 20;
+            text-align: center;
         }}
 
-        /* --- PROGRESSION UI --- */
+        /* --- LOADING BAR --- */
         .progress-tray {{
-            width: 550px;
+            width: 600px;
             height: 2px;
             background: rgba(255,255,255,0.05);
             margin-top: 80px;
@@ -274,20 +277,19 @@ def show_vortex_intro():
             width: 0%;
             height: 100%;
             background: #00F2FF;
-            box-shadow: 0 0 25px #00F2FF, 0 0 50px rgba(0, 242, 255, 0.3);
-            animation: fill-up 6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+            box-shadow: 0 0 30px #00F2FF;
+            animation: fill-up 6.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
         }}
 
         @keyframes fill-up {{ to {{ width: 100%; }} }}
         </style>
         
         <div class="vortex-container">
-            <div class="star" style="top:10%; left:25%; width:1px; height:1px; --duration:3s;"></div>
-            <div class="star" style="top:40%; left:80%; width:2px; height:2px; --duration:5s;"></div>
-            <div class="star" style="top:70%; left:30%; width:1px; height:1px; --duration:4s;"></div>
-            <div class="star" style="top:20%; left:60%; width:2.5px; height:2.5px; --duration:6s;"></div>
-            <div class="star" style="top:80%; left:15%; width:1.5px; height:1.5px; --duration:4.5s;"></div>
-            <div class="star" style="top:50%; left:90%; width:1px; height:1px; --duration:7s;"></div>
+            <div class="star" style="top:15%; left:25%; width:1px; height:1px; --duration:3s;"></div>
+            <div class="star" style="top:45%; left:85%; width:2px; height:2px; --duration:5s;"></div>
+            <div class="star" style="top:75%; left:35%; width:1px; height:1px; --duration:4s;"></div>
+            <div class="star" style="top:25%; left:65%; width:2.5px; height:2.5px; --duration:6s;"></div>
+            <div class="star" style="top:85%; left:20%; width:1.5px; height:1.5px; --duration:4.5s;"></div>
             
             <div class="gear-system">
                 <div class="gear-circle"></div>
@@ -306,23 +308,19 @@ def show_vortex_intro():
         </div>
     """, unsafe_allow_html=True)
 
-    status_slot = st.empty()
-    steps = ["INITIATING GEAR LOGIC...", "CALIBRATING STARFIELD...", "VOID-OS v4.0 ONLINE."]
-    
-    for step in steps:
-        status_slot.markdown(f"""
-            <div style="position: fixed; top: 80%; left: 50%; transform: translateX(-50%); z-index: 10000;">
-                <p style="color: rgba(0, 242, 255, 0.5); font-family: monospace; font-size: 0.75rem; letter-spacing: 7px; text-align: center;">{step}</p>
-            </div>
-        """, unsafe_allow_html=True)
-        time.sleep(1.8)
-        
-    intro_placeholder.empty()
+    # Boot Sequence Simulation
+    time.sleep(6.5) 
+    vortex_placeholder.empty()
 
-# --- TRIGGER ---
+# --- STAGE 2: EXECUTION ---
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
+
+# Your Main App Code Starts Here
+st.title("VOID-OS Mainframe")
+st.write("System Operational.")
+
 
 def draw_title(emoji, text):
     st.markdown(f"""
