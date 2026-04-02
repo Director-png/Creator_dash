@@ -183,15 +183,9 @@ def show_vortex_intro():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
         
-        /* --- DEEP SPACE BACKGROUND --- */
+        /* --- ELITE STARFIELD GENERATOR --- */
         .vortex-container {
-            background-color: #000000;
-            background-image: 
-                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0));
-            background-size: 200px 200px;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -200,59 +194,67 @@ def show_vortex_intro():
             position: fixed;
             top: 0; left: 0; width: 100%; z-index: 9999;
             overflow: hidden;
-            animation: space-drift 100s linear infinite;
         }
 
-        @keyframes space-drift {
-            from { background-position: 0 0; }
-            to { background-position: 1000px 1000px; }
+        /* Real Starfield using Box-Shadow (Tiny, Sharp, Varied) */
+        .stars-layer {
+            width: 1px;
+            height: 1px;
+            background: transparent;
+            box-shadow: 1747px 546px #FFF , 134px 1432px #FFF , 1805px 1042px #FFF , 456px 234px #DDD , 1200px 800px #FFF, 300px 100px #EEE, 1500px 200px #FFF, 500px 1200px #DDD;
+            animation: star-glow 4s ease-in-out infinite;
         }
-
-        /* --- THE VORTEX EYE LOGO --- */
-        .eye-vortex {
-            position: relative;
-            width: 180px;
-            height: 180px;
-            border: 3px solid #C0C0C2; /* Main Silver Boundary */
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 30px rgba(192, 192, 194, 0.2);
-            margin-bottom: 20px;
-        }
-
-        /* The Internal Co-Centric Circles */
-        .inner-circle {
-            position: absolute;
-            border: 1.5px solid rgba(192, 192, 194, 0.6);
-            border-radius: 50%;
-            transform-origin: center;
-        }
-
-        /* Circles touching the boundary and rotating */
-        .inner-circle:nth-child(1) { width: 90%; height: 90%; animation: rotate-eye 4s linear infinite; }
-        .inner-circle:nth-child(2) { width: 75%; height: 75%; animation: rotate-eye 6s linear reverse infinite; }
-        .inner-circle:nth-child(3) { width: 60%; height: 60%; animation: rotate-eye 3s linear infinite; }
         
-        /* The Center "Eye" Space */
-        .eye-center {
-            width: 25px;
-            height: 25px;
-            background: radial-gradient(circle, #00F2FF 0%, transparent 80%);
+        /* Moving stars for depth */
+        .stars-moving {
+            width: 2px;
+            height: 2px;
+            background: transparent;
+            box-shadow: 444px 192px #FFF , 800px 1200px #FFF , 120px 450px #DDD , 1600px 900px #FFF;
+            animation: space-travel 150s linear infinite;
+        }
+
+        @keyframes star-glow { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        @keyframes space-travel { from { transform: translateY(0); } to { transform: translateY(-2000px); } }
+
+        /* --- THE GEAR-VORTEX (ORBITAL OVERLAP) --- */
+        .gear-system {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            border: 1px solid rgba(192, 192, 194, 0.3); /* Boundary */
             border-radius: 50%;
-            box-shadow: 0 0 15px #00F2FF;
-            animation: blink 2s ease-in-out infinite;
+            margin-bottom: 30px;
         }
 
-        @keyframes rotate-eye {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .gear {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 1.5px solid #C0C0C2; /* Silver */
+            border-radius: 50%;
+            top: 50%; left: 50%;
+            margin-top: -50px; margin-left: -50px;
+            /* Gear logic: Touching the boundary */
+            transform-origin: center center;
         }
 
-        @keyframes blink {
-            0%, 100% { opacity: 0.4; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.1); }
+        /* Each gear orbits the boundary while spinning on its own axis */
+        .gear:nth-child(1) { animation: gear-orbit-1 10s linear infinite; }
+        .gear:nth-child(2) { animation: gear-orbit-2 12s linear infinite; }
+        .gear:nth-child(3) { animation: gear-orbit-3 15s linear infinite; }
+
+        @keyframes gear-orbit-1 { 
+            from { transform: rotate(0deg) translateX(60px) rotate(0deg); } 
+            to { transform: rotate(360deg) translateX(60px) rotate(-360deg); } 
+        }
+        @keyframes gear-orbit-2 { 
+            from { transform: rotate(120deg) translateX(60px) rotate(0deg); } 
+            to { transform: rotate(480deg) translateX(60px) rotate(-360deg); } 
+        }
+        @keyframes gear-orbit-3 { 
+            from { transform: rotate(240deg) translateX(60px) rotate(0deg); } 
+            to { transform: rotate(600deg) translateX(60px) rotate(-360deg); } 
         }
 
         /* Typography */
@@ -266,28 +268,28 @@ def show_vortex_intro():
             background: linear-gradient(to bottom, #FFFFFF 60%, #444444 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-align: center;
+            z-index: 10;
         }
 
         .tagline-sub {
             font-family: 'Inter', sans-serif;
             color: #00F2FF;
             font-size: 0.75rem;
-            letter-spacing: 12px;
+            letter-spacing: 14px;
             font-weight: 100;
             opacity: 0.8;
-            text-align: center;
-            text-transform: uppercase;
+            z-index: 10;
         }
 
-        /* --- THE LOADING BAR --- */
+        /* --- THE LOADING TRAY --- */
         .progress-tray {
-            width: 400px;
+            width: 450px;
             height: 1px;
             background: rgba(255,255,255,0.05);
             margin-top: 60px;
             position: relative;
             overflow: hidden;
+            z-index: 10;
         }
 
         .progress-fill {
@@ -295,58 +297,51 @@ def show_vortex_intro():
             height: 100%;
             background: #00F2FF;
             box-shadow: 0 0 15px #00F2FF;
-            animation: fill-up 5.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+            animation: fill-up 6.5s linear forwards;
         }
 
-        @keyframes fill-up {
-            from { width: 0%; }
-            to { width: 100%; }
-        }
-
-        .status-msg-container {
-            margin-top: 20px;
-            height: 20px;
-        }
+        @keyframes fill-up { from { width: 0%; } to { width: 100%; } }
         </style>
         
         <div class="vortex-container">
-            <div class="eye-vortex">
-                <div class="inner-circle"></div>
-                <div class="inner-circle"></div>
-                <div class="inner-circle"></div>
-                <div class="eye-center"></div>
+            <div class="stars-layer"></div>
+            <div class="stars-moving"></div>
+            
+            <div class="gear-system">
+                <div class="gear"></div>
+                <div class="gear"></div>
+                <div class="gear"></div>
             </div>
+            
             <h1 class="logo-title">VOID-OS</h1>
             <p class="tagline-sub">Predict. Integrate. Conquer.</p>
             
             <div class="progress-tray">
                 <div class="progress-fill"></div>
             </div>
-            <div id="status-text" style="margin-top:20px;"></div>
         </div>
     """, unsafe_allow_html=True)
 
-    # Tactical sequence logic handled via Streamlit Empty for better stability
+    # Tactical sequence logic (Fixed Slot for Errorless display)
     status_slot = st.empty()
     steps = [
-        "INITIALIZING SOVEREIGN CORE...", 
-        "UPLINKING TO GLOBAL PULSE...", 
-        "CALIBRATING NEURAL VECTORS...", 
-        "INTEGRATING LOGIC LAYERS...", 
-        "VOID-OS ONLINE: WELCOME DIRECTOR."
+        "CALIBRATING STARFIELD VECTORS...", 
+        "UPLINKING SOVEREIGN NODES...", 
+        "SYNCHRONIZING GEAR LOGIC...", 
+        "BYPASSING MARKET NOISE...", 
+        "VOID-OS v4.0 ONLINE."
     ]
     
     for step in steps:
-        # Pushes status below the bar with absolute positioning to stay on top
         status_slot.markdown(f"""
             <div style="position: fixed; top: 78%; left: 50%; transform: translateX(-50%); z-index: 10000;">
-                <p style="color: rgba(0, 242, 255, 0.5); font-family: monospace; 
-                          font-size: 0.6rem; letter-spacing: 4px; text-align: center;">
+                <p style="color: rgba(0, 242, 255, 0.4); font-family: monospace; 
+                          font-size: 0.6rem; letter-spacing: 5px; text-align: center;">
                     {step}
                 </p>
             </div>
         """, unsafe_allow_html=True)
-        time.sleep(1.1)
+        time.sleep(1.3)
         
     intro_placeholder.empty()
 
@@ -354,6 +349,7 @@ def show_vortex_intro():
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
+
 
 def draw_title(emoji, text):
     st.markdown(f"""
