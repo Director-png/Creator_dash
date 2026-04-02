@@ -180,7 +180,7 @@ import time
 def show_vortex_intro():
     placeholder = st.empty()
     
-    # This build uses a "Force-Fill" technique to remove the boxy look
+    # Final optimized build: Moving starfield + Scaled-down inner geometry
     vortex_code = r"""
     <html>
     <head>
@@ -196,26 +196,42 @@ def show_vortex_intro():
                 position: relative;
             }
 
-            /* --- POLISHED STARFIELD --- */
-            .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.3; animation: pulse var(--d) infinite; }
-            @keyframes pulse { 0%, 100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.3); } }
+            /* --- MOVING STARFIELD --- */
+            .starfield {
+                position: absolute; width: 200%; height: 200%;
+                background: transparent;
+                animation: move-stars 60s linear infinite;
+            }
+            @keyframes move-stars {
+                from { transform: translate(-25%, -25%); }
+                to { transform: translate(0%, 0%); }
+            }
 
-            /* --- THE CENTRIFUGE VORTEX --- */
+            .star { 
+                position: absolute; background: #fff; border-radius: 50%; 
+                animation: twinkle var(--d) infinite ease-in-out; 
+            }
+            @keyframes twinkle { 
+                0%, 100% { opacity: 0.3; transform: scale(1); } 
+                50% { opacity: 1; transform: scale(1.4); box-shadow: 0 0 8px #fff; } 
+            }
+
+            /* --- SCALED CENTRIFUGE --- */
             .boundary {
                 position: relative;
-                width: 380px; height: 380px;
-                border: 4px solid #e0e0e0;
+                width: 320px; height: 320px; /* Reduced from 380px to fit perfectly */
+                border: 3px solid rgba(224, 224, 224, 0.8);
                 border-radius: 50%;
                 display: flex; justify-content: center; align-items: center;
-                animation: spin 0.8s linear infinite; /* Ultra-fast 0.8s spin */
-                box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
+                animation: spin 1.2s linear infinite;
+                box-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
             }
 
             .static-logic {
                 position: absolute;
                 width: 100%; height: 100%;
                 display: flex; justify-content: center; align-items: center;
-                animation: counter-spin 0.8s linear infinite;
+                animation: counter-spin 1.2s linear infinite;
             }
 
             @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -223,48 +239,54 @@ def show_vortex_intro():
 
             .vortex-core {
                 position: absolute;
-                width: 190px; height: 190px; /* Large overlapping circles */
-                border: 3px solid #c0c0c2;
+                width: 165px; height: 165px; /* Scaled down to stay within boundary */
+                border: 2px solid rgba(192, 192, 194, 0.6);
                 border-radius: 50%;
-                box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
             }
 
-            /* Hexagonal Core Mapping */
-            .vortex-core:nth-child(1) { transform: translate(0, -115px); }
-            .vortex-core:nth-child(2) { transform: translate(100px, -58px); }
-            .vortex-core:nth-child(3) { transform: translate(100px, 58px); }
-            .vortex-core:nth-child(4) { transform: translate(0, 115px); }
-            .vortex-core:nth-child(5) { transform: translate(-100px, 58px); }
-            .vortex-core:nth-child(6) { transform: translate(-100px, -58px); }
+            /* Precise Hexagonal Mapping - Offset adjusted for 165px circles */
+            .vortex-core:nth-child(1) { transform: translate(0, -82px); }
+            .vortex-core:nth-child(2) { transform: translate(71px, -41px); }
+            .vortex-core:nth-child(3) { transform: translate(71px, 41px); }
+            .vortex-core:nth-child(4) { transform: translate(0, 82px); }
+            .vortex-core:nth-child(5) { transform: translate(-71px, 41px); }
+            .vortex-core:nth-child(6) { transform: translate(-71px, -41px); }
 
-            /* --- BRANDING --- */
+            /* --- TYPOGRAPHY --- */
             .title {
                 font-family: 'Syncopate', sans-serif;
-                color: #fff; font-size: 5.5rem;
-                letter-spacing: 40px; margin-top: 60px;
-                text-indent: 40px;
-                filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+                color: #fff; font-size: 4.5rem;
+                letter-spacing: 30px; margin-top: 50px;
+                text-indent: 30px;
+                z-index: 10;
             }
 
             .tagline {
                 font-family: 'Inter', sans-serif;
-                color: #00f2ff; font-size: 0.8rem;
-                letter-spacing: 12px; margin-top: 15px;
-                text-transform: uppercase; opacity: 0.7;
+                color: #00f2ff; font-size: 0.7rem;
+                letter-spacing: 10px; margin-top: 15px;
+                text-transform: uppercase; opacity: 0.8;
+                z-index: 10;
             }
 
             /* --- PROGRESS --- */
-            .progress-tray { width: 650px; height: 1px; background: rgba(255,255,255,0.1); margin-top: 80px; position: relative; }
-            .fill { width: 0%; height: 100%; background: #00f2ff; box-shadow: 0 0 20px #00f2ff; animation: load 6s cubic-bezier(0.85, 0, 0.15, 1) forwards; }
+            .progress-tray { width: 500px; height: 1px; background: rgba(255,255,255,0.1); margin-top: 60px; position: relative; z-index: 10; }
+            .fill { width: 0%; height: 100%; background: #00f2ff; box-shadow: 0 0 20px #00f2ff; animation: load 6s linear forwards; }
             @keyframes load { to { width: 100%; } }
         </style>
     </head>
     <body>
         <div class="vortex-frame">
-            <div class="star" style="top:15%; left:25%; width:2px; height:2px; --d:3s;"></div>
-            <div class="star" style="top:45%; left:75%; width:1px; height:1px; --d:5s;"></div>
-            <div class="star" style="top:80%; left:10%; width:3px; height:3px; --d:4s;"></div>
-            
+            <div class="starfield">
+                <div class="star" style="top:10%; left:15%; width:2px; height:2px; --d:3s;"></div>
+                <div class="star" style="top:35%; left:65%; width:1px; height:1px; --d:5s;"></div>
+                <div class="star" style="top:60%; left:25%; width:3px; height:3px; --d:4s;"></div>
+                <div class="star" style="top:85%; left:80%; width:1.5px; height:1.5px; --d:6s;"></div>
+                <div class="star" style="top:20%; left:85%; width:2px; height:2px; --d:2s;"></div>
+                <div class="star" style="top:70%; left:50%; width:1px; height:1px; --d:7s;"></div>
+                <div class="star" style="top:5%; left:45%; width:2.5px; height:2.5px; --d:4.5s;"></div>
+            </div>
+
             <div class="boundary">
                 <div class="static-logic">
                     <div class="vortex-core"></div>
@@ -285,13 +307,12 @@ def show_vortex_intro():
     """
 
     with placeholder:
-        # We use height=1000 and scrolling=False to force it to fill the view
         components.html(vortex_code, height=1000, scrolling=False)
     
     time.sleep(6.5)
     placeholder.empty()
 
-# --- INITIALIZE ---
+# Initialization logic
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
