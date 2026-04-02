@@ -178,20 +178,18 @@ import time
 import base64
 import os
 
-def get_base64_image(file_name):
-    """Encodes the local LOGO.png into a string Streamlit can read."""
-    # Finds the directory where this script is saved
-    script_dir = os.path.dirname(__file__) 
-    full_path = os.path.join(script_dir, file_name)
+def get_base64_image():
+    """Directly pulls the image from your specific Windows path."""
+    # PASTE YOUR FULL PATH BETWEEN THE QUOTES BELOW
+    path = r"C:\Users\hp\OneDrive\Pictures\Screenshots\Screenshot 2026-04-02 130156.png"
     
-    if os.path.exists(full_path):
-        with open(full_path, "rb") as img_file:
+    if os.path.exists(path):
+        with open(path, "rb") as img_file:
             return base64.b64encode(img_file.read()).decode()
     return None
 
 def show_vortex_intro():
-    # --- ASSET RETRIEVAL ---
-    img_base64 = get_base64_image("LOGO.png")
+    img_base64 = get_base64_image()
     logo_html = f"data:image/png;base64,{img_base64}" if img_base64 else None
 
     intro_placeholder = st.empty()
@@ -200,9 +198,15 @@ def show_vortex_intro():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
         
-        /* --- REAL STARFIELD BACKGROUND --- */
         .vortex-container {{
-            background: radial-gradient(ellipse at bottom, #00050a 0%, #000000 100%);
+            background: #000;
+            /* Ultra-Sharp Starfield */
+            background-image: 
+                radial-gradient(1px 1px at 10% 10%, #fff, transparent),
+                radial-gradient(1px 1px at 50% 50%, #fff, transparent),
+                radial-gradient(1.5px 1.5px at 80% 20%, #fff, transparent),
+                radial-gradient(1px 1px at 30% 80%, #ddd, transparent);
+            background-size: 400px 400px;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -213,88 +217,52 @@ def show_vortex_intro():
             overflow: hidden;
         }}
 
-        /* Sharp Star Layers */
-        .stars-static {{
-            position: absolute;
-            width: 1px; height: 1px;
-            background: transparent;
-            box-shadow: 145px 234px #FFF, 890px 456px #DDD, 1200px 100px #FFF, 400px 900px #EEE, 1700px 300px #FFF, 200px 700px #FFF, 1400px 800px #DDD;
-            animation: twinkle 4s infinite ease-in-out;
-        }}
-
-        .stars-moving {{
-            position: absolute;
-            width: 2px; height: 2px;
-            box-shadow: 500px 100px #FFF, 1100px 800px #FFF, 300px 400px #DDD, 1600px 200px #FFF;
-            animation: space-drift 180s linear infinite;
-        }}
-
-        @keyframes twinkle {{ 0%, 100% {{ opacity: 0.3; }} 50% {{ opacity: 1; }} }}
-        @keyframes space-drift {{ from {{ transform: translateY(0); }} to {{ transform: translateY(-2000px); }} }}
-
-        /* --- THE GEAR-VORTEX LOGO --- */
         .gear-system {{
             position: relative;
-            width: 220px;
-            height: 220px;
-            border: 1px solid rgba(192, 192, 194, 0.2); /* Silver Boundary */
+            width: 240px;
+            height: 240px;
+            border: 1px solid rgba(192, 192, 194, 0.2);
             border-radius: 50%;
-            margin-bottom: 25px;
             display: flex;
             justify-content: center;
             align-items: center;
+            margin-bottom: 20px;
         }}
 
         .main-logo {{
-            width: 120px;
+            width: 140px;
             z-index: 10;
-            filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
         }}
 
-        /* The Overlapping Gear Circles */
         .gear-orbit {{
             position: absolute;
-            width: 90px;
-            height: 90px;
-            border: 1px solid rgba(192, 192, 194, 0.5);
+            width: 100px;
+            height: 100px;
+            border: 1.2px solid rgba(192, 192, 194, 0.4);
             border-radius: 50%;
-            transform-origin: center center;
         }}
 
-        .gear-orbit:nth-child(1) {{ animation: orbit-1 10s linear infinite; }}
-        .gear-orbit:nth-child(2) {{ animation: orbit-2 12s linear infinite; }}
-        .gear-orbit:nth-child(3) {{ animation: orbit-3 15s linear infinite; }}
+        /* Orbital Gear Mechanics */
+        .gear-orbit:nth-child(1) {{ animation: orbit-1 8s linear infinite; }}
+        .gear-orbit:nth-child(2) {{ animation: orbit-2 10s linear infinite; }}
+        .gear-orbit:nth-child(3) {{ animation: orbit-3 12s linear infinite; }}
 
-        @keyframes orbit-1 {{ from {{ transform: rotate(0deg) translateX(65px); }} to {{ transform: rotate(360deg) translateX(65px); }} }}
-        @keyframes orbit-2 {{ from {{ transform: rotate(120deg) translateX(65px); }} to {{ transform: rotate(480deg) translateX(65px); }} }}
-        @keyframes orbit-3 {{ from {{ transform: rotate(240deg) translateX(65px); }} to {{ transform: rotate(600deg) translateX(65px); }} }}
+        @keyframes orbit-1 {{ from {{ transform: rotate(0deg) translateX(70px); }} to {{ transform: rotate(360deg) translateX(70px); }} }}
+        @keyframes orbit-2 {{ from {{ transform: rotate(120deg) translateX(70px); }} to {{ transform: rotate(480deg) translateX(70px); }} }}
+        @keyframes orbit-3 {{ from {{ transform: rotate(240deg) translateX(70px); }} to {{ transform: rotate(600deg) translateX(70px); }} }}
 
-        /* --- TYPOGRAPHY --- */
         .logo-title {{
             font-family: 'Syncopate', sans-serif;
             color: #ffffff;
             font-size: 3.8rem;
-            font-weight: 700;
             letter-spacing: 22px;
-            margin: 20px 0 5px 22px;
-            background: linear-gradient(to bottom, #FFFFFF 60%, #444444 100%);
+            margin: 20px 0 0 22px;
+            background: linear-gradient(to bottom, #FFF 60%, #444 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            z-index: 20;
         }}
 
-        .tagline-sub {{
-            font-family: 'Inter', sans-serif;
-            color: #00F2FF;
-            font-size: 0.75rem;
-            letter-spacing: 14px;
-            opacity: 0.8;
-            text-align: center;
-            text-transform: uppercase;
-            z-index: 20;
-        }}
-
-        /* --- THE LOADING TRAY --- */
         .progress-tray {{
             width: 450px;
             height: 1px;
@@ -302,7 +270,6 @@ def show_vortex_intro():
             margin-top: 60px;
             position: relative;
             overflow: hidden;
-            z-index: 20;
         }}
 
         .progress-fill {{
@@ -310,59 +277,42 @@ def show_vortex_intro():
             height: 100%;
             background: #00F2FF;
             box-shadow: 0 0 15px #00F2FF;
-            animation: fill-up 6.5s linear forwards;
+            animation: fill-up 6s linear forwards;
         }}
 
-        @keyframes fill-up {{ from {{ width: 0%; }} to {{ width: 100%; }} }}
+        @keyframes fill-up {{ to {{ width: 100%; }} }}
         </style>
         
         <div class="vortex-container">
-            <div class="stars-static"></div>
-            <div class="stars-moving"></div>
-            
             <div class="gear-system">
                 <div class="gear-orbit"></div>
                 <div class="gear-orbit"></div>
                 <div class="gear-orbit"></div>
-                {f'<img src="{logo_html}" class="main-logo">' if logo_html else ''}
+                {f'<img src="{logo_html}" class="main-logo">' if logo_html else '<div style="color:red;">IMAGE_NOT_FOUND</div>'}
             </div>
-            
             <h1 class="logo-title">VOID-OS</h1>
-            <p class="tagline-sub">Predict. Integrate. Conquer.</p>
-            
             <div class="progress-tray">
                 <div class="progress-fill"></div>
             </div>
         </div>
     """, unsafe_allow_html=True)
 
-    # Tactical Sequence
     status_slot = st.empty()
-    steps = [
-        "MAPPING STARFIELD VECTORS...", 
-        "UPLINKING SOVEREIGN NODES...", 
-        "SYNCHRONIZING GEAR LOGIC...", 
-        "VOID-OS v1.0 ONLINE."
-    ]
+    steps = ["SYNCING LOCAL ASSETS...", "MAPPING VECTORS...", "VOID-OS ONLINE."]
     
     for step in steps:
         status_slot.markdown(f"""
             <div style="position: fixed; top: 78%; left: 50%; transform: translateX(-50%); z-index: 10000;">
-                <p style="color: rgba(0, 242, 255, 0.4); font-family: monospace; 
-                          font-size: 0.6rem; letter-spacing: 5px; text-align: center;">
-                    {step}
-                </p>
+                <p style="color: rgba(0, 242, 255, 0.4); font-family: monospace; font-size: 0.6rem; letter-spacing: 5px;">{step}</p>
             </div>
         """, unsafe_allow_html=True)
-        time.sleep(1.6)
+        time.sleep(1.8)
         
     intro_placeholder.empty()
 
-# --- EXECUTION ---
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
-
 
 def draw_title(emoji, text):
     st.markdown(f"""
