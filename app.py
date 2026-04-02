@@ -431,17 +431,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-def typewriter_effect(text):
-    container = st.empty()
-    full_text = ""
-    for char in text:
-        full_text += char
-        container.markdown(full_text + "▌")
-        time.sleep(0.005) 
-    container.markdown(full_text)
-
-
-
 def save_script_to_vault(title, content):
     # This function now has a safety check
     if not content:
