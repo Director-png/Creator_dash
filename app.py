@@ -176,86 +176,61 @@ NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 import streamlit as st
 import time
 
+# --- VOID-OS GATEKEEPER ENGINE ---
 def show_vortex_intro():
-    intro_placeholder = st.empty()
+    # 1. Clear any existing UI elements
+    placeholder = st.empty()
     
-    st.markdown("""
-        <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
+    # 2. Inject the CSS and HTML as a single block
+    vortex_html = """
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&display=swap');
         
-        /* --- DYNAMIC STARFIELD --- */
         .vortex-container {
             background: #000;
             height: 100vh;
+            width: 100vw;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             position: fixed;
-            top: 0; left: 0; width: 100%; z-index: 9999;
+            top: 0; left: 0; z-index: 9999;
             overflow: hidden;
+            font-family: 'Inter', sans-serif;
         }
 
-        .star {
-            position: absolute;
-            background: #FFFFFF;
-            border-radius: 50%;
-            opacity: 0.5;
-            animation: twinkle var(--duration) infinite ease-in-out;
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.4); box-shadow: 0 0 10px #FFF; }
-        }
-
-        /* --- THE CENTRIFUGE VORTEX --- */
+        /* --- THE CENTRIFUGE --- */
         .boundary-circle {
             position: relative;
-            width: 340px;
-            height: 340px;
-            border: 4px solid #C0C0C2; /* Silver Bold Outline */
+            width: 320px;
+            height: 320px;
+            border: 4px solid #C0C0C2;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 40px;
-            /* HIGH SPEED SPIN */
-            animation: vortex-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            box-shadow: 0 0 40px rgba(192, 192, 194, 0.2);
-        }
-
-        @keyframes vortex-spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            animation: spin 1.1s linear infinite;
         }
 
         .static-core {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Counter-rotation to keep the inside static */
-            animation: counter-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            animation: counter-spin 1.1s linear infinite;
         }
 
-        @keyframes counter-spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(-360deg); }
-        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes counter-spin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
 
         .gear-circle {
             position: absolute;
-            width: 135px;
-            height: 135px;
-            border: 3.5px solid #C0C0C2; /* High-Contrast Silver */
+            width: 130px; height: 130px;
+            border: 3px solid #C0C0C2;
             border-radius: 50%;
-            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
         }
 
-        /* Hexagonal Static Alignment */
+        /* Hexagonal Lock */
         .gear-circle:nth-child(1) { transform: translate(0, -90px); }
         .gear-circle:nth-child(2) { transform: translate(78px, -45px); }
         .gear-circle:nth-child(3) { transform: translate(78px, 45px); }
@@ -263,72 +238,61 @@ def show_vortex_intro():
         .gear-circle:nth-child(5) { transform: translate(-78px, 45px); }
         .gear-circle:nth-child(6) { transform: translate(-78px, -45px); }
 
-        /* --- TYPOGRAPHY & LOADING --- */
         .logo-title {
             font-family: 'Syncopate', sans-serif;
-            color: #FFFFFF;
+            color: #FFF;
             font-size: 5rem;
-            letter-spacing: 35px;
-            margin: 20px 0 0 35px;
-            background: linear-gradient(to bottom, #FFF 50%, #444 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            z-index: 20;
+            letter-spacing: 30px;
+            margin-top: 40px;
+            text-align: center;
         }
 
         .progress-tray {
-            width: 600px;
-            height: 2px;
-            background: rgba(255,255,255,0.05);
-            margin-top: 80px;
+            width: 500px; height: 2px;
+            background: rgba(255,255,255,0.1);
+            margin-top: 50px;
             position: relative;
-            overflow: hidden;
         }
 
         .progress-fill {
-            width: 0%;
-            height: 100%;
+            width: 0%; height: 100%;
             background: #00F2FF;
-            box-shadow: 0 0 30px #00F2FF;
-            animation: fill-up 6.5s cubic-bezier(0.85, 0, 0.15, 1) forwards;
+            box-shadow: 0 0 20px #00F2FF;
+            animation: load 6s linear forwards;
         }
 
-        @keyframes fill-up { to { width: 100%; } }
-        </style>
-        
-        <div class="vortex-container">
-            <div class="star" style="top:15%; left:25%; width:1px; height:1px; --duration:3s;"></div>
-            <div class="star" style="top:45%; left:85%; width:2.5px; height:2.5px; --duration:5s;"></div>
-            <div class="star" style="top:75%; left:35%; width:1px; height:1px; --duration:4s;"></div>
-            <div class="star" style="top:25%; left:65%; width:3px; height:3px; --duration:6s;"></div>
-            <div class="star" style="top:85%; left:15%; width:1.5px; height:1.5px; --duration:4.5s;"></div>
-            
-            <div class="boundary-circle">
-                <div class="static-core">
-                    <div class="gear-circle"></div>
-                    <div class="gear-circle"></div>
-                    <div class="gear-circle"></div>
-                    <div class="gear-circle"></div>
-                    <div class="gear-circle"></div>
-                    <div class="gear-circle"></div>
-                    <div style="color:rgba(255,255,255,0.25); font-family:monospace; font-size:0.7rem; letter-spacing:3px; z-index:15;">
-                        [ SOVEREIGN_CORE ]
-                    </div>
+        @keyframes load { to { width: 100%; } }
+    </style>
+
+    <div class="vortex-container">
+        <div class="boundary-circle">
+            <div class="static-core">
+                <div class="gear-circle"></div>
+                <div class="gear-circle"></div>
+                <div class="gear-circle"></div>
+                <div class="gear-circle"></div>
+                <div class="gear-circle"></div>
+                <div class="gear-circle"></div>
+                <div style="color:rgba(255,255,255,0.3); font-size:0.7rem; letter-spacing:3px;">
+                    [ SOVEREIGN_CORE ]
                 </div>
             </div>
-
-            <h1 class="logo-title">VOID-OS</h1>
-            
-            <div class="progress-tray">
-                <div class="progress-fill"></div>
-            </div>
         </div>
-    """, unsafe_allow_html=True)
-
-    # Boot Sequence Simulation
+        <h1 class="logo-title">VOID-OS</h1>
+        <div class="progress-tray">
+            <div class="progress-fill"></div>
+        </div>
+    </div>
+    """
+    
+    # CRITICAL: This is where the magic happens.
+    placeholder.markdown(vortex_html, unsafe_allow_html=True)
+    
+    # 3. Wait for animation to finish
     time.sleep(6.5)
-    intro_placeholder.empty()
+    placeholder.empty()
 
+# --- TRIGGER ---
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
