@@ -1075,18 +1075,6 @@ is_admin = str(user_role_raw).lower() == 'admin' or st.session_state.get('admin_
 is_paid = "paid" in str(user_status_raw).lower() or "pro" in str(user_status_raw).lower()
 
 
-# --- 2. SPLASH SCREEN ---
-if 'first_load' not in st.session_state:
-    st.markdown("<style>.stApp { background-color: #000000; }</style>", unsafe_allow_html=True)
-    empty_space = st.empty()
-    with empty_space.container():
-        if lottie_loading: st_lottie(lottie_loading, height=400)
-        st.markdown("<h1 style='text-align: center; color: #00d4ff; font-family: monospace;'>INITIALIZING VOID OS...</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: #333;'>SYNCING NEURAL NODES</p>", unsafe_allow_html=True)
-        time.sleep(3.0) 
-    st.session_state.first_load = True
-    st.rerun()
-
 # --- EMERGENCY DIAGNOSTIC ---
 if st.sidebar.checkbox("🔍 Debug Node Mapping"):
     users_test = load_user_db()
