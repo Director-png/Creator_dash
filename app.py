@@ -175,52 +175,98 @@ NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 import streamlit as st
 import time
 
-# --- ELITE INTRO OVERRIDE ---
-def show_elite_intro():
-    placeholder = st.empty()
+import streamlit as st
+import time
+
+def show_cinematic_intro():
+    intro_placeholder = st.empty()
     
-    with placeholder.container():
-        # Using a High-End "Cyber" CSS style
+    # CSS for the "Scanned" Terminal look
+    st.markdown("""
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        
+        .boot-container {
+            background-color: #050505;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Share Tech Mono', monospace;
+            position: fixed;
+            top: 0; left: 0; width: 100%; z-index: 9999;
+        }
+        
+        .logo-text {
+            color: #00F2FF;
+            font-size: 4rem;
+            letter-spacing: 15px;
+            text-shadow: 0 0 20px #00F2FF;
+            animation: flicker 0.1s infinite;
+        }
+        
+        .scan-line {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 242, 255, 0.5);
+            position: absolute;
+            top: 0;
+            box-shadow: 0 0 15px #00F2FF;
+            animation: scan 2s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.9; }
+            50% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+
+        .status-msg {
+            color: #7000FF;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    with intro_placeholder.container():
+        # The HTML Structure
         st.markdown("""
-            <style>
-            .stApp { background-color: #0E1117; }
-            .terminal-text {
-                font-family: 'Courier New', Courier, monospace;
-                color: #00F2FF;
-                text-align: center;
-                text-shadow: 0 0 10px #00F2FF;
-            }
-            </style>
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh;">
-                <h1 class="terminal-text">VOID-OS</h1>
-                <p class="terminal-text" id="status-text">INITIALIZING QUANTUM LAYER...</p>
+            <div class="boot-container">
+                <div class="scan-line"></div>
+                <div class="logo-text">VOID-OS</div>
+                <div id="dynamic-status" class="status-msg">BYPASSING MARKET NOISE...</div>
             </div>
         """, unsafe_allow_html=True)
         
-        # Simulated "Decryption" Sequence
-        progress_bar = st.progress(0)
-        status_messages = [
-            "DECRYPTING SOVEREIGN CORE...",
-            "ESTABLISHING NEURAL UPLINK...",
-            "BYPASSING MARKET NOISE...",
-            "ACCESS GRANTED."
+        # The Sequence (This is what they see in your video)
+        boot_steps = [
+            "Initializing Sovereign Core...",
+            "Syncing Global Pulse Nodes...",
+            "Calibrating Quantum Intersect...",
+            "Logic Layer: ACTIVE",
+            "Accessing Solo Agency Vault..."
         ]
         
-        for i in range(100):
-            time.sleep(0.03) # High-speed feel
-            progress_bar.progress(i + 1)
-            if i % 25 == 0:
-                # Update the message every 25%
-                msg_index = i // 25
-                # (Note: In a real app, you'd use st.empty for the text too)
-        
-    placeholder.empty() # Clears the intro and moves to Login
+        status_area = st.empty()
+        for step in boot_steps:
+            # We use an empty area to update the text under the big logo
+            status_area.markdown(f"<p style='text-align:center; color:#7000FF; font-family:monospace;'>{step}</p>", unsafe_allow_html=True)
+            time.sleep(0.6) # The "Calculated" delay
+            
+    intro_placeholder.empty()
 
-# Run this at the very top of your app
-if 'initialized' not in st.session_state:
-    show_elite_intro()
-    st.session_state.initialized = True
-
+# Trigger the boot sequence only once per session
+if 'booted' not in st.session_state:
+    show_cinematic_intro()
+    st.session_state.booted = True
 
 def draw_title(emoji, text):
     st.markdown(f"""
