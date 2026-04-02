@@ -175,20 +175,28 @@ NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 
 import streamlit as st
 import time
+import base64
 
 def show_vortex_intro():
+    # --- IMAGE ENCODING LOGIC ---
+    # Put your 'Gemini_Generated_Image.jpg' in the same folder as this script
+    try:
+        with open("Gemini_Generated_Image.jpg", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode()
+        logo_html = f"data:image/jpg;base64,{encoded_string}"
+    except FileNotFoundError:
+        # Fallback if the file isn't found during testing
+        logo_html = "https://via.placeholder.com/180"
+
     intro_placeholder = st.empty()
     
-    # Replace 'YOUR_LOGO_URL' with the actual path to your logo image
-    logo_url = "https://raw.githubusercontent.com/your-repo/main/logo.png" 
-
     st.markdown(f"""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
         
         .vortex-container {{
             background: #000000;
-            background-image: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000 70%);
+            background-image: radial-gradient(circle at 50% 50%, #0a0a0a 0%, #000 80%);
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -196,48 +204,53 @@ def show_vortex_intro():
             align-items: center;
             position: fixed;
             top: 0; left: 0; width: 100%; z-index: 9999;
+            overflow: hidden;
         }}
 
-        /* The Rolling Vortex Logo */
+        /* The Rolling Vortex Logo Animation */
         .vortex-logo {{
-            width: 180px;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 0 15px rgba(255,255,255,0.2));
-            animation: rolling-vortex 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            width: 220px;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
+            animation: rolling-vortex 6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
         }}
 
         @keyframes rolling-vortex {{
-            0% {{ transform: rotate(0deg) scale(0.95); filter: brightness(0.8); }}
-            50% {{ transform: rotate(180deg) scale(1.05); filter: brightness(1.2) drop-shadow(0 0 30px rgba(0, 242, 255, 0.3)); }}
-            100% {{ transform: rotate(360deg) scale(0.95); filter: brightness(0.8); }}
+            0% {{ transform: rotate(0deg) scale(0.98); filter: brightness(0.9); }}
+            50% {{ transform: rotate(180deg) scale(1.05); filter: brightness(1.2) drop-shadow(0 0 40px rgba(0, 242, 255, 0.2)); }}
+            100% {{ transform: rotate(360deg) scale(0.98); filter: brightness(0.9); }}
         }}
 
         .logo-title {{
             font-family: 'Syncopate', sans-serif;
             color: #ffffff;
-            font-size: 3.5rem;
+            font-size: 3.8rem;
             font-weight: 700;
-            letter-spacing: 20px;
+            letter-spacing: 22px;
             margin: 10px 0;
-            background: linear-gradient(to bottom, #ffffff 50%, #777777 100%);
+            background: linear-gradient(to bottom, #ffffff 60%, #444444 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-align: center;
+            padding-left: 22px; /* Offsets letter spacing for perfect centering */
         }}
 
         .tagline-sub {{
             font-family: 'Inter', sans-serif;
             color: #00F2FF;
-            font-size: 0.7rem;
-            letter-spacing: 10px;
+            font-size: 0.75rem;
+            letter-spacing: 12px;
             font-weight: 100;
-            opacity: 0.8;
+            opacity: 0.7;
+            text-align: center;
+            margin-top: 15px;
         }}
 
         .progress-tray {{
-            width: 300px;
-            height: 2px;
-            background: rgba(255,255,255,0.1);
-            margin-top: 40px;
+            width: 400px;
+            height: 1px;
+            background: rgba(255,255,255,0.05);
+            margin-top: 50px;
             position: relative;
             overflow: hidden;
         }}
@@ -245,19 +258,19 @@ def show_vortex_intro():
         .progress-fill {{
             width: 0%;
             height: 100%;
-            background: #00F2FF;
-            box-shadow: 0 0 10px #00F2FF;
-            animation: fill-up 5s linear forwards;
+            background: linear-gradient(90deg, transparent, #00F2FF, transparent);
+            box-shadow: 0 0 15px #00F2FF;
+            animation: fill-up 5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
         }}
 
         @keyframes fill-up {{
-            0% {{ width: 0%; }}
-            100% {{ width: 100%; }}
+            0% {{ width: 0%; transform: translateX(-100%); }}
+            100% {{ width: 100%; transform: translateX(0%); }}
         }}
         </style>
         
         <div class="vortex-container">
-            <img src="{logo_url}" class="vortex-logo">
+            <img src="{logo_html}" class="vortex-logo">
             <h1 class="logo-title">VOID-OS</h1>
             <p class="tagline-sub">PREDICT. INTEGRATE. CONQUER.</p>
             <div class="progress-tray">
@@ -266,22 +279,30 @@ def show_vortex_intro():
         </div>
     """, unsafe_allow_html=True)
 
-    # 5-Second Tactical Sequence
+    # --- 5-Second Tactical Logic Sequence ---
     status_area = st.empty()
     steps = [
-        "BOOTING SOVEREIGN CORE...", 
-        "ANALYZING GLOBAL VECTORS...", 
-        "INTEGRATING NEURAL NODES...", 
-        "BYPASSING MARKET NOISE...", 
-        "VOID-OS v4.0 ONLINE."
+        "INITIALIZING SOVEREIGN CORE...", 
+        "UPLINKING TO GLOBAL PULSE...", 
+        "CALIBRATING NEURAL VECTORS...", 
+        "INTEGRATING LOGIC LAYERS...", 
+        "ACCESS GRANTED: WELCOME DIRECTOR."
     ]
     
+    # We use a spacer to push the status text down below the tagline
     for step in steps:
-        status_area.markdown(f"<p style='text-align:center; color:gray; font-family:monospace; font-size:0.6rem; letter-spacing:3px; margin-top:10px;'>{step}</p>", unsafe_allow_html=True)
-        time.sleep(1.0) # Total 5 seconds
+        status_area.markdown(f"""
+            <div style='height: 250px;'></div>
+            <p style='text-align:center; color:rgba(255,255,255,0.3); 
+            font-family:monospace; font-size:0.6rem; letter-spacing:4px;'>
+            {step}
+            </p>
+        """, unsafe_allow_html=True)
+        time.sleep(1.0) 
         
     intro_placeholder.empty()
 
+# --- TRIGGER ---
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
