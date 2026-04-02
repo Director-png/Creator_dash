@@ -173,7 +173,163 @@ NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
 NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
 
+import streamlit as st
+import time
 
+def show_future_intercept_intro():
+    intro_placeholder = st.empty()
+    
+    # 1. CORE CSS INJECTION (Triple-quoted to prevent Python SyntaxErrors)
+    st.markdown("""
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;900&display=swap');
+        
+        .intercept-container {
+            background: #000000;
+            height: 100vh; width: 100vw;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            position: fixed; top: 0; left: 0; z-index: 9999;
+            overflow: hidden;
+        }
+
+        /* --- HIGH-DENSITY COLOR STAR ENGINE --- */
+        .star-layer {
+            position: absolute; width: 250%; height: 250%;
+            top: -75%; left: -75%;
+            background-repeat: repeat;
+            animation: nebula-drift 100s linear infinite;
+        }
+
+        /* Large Multicultural Glowing Stars */
+        .stars-xl {
+            background-image: 
+                radial-gradient(6px 6px at 150px 250px, #FF0070, transparent), /* Pink */
+                radial-gradient(5px 5px at 400px 600px, #7000FF, transparent), /* Purple */
+                radial-gradient(6px 6px at 600px 150px, #FFD000, transparent), /* Yellow */
+                radial-gradient(5px 5px at 850px 450px, #00F2FF, transparent); /* Cyan */
+            background-size: 800px 800px;
+            animation: deep-glow 4s infinite ease-in-out;
+        }
+
+        /* High-Density Background Stars */
+        .stars-md {
+            background-image: 
+                radial-gradient(2.5px 2.5px at 50px 150px, #fff, transparent),
+                radial-gradient(3px 3px at 450px 350px, #fff, transparent),
+                radial-gradient(2.5px 2.5px at 250px 50px, #00F2FF, transparent),
+                radial-gradient(2px 2px at 100px 400px, #FF0070, transparent);
+            background-size: 350px 350px;
+            opacity: 0.5;
+            animation: deep-glow 7s infinite ease-in-out reverse;
+        }
+
+        @keyframes nebula-drift {
+            from { transform: translate(0, 0); }
+            to { transform: translate(150px, 200px); }
+        }
+
+        @keyframes deep-glow {
+            0%, 100% { filter: brightness(1) blur(1px); opacity: 0.4; }
+            50% { filter: brightness(2.2) blur(3px); opacity: 1; }
+        }
+
+        /* --- LOGO BOX --- */
+        .logo-box {
+            position: relative;
+            text-align: center;
+            z-index: 10000;
+        }
+
+        .main-title {
+            font-family: 'Syncopate', sans-serif;
+            color: #ffffff;
+            font-size: 4.5rem;
+            font-weight: 700;
+            letter-spacing: 30px;
+            margin: 0;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #fff 40%, #666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
+        }
+
+        .glitch-line {
+            width: 0%; height: 1px;
+            background: linear-gradient(90deg, transparent, #00F2FF, transparent);
+            margin-top: 15px;
+            animation: expand-line 2s ease-in-out forwards;
+        }
+
+        @keyframes expand-line {
+            0% { width: 0%; opacity: 0; }
+            100% { width: 100%; opacity: 1; }
+        }
+
+        .tagline {
+            font-family: 'Inter', sans-serif;
+            color: #00F2FF;
+            font-size: 0.8rem;
+            letter-spacing: 12px;
+            margin-top: 25px;
+            font-weight: 100;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: slideUp 2s ease-out forwards 1.5s;
+        }
+
+        @keyframes slideUp {
+            0% { transform: translateY(30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    with intro_placeholder.container():
+        st.markdown("""
+            <div class="intercept-container">
+                <div class="star-layer stars-md"></div>
+                <div class="star-layer stars-xl"></div>
+                
+                <div class="logo-box">
+                    <h1 class="main-title">VOID-OS</h1>
+                    <div class="glitch-line"></div>
+                    <p class="tagline">PREDICT. INTEGRATE. CONQUER.</p>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        status_placeholder = st.empty()
+        
+        tactical_steps = [
+            "SCANNING TEMPORAL VECTORS...",
+            "SYNTHESIZING MARKET LOGIC...",
+            "DECRYPTING COMPETITOR STACKS...",
+            "ESTABLISHING SOVEREIGN UPLINK...",
+            "INJECTING VOID-CORE v4.0...",
+            "SYSTEMS ONLINE."
+        ]
+        
+        # Timing: 6 steps * 1.66s = ~10 Seconds total immersion
+        for step in tactical_steps:
+            status_placeholder.markdown(f"""
+                <div style='position:fixed; bottom:10%; width:100%; left:0; z-index:10001;'>
+                    <p style='text-align:center; color:rgba(0, 242, 255, 0.8); 
+                    font-family:monospace; font-size:0.75rem; letter-spacing:8px;
+                    text-shadow: 0 0 15px #00F2FF;'>
+                    {step}
+                    </p>
+                </div>
+            """, unsafe_allow_html=True)
+            time.sleep(1.66)
+            
+    intro_placeholder.empty()
+
+# Initialization logic
+if 'booted' not in st.session_state:
+    show_future_intercept_intro()
+    st.session_state.booted = True
 
 def draw_title(emoji, text):
     st.markdown(f"""
