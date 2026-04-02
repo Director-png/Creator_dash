@@ -179,66 +179,65 @@ import time
 def show_future_intercept_intro():
     intro_placeholder = st.empty()
     
-    # 1. CORE CSS INJECTION (Triple-quoted to prevent Python SyntaxErrors)
+    # ADVANCED BUILD: Large-Scale Glowing Starfield + 10s Tactical Sequence
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;900&display=swap');
         
         .intercept-container {
             background: #000000;
-            height: 100vh; width: 100vw;
+            height: 100vh; width: 100%;
             display: flex; flex-direction: column;
             justify-content: center; align-items: center;
             position: fixed; top: 0; left: 0; z-index: 9999;
             overflow: hidden;
         }
 
-        /* --- HIGH-DENSITY COLOR STAR ENGINE --- */
-        .star-layer {
-            position: absolute; width: 250%; height: 250%;
-            top: -75%; left: -75%;
+        /* --- LARGE-SCALE STARFIELD ENGINE --- */
+        .starfield-main, .starfield-slow {
+            position: absolute; width: 200%; height: 200%;
+            top: -50%; left: -50%;
             background-repeat: repeat;
-            animation: nebula-drift 100s linear infinite;
         }
 
-        /* Large Multicultural Glowing Stars */
-        .stars-xl {
+        /* Primary Layer: Large, Glowing Hero Stars */
+        .starfield-main {
             background-image: 
-                radial-gradient(6px 6px at 150px 250px, #FF0070, transparent), /* Pink */
-                radial-gradient(5px 5px at 400px 600px, #7000FF, transparent), /* Purple */
-                radial-gradient(6px 6px at 600px 150px, #FFD000, transparent), /* Yellow */
-                radial-gradient(5px 5px at 850px 450px, #00F2FF, transparent); /* Cyan */
-            background-size: 800px 800px;
-            animation: deep-glow 4s infinite ease-in-out;
+                radial-gradient(3px 3px at 15% 15%, #fff, transparent),
+                radial-gradient(4px 4px at 45% 35%, #00F2FF, transparent),
+                radial-gradient(3px 3px at 75% 65%, #fff, transparent),
+                radial-gradient(5px 5px at 25% 85%, #fff, transparent),
+                radial-gradient(4px 4px at 85% 15%, #00F2FF, transparent);
+            background-size: 500px 500px;
+            animation: star-drift 60s linear infinite, twinkle 3s ease-in-out infinite;
+            opacity: 0.6;
         }
 
-        /* High-Density Background Stars */
-        .stars-md {
+        /* Secondary Layer: Smaller, Distant Stars for Depth */
+        .starfield-slow {
             background-image: 
-                radial-gradient(2.5px 2.5px at 50px 150px, #fff, transparent),
-                radial-gradient(3px 3px at 450px 350px, #fff, transparent),
-                radial-gradient(2.5px 2.5px at 250px 50px, #00F2FF, transparent),
-                radial-gradient(2px 2px at 100px 400px, #FF0070, transparent);
-            background-size: 350px 350px;
-            opacity: 0.5;
-            animation: deep-glow 7s infinite ease-in-out reverse;
+                radial-gradient(1.5px 1.5px at 10% 80%, #fff, transparent),
+                radial-gradient(2px 2px at 90% 40%, #fff, transparent),
+                radial-gradient(1px 1px at 50% 50%, #00F2FF, transparent);
+            background-size: 300px 300px;
+            animation: star-drift 120s linear infinite reverse;
+            opacity: 0.3;
         }
 
-        @keyframes nebula-drift {
-            from { transform: translate(0, 0); }
-            to { transform: translate(150px, 200px); }
+        @keyframes star-drift {
+            from { transform: translateY(0); }
+            to { transform: translateY(500px); }
         }
 
-        @keyframes deep-glow {
-            0%, 100% { filter: brightness(1) blur(1px); opacity: 0.4; }
-            50% { filter: brightness(2.2) blur(3px); opacity: 1; }
+        @keyframes twinkle {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 2px #fff); }
+            50% { filter: brightness(2) drop-shadow(0 0 12px #00F2FF); }
         }
 
-        /* --- LOGO BOX --- */
         .logo-box {
             position: relative;
             text-align: center;
-            z-index: 10000;
+            z-index: 10;
         }
 
         .main-title {
@@ -246,25 +245,20 @@ def show_future_intercept_intro():
             color: #ffffff;
             font-size: 4.5rem;
             font-weight: 700;
-            letter-spacing: 30px;
+            letter-spacing: 25px;
             margin: 0;
             text-transform: uppercase;
             background: linear-gradient(to bottom, #fff 40%, #666 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
         }
 
         .glitch-line {
             width: 0%; height: 1px;
             background: linear-gradient(90deg, transparent, #00F2FF, transparent);
-            margin-top: 15px;
-            animation: expand-line 2s ease-in-out forwards;
-        }
-
-        @keyframes expand-line {
-            0% { width: 0%; opacity: 0; }
-            100% { width: 100%; opacity: 1; }
+            margin-top: 10px;
+            animation: expand 1.5s ease-in-out forwards;
         }
 
         .tagline {
@@ -272,15 +266,20 @@ def show_future_intercept_intro():
             color: #00F2FF;
             font-size: 0.8rem;
             letter-spacing: 12px;
-            margin-top: 25px;
+            margin-top: 20px;
             font-weight: 100;
             text-transform: uppercase;
             opacity: 0;
-            animation: slideUp 2s ease-out forwards 1.5s;
+            animation: slideUp 2s ease-out forwards 1.2s;
+        }
+
+        @keyframes expand {
+            0% { width: 0%; opacity: 0; }
+            100% { width: 100%; opacity: 1; }
         }
 
         @keyframes slideUp {
-            0% { transform: translateY(30px); opacity: 0; }
+            0% { transform: translateY(20px); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
         }
         </style>
@@ -289,9 +288,8 @@ def show_future_intercept_intro():
     with intro_placeholder.container():
         st.markdown("""
             <div class="intercept-container">
-                <div class="star-layer stars-md"></div>
-                <div class="star-layer stars-xl"></div>
-                
+                <div class="starfield-slow"></div>
+                <div class="starfield-main"></div>
                 <div class="logo-box">
                     <h1 class="main-title">VOID-OS</h1>
                     <div class="glitch-line"></div>
@@ -311,22 +309,21 @@ def show_future_intercept_intro():
             "SYSTEMS ONLINE."
         ]
         
-        # Timing: 6 steps * 1.66s = ~10 Seconds total immersion
+        # Timing: 6 steps * 1.6s = ~9.6 seconds total immersion
         for step in tactical_steps:
             status_placeholder.markdown(f"""
-                <div style='position:fixed; bottom:10%; width:100%; left:0; z-index:10001;'>
-                    <p style='text-align:center; color:rgba(0, 242, 255, 0.8); 
-                    font-family:monospace; font-size:0.75rem; letter-spacing:8px;
-                    text-shadow: 0 0 15px #00F2FF;'>
+                <div style='position:fixed; bottom:12%; width:100%; left:0; z-index:10000;'>
+                    <p style='text-align:center; color:rgba(0, 242, 255, 0.7); 
+                    font-family:monospace; font-size:0.75rem; letter-spacing:6px;
+                    text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);'>
                     {step}
                     </p>
                 </div>
             """, unsafe_allow_html=True)
-            time.sleep(1.66)
+            time.sleep(1.6)
             
     intro_placeholder.empty()
 
-# Initialization logic
 if 'booted' not in st.session_state:
     show_future_intercept_intro()
     st.session_state.booted = True
