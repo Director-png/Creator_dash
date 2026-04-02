@@ -233,6 +233,55 @@ FEEDBACK_API_URL = get_void_secret("FEEDBACK_API_URL", "RESTRICTED")
 NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
 NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
+import streamlit as st
+import time
+
+# --- ELITE INTRO OVERRIDE ---
+def show_elite_intro():
+    placeholder = st.empty()
+    
+    with placeholder.container():
+        # Using a High-End "Cyber" CSS style
+        st.markdown("""
+            <style>
+            .stApp { background-color: #0E1117; }
+            .terminal-text {
+                font-family: 'Courier New', Courier, monospace;
+                color: #00F2FF;
+                text-align: center;
+                text-shadow: 0 0 10px #00F2FF;
+            }
+            </style>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh;">
+                <h1 class="terminal-text">VOID-OS</h1>
+                <p class="terminal-text" id="status-text">INITIALIZING QUANTUM LAYER...</p>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        # Simulated "Decryption" Sequence
+        progress_bar = st.progress(0)
+        status_messages = [
+            "DECRYPTING SOVEREIGN CORE...",
+            "ESTABLISHING NEURAL UPLINK...",
+            "BYPASSING MARKET NOISE...",
+            "ACCESS GRANTED."
+        ]
+        
+        for i in range(100):
+            time.sleep(0.03) # High-speed feel
+            progress_bar.progress(i + 1)
+            if i % 25 == 0:
+                # Update the message every 25%
+                msg_index = i // 25
+                # (Note: In a real app, you'd use st.empty for the text too)
+        
+    placeholder.empty() # Clears the intro and moves to Login
+
+# Run this at the very top of your app
+if 'initialized' not in st.session_state:
+    show_elite_intro()
+    st.session_state.initialized = True
+
 
 def draw_title(emoji, text):
     st.markdown(f"""
