@@ -179,7 +179,7 @@ import time
 def show_future_intercept_intro():
     intro_placeholder = st.empty()
     
-    # ADVANCED BUILD: Multi-layered Starfield with Glowing Parallax
+    # ADVANCED BUILD: Large-Scale Glowing Starfield + 10s Tactical Sequence
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;900&display=swap');
@@ -193,31 +193,45 @@ def show_future_intercept_intro():
             overflow: hidden;
         }
 
-        /* --- REALISTIC STARFIELD ENGINE --- */
-        .starfield-layer {
+        /* --- LARGE-SCALE STARFIELD ENGINE --- */
+        .starfield-main, .starfield-slow {
             position: absolute; width: 200%; height: 200%;
             top: -50%; left: -50%;
+            background-repeat: repeat;
+        }
+
+        /* Primary Layer: Large, Glowing Hero Stars */
+        .starfield-main {
             background-image: 
-                radial-gradient(1px 1px at 10% 10%, #fff, transparent),
-                radial-gradient(2px 2px at 20% 50%, #fff, transparent),
-                radial-gradient(1.5px 1.5px at 30% 90%, #fff, transparent),
-                radial-gradient(2px 2px at 50% 20%, #00F2FF, transparent),
-                radial-gradient(1px 1px at 70% 40%, #fff, transparent),
-                radial-gradient(2.5px 2.5px at 80% 80%, #fff, transparent),
-                radial-gradient(1px 1px at 90% 10%, #00F2FF, transparent);
-            background-size: 400px 400px;
-            animation: star-drift 80s linear infinite, glow 4s ease-in-out infinite;
-            opacity: 0.4;
+                radial-gradient(3px 3px at 15% 15%, #fff, transparent),
+                radial-gradient(4px 4px at 45% 35%, #00F2FF, transparent),
+                radial-gradient(3px 3px at 75% 65%, #fff, transparent),
+                radial-gradient(5px 5px at 25% 85%, #fff, transparent),
+                radial-gradient(4px 4px at 85% 15%, #00F2FF, transparent);
+            background-size: 500px 500px;
+            animation: star-drift 60s linear infinite, twinkle 3s ease-in-out infinite;
+            opacity: 0.6;
+        }
+
+        /* Secondary Layer: Smaller, Distant Stars for Depth */
+        .starfield-slow {
+            background-image: 
+                radial-gradient(1.5px 1.5px at 10% 80%, #fff, transparent),
+                radial-gradient(2px 2px at 90% 40%, #fff, transparent),
+                radial-gradient(1px 1px at 50% 50%, #00F2FF, transparent);
+            background-size: 300px 300px;
+            animation: star-drift 120s linear infinite reverse;
+            opacity: 0.3;
         }
 
         @keyframes star-drift {
             from { transform: translateY(0); }
-            to { transform: translateY(400px); }
+            to { transform: translateY(500px); }
         }
 
-        @keyframes glow {
-            0%, 100% { filter: brightness(1) blur(0px); }
-            50% { filter: brightness(1.8) blur(1px); }
+        @keyframes twinkle {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 2px #fff); }
+            50% { filter: brightness(2) drop-shadow(0 0 12px #00F2FF); }
         }
 
         .logo-box {
@@ -256,7 +270,7 @@ def show_future_intercept_intro():
             font-weight: 100;
             text-transform: uppercase;
             opacity: 0;
-            animation: slideUp 2s ease-out forwards 1s;
+            animation: slideUp 2s ease-out forwards 1.2s;
         }
 
         @keyframes expand {
@@ -274,7 +288,8 @@ def show_future_intercept_intro():
     with intro_placeholder.container():
         st.markdown("""
             <div class="intercept-container">
-                <div class="starfield-layer"></div>
+                <div class="starfield-slow"></div>
+                <div class="starfield-main"></div>
                 <div class="logo-box">
                     <h1 class="main-title">VOID-OS</h1>
                     <div class="glitch-line"></div>
@@ -288,28 +303,31 @@ def show_future_intercept_intro():
         tactical_steps = [
             "SCANNING TEMPORAL VECTORS...",
             "SYNTHESIZING MARKET LOGIC...",
+            "DECRYPTING COMPETITOR STACKS...",
             "ESTABLISHING SOVEREIGN UPLINK...",
-            "VOID-OS v4.0 ONLINE."
+            "INJECTING VOID-CORE v4.0...",
+            "SYSTEMS ONLINE."
         ]
         
-        # Timing adjusted to exactly 5.6 seconds (1.4s * 4 steps)
+        # Timing: 6 steps * 1.6s = ~9.6 seconds total immersion
         for step in tactical_steps:
             status_placeholder.markdown(f"""
-                <div style='position:fixed; bottom:15%; width:100%; left:0; z-index:10000;'>
-                    <p style='text-align:center; color:rgba(0, 242, 255, 0.6); 
+                <div style='position:fixed; bottom:12%; width:100%; left:0; z-index:10000;'>
+                    <p style='text-align:center; color:rgba(0, 242, 255, 0.7); 
                     font-family:monospace; font-size:0.75rem; letter-spacing:6px;
-                    text-shadow: 0 0 10px rgba(0, 242, 255, 0.2);'>
+                    text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);'>
                     {step}
                     </p>
                 </div>
             """, unsafe_allow_html=True)
-            time.sleep(1.4)
+            time.sleep(1.6)
             
     intro_placeholder.empty()
 
 if 'booted' not in st.session_state:
     show_future_intercept_intro()
     st.session_state.booted = True
+
 
 def draw_title(emoji, text):
     st.markdown(f"""
