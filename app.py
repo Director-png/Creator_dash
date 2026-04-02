@@ -175,22 +175,19 @@ NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 
 import streamlit as st
 import time
-import base64
-import os
 
 def show_vortex_intro():
-    img_base64 = get_base64_image()
-    logo_html = f"data:image/png;base64,{img_base64}" if img_base64 else None
-
+    # Use a single placeholder to prevent ghosting or layout shifts
     intro_placeholder = st.empty()
     
-    st.markdown(f"""
+    # CSS for the realistic starfield and the high-speed centrifuge
+    st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
         
-        /* --- HIGH-VELOCITY STARFIELD --- */
-        .vortex-container {{
-            background: #000;
+        /* --- REAL SKY STARFIELD --- */
+        .vortex-container {
+            background: radial-gradient(circle at center, #000814 0%, #000000 100%);
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -199,119 +196,122 @@ def show_vortex_intro():
             position: fixed;
             top: 0; left: 0; width: 100%; z-index: 9999;
             overflow: hidden;
-        }}
+        }
 
-        .star-field {{
+        /* Dynamic, twinkling stars with different sizes and speeds */
+        .star {
             position: absolute;
-            width: 200%;
-            height: 200%;
-            background-image: 
-                radial-gradient(1px 1px at 20% 30%, #fff, transparent),
-                radial-gradient(1.5px 1.5px at 70% 70%, #fff, transparent),
-                radial-gradient(1px 1px at 40% 80%, #ddd, transparent),
-                radial-gradient(2px 2px at 10% 90%, #fff, transparent);
-            background-size: 500px 500px;
-            animation: sky-spin 100s linear infinite;
-        }}
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
 
-        @keyframes sky-spin {{ from {{ transform: rotate(0deg); }} to {{ transform: rotate(360deg); }} }}
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 8px #fff; }
+        }
 
-        /* --- THE CENTRIFUGE SYSTEM --- */
-        .boundary-circle {{
+        /* --- THE CENTRIFUGE VORTEX SYSTEM --- */
+        .boundary-circle {
             position: relative;
             width: 320px;
             height: 320px;
-            border: 4px double rgba(192, 192, 194, 0.4); /* High-tech double line */
+            border: 4px solid #C0C0C2; /* Bold Silver Boundary */
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 40px;
-            /* ACCELERATED ROTATION */
-            animation: boundary-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            box-shadow: 0 0 50px rgba(0, 242, 255, 0.1);
-        }}
+            box-shadow: 0 0 30px rgba(192, 192, 194, 0.2);
+            /* HIGH-SPEED BOUNDARY ROTATION (1.2 seconds) */
+            animation: centrifuge-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
 
-        @keyframes boundary-spin {{
-            from {{ transform: rotate(0deg); }}
-            to {{ transform: rotate(360deg); }}
-        }}
+        @keyframes centrifuge-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
 
-        .static-core {{
+        /* The core remains UP-RIGHT while the boundary spins around it */
+        .static-core {
             position: absolute;
             width: 100%;
             height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Counter-rotation to keep inner elements upright */
-            animation: counter-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }}
+            /* This counter-rotates to keep the core upright */
+            animation: core-counter-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
 
-        @keyframes counter-spin {{
-            from {{ transform: rotate(0deg); }}
-            to {{ transform: rotate(-360deg); }}
-        }}
+        @keyframes core-counter-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
 
-        .gear-circle {{
+        /* The Inner overlapping circles (Gears are gone, these are static cores) */
+        .gear-circle {
             position: absolute;
             width: 130px;
             height: 130px;
-            border: 3.5px solid #FFFFFF; /* Bolder outlines for pop */
+            border: 3px solid #C0C0C2; /* Bold Silver */
             border-radius: 50%;
-            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
-        }}
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+            /* They DO NOT rotate anymore */
+        }
 
-        /* Precision Hexagonal Alignment */
-        .gear-circle:nth-child(1) {{ transform: translate(0, -95px); }}
-        .gear-circle:nth-child(2) {{ transform: translate(82px, -48px); }}
-        .gear-circle:nth-child(3) {{ transform: translate(82px, 48px); }}
-        .gear-circle:nth-child(4) {{ transform: translate(0, 95px); }}
-        .gear-circle:nth-child(5) {{ transform: translate(-82px, 48px); }}
-        .gear-circle:nth-child(6) {{ transform: translate(-82px, -48px); }}
+        /* 6 Inner Circles locked in a Hexagonal Pattern (Creating the vortex core) */
+        .gear-circle:nth-child(1) { transform: translate(0, -85px); }
+        .gear-circle:nth-child(2) { transform: translate(74px, -42px); }
+        .gear-circle:nth-child(3) { transform: translate(74px, 42px); }
+        .gear-circle:nth-child(4) { transform: translate(0, 85px); }
+        .gear-circle:nth-child(5) { transform: translate(-74px, 42px); }
+        .gear-circle:nth-child(6) { transform: translate(-74px, -42px); }
 
-        .main-logo {{
-            width: 155px; 
-            z-index: 10;
-            filter: drop-shadow(0 0 30px rgba(255,255,255,0.25));
-            border-radius: 50%;
-        }}
-
-        .logo-title {{
+        /* --- TYPOGRAPHY --- */
+        .logo-title {
             font-family: 'Syncopate', sans-serif;
             color: #ffffff;
-            font-size: 5rem;
-            letter-spacing: 35px;
-            margin: 20px 0 0 35px;
-            background: linear-gradient(to bottom, #FFFFFF 50%, #222 100%);
+            font-size: 4.8rem;
+            letter-spacing: 32px;
+            margin: 20px 0 0 32px;
+            background: linear-gradient(to bottom, #FFFFFF 50%, #444444 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             z-index: 20;
-        }}
+            text-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
 
-        .progress-tray {{
-            width: 600px;
-            height: 2px;
+        /* --- LOADING TRAY --- */
+        .progress-tray {
+            width: 550px;
+            height: 1px;
             background: rgba(255,255,255,0.05);
             margin-top: 80px;
             position: relative;
             overflow: hidden;
             z-index: 20;
-        }}
+        }
 
-        .progress-fill {{
+        .progress-fill {
             width: 0%;
             height: 100%;
             background: #00F2FF;
-            box-shadow: 0 0 35px #00F2FF;
-            animation: fill-up 6.5s linear forwards;
-        }}
+            box-shadow: 0 0 20px #00F2FF, 0 0 40px rgba(0, 242, 255, 0.5);
+            animation: fill-up 6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+        }
 
-        @keyframes fill-up {{ to {{ width: 100%; }} }}
+        @keyframes fill-up { from { width: 0%; } to { width: 100%; } }
         </style>
         
         <div class="vortex-container">
-            <div class="star-field"></div>
+            <div class="star" style="top:10%; left:20%; width:1px; height:1px; --duration:3s;"></div>
+            <div class="star" style="top:40%; left:80%; width:2px; height:2px; --duration:5s;"></div>
+            <div class="star" style="top:70%; left:40%; width:1px; height:1px; --duration:4s;"></div>
+            <div class="star" style="top:15%; left:65%; width:2.5px; height:2.5px; --duration:6s;"></div>
+            <div class="star" style="top:85%; left:15%; width:1.5px; height:1.5px; --duration:4.5s;"></div>
+            <div class="star" style="top:55%; left:90%; width:1px; height:1px; --duration:7s;"></div>
             
             <div class="boundary-circle">
                 <div class="static-core">
@@ -321,7 +321,9 @@ def show_vortex_intro():
                     <div class="gear-circle"></div>
                     <div class="gear-circle"></div>
                     <div class="gear-circle"></div>
-                    {f'<img src="{logo_html}" class="main-logo">' if logo_html else '<div style="color:rgba(255,255,255,0.3); font-family:monospace; font-size:0.7rem; letter-spacing:2px;">[ OFFLINE_CORE ]</div>'}
+                    <div style="color:rgba(255,255,255,0.15); font-family:monospace; font-size:0.6rem; letter-spacing:1px; z-index:15;">
+                        [ SOVEREIGN_CORE ]
+                    </div>
                 </div>
             </div>
 
@@ -334,15 +336,15 @@ def show_vortex_intro():
     """, unsafe_allow_html=True)
 
     status_slot = st.empty()
-    steps = ["STABILIZING CORE...", "ACCELERATING BOUNDARY...", "VOID-OS ONLINE."]
+    steps = ["ENGAGING GEAR LOGIC...", "CALIBRATING STARFIELD...", "VOID-OS v4.0 ONLINE."]
     
     for step in steps:
         status_slot.markdown(f"""
-            <div style="position: fixed; top: 82%; left: 50%; transform: translateX(-50%); z-index: 10000;">
-                <p style="color: rgba(0, 242, 255, 0.6); font-family: monospace; font-size: 0.8rem; letter-spacing: 8px; text-align: center;">{step}</p>
+            <div style="position: fixed; top: 80%; left: 50%; transform: translateX(-50%); z-index: 10000;">
+                <p style="color: rgba(0, 242, 255, 0.4); font-family: monospace; font-size: 0.75rem; letter-spacing: 7px; text-align: center;">{step}</p>
             </div>
         """, unsafe_allow_html=True)
-        time.sleep(2.1)
+        time.sleep(1.8)
         
     intro_placeholder.empty()
 
