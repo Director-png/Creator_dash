@@ -180,143 +180,150 @@ import time
 def show_vortex_intro():
     placeholder = st.empty()
     
-    # Final optimized build: Moving starfield + Scaled-down inner geometry
+    # MASTER BUILD: Parallax Glowing Starfield + Locked Geometry
     vortex_code = r"""
     <html>
     <head>
         <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@200&display=swap" rel="stylesheet">
         <style>
-            body { margin: 0; background: #000; overflow: hidden; height: 100vh; width: 100vw; }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { background: #000; overflow: hidden; height: 100vh; width: 100vw; }
             
-            .vortex-frame {
+            .vortex-stage {
                 height: 100vh; width: 100vw;
                 display: flex; flex-direction: column;
                 justify-content: center; align-items: center;
-                background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+                background: radial-gradient(circle at center, #0d0d0d 0%, #000 100%);
                 position: relative;
             }
 
-            /* --- MOVING STARFIELD --- */
-            .starfield {
-                position: absolute; width: 200%; height: 200%;
-                background: transparent;
-                animation: move-stars 60s linear infinite;
+            /* --- DYNAMIC GLOWING STARFIELD --- */
+            .star-layer {
+                position: absolute; width: 100%; height: 100%;
+                top: 0; left: 0;
             }
-            @keyframes move-stars {
-                from { transform: translate(-25%, -25%); }
-                to { transform: translate(0%, 0%); }
+            .star {
+                position: absolute; background: #fff; border-radius: 50%;
+                filter: blur(0.5px);
+                animation: move-and-glow var(--speed) infinite linear;
             }
-
-            .star { 
-                position: absolute; background: #fff; border-radius: 50%; 
-                animation: twinkle var(--d) infinite ease-in-out; 
-            }
-            @keyframes twinkle { 
-                0%, 100% { opacity: 0.3; transform: scale(1); } 
-                50% { opacity: 1; transform: scale(1.4); box-shadow: 0 0 8px #fff; } 
+            @keyframes move-and-glow {
+                0% { transform: translateY(0) scale(1); opacity: 0.2; }
+                50% { opacity: 0.8; transform: translateY(-20px) scale(1.2); box-shadow: 0 0 10px #fff; }
+                100% { transform: translateY(-40px) scale(1); opacity: 0.2; }
             }
 
-            /* --- SCALED CENTRIFUGE --- */
-            .boundary {
+            /* --- THE LOCKED CENTRIFUGE --- */
+            .outer-boundary {
                 position: relative;
-                width: 320px; height: 320px; /* Reduced from 380px to fit perfectly */
-                border: 3px solid rgba(224, 224, 224, 0.8);
+                width: 340px; height: 340px;
+                border: 2px solid rgba(255, 255, 255, 0.4);
                 border-radius: 50%;
                 display: flex; justify-content: center; align-items: center;
-                animation: spin 1.2s linear infinite;
-                box-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
+                animation: spin-outer 1s linear infinite;
+                box-shadow: 0 0 50px rgba(255, 255, 255, 0.03);
             }
 
-            .static-logic {
+            .inner-logic-gate {
                 position: absolute;
                 width: 100%; height: 100%;
                 display: flex; justify-content: center; align-items: center;
-                animation: counter-spin 1.2s linear infinite;
+                animation: spin-inner 1s linear infinite;
             }
 
-            @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-            @keyframes counter-spin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+            @keyframes spin-outer { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            @keyframes spin-inner { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
 
-            .vortex-core {
+            .vortex-ring {
                 position: absolute;
-                width: 165px; height: 165px; /* Scaled down to stay within boundary */
-                border: 2px solid rgba(192, 192, 194, 0.6);
+                width: 160px; height: 160px; /* Locked size to prevent boundary breach */
+                border: 1.5px solid rgba(192, 192, 194, 0.5);
                 border-radius: 50%;
             }
 
-            /* Precise Hexagonal Mapping - Offset adjusted for 165px circles */
-            .vortex-core:nth-child(1) { transform: translate(0, -82px); }
-            .vortex-core:nth-child(2) { transform: translate(71px, -41px); }
-            .vortex-core:nth-child(3) { transform: translate(71px, 41px); }
-            .vortex-core:nth-child(4) { transform: translate(0, 82px); }
-            .vortex-core:nth-child(5) { transform: translate(-71px, 41px); }
-            .vortex-core:nth-child(6) { transform: translate(-71px, -41px); }
+            /* Hexagonal Core Mapping - Calculated for 160px circles in 340px boundary */
+            .vortex-ring:nth-child(1) { transform: translate(0, -85px); }
+            .vortex-ring:nth-child(2) { transform: translate(74px, -42px); }
+            .vortex-ring:nth-child(3) { transform: translate(74px, 42px); }
+            .vortex-ring:nth-child(4) { transform: translate(0, 85px); }
+            .vortex-ring:nth-child(5) { transform: translate(-74px, 42px); }
+            .vortex-ring:nth-child(6) { transform: translate(-74px, -42px); }
 
-            /* --- TYPOGRAPHY --- */
+            /* --- BRANDING & PROGRESS --- */
+            .branding { text-align: center; z-index: 10; margin-top: 50px; }
             .title {
                 font-family: 'Syncopate', sans-serif;
-                color: #fff; font-size: 4.5rem;
-                letter-spacing: 30px; margin-top: 50px;
-                text-indent: 30px;
-                z-index: 10;
+                color: #fff; font-size: 4.8rem;
+                letter-spacing: 35px; text-indent: 35px;
+                margin-bottom: 10px;
             }
-
             .tagline {
                 font-family: 'Inter', sans-serif;
-                color: #00f2ff; font-size: 0.7rem;
-                letter-spacing: 10px; margin-top: 15px;
-                text-transform: uppercase; opacity: 0.8;
-                z-index: 10;
+                color: #00f2ff; font-size: 0.75rem;
+                letter-spacing: 10px; text-transform: uppercase;
+                opacity: 0.8;
             }
-
-            /* --- PROGRESS --- */
-            .progress-tray { width: 500px; height: 1px; background: rgba(255,255,255,0.1); margin-top: 60px; position: relative; z-index: 10; }
-            .fill { width: 0%; height: 100%; background: #00f2ff; box-shadow: 0 0 20px #00f2ff; animation: load 6s linear forwards; }
-            @keyframes load { to { width: 100%; } }
+            .progress-bar {
+                width: 550px; height: 1px;
+                background: rgba(255, 255, 255, 0.1);
+                margin-top: 60px; position: relative; overflow: hidden;
+            }
+            .progress-fill {
+                width: 0%; height: 100%;
+                background: #00f2ff;
+                box-shadow: 0 0 15px #00f2ff;
+                animation: fill-and-finish 7s linear forwards;
+            }
+            @keyframes fill-and-finish { to { width: 100%; } }
         </style>
     </head>
     <body>
-        <div class="vortex-frame">
-            <div class="starfield">
-                <div class="star" style="top:10%; left:15%; width:2px; height:2px; --d:3s;"></div>
-                <div class="star" style="top:35%; left:65%; width:1px; height:1px; --d:5s;"></div>
-                <div class="star" style="top:60%; left:25%; width:3px; height:3px; --d:4s;"></div>
-                <div class="star" style="top:85%; left:80%; width:1.5px; height:1.5px; --d:6s;"></div>
-                <div class="star" style="top:20%; left:85%; width:2px; height:2px; --d:2s;"></div>
-                <div class="star" style="top:70%; left:50%; width:1px; height:1px; --d:7s;"></div>
-                <div class="star" style="top:5%; left:45%; width:2.5px; height:2.5px; --d:4.5s;"></div>
+        <div class="vortex-stage">
+            <div class="star-layer">
+                <div class="star" style="top:15%; left:20%; width:2px; height:2px; --speed:4s;"></div>
+                <div class="star" style="top:45%; left:85%; width:1px; height:1px; --speed:6s;"></div>
+                <div class="star" style="top:75%; left:30%; width:3px; height:3px; --speed:5s;"></div>
+                <div class="star" style="top:10%; left:60%; width:2px; height:2px; --speed:7s;"></div>
+                <div class="star" style="top:85%; left:15%; width:1.5px; height:1.5px; --speed:4s;"></div>
+                <div class="star" style="top:25%; left:75%; width:2.5px; height:2.5px; --speed:3.5s;"></div>
             </div>
 
-            <div class="boundary">
-                <div class="static-logic">
-                    <div class="vortex-core"></div>
-                    <div class="vortex-core"></div>
-                    <div class="vortex-core"></div>
-                    <div class="vortex-core"></div>
-                    <div class="vortex-core"></div>
-                    <div class="vortex-core"></div>
+            <div class="outer-boundary">
+                <div class="inner-logic-gate">
+                    <div class="vortex-ring"></div>
+                    <div class="vortex-ring"></div>
+                    <div class="vortex-ring"></div>
+                    <div class="vortex-ring"></div>
+                    <div class="vortex-ring"></div>
+                    <div class="vortex-ring"></div>
                 </div>
             </div>
 
-            <div class="title">VOID-OS</div>
-            <div class="tagline">Intelligence Access Protocol v4.0</div>
-            <div class="progress-tray"><div class="fill"></div></div>
+            <div class="branding">
+                <h1 class="title">VOID-OS</h1>
+                <p class="tagline">Intelligence Access Protocol v4.0</p>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
         </div>
     </body>
     </html>
     """
 
     with placeholder:
+        # Full-height component to prevent boxing
         components.html(vortex_code, height=1000, scrolling=False)
     
-    time.sleep(6.5)
+    # 7 seconds to ensure the animation and progress bar feel complete
+    time.sleep(7.0)
     placeholder.empty()
 
-# Initialization logic
+# Trigger Logic
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
-
 
 def draw_title(emoji, text):
     st.markdown(f"""
