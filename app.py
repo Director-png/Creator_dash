@@ -173,7 +173,128 @@ NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
 NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
 
+import streamlit as st
+import streamlit.components.v1 as components
+import time
 
+def show_vortex_intro():
+    placeholder = st.empty()
+    
+    # This build uses a "Force-Fill" technique to remove the boxy look
+    vortex_code = r"""
+    <html>
+    <head>
+        <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@200&display=swap" rel="stylesheet">
+        <style>
+            body { margin: 0; background: #000; overflow: hidden; height: 100vh; width: 100vw; }
+            
+            .vortex-frame {
+                height: 100vh; width: 100vw;
+                display: flex; flex-direction: column;
+                justify-content: center; align-items: center;
+                background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+                position: relative;
+            }
+
+            /* --- POLISHED STARFIELD --- */
+            .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.3; animation: pulse var(--d) infinite; }
+            @keyframes pulse { 0%, 100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.3); } }
+
+            /* --- THE CENTRIFUGE VORTEX --- */
+            .boundary {
+                position: relative;
+                width: 380px; height: 380px;
+                border: 4px solid #e0e0e0;
+                border-radius: 50%;
+                display: flex; justify-content: center; align-items: center;
+                animation: spin 0.8s linear infinite; /* Ultra-fast 0.8s spin */
+                box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
+            }
+
+            .static-logic {
+                position: absolute;
+                width: 100%; height: 100%;
+                display: flex; justify-content: center; align-items: center;
+                animation: counter-spin 0.8s linear infinite;
+            }
+
+            @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            @keyframes counter-spin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+
+            .vortex-core {
+                position: absolute;
+                width: 190px; height: 190px; /* Large overlapping circles */
+                border: 3px solid #c0c0c2;
+                border-radius: 50%;
+                box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
+            }
+
+            /* Hexagonal Core Mapping */
+            .vortex-core:nth-child(1) { transform: translate(0, -115px); }
+            .vortex-core:nth-child(2) { transform: translate(100px, -58px); }
+            .vortex-core:nth-child(3) { transform: translate(100px, 58px); }
+            .vortex-core:nth-child(4) { transform: translate(0, 115px); }
+            .vortex-core:nth-child(5) { transform: translate(-100px, 58px); }
+            .vortex-core:nth-child(6) { transform: translate(-100px, -58px); }
+
+            /* --- BRANDING --- */
+            .title {
+                font-family: 'Syncopate', sans-serif;
+                color: #fff; font-size: 5.5rem;
+                letter-spacing: 40px; margin-top: 60px;
+                text-indent: 40px;
+                filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+            }
+
+            .tagline {
+                font-family: 'Inter', sans-serif;
+                color: #00f2ff; font-size: 0.8rem;
+                letter-spacing: 12px; margin-top: 15px;
+                text-transform: uppercase; opacity: 0.7;
+            }
+
+            /* --- PROGRESS --- */
+            .progress-tray { width: 650px; height: 1px; background: rgba(255,255,255,0.1); margin-top: 80px; position: relative; }
+            .fill { width: 0%; height: 100%; background: #00f2ff; box-shadow: 0 0 20px #00f2ff; animation: load 6s cubic-bezier(0.85, 0, 0.15, 1) forwards; }
+            @keyframes load { to { width: 100%; } }
+        </style>
+    </head>
+    <body>
+        <div class="vortex-frame">
+            <div class="star" style="top:15%; left:25%; width:2px; height:2px; --d:3s;"></div>
+            <div class="star" style="top:45%; left:75%; width:1px; height:1px; --d:5s;"></div>
+            <div class="star" style="top:80%; left:10%; width:3px; height:3px; --d:4s;"></div>
+            
+            <div class="boundary">
+                <div class="static-logic">
+                    <div class="vortex-core"></div>
+                    <div class="vortex-core"></div>
+                    <div class="vortex-core"></div>
+                    <div class="vortex-core"></div>
+                    <div class="vortex-core"></div>
+                    <div class="vortex-core"></div>
+                </div>
+            </div>
+
+            <div class="title">VOID-OS</div>
+            <div class="tagline">Intelligence Access Protocol v4.0</div>
+            <div class="progress-tray"><div class="fill"></div></div>
+        </div>
+    </body>
+    </html>
+    """
+
+    with placeholder:
+        # We use height=1000 and scrolling=False to force it to fill the view
+        components.html(vortex_code, height=1000, scrolling=False)
+    
+    time.sleep(6.5)
+    placeholder.empty()
+
+# --- INITIALIZE ---
+if 'booted' not in st.session_state:
+    show_vortex_intro()
+    st.session_state.booted = True
 
 
 def draw_title(emoji, text):
