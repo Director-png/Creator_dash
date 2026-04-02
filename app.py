@@ -172,158 +172,128 @@ FEEDBACK_API_URL = get_void_secret("FEEDBACK_API_URL", "RESTRICTED")
 NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
 NEWS_API_KEY = get_void_secret("NEWS_API_KEY", "RESTRICTED")
 # --- 🛰️ UTILITIES & BRAIN FUNCTIONS ---
-
 import streamlit as st
-import streamlit.components.v1 as components
 import time
 
-def show_vortex_intro():
-    placeholder = st.empty()
+def show_future_intercept_intro():
+    intro_placeholder = st.empty()
     
-    # MASTER BUILD: Parallax Glowing Starfield + Locked Geometry
-    vortex_code = r"""
-    <html>
-    <head>
-        <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@200&display=swap" rel="stylesheet">
+    st.markdown("""
         <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { background: #000; overflow: hidden; height: 100vh; width: 100vw; }
-            
-            .vortex-stage {
-                height: 100vh; width: 100vw;
-                display: flex; flex-direction: column;
-                justify-content: center; align-items: center;
-                background: radial-gradient(circle at center, #0d0d0d 0%, #000 100%);
-                position: relative;
-            }
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;900&display=swap');
+        
+        .intercept-container {
+            background: #000000;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 242, 255, 0.05) 0%, transparent 50%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0; left: 0; width: 100%; z-index: 9999;
+            overflow: hidden;
+        }
 
-            /* --- DYNAMIC GLOWING STARFIELD --- */
-            .star-layer {
-                position: absolute; width: 100%; height: 100%;
-                top: 0; left: 0;
-            }
-            .star {
-                position: absolute; background: #fff; border-radius: 50%;
-                filter: blur(0.5px);
-                animation: move-and-glow var(--speed) infinite linear;
-            }
-            @keyframes move-and-glow {
-                0% { transform: translateY(0) scale(1); opacity: 0.2; }
-                50% { opacity: 0.8; transform: translateY(-20px) scale(1.2); box-shadow: 0 0 10px #fff; }
-                100% { transform: translateY(-40px) scale(1); opacity: 0.2; }
-            }
+        .logo-box {
+            position: relative;
+            text-align: center;
+        }
 
-            /* --- THE LOCKED CENTRIFUGE --- */
-            .outer-boundary {
-                position: relative;
-                width: 340px; height: 340px;
-                border: 2px solid rgba(255, 255, 255, 0.4);
-                border-radius: 50%;
-                display: flex; justify-content: center; align-items: center;
-                animation: spin-outer 1s linear infinite;
-                box-shadow: 0 0 50px rgba(255, 255, 255, 0.03);
-            }
+        .main-title {
+            font-family: 'Syncopate', sans-serif;
+            color: #ffffff;
+            font-size: 4.5rem;
+            font-weight: 700;
+            letter-spacing: 25px;
+            margin: 0;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #fff 40%, #666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-            .inner-logic-gate {
-                position: absolute;
-                width: 100%; height: 100%;
-                display: flex; justify-content: center; align-items: center;
-                animation: spin-inner 1s linear infinite;
-            }
+        .tagline {
+            font-family: 'Inter', sans-serif;
+            color: #00F2FF;
+            font-size: 0.8rem;
+            letter-spacing: 12px;
+            margin-top: 20px;
+            font-weight: 100;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: slideUp 2s ease-out forwards 1s;
+        }
 
-            @keyframes spin-outer { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-            @keyframes spin-inner { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+        .glitch-line {
+            width: 0%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #00F2FF, transparent);
+            margin-top: 10px;
+            animation: expand 1.5s ease-in-out forwards;
+        }
 
-            .vortex-ring {
-                position: absolute;
-                width: 160px; height: 160px; /* Locked size to prevent boundary breach */
-                border: 1.5px solid rgba(192, 192, 194, 0.5);
-                border-radius: 50%;
-            }
+        @keyframes expand {
+            0% { width: 0%; opacity: 0; }
+            100% { width: 100%; opacity: 1; }
+        }
 
-            /* Hexagonal Core Mapping - Calculated for 160px circles in 340px boundary */
-            .vortex-ring:nth-child(1) { transform: translate(0, -85px); }
-            .vortex-ring:nth-child(2) { transform: translate(74px, -42px); }
-            .vortex-ring:nth-child(3) { transform: translate(74px, 42px); }
-            .vortex-ring:nth-child(4) { transform: translate(0, 85px); }
-            .vortex-ring:nth-child(5) { transform: translate(-74px, 42px); }
-            .vortex-ring:nth-child(6) { transform: translate(-74px, -42px); }
+        @keyframes slideUp {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
 
-            /* --- BRANDING & PROGRESS --- */
-            .branding { text-align: center; z-index: 10; margin-top: 50px; }
-            .title {
-                font-family: 'Syncopate', sans-serif;
-                color: #fff; font-size: 4.8rem;
-                letter-spacing: 35px; text-indent: 35px;
-                margin-bottom: 10px;
-            }
-            .tagline {
-                font-family: 'Inter', sans-serif;
-                color: #00f2ff; font-size: 0.75rem;
-                letter-spacing: 10px; text-transform: uppercase;
-                opacity: 0.8;
-            }
-            .progress-bar {
-                width: 550px; height: 1px;
-                background: rgba(255, 255, 255, 0.1);
-                margin-top: 60px; position: relative; overflow: hidden;
-            }
-            .progress-fill {
-                width: 0%; height: 100%;
-                background: #00f2ff;
-                box-shadow: 0 0 15px #00f2ff;
-                animation: fill-and-finish 7s linear forwards;
-            }
-            @keyframes fill-and-finish { to { width: 100%; } }
+        .neural-bit {
+            position: absolute;
+            color: #7000FF;
+            font-family: monospace;
+            font-size: 10px;
+            opacity: 0.3;
+        }
         </style>
-    </head>
-    <body>
-        <div class="vortex-stage">
-            <div class="star-layer">
-                <div class="star" style="top:15%; left:20%; width:2px; height:2px; --speed:4s;"></div>
-                <div class="star" style="top:45%; left:85%; width:1px; height:1px; --speed:6s;"></div>
-                <div class="star" style="top:75%; left:30%; width:3px; height:3px; --speed:5s;"></div>
-                <div class="star" style="top:10%; left:60%; width:2px; height:2px; --speed:7s;"></div>
-                <div class="star" style="top:85%; left:15%; width:1.5px; height:1.5px; --speed:4s;"></div>
-                <div class="star" style="top:25%; left:75%; width:2.5px; height:2.5px; --speed:3.5s;"></div>
-            </div>
+    """, unsafe_allow_html=True)
 
-            <div class="outer-boundary">
-                <div class="inner-logic-gate">
-                    <div class="vortex-ring"></div>
-                    <div class="vortex-ring"></div>
-                    <div class="vortex-ring"></div>
-                    <div class="vortex-ring"></div>
-                    <div class="vortex-ring"></div>
-                    <div class="vortex-ring"></div>
+    with intro_placeholder.container():
+        st.markdown("""
+            <div class="intercept-container">
+                <div class="logo-box">
+                    <h1 class="main-title">VOID-OS</h1>
+                    <div class="glitch-line"></div>
+                    <p class="tagline">PREDICT. INTEGRATE. CONQUER.</p>
                 </div>
             </div>
+        """, unsafe_allow_html=True)
+        
+        # Tactical Progress (Ultra-Fast, High-Stakes)
+        status_placeholder = st.empty()
+        status_placeholder.markdown("<div style='height:200px;'></div>", unsafe_allow_html=True) # Spacer
+        
+        tactical_steps = [
+            "SCANNING TEMPORAL VECTORS...",
+            "SYNTHESIZING MARKET LOGIC...",
+            "ESTABLISHING SOVEREIGN UPLINK...",
+            "VOID-OS v4.0 ONLINE."
+        ]
+        
+        for step in tactical_steps:
+            status_placeholder.markdown(f"""
+                <p style='text-align:center; color:rgba(0, 242, 255, 0.4); 
+                font-family:monospace; font-size:0.7rem; letter-spacing:5px;'>
+                {step}
+                </p>
+            """, unsafe_allow_html=True)
+            time.sleep(0.6)
+            
+    intro_placeholder.empty()
 
-            <div class="branding">
-                <h1 class="title">VOID-OS</h1>
-                <p class="tagline">Intelligence Access Protocol v4.0</p>
-            </div>
-
-            <div class="progress-bar">
-                <div class="progress-fill"></div>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-
-    with placeholder:
-        # Full-height component to prevent boxing
-        components.html(vortex_code, height=1000, scrolling=False)
-    
-    # 7 seconds to ensure the animation and progress bar feel complete
-    time.sleep(7.0)
-    placeholder.empty()
-
-# Trigger Logic
 if 'booted' not in st.session_state:
-    show_vortex_intro()
+    show_future_intercept_intro()
     st.session_state.booted = True
+
 
 def draw_title(emoji, text):
     st.markdown(f"""
