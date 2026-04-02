@@ -184,7 +184,11 @@ def show_vortex_intro():
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
         
         .vortex-container {
-            background: #000000;
+            /* Black Marble Aesthetic Background */
+            background-color: #000000;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(20, 20, 25, 0.9) 0%, rgba(0,0,0,1) 100%),
+                url('https://www.transparenttextures.com/patterns/black-mamba.png'); /* Subtle marble texture */
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -192,58 +196,49 @@ def show_vortex_intro():
             align-items: center;
             position: fixed;
             top: 0; left: 0; width: 100%; z-index: 9999;
+            overflow: hidden;
         }
 
-        /* --- THE CSS GENERATED VORTEX (No Image Required) --- */
-        .vortex-gen {
+        /* --- THE SILVER VORTEX CORE (CSS REPLICA) --- */
+        .silver-vortex {
             position: relative;
-            width: 120px;
-            height: 120px;
-            margin-bottom: 40px;
+            width: 180px;
+            height: 180px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: silver-swirl 8s linear infinite;
         }
 
-        .ring {
+        .swirl-ring {
             position: absolute;
-            width: 100%;
-            height: 100%;
             border: 2px solid transparent;
-            border-top: 2px solid #00F2FF;
+            border-top: 2px solid #C0C0C2; /* Silver base */
             border-radius: 50%;
-            animation: rotate-vortex 2s linear infinite;
+            filter: drop-shadow(0 0 5px rgba(192, 192, 194, 0.4));
         }
 
-        .ring:nth-child(2) {
-            width: 80%;
-            height: 80%;
-            top: 10%;
-            left: 10%;
-            border-top: 2px solid #7000FF;
-            animation-duration: 3s;
-            animation-direction: reverse;
-        }
+        /* Generating the layered silver swirl effect */
+        .swirl-ring:nth-child(1) { width: 100%; height: 100%; animation: rotate-ccw 4s linear infinite; opacity: 0.8; }
+        .swirl-ring:nth-child(2) { width: 85%; height: 85%; animation: rotate-cw 3s linear infinite; opacity: 0.6; border-top: 2px solid #E8E8E8; }
+        .swirl-ring:nth-child(3) { width: 70%; height: 70%; animation: rotate-ccw 5s linear infinite; opacity: 0.9; }
+        .swirl-ring:nth-child(4) { width: 55%; height: 55%; animation: rotate-cw 2s linear infinite; opacity: 0.7; border-top: 2px solid #A9A9A9; }
+        .swirl-ring:nth-child(5) { width: 40%; height: 40%; animation: rotate-ccw 6s linear infinite; opacity: 1; border-top: 2px solid #FFFFFF; }
 
-        .ring:nth-child(3) {
-            width: 60%;
-            height: 60%;
-            top: 20%;
-            left: 20%;
-            border-top: 2px solid #00F2FF;
-            animation-duration: 1.5s;
-        }
+        @keyframes rotate-cw { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes rotate-ccw { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+        @keyframes silver-swirl { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.3); } }
 
-        @keyframes rotate-vortex {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
+        /* Typography */
         .logo-title {
             font-family: 'Syncopate', sans-serif;
             color: #ffffff;
-            font-size: 3.5rem;
+            font-size: 4rem;
             font-weight: 700;
-            letter-spacing: 20px;
-            margin: 10px 0;
-            background: linear-gradient(to bottom, #ffffff 60%, #444444 100%);
+            letter-spacing: 25px;
+            margin: 15px 0 5px 25px; /* Offset for letter spacing */
+            background: linear-gradient(to bottom, #FFFFFF 50%, #8E8E8E 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-align: center;
@@ -253,50 +248,82 @@ def show_vortex_intro():
             font-family: 'Inter', sans-serif;
             color: #00F2FF;
             font-size: 0.75rem;
-            letter-spacing: 12px;
-            opacity: 0.7;
+            letter-spacing: 14px;
+            font-weight: 100;
+            opacity: 0.8;
             text-align: center;
-            margin-top: 10px;
+            text-transform: uppercase;
         }
 
-        .status-msg {
-            margin-top: 50px;
-            color: rgba(255,255,255,0.3);
+        /* The Neon Cyan Loading Bar */
+        .progress-tray {
+            width: 450px;
+            height: 1px;
+            background: rgba(255,255,255,0.05);
+            margin-top: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #00F2FF;
+            box-shadow: 0 0 20px #00F2FF, 0 0 40px rgba(0, 242, 255, 0.5);
+            animation: fill-up 5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+        }
+
+        @keyframes fill-up {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .status-text {
+            margin-top: 20px;
+            color: rgba(255,255,255,0.2);
             font-family: monospace;
             font-size: 0.6rem;
-            letter-spacing: 4px;
+            letter-spacing: 5px;
             text-transform: uppercase;
         }
         </style>
         
         <div class="vortex-container">
-            <div class="vortex-gen">
-                <div class="ring"></div>
-                <div class="ring"></div>
-                <div class="ring"></div>
+            <div class="silver-vortex">
+                <div class="swirl-ring"></div>
+                <div class="swirl-ring"></div>
+                <div class="swirl-ring"></div>
+                <div class="swirl-ring"></div>
+                <div class="swirl-ring"></div>
             </div>
             <h1 class="logo-title">VOID-OS</h1>
-            <p class="tagline-sub">PREDICT. INTEGRATE. CONQUER.</p>
-            <div id="status" class="status-msg">INITIALIZING SYSTEM...</div>
+            <p class="tagline-sub">Predict. Integrate. Conquer.</p>
+            
+            <div class="progress-tray">
+                <div class="progress-fill"></div>
+            </div>
+            <div id="status-update" class="status-text">CALIBRATING NEURAL NODES...</div>
         </div>
     """, unsafe_allow_html=True)
 
     # 5-Second Tactical Sequence
     status_area = st.empty()
     steps = [
-        "CALIBRATING TEMPORAL VECTORS...", 
-        "UPLINKING NEURAL FORGE...", 
+        "INITIALIZING SOVEREIGN CORE...", 
+        "UPLINKING GLOBAL PULSE...", 
+        "INTEGRATING VECTOR LOGIC...", 
         "BYPASSING MARKET NOISE...", 
         "VOID-OS v4.0 ONLINE."
     ]
     
     for step in steps:
-        # Pushes status text to the correct div area visually
-        st.markdown(f"<style>.status-msg::after {{ content: '{step}'; }}</style>", unsafe_allow_html=True)
-        time.sleep(1.2)
+        # We update the status message dynamically
+        st.markdown(f"<style>.status-text::after {{ content: ' {step}'; }}</style>", unsafe_allow_html=True)
+        time.sleep(1.1)
         
     intro_placeholder.empty()
 
+# --- TRIGGER ---
 if 'booted' not in st.session_state:
     show_vortex_intro()
     st.session_state.booted = True
