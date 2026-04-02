@@ -183,7 +183,7 @@ def show_vortex_intro():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@100&display=swap');
         
-        /* --- REALISTIC SHIMMERING STARFIELD --- */
+        /* --- GAUSSIAN STARFIELD --- */
         .vortex-container {{
             background: radial-gradient(circle at center, #000814 0%, #000000 100%);
             height: 100vh;
@@ -196,7 +196,6 @@ def show_vortex_intro():
             overflow: hidden;
         }}
 
-        /* Individual Twinkling Stars */
         .star {{
             position: absolute;
             background: white;
@@ -210,61 +209,60 @@ def show_vortex_intro():
             50% {{ opacity: 1; transform: scale(1.2); box-shadow: 0 0 8px #fff; }}
         }}
 
-        /* --- THE INFINITY GEAR VORTEX --- */
+        /* --- THE INFINITY VORTEX (6-GEAR SYSTEM) --- */
         .gear-system {{
             position: relative;
-            width: 280px;
-            height: 280px;
-            border: 2px solid rgba(192, 192, 194, 0.4); 
+            width: 300px;
+            height: 300px;
+            border: 2px solid rgba(192, 192, 194, 0.3); 
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 30px;
-            box-shadow: 0 0 30px rgba(192, 192, 194, 0.1);
+            margin-bottom: 40px;
         }}
 
         .gear-circle {{
             position: absolute;
-            width: 120px;
-            height: 120px;
-            border: 2.5px solid #FFFFFF; /* Bold Popping Outlines */
+            width: 130px;
+            height: 130px;
+            border: 3px solid #FFFFFF; /* Bold Popping Outlines */
             border-radius: 50%;
             transform-origin: center center;
-            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
         }}
 
-        /* 6 Gears with Increased Speed and Staggered Delays */
-        .gear-circle:nth-child(1) {{ animation: orbit 5s linear infinite; }}
-        .gear-circle:nth-child(2) {{ animation: orbit 6s linear infinite; animation-delay: -1s; }}
-        .gear-circle:nth-child(3) {{ animation: orbit 7s linear infinite; animation-delay: -2s; }}
-        .gear-circle:nth-child(4) {{ animation: orbit 8s linear infinite; animation-delay: -3s; }}
-        .gear-circle:nth-child(5) {{ animation: orbit 9s linear infinite; animation-delay: -4s; }}
-        .gear-circle:nth-child(6) {{ animation: orbit 10s linear infinite; animation-delay: -5s; }}
+        /* Staggered Orbital Mechanics */
+        .gear-circle:nth-child(1) {{ animation: orbit 4s linear infinite; }}
+        .gear-circle:nth-child(2) {{ animation: orbit 5s linear infinite; animation-delay: -0.8s; }}
+        .gear-circle:nth-child(3) {{ animation: orbit 6s linear infinite; animation-delay: -1.6s; }}
+        .gear-circle:nth-child(4) {{ animation: orbit 7s linear infinite; animation-delay: -2.4s; }}
+        .gear-circle:nth-child(5) {{ animation: orbit 8s linear infinite; animation-delay: -3.2s; }}
+        .gear-circle:nth-child(6) {{ animation: orbit 9s linear infinite; animation-delay: -4.0s; }}
 
         @keyframes orbit {{
-            from {{ transform: rotate(0deg) translateX(80px); }}
-            to {{ transform: rotate(360deg) translateX(80px); }}
+            from {{ transform: rotate(0deg) translateX(85px); }}
+            to {{ transform: rotate(360deg) translateX(85px); }}
         }}
 
         /* --- TYPOGRAPHY --- */
         .logo-title {{
             font-family: 'Syncopate', sans-serif;
             color: #ffffff;
-            font-size: 4.2rem;
-            letter-spacing: 28px;
-            margin: 20px 0 0 28px;
-            background: linear-gradient(to bottom, #FFFFFF 50%, #666666 100%);
+            font-size: 4.5rem;
+            letter-spacing: 30px;
+            margin: 20px 0 0 30px;
+            background: linear-gradient(to bottom, #FFFFFF 50%, #444444 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             z-index: 20;
         }}
 
         .progress-tray {{
-            width: 500px;
+            width: 550px;
             height: 2px;
             background: rgba(255,255,255,0.05);
-            margin-top: 70px;
+            margin-top: 80px;
             position: relative;
             overflow: hidden;
             z-index: 20;
@@ -274,7 +272,7 @@ def show_vortex_intro():
             width: 0%;
             height: 100%;
             background: #00F2FF;
-            box-shadow: 0 0 20px #00F2FF;
+            box-shadow: 0 0 25px #00F2FF;
             animation: fill-up 6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
         }}
 
@@ -282,11 +280,11 @@ def show_vortex_intro():
         </style>
         
         <div class="vortex-container">
-            <div class="star" style="top:15%; left:15%; width:1px; height:1px; --duration:3s;"></div>
-            <div class="star" style="top:45%; left:85%; width:2px; height:2px; --duration:5s;"></div>
-            <div class="star" style="top:75%; left:35%; width:1px; height:1px; --duration:4s;"></div>
-            <div class="star" style="top:25%; left:65%; width:2px; height:2px; --duration:6s;"></div>
-            <div class="star" style="top:85%; left:20%; width:1.5px; height:1.5px; --duration:4.5s;"></div>
+            <div class="star" style="top:12%; left:22%; width:1px; height:1px; --duration:3.2s;"></div>
+            <div class="star" style="top:38%; left:88%; width:2px; height:2px; --duration:4.8s;"></div>
+            <div class="star" style="top:72%; left:42%; width:1px; height:1px; --duration:4.1s;"></div>
+            <div class="star" style="top:55%; left:12%; width:2.5px; height:2.5px; --duration:5.5s;"></div>
+            <div class="star" style="top:82%; left:75%; width:1.5px; height:1.5px; --duration:3.7s;"></div>
             
             <div class="gear-system">
                 <div class="gear-circle"></div>
@@ -310,8 +308,8 @@ def show_vortex_intro():
     
     for step in steps:
         status_slot.markdown(f"""
-            <div style="position: fixed; top: 78%; left: 50%; transform: translateX(-50%); z-index: 10000;">
-                <p style="color: rgba(0, 242, 255, 0.6); font-family: monospace; font-size: 0.7rem; letter-spacing: 6px; text-align: center;">{step}</p>
+            <div style="position: fixed; top: 80%; left: 50%; transform: translateX(-50%); z-index: 10000;">
+                <p style="color: rgba(0, 242, 255, 0.5); font-family: monospace; font-size: 0.75rem; letter-spacing: 7px; text-align: center;">{step}</p>
             </div>
         """, unsafe_allow_html=True)
         time.sleep(1.8)
