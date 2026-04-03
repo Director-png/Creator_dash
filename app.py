@@ -343,39 +343,34 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;400;900&display=swap');
 
-    /* --- THE UNIFIED STARFIELD (Matches Loading Screen) --- */
+    /* --- THE UNIFIED STARFIELD --- */
     .stApp {
-        background: #000000 !important;
+        background-color: #000000 !important;
         background-image: 
-            radial-gradient(1.5px 1.5px at 20px 30px, #fff, rgba(0,0,0,0)),
-            radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
-            radial-gradient(2px 2px at 150px 250px, #FF0070, rgba(0,0,0,0)), /* Pink Star */
-            radial-gradient(2px 2px at 400px 600px, #7000FF, rgba(0,0,0,0)), /* Purple Star */
-            radial-gradient(2px 2px at 600px 150px, #00F2FF, rgba(0,0,0,0)); /* Cyan Star */
-        background-size: 800px 800px;
-        animation: star-drift 120s linear infinite;
+            radial-gradient(1.5px 1.5px at 10% 10%, #fff, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 50% 50%, #fff, rgba(0,0,0,0)),
+            radial-gradient(2.5px 2.5px at 30% 80%, #FF0070, rgba(0,0,0,0)), /* Pink */
+            radial-gradient(2px 2px at 80% 20%, #7000FF, rgba(0,0,0,0)),   /* Purple */
+            radial-gradient(2px 2px at 70% 60%, #00F2FF, rgba(0,0,0,0));   /* Cyan */
+        background-size: 100% 100%;
+        background-attachment: fixed;
     }
 
-    @keyframes star-drift {
-        from { background-position: 0 0; }
-        to { background-position: 800px 800px; }
-    }
-
-    /* --- THE VOID SIDEBAR (Deep Space Blue) --- */
+    /* --- THE TACTICAL NAVY SIDEBAR --- */
     [data-testid="stSidebar"] {
-        background-color: rgba(0, 15, 40, 0.9) !important; /* Deep Tactical Blue */
+        background-color: #000814 !important; /* Deep Navy Blue */
         border-right: 1px solid rgba(0, 242, 255, 0.2) !important;
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(15px);
     }
 
     /* --- THE GLASS TERMINAL CARD --- */
     .stat-card {
-        background: rgba(0, 10, 20, 0.6) !important;
+        background: rgba(0, 10, 20, 0.7) !important;
         backdrop-filter: blur(15px);
         border: 1px solid rgba(0, 242, 255, 0.2) !important;
         padding: 25px !important;
         border-radius: 20px !important;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.8);
         margin-bottom: 20px;
     }
 
@@ -387,9 +382,9 @@ st.markdown("""
         font-family: 'Syncopate', sans-serif;
         text-transform: uppercase;
         letter-spacing: 3px;
-        padding: 10px 25px !important; /* REDUCED SIZE */
-        font-size: 0.65rem !important; /* REDUCED FONT */
-        border-radius: 30px !important; /* PILL SHAPE */
+        padding: 10px 25px !important;
+        font-size: 0.65rem !important;
+        border-radius: 30px !important;
         transition: all 0.3s ease-in-out !important;
         display: block;
         margin: 0 auto;
@@ -421,25 +416,6 @@ st.markdown("""
     header, [data-testid="stHeader"] { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
-
-# 3. SIDEBAR NAVIGATION
-with st.sidebar:
-    st.markdown("<p style='font-family:Syncopate; letter-spacing:4px; color:#00F2FF; font-size:0.8rem; margin-top:20px;'>🛰️ SYSTEM NAV</p>", unsafe_allow_html=True)
-    st.radio("VECTOR", ["DASHBOARD", "GLOBAL PULSE", "TREND DUEL", "NEURAL FORGE"], label_visibility="collapsed")
-
-# 4. DASHBOARD LAYOUT
-st.markdown("<h1 style='font-family:Syncopate; letter-spacing:15px; text-align:center; color:white; margin: 40px 0; font-size:2rem;'>COMMAND</h1>", unsafe_allow_html=True)
-
-col1, col2 = st.columns(2)
-with col1:
-    st.markdown("""<div class="stat-card"><p class="stat-label">TEMPORAL VIGOR</p><p class="stat-value">98.2%</p></div>""", unsafe_allow_html=True)
-
-with col2:
-    st.markdown("""<div class="stat-card"><p class="stat-label">ACTIVE NODES</p><p class="stat-value">4,812</p></div>""", unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
-if st.button("INITIALIZE UPLINK"):
-    st.success("SYSTEM READY")
 
 # 4. MAIN INTERFACE
 def draw_stat_card(label, value):
