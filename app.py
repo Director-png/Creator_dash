@@ -446,37 +446,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 3. SIDEBAR NAVIGATION
-with st.sidebar:
-    st.markdown("<p style='font-family:Syncopate; letter-spacing:4px; color:#00F2FF; font-size:0.8rem; margin-top:20px;'>🛰️ SYSTEM NAV</p>", unsafe_allow_html=True)
-    nav = st.radio("VECTOR", ["DASHBOARD", "GLOBAL PULSE", "TREND DUEL", "NEURAL FORGE"], label_visibility="collapsed")
-
-# 4. CONDITIONAL CONTENT LOGIC
-if nav == "DASHBOARD":
-    st.markdown("<h1 style='font-family:Syncopate; letter-spacing:15px; text-align:center; color:white; margin: 40px 0; font-size:2rem;'>COMMAND</h1>", unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""<div class="stat-card"><p class="stat-label">TEMPORAL VIGOR</p><p class="stat-value">98.2%</p></div>""", unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("""<div class="stat-card"><p class="stat-label">ACTIVE NODES</p><p class="stat-value">4,812</p></div>""", unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("INITIALIZE UPLINK"):
-        st.success("SYSTEM READY")
-
-elif nav == "GLOBAL PULSE":
-    st.markdown("<h1 style='font-family:Syncopate; letter-spacing:15px; text-align:center; color:white; margin: 40px 0; font-size:2rem;'>GLOBAL PULSE</h1>", unsafe_allow_html=True)
-    st.write("Intercepting global news vectors...")
-
-elif nav == "TREND DUEL":
-    st.markdown("<h1 style='font-family:Syncopate; letter-spacing:15px; text-align:center; color:white; margin: 40px 0; font-size:2rem;'>TREND DUEL</h1>", unsafe_allow_html=True)
-    st.write("Comparing market vigor...")
-
-elif nav == "NEURAL FORGE":
-    st.markdown("<h1 style='font-family:Syncopate; letter-spacing:15px; text-align:center; color:white; margin: 40px 0; font-size:2rem;'>NEURAL FORGE</h1>", unsafe_allow_html=True)
-    st.write("Synthesizing content modules...")
 
 # 4. MAIN INTERFACE
 def draw_stat_card(label, value):
