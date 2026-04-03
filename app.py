@@ -353,7 +353,7 @@ st.markdown("""
             radial-gradient(1.2px 1.2px at 400px 100px, #FF0070, rgba(0,0,0,0)),   
             radial-gradient(1.2px 1.2px at 500px 300px, #7000FF, rgba(0,0,0,0)),   
             radial-gradient(1.5px 1.5px at 200px 500px, #fff, rgba(0,0,0,0));
-        background-size: 300px 300px; /* Even smaller tiling for maximum density */
+        background-size: 300px 300px;
         background-attachment: fixed;
         animation: star-drift 200s linear infinite;
     }
@@ -363,19 +363,34 @@ st.markdown("""
         to { background-position: 300px 600px; }
     }
 
-    /* --- HEADER & TOGGLE RECOVERY --- */
-    /* Make the header invisible but KEEP the height for the button */
-    header[data-testid="stHeader"] {
-        background-color: rgba(0,0,0,0) !important;
-        color: rgba(0,0,0,0) !important;
+    /* --- THE NEURAL LASER SCAN (Psychological Loading Bar) --- */
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #00F2FF, transparent);
+        box-shadow: 0 0 15px #00F2FF, 0 0 30px #00F2FF;
+        z-index: 1000000;
+        animation: laser-scan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     }
 
-    /* Kill the top decoration line */
+    @keyframes laser-scan {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+
+    /* --- HEADER & TOGGLE RECOVERY --- */
+    header[data-testid="stHeader"] {
+        background-color: rgba(0,0,0,0) !important;
+    }
+
     [data-testid="stDecoration"] {
         display: none !important;
     }
 
-    /* Target the Sidebar Toggle specifically */
     button[data-testid="stSidebarCollapsedControl"] {
         background-color: rgba(0, 11, 30, 0.9) !important;
         border: 1px solid #00F2FF !important;
