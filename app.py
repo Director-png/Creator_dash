@@ -348,38 +348,46 @@ st.markdown("""
         background-color: #000000 !important;
         background-image: 
             radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
-            radial-gradient(1px 1px at 150px 150px, #fff, rgba(0,0,0,0)),
+            radial-gradient(1.2px 1.2px at 150px 150px, #fff, rgba(0,0,0,0)),
             radial-gradient(1.5px 1.5px at 300px 450px, #00F2FF, rgba(0,0,0,0)), 
-            radial-gradient(1px 1px at 400px 100px, #FF0070, rgba(0,0,0,0)),   
-            radial-gradient(1px 1px at 500px 300px, #7000FF, rgba(0,0,0,0)),   
+            radial-gradient(1.2px 1.2px at 400px 100px, #FF0070, rgba(0,0,0,0)),   
+            radial-gradient(1.2px 1.2px at 500px 300px, #7000FF, rgba(0,0,0,0)),   
             radial-gradient(1.5px 1.5px at 200px 500px, #fff, rgba(0,0,0,0));
-        background-size: 350px 350px; /* Smaller tiling = More Stars */
+        background-size: 300px 300px; /* Even smaller tiling for maximum density */
         background-attachment: fixed;
         animation: star-drift 200s linear infinite;
     }
 
     @keyframes star-drift {
         from { background-position: 0 0; }
-        to { background-position: 350px 700px; }
+        to { background-position: 300px 600px; }
     }
 
-    /* --- SIDEBAR TOGGLE RECOVERY (CRITICAL FIX) --- */
-    /* Hide the header background but keep the button visible */
+    /* --- HEADER & TOGGLE RECOVERY --- */
+    /* Make the header invisible but KEEP the height for the button */
     header[data-testid="stHeader"] {
-        background: transparent !important;
+        background-color: rgba(0,0,0,0) !important;
+        color: rgba(0,0,0,0) !important;
     }
 
-    /* Force the Sidebar Toggle to show up and look Tactical */
+    /* Kill the top decoration line */
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+
+    /* Target the Sidebar Toggle specifically */
     button[data-testid="stSidebarCollapsedControl"] {
-        background: rgba(0, 11, 30, 0.8) !important;
-        border: 1px solid rgba(0, 242, 255, 0.4) !important;
+        background-color: rgba(0, 11, 30, 0.9) !important;
+        border: 1px solid #00F2FF !important;
         border-radius: 8px !important;
         color: #00F2FF !important;
-        visibility: visible !important;
-        display: flex !important;
+        position: fixed !important;
         top: 15px !important;
         left: 15px !important;
         z-index: 999999 !important;
+        display: flex !important;
+        visibility: visible !important;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
     }
 
     /* --- THE TACTICAL MIDNIGHT NAVY SIDEBAR --- */
@@ -437,11 +445,6 @@ st.markdown("""
         color: #00F2FF;
         font-size: 0.55rem;
         letter-spacing: 5px;
-    }
-
-    /* Hide unnecessary UI elements but NOT the sidebar control */
-    [data-testid="stDecoration"], [data-testid="stToolbar"] {
-        display: none !important;
     }
 </style>
 """, unsafe_allow_html=True)
