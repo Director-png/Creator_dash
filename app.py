@@ -334,78 +334,62 @@ st.set_page_config(page_title=" ", layout="wide", initial_sidebar_state="collaps
 # 2. UNIVERSAL CSS OVERRIDE (Kills Double Title + Restores Toggle + Hover Glow)
 
 import streamlit as st
-import time
 
 # 1. CORE SYSTEM CONFIG
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. THE UI ENGINE: SPACE-HUD INJECTION
+# 2. THE SPACE-COCKPIT INJECTION
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;400;900&display=swap');
 
-    /* --- THE INFINITE VOID --- */
+    /* --- THE INFINITE STARFIELD BACKGROUND --- */
     .stApp {
         background: #000000 !important;
-        /* Parallax Background Simulation */
+        /* Layered Starfield for Depth */
         background-image: 
-            radial-gradient(1.5px 1.5px at 10% 10%, #fff, transparent),
-            radial-gradient(2px 2px at 50% 50%, #00F2FF, transparent),
-            radial-gradient(1px 1px at 80% 20%, #FF0070, transparent),
-            radial-gradient(1.5px 1.5px at 30% 70%, #7000FF, transparent);
-        background-size: 800px 800px;
-        animation: parallax-drift 120s linear infinite;
+            radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+            radial-gradient(1.5px 1.5px at 500px 600px, #00F2FF, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 300px 400px, #FF0070, rgba(0,0,0,0)),
+            radial-gradient(1px 1px at 80% 80%, #fff, rgba(0,0,0,0));
+        background-size: 550px 550px;
+        animation: star-drift 100s linear infinite;
     }
 
-    @keyframes parallax-drift {
+    @keyframes star-drift {
         0% { background-position: 0% 0%; }
         100% { background-position: 100% 100%; }
     }
 
-    /* --- HIDE DEFAULT ELEMENTS --- */
-    header, [data-testid="stHeader"], [data-testid="stDecoration"] {
-        visibility: hidden !important;
-        height: 0px !important;
-    }
-
-    /* --- THE HOLOGRAPHIC ORBITAL MAP (Sidebar Replacement) --- */
-    [data-testid="stSidebar"] {
-        background-color: rgba(0, 10, 20, 0.9) !important;
-        border-right: 1px solid rgba(0, 242, 255, 0.2) !important;
-        backdrop-filter: blur(25px) !important;
-    }
-
-    /* Target the sidebar radio buttons to look like Satellite Nodes */
-    div[data-testid="stSidebarUserContent"] .st-emotion-cache-1offfwp {
-        background: rgba(0, 242, 255, 0.05) !important;
-        border: 1px solid rgba(0, 242, 255, 0.2) !important;
-        border-radius: 0px !important; /* Industrial Sharp Edges */
-        margin-bottom: 10px !important;
-        transition: 0.3s all;
-    }
-
-    /* --- THE SCANNING DATA CARDS --- */
+    /* --- THE GLASS TERMINAL CARD --- */
     .stat-card {
-        background: rgba(0, 20, 30, 0.4) !important;
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(0, 242, 255, 0.15) !important;
+        background: rgba(0, 15, 25, 0.6) !important;
+        backdrop-filter: blur(12px) saturate(150%);
+        border: 1px solid rgba(0, 242, 255, 0.2) !important;
         padding: 30px !important;
         position: relative;
         overflow: hidden;
-        border-radius: 4px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        border-radius: 4px; /* Industrial Sharpness */
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        transition: 0.3s transform ease;
     }
 
-    /* THE SCANNING LASER BEAM */
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(0, 255, 65, 0.4) !important; /* Slight Green tint on hover */
+    }
+
+    /* THE SCANNING LASER */
     .stat-card::after {
         content: "";
         position: absolute;
         top: -100%; left: 0;
-        width: 100%; height: 2px;
+        width: 100%; height: 1px;
         background: linear-gradient(90deg, transparent, #00F2FF, transparent);
-        box-shadow: 0 0 15px #00F2FF;
-        opacity: 0.4;
-        animation: scan-line 5s linear infinite;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
+        opacity: 0.3;
+        animation: scan-line 6s linear infinite;
     }
 
     @keyframes scan-line {
@@ -413,76 +397,83 @@ st.markdown("""
         100% { top: 110%; }
     }
 
-    /* --- COMMANDER BUTTONS (Hollow logic) --- */
+    /* --- THE KINETIC BUTTONS (CYAN -> GREEN GLOW) --- */
     div.stButton > button {
-        background: rgba(0, 242, 255, 0.02) !important;
+        background: transparent !important;
         color: #00F2FF !important;
-        border: 1px solid rgba(0, 242, 255, 0.3) !important;
+        border: 1px solid rgba(0, 242, 255, 0.5) !important;
         font-family: 'Syncopate', sans-serif;
         text-transform: uppercase;
         letter-spacing: 5px;
-        font-size: 0.7rem !important;
-        padding: 18px 30px !important;
-        transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-        border-radius: 2px !important;
+        font-size: 0.75rem !important;
+        padding: 18px 35px !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        border-radius: 0px !important;
     }
 
     div.stButton > button:hover {
-        border-color: #00F2FF !important;
-        background: rgba(0, 242, 255, 0.1) !important;
-        box-shadow: 0 0 30px rgba(0, 242, 255, 0.4), inset 0 0 10px rgba(0, 242, 255, 0.2) !important;
-        transform: translateY(-2px);
-        color: #fff !important;
+        border-color: #00ff41 !important; /* VOID GREEN */
+        color: #00ff41 !important;
+        background-color: rgba(0, 255, 65, 0.05) !important;
+        box-shadow: 0px 0px 25px rgba(0, 255, 65, 0.5) !important;
+        transform: scale(1.03);
     }
 
-    /* --- DATA TEXT STYLES --- */
+    /* --- TEXT DATA STYLING --- */
     .stat-value {
         font-family: 'Inter', sans-serif;
         font-weight: 900;
-        font-size: 2.5rem !important;
+        font-size: 3rem !important;
         color: #ffffff;
-        text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        margin: 0;
     }
 
     .stat-label {
         font-family: 'Syncopate', sans-serif;
         color: #00F2FF;
-        font-size: 0.6rem;
+        font-size: 0.65rem;
         letter-spacing: 6px;
         text-transform: uppercase;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
     }
 
-    /* --- THE NEON BREATH EFFECT --- */
-    .neon-breath {
-        animation: breath 4s ease-in-out infinite;
-    }
-
-    @keyframes breath {
-        0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 5px #00F2FF); }
-        50% { opacity: 1; filter: drop-shadow(0 0 15px #00F2FF); }
+    /* --- HIDE HEADER OVERLAYS --- */
+    header, [data-testid="stHeader"], [data-testid="stDecoration"] {
+        background: transparent !important;
+        visibility: hidden !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. NAVIGATION: THE SATELLITE ORBITAL MAP
+# 3. NAV LOGIC
 with st.sidebar:
-    st.markdown("### 🛰️ ORBITAL HUD")
-    # This logic matches your button structure but sits in the sidebar map
-    nav_selection = st.radio(
-        "SELECT MODULE",
-        ["🏠 DASHBOARD", "🛰️ GLOBAL PULSE", "⚔️ TREND DUEL", "🔨 NEURAL FORGE", "📊 ROI ENGINE"],
-        label_visibility="collapsed"
-    )
+    st.markdown("<p style='font-family:Syncopate; letter-spacing:5px; color:#00F2FF;'>SATELLITE NAV</p>", unsafe_allow_html=True)
+    nav = st.radio("SELECT VECTOR", ["DASHBOARD", "GLOBAL PULSE", "TREND DUEL", "NEURAL FORGE"], label_visibility="collapsed")
+
+# 4. DASHBOARD RENDER
+if nav == "DASHBOARD":
+    st.markdown("<h1 style='font-family:Syncopate; letter-spacing:25px; text-align:center; color:white; margin: 60px 0;'>COMMAND</h1>", unsafe_allow_html=True)
     
-    st.markdown("---")
-    st.markdown("""
-        <div style='opacity: 0.5; font-size: 0.6rem; letter-spacing: 2px;'>
-            SYSTEM STATUS: SOVEREIGN<br>
-            UPLINK: ACTIVE<br>
-            LOCATION: INDIA VECTORS
-        </div>
-    """, unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+            <div class="stat-card">
+                <p class="stat-label">TEMPORAL VIGOR</p>
+                <p class="stat-value">98.2%</p>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+            <div class="stat-card">
+                <p class="stat-label">ACTIVE NODES</p>
+                <p class="stat-value">4,812</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.button("INITIALIZE NEURAL FORGE")
+
 
 # 4. MAIN INTERFACE
 def draw_stat_card(label, value):
