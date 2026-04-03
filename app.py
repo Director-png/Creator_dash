@@ -346,27 +346,45 @@ st.markdown("""
     /* --- THE HIGH-DENSITY STARFIELD --- */
     .stApp {
         background-color: #000000 !important;
-        /* Using multiple transparent layers for depth and density */
         background-image: 
             radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
             radial-gradient(1px 1px at 150px 150px, #fff, rgba(0,0,0,0)),
-            radial-gradient(1.5px 1.5px at 300px 450px, #00F2FF, rgba(0,0,0,0)), /* Cyan dots */
-            radial-gradient(1px 1px at 400px 100px, #FF0070, rgba(0,0,0,0)),   /* Pink dots */
-            radial-gradient(1px 1px at 500px 300px, #7000FF, rgba(0,0,0,0)),   /* Purple dots */
+            radial-gradient(1.5px 1.5px at 300px 450px, #00F2FF, rgba(0,0,0,0)), 
+            radial-gradient(1px 1px at 400px 100px, #FF0070, rgba(0,0,0,0)),   
+            radial-gradient(1px 1px at 500px 300px, #7000FF, rgba(0,0,0,0)),   
             radial-gradient(1.5px 1.5px at 200px 500px, #fff, rgba(0,0,0,0));
-        background-size: 400px 400px; /* Tiling size: smaller = more stars */
+        background-size: 350px 350px; /* Smaller tiling = More Stars */
         background-attachment: fixed;
-        animation: star-drift 180s linear infinite;
+        animation: star-drift 200s linear infinite;
     }
 
     @keyframes star-drift {
         from { background-position: 0 0; }
-        to { background-position: 400px 800px; }
+        to { background-position: 350px 700px; }
+    }
+
+    /* --- SIDEBAR TOGGLE RECOVERY (CRITICAL FIX) --- */
+    /* Hide the header background but keep the button visible */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+    }
+
+    /* Force the Sidebar Toggle to show up and look Tactical */
+    button[data-testid="stSidebarCollapsedControl"] {
+        background: rgba(0, 11, 30, 0.8) !important;
+        border: 1px solid rgba(0, 242, 255, 0.4) !important;
+        border-radius: 8px !important;
+        color: #00F2FF !important;
+        visibility: visible !important;
+        display: flex !important;
+        top: 15px !important;
+        left: 15px !important;
+        z-index: 999999 !important;
     }
 
     /* --- THE TACTICAL MIDNIGHT NAVY SIDEBAR --- */
     [data-testid="stSidebar"] {
-        background-color: #000b1e !important; /* Deep Midnight Navy */
+        background-color: #000b1e !important; 
         border-right: 1px solid rgba(0, 242, 255, 0.2) !important;
         backdrop-filter: blur(20px);
     }
@@ -380,12 +398,6 @@ st.markdown("""
         border-radius: 20px !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.8);
         margin-bottom: 20px;
-        transition: 0.3s all ease;
-    }
-
-    .stat-card:hover {
-        border-color: #00F2FF !important;
-        box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
     }
 
     /* --- THE MINI ROUNDED KINETIC BUTTONS --- */
@@ -405,7 +417,7 @@ st.markdown("""
     }
 
     div.stButton > button:hover {
-        border-color: #00ff41 !important; /* NEON GREEN */
+        border-color: #00ff41 !important; 
         color: #00ff41 !important;
         box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.5) !important;
         background-color: rgba(0, 255, 65, 0.05) !important;
@@ -427,10 +439,44 @@ st.markdown("""
         letter-spacing: 5px;
     }
 
-    header, [data-testid="stHeader"] { visibility: hidden; }
+    /* Hide unnecessary UI elements but NOT the sidebar control */
+    [data-testid="stDecoration"], [data-testid="stToolbar"] {
+        display: none !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
+# 3. SIDEBAR NAVIGATION
+with st.sidebar:
+    st.markdown("<p style='font-family:Syncopate; letter-spacing:4px; color:#00F2FF; font-size:0.8rem; margin-top:20px;'>🛰️ SYSTEM NAV</p>", unsafe_allow_html=True)
+    nav = st.radio("VECTOR", ["DASHBOARD", "GLOBAL PULSE", "TREND DUEL", "NEURAL FORGE"], label_visibility="collapsed")
+
+# 4. CONDITIONAL CONTENT LOGIC
+if nav == "DASHBOARD":
+    st.markdown("<h1 style='font-family:Syncopate; letter-spacing:15px; text-align:center; color:white; margin: 40px 0; font-size:2rem;'>COMMAND</h1>", unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""<div class="stat-card"><p class="stat-label">TEMPORAL VIGOR</p><p class="stat-value">98.2%</p></div>""", unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("""<div class="stat-card"><p class="stat-label">ACTIVE NODES</p><p class="stat-value">4,812</p></div>""", unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("INITIALIZE UPLINK"):
+        st.success("SYSTEM READY")
+
+elif nav == "GLOBAL PULSE":
+    st.markdown("<h1 style='font-family:Syncopate; letter-spacing:15px; text-align:center; color:white; margin: 40px 0; font-size:2rem;'>GLOBAL PULSE</h1>", unsafe_allow_html=True)
+    st.write("Intercepting global news vectors...")
+
+elif nav == "TREND DUEL":
+    st.markdown("<h1 style='font-family:Syncopate; letter-spacing:15px; text-align:center; color:white; margin: 40px 0; font-size:2rem;'>TREND DUEL</h1>", unsafe_allow_html=True)
+    st.write("Comparing market vigor...")
+
+elif nav == "NEURAL FORGE":
+    st.markdown("<h1 style='font-family:Syncopate; letter-spacing:15px; text-align:center; color:white; margin: 40px 0; font-size:2rem;'>NEURAL FORGE</h1>", unsafe_allow_html=True)
+    st.write("Synthesizing content modules...")
 
 # 4. MAIN INTERFACE
 def draw_stat_card(label, value):
