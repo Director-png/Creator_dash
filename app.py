@@ -332,93 +332,95 @@ def draw_title(emoji, text):
 st.set_page_config(page_title=" ", layout="wide", initial_sidebar_state="collapsed")
 
 # 2. UNIVERSAL CSS OVERRIDE (Kills Double Title + Restores Toggle + Hover Glow)
+
 st.markdown("""
 <style>
-    /* 1. HIDE HEADER CONTENT BUT KEEP THE HEIGHT FOR THE TOGGLE */
-    header[data-testid="stHeader"] {
-        background-color: rgba(0,0,0,0) !important;
+    @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;400;900&display=swap');
+
+    /* 1. THE DEEP SPACE WRAPPER */
+    .stApp {
+        background: #000000 !important;
+        background-attachment: fixed;
+    }
+
+    /* 2. THE GLASS TERMINAL CARD (Replacing standard blocks) */
+    [data-testid="stVerticalBlock"] > div:has(div.stat-card) {
+        background: rgba(0, 20, 30, 0.4) !important;
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(0, 242, 255, 0.15);
+        border-radius: 2px; /* Sharp corners feel more "Industrial" */
+        padding: 10px;
+        box-shadow: inset 0 0 20px rgba(0, 242, 255, 0.05);
+    }
+
+    /* 3. NEON PULSE FOR ACTIVE MODULES */
+    .stat-card {
         background: transparent !important;
-        color: transparent !important;
+        border: none !important;
+        padding: 25px !important;
+        position: relative;
+        overflow: hidden;
     }
 
-    /* 2. KILL THE DECORATION LINE (The line at the very top) */
-    [data-testid="stDecoration"] {
-        display: none !important;
+    /* THE SCANNING EFFECT (The "Billion Dollar" Detail) */
+    .stat-card::after {
+        content: "";
+        position: absolute;
+        top: -100%; left: 0;
+        width: 100%; height: 2px;
+        background: linear-gradient(90deg, transparent, #00F2FF, transparent);
+        opacity: 0.3;
+        animation: scanning-pulse 4s linear infinite;
     }
 
-    /* 3. FORCE THE TOGGLE TO BE VISIBLE AND INTERACTABLE */
-    button[data-testid="stSidebarCollapsedControl"], 
-    .st-emotion-cache-6q9sum {
-        display: flex !important;
-        visibility: visible !important;
-        position: fixed !important;
-        top: 12px !important;
-        left: 12px !important;
-        z-index: 99999999 !important;
-        background: rgba(0, 212, 255, 0.1) !important;
-        border: 1px solid rgba(0, 212, 255, 0.4) !important;
-        border-radius: 8px !important;
-        color: #00d4ff !important;
+    @keyframes scanning-pulse {
+        0% { top: -10%; }
+        100% { top: 110%; }
     }
 
-    /* Target the icon inside the toggle */
-    button[data-testid="stSidebarCollapsedControl"] svg {
-        fill: #00d4ff !important;
+    /* 4. THE COMMANDER TOGGLE (Sidebar Fix) */
+    button[data-testid="stSidebarCollapsedControl"] {
+        background: rgba(0, 0, 0, 0.8) !important;
+        border: 1px solid #00F2FF !important;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
+        left: 20px !important;
+        top: 20px !important;
     }
 
-    /* 4. HOLLOW BUTTONS + HOVER GLOW */
+    /* 5. HOLLOW HOVER BUTTONS */
     div.stButton > button {
-        background: transparent !important;
-        color: #00d4ff !important;
-        border: 1px solid rgba(0, 212, 255, 0.5) !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        background: rgba(0, 242, 255, 0.02) !important;
+        color: #00F2FF !important;
+        border: 1px solid rgba(0, 242, 255, 0.3) !important;
+        font-family: 'Syncopate', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        transition: 0.3s all cubic-bezier(0.19, 1, 0.22, 1);
     }
 
     div.stButton > button:hover {
-        border-color: #00ff41 !important;
-        color: #00ff41 !important;
-        background-color: rgba(0, 255, 65, 0.05) !important;
-        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.4) !important;
-        transform: scale(1.02);
+        border-color: #00F2FF !important;
+        background: rgba(0, 242, 255, 0.1) !important;
+        box-shadow: 0 0 30px rgba(0, 242, 255, 0.4), inset 0 0 10px rgba(0, 242, 255, 0.2) !important;
+        transform: translateY(-2px);
     }
 
-    /* 5. FIX THE MAIN APP PADDING */
-    .stAppViewMain {
-        padding-top: 0rem !important;
-    }
-
-    /* 6. THE NEON DATA CARD */
-    .stat-card {
-        background: rgba(0, 212, 255, 0.05) !important;
-        border: 1px solid rgba(0, 212, 255, 0.2) !important;
-        border-radius: 15px !important;
-        padding: 20px !important;
-        transition: all 0.4s ease !important;
-        backdrop-filter: blur(10px);
-        margin-bottom: 15px;
-    }
-
-    .stat-card:hover {
-        border-color: #00ff41 !important;
-        box-shadow: 0px 0px 20px rgba(0, 255, 65, 0.2) !important;
-        transform: translateY(-5px);
-    }
-
+    /* 6. DATA TEXT REFINEMENT */
     .stat-value {
-        font-family: 'Courier New', Courier, monospace;
-        font-size: 2rem !important;
-        font-weight: bold;
-        color: #00ff41;
-        text-shadow: 0px 0px 10px rgba(0, 255, 65, 0.5);
-        margin: 0;
+        font-family: 'Inter', sans-serif;
+        font-weight: 900;
+        font-size: 2.8rem !important;
+        color: #ffffff;
+        letter-spacing: -1px;
     }
 
     .stat-label {
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        color: #00d4ff;
-        font-size: 0.7rem;
-        margin: 0;
+        font-family: 'Syncopate', sans-serif;
+        color: #00F2FF;
+        font-size: 0.65rem;
+        letter-spacing: 5px;
+        opacity: 0.7;
     }
 </style>
 """, unsafe_allow_html=True)
