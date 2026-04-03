@@ -334,145 +334,137 @@ st.set_page_config(page_title=" ", layout="wide", initial_sidebar_state="collaps
 # 2. UNIVERSAL CSS OVERRIDE (Kills Double Title + Restores Toggle + Hover Glow)
 
 import streamlit as st
+import streamlit.components.v1 as components
 
-# 1. CORE SYSTEM CONFIG
+# 1. SYSTEM CONFIG
 st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. THE SPACE-COCKPIT INJECTION
+# 2. THE KINETIC STARFIELD (JavaScript + CSS)
+# This creates a canvas that sits behind everything and reacts to the mouse.
+components.html(
+    """
+    <canvas id="starfield" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; background: #000;"></canvas>
+    <script>
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let width, height, stars = [];
+        let mouse = { x: 0, y: 0 };
+
+        function init() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            stars = [];
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: Math.random() * 1.5,
+                    speedX: (Math.random() - 0.5) * 0.5,
+                    speedY: (Math.random() - 0.5) * 0.5
+                });
+            }
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = (e.clientX - width / 2) * 0.05;
+            mouse.y = (e.clientY - height / 2) * 0.05;
+        });
+
+        function animate() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = '#fff';
+            
+            stars.forEach(s => {
+                let x = s.x + mouse.x;
+                let y = s.y + mouse.y;
+                
+                // Wrap around screen
+                if (x < 0) x = width; if (x > width) x = 0;
+                if (y < 0) y = height; if (y > height) y = 0;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                s.x += s.speedX;
+                s.y += s.speedY;
+            });
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+        window.addEventListener('resize', init);
+    </script>
+    """,
+    height=0,
+)
+
+# 3. THE UI STYLING (Rounded + Kinetic Glow)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;400;900&display=swap');
 
-    /* --- THE INFINITE STARFIELD BACKGROUND --- */
+    /* Transparent App Wrapper to see the JS Stars */
     .stApp {
-        background: #000000 !important;
-        /* Layered Starfield for Depth */
-        background-image: 
-            radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
-            radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
-            radial-gradient(1.5px 1.5px at 500px 600px, #00F2FF, rgba(0,0,0,0)),
-            radial-gradient(2px 2px at 300px 400px, #FF0070, rgba(0,0,0,0)),
-            radial-gradient(1px 1px at 80% 80%, #fff, rgba(0,0,0,0));
-        background-size: 550px 550px;
-        animation: star-drift 100s linear infinite;
-    }
-
-    @keyframes star-drift {
-        0% { background-position: 0% 0%; }
-        100% { background-position: 100% 100%; }
+        background: transparent !important;
     }
 
     /* --- THE GLASS TERMINAL CARD --- */
     .stat-card {
-        background: rgba(0, 15, 25, 0.6) !important;
-        backdrop-filter: blur(12px) saturate(150%);
+        background: rgba(0, 10, 20, 0.7) !important;
+        backdrop-filter: blur(10px);
         border: 1px solid rgba(0, 242, 255, 0.2) !important;
         padding: 30px !important;
-        position: relative;
-        overflow: hidden;
-        border-radius: 4px; /* Industrial Sharpness */
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        transition: 0.3s transform ease;
+        border-radius: 20px !important; /* BACK TO ROUNDED */
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        text-align: center;
     }
 
-    .stat-card:hover {
-        transform: translateY(-5px);
-        border-color: rgba(0, 255, 65, 0.4) !important; /* Slight Green tint on hover */
-    }
-
-    /* THE SCANNING LASER */
-    .stat-card::after {
-        content: "";
-        position: absolute;
-        top: -100%; left: 0;
-        width: 100%; height: 1px;
-        background: linear-gradient(90deg, transparent, #00F2FF, transparent);
-        box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
-        opacity: 0.3;
-        animation: scan-line 6s linear infinite;
-    }
-
-    @keyframes scan-line {
-        0% { top: -10%; }
-        100% { top: 110%; }
-    }
-
-    /* --- THE KINETIC BUTTONS (CYAN -> GREEN GLOW) --- */
+    /* --- THE ROUNDED KINETIC BUTTONS (CYAN -> GREEN) --- */
     div.stButton > button {
         background: transparent !important;
         color: #00F2FF !important;
-        border: 1px solid rgba(0, 242, 255, 0.5) !important;
+        border: 2px solid #00F2FF !important;
         font-family: 'Syncopate', sans-serif;
         text-transform: uppercase;
-        letter-spacing: 5px;
-        font-size: 0.75rem !important;
-        padding: 18px 35px !important;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        border-radius: 0px !important;
+        letter-spacing: 4px;
+        padding: 15px 40px !important;
+        border-radius: 50px !important; /* FULLY ROUNDED / PILL SHAPE */
+        transition: all 0.3s ease-in-out !important;
     }
 
     div.stButton > button:hover {
-        border-color: #00ff41 !important; /* VOID GREEN */
+        border-color: #00ff41 !important; /* THE GREEN GLOW */
         color: #00ff41 !important;
+        box-shadow: 0px 0px 30px rgba(0, 255, 65, 0.6) !important;
         background-color: rgba(0, 255, 65, 0.05) !important;
-        box-shadow: 0px 0px 25px rgba(0, 255, 65, 0.5) !important;
-        transform: scale(1.03);
+        transform: scale(1.05);
     }
 
-    /* --- TEXT DATA STYLING --- */
+    /* --- DATA TEXT --- */
     .stat-value {
         font-family: 'Inter', sans-serif;
         font-weight: 900;
-        font-size: 3rem !important;
+        font-size: 2.8rem !important;
         color: #ffffff;
-        margin: 0;
     }
 
     .stat-label {
         font-family: 'Syncopate', sans-serif;
         color: #00F2FF;
-        font-size: 0.65rem;
-        letter-spacing: 6px;
-        text-transform: uppercase;
-        margin-bottom: 5px;
+        font-size: 0.6rem;
+        letter-spacing: 5px;
     }
 
-    /* --- HIDE HEADER OVERLAYS --- */
-    header, [data-testid="stHeader"], [data-testid="stDecoration"] {
-        background: transparent !important;
-        visibility: hidden !important;
-    }
+    /* Clean up headers */
+    header, [data-testid="stHeader"] { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. NAV LOGIC
-with st.sidebar:
-    st.markdown("<p style='font-family:Syncopate; letter-spacing:5px; color:#00F2FF;'>SATELLITE NAV</p>", unsafe_allow_html=True)
-    nav = st.radio("SELECT VECTOR", ["DASHBOARD", "GLOBAL PULSE", "TREND DUEL", "NEURAL FORGE"], label_visibility="collapsed")
-
-# 4. DASHBOARD RENDER
-if nav == "DASHBOARD":
-    st.markdown("<h1 style='font-family:Syncopate; letter-spacing:25px; text-align:center; color:white; margin: 60px 0;'>COMMAND</h1>", unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""
-            <div class="stat-card">
-                <p class="stat-label">TEMPORAL VIGOR</p>
-                <p class="stat-value">98.2%</p>
-            </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-            <div class="stat-card">
-                <p class="stat-label">ACTIVE NODES</p>
-                <p class="stat-value">4,812</p>
-            </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.button("INITIALIZE NEURAL FORGE")
 
 
 # 4. MAIN INTERFACE
