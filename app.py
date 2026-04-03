@@ -424,6 +424,9 @@ st.markdown("""
 
 # 3. SIDEBAR NAVIGATION
 with st.sidebar:
+    st.markdown("<p style='font-family:Syncopate; letter-spacing:4px; color:#00F2FF; font-size:0.8rem; margin-top:20px;'>🛰️ SYSTEM NAV</p>", unsafe_allow_html=True)
+    st.radio("VECTOR", ["DASHBOARD", "GLOBAL PULSE", "TREND DUEL", "NEURAL FORGE"], label_visibility="collapsed")
+
 # 4. DASHBOARD LAYOUT
 st.markdown("<h1 style='font-family:Syncopate; letter-spacing:15px; text-align:center; color:white; margin: 40px 0; font-size:2rem;'>COMMAND</h1>", unsafe_allow_html=True)
 
@@ -437,7 +440,6 @@ with col2:
 st.markdown("<br>", unsafe_allow_html=True)
 if st.button("INITIALIZE UPLINK"):
     st.success("SYSTEM READY")
-
 
 # 4. MAIN INTERFACE
 def draw_stat_card(label, value):
