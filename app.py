@@ -343,24 +343,32 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;400;900&display=swap');
 
-    /* --- THE UNIFIED STARFIELD --- */
+    /* --- THE HIGH-DENSITY STARFIELD --- */
     .stApp {
         background-color: #000000 !important;
+        /* Using multiple transparent layers for depth and density */
         background-image: 
-            radial-gradient(1.5px 1.5px at 10% 10%, #fff, rgba(0,0,0,0)),
-            radial-gradient(2px 2px at 50% 50%, #fff, rgba(0,0,0,0)),
-            radial-gradient(2.5px 2.5px at 30% 80%, #FF0070, rgba(0,0,0,0)), /* Pink */
-            radial-gradient(2px 2px at 80% 20%, #7000FF, rgba(0,0,0,0)),   /* Purple */
-            radial-gradient(2px 2px at 70% 60%, #00F2FF, rgba(0,0,0,0));   /* Cyan */
-        background-size: 100% 100%;
+            radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
+            radial-gradient(1px 1px at 150px 150px, #fff, rgba(0,0,0,0)),
+            radial-gradient(1.5px 1.5px at 300px 450px, #00F2FF, rgba(0,0,0,0)), /* Cyan dots */
+            radial-gradient(1px 1px at 400px 100px, #FF0070, rgba(0,0,0,0)),   /* Pink dots */
+            radial-gradient(1px 1px at 500px 300px, #7000FF, rgba(0,0,0,0)),   /* Purple dots */
+            radial-gradient(1.5px 1.5px at 200px 500px, #fff, rgba(0,0,0,0));
+        background-size: 400px 400px; /* Tiling size: smaller = more stars */
         background-attachment: fixed;
+        animation: star-drift 180s linear infinite;
     }
 
-    /* --- THE TACTICAL NAVY SIDEBAR --- */
+    @keyframes star-drift {
+        from { background-position: 0 0; }
+        to { background-position: 400px 800px; }
+    }
+
+    /* --- THE TACTICAL MIDNIGHT NAVY SIDEBAR --- */
     [data-testid="stSidebar"] {
-        background-color: #000814 !important; /* Deep Navy Blue */
+        background-color: #000b1e !important; /* Deep Midnight Navy */
         border-right: 1px solid rgba(0, 242, 255, 0.2) !important;
-        backdrop-filter: blur(15px);
+        backdrop-filter: blur(20px);
     }
 
     /* --- THE GLASS TERMINAL CARD --- */
@@ -372,6 +380,12 @@ st.markdown("""
         border-radius: 20px !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.8);
         margin-bottom: 20px;
+        transition: 0.3s all ease;
+    }
+
+    .stat-card:hover {
+        border-color: #00F2FF !important;
+        box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
     }
 
     /* --- THE MINI ROUNDED KINETIC BUTTONS --- */
@@ -416,6 +430,7 @@ st.markdown("""
     header, [data-testid="stHeader"] { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
+
 
 # 4. MAIN INTERFACE
 def draw_stat_card(label, value):
