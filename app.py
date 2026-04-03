@@ -333,70 +333,98 @@ st.set_page_config(page_title=" ", layout="wide", initial_sidebar_state="collaps
 
 # 2. UNIVERSAL CSS OVERRIDE (Kills Double Title + Restores Toggle + Hover Glow)
 
+import streamlit as st
+import time
+
+# 1. CORE SYSTEM CONFIG
+st.set_page_config(page_title="VOID OS", layout="wide", initial_sidebar_state="collapsed")
+
+# 2. THE UI ENGINE: SPACE-HUD INJECTION
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;400;900&display=swap');
 
-    /* 1. THE DEEP SPACE WRAPPER */
+    /* --- THE INFINITE VOID --- */
     .stApp {
         background: #000000 !important;
-        background-attachment: fixed;
+        /* Parallax Background Simulation */
+        background-image: 
+            radial-gradient(1.5px 1.5px at 10% 10%, #fff, transparent),
+            radial-gradient(2px 2px at 50% 50%, #00F2FF, transparent),
+            radial-gradient(1px 1px at 80% 20%, #FF0070, transparent),
+            radial-gradient(1.5px 1.5px at 30% 70%, #7000FF, transparent);
+        background-size: 800px 800px;
+        animation: parallax-drift 120s linear infinite;
     }
 
-    /* 2. THE GLASS TERMINAL CARD (Replacing standard blocks) */
-    [data-testid="stVerticalBlock"] > div:has(div.stat-card) {
-        background: rgba(0, 20, 30, 0.4) !important;
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
-        border: 1px solid rgba(0, 242, 255, 0.15);
-        border-radius: 2px; /* Sharp corners feel more "Industrial" */
-        padding: 10px;
-        box-shadow: inset 0 0 20px rgba(0, 242, 255, 0.05);
+    @keyframes parallax-drift {
+        0% { background-position: 0% 0%; }
+        100% { background-position: 100% 100%; }
     }
 
-    /* 3. NEON PULSE FOR ACTIVE MODULES */
+    /* --- HIDE DEFAULT ELEMENTS --- */
+    header, [data-testid="stHeader"], [data-testid="stDecoration"] {
+        visibility: hidden !important;
+        height: 0px !important;
+    }
+
+    /* --- THE HOLOGRAPHIC ORBITAL MAP (Sidebar Replacement) --- */
+    [data-testid="stSidebar"] {
+        background-color: rgba(0, 10, 20, 0.9) !important;
+        border-right: 1px solid rgba(0, 242, 255, 0.2) !important;
+        backdrop-filter: blur(25px) !important;
+    }
+
+    /* Target the sidebar radio buttons to look like Satellite Nodes */
+    div[data-testid="stSidebarUserContent"] .st-emotion-cache-1offfwp {
+        background: rgba(0, 242, 255, 0.05) !important;
+        border: 1px solid rgba(0, 242, 255, 0.2) !important;
+        border-radius: 0px !important; /* Industrial Sharp Edges */
+        margin-bottom: 10px !important;
+        transition: 0.3s all;
+    }
+
+    /* --- THE SCANNING DATA CARDS --- */
     .stat-card {
-        background: transparent !important;
-        border: none !important;
-        padding: 25px !important;
+        background: rgba(0, 20, 30, 0.4) !important;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(0, 242, 255, 0.15) !important;
+        padding: 30px !important;
         position: relative;
         overflow: hidden;
+        border-radius: 4px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     }
 
-    /* THE SCANNING EFFECT (The "Billion Dollar" Detail) */
+    /* THE SCANNING LASER BEAM */
     .stat-card::after {
         content: "";
         position: absolute;
         top: -100%; left: 0;
         width: 100%; height: 2px;
         background: linear-gradient(90deg, transparent, #00F2FF, transparent);
-        opacity: 0.3;
-        animation: scanning-pulse 4s linear infinite;
+        box-shadow: 0 0 15px #00F2FF;
+        opacity: 0.4;
+        animation: scan-line 5s linear infinite;
     }
 
-    @keyframes scanning-pulse {
+    @keyframes scan-line {
         0% { top: -10%; }
         100% { top: 110%; }
     }
 
-    /* 4. THE COMMANDER TOGGLE (Sidebar Fix) */
-    button[data-testid="stSidebarCollapsedControl"] {
-        background: rgba(0, 0, 0, 0.8) !important;
-        border: 1px solid #00F2FF !important;
-        box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
-        left: 20px !important;
-        top: 20px !important;
-    }
-
-    /* 5. HOLLOW HOVER BUTTONS */
+    /* --- COMMANDER BUTTONS (Hollow logic) --- */
     div.stButton > button {
         background: rgba(0, 242, 255, 0.02) !important;
         color: #00F2FF !important;
         border: 1px solid rgba(0, 242, 255, 0.3) !important;
         font-family: 'Syncopate', sans-serif;
         text-transform: uppercase;
-        letter-spacing: 4px;
-        transition: 0.3s all cubic-bezier(0.19, 1, 0.22, 1);
+        letter-spacing: 5px;
+        font-size: 0.7rem !important;
+        padding: 18px 30px !important;
+        transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        border-radius: 2px !important;
     }
 
     div.stButton > button:hover {
@@ -404,26 +432,67 @@ st.markdown("""
         background: rgba(0, 242, 255, 0.1) !important;
         box-shadow: 0 0 30px rgba(0, 242, 255, 0.4), inset 0 0 10px rgba(0, 242, 255, 0.2) !important;
         transform: translateY(-2px);
+        color: #fff !important;
     }
 
-    /* 6. DATA TEXT REFINEMENT */
+    /* --- DATA TEXT STYLES --- */
     .stat-value {
         font-family: 'Inter', sans-serif;
         font-weight: 900;
-        font-size: 2.8rem !important;
+        font-size: 2.5rem !important;
         color: #ffffff;
-        letter-spacing: -1px;
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
     }
 
     .stat-label {
         font-family: 'Syncopate', sans-serif;
         color: #00F2FF;
-        font-size: 0.65rem;
-        letter-spacing: 5px;
-        opacity: 0.7;
+        font-size: 0.6rem;
+        letter-spacing: 6px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+
+    /* --- THE NEON BREATH EFFECT --- */
+    .neon-breath {
+        animation: breath 4s ease-in-out infinite;
+    }
+
+    @keyframes breath {
+        0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 5px #00F2FF); }
+        50% { opacity: 1; filter: drop-shadow(0 0 15px #00F2FF); }
     }
 </style>
 """, unsafe_allow_html=True)
+
+# 3. NAVIGATION: THE SATELLITE ORBITAL MAP
+with st.sidebar:
+    st.markdown("### 🛰️ ORBITAL HUD")
+    # This logic matches your button structure but sits in the sidebar map
+    nav_selection = st.radio(
+        "SELECT MODULE",
+        ["🏠 DASHBOARD", "🛰️ GLOBAL PULSE", "⚔️ TREND DUEL", "🔨 NEURAL FORGE", "📊 ROI ENGINE"],
+        label_visibility="collapsed"
+    )
+    
+    st.markdown("---")
+    st.markdown("""
+        <div style='opacity: 0.5; font-size: 0.6rem; letter-spacing: 2px;'>
+            SYSTEM STATUS: SOVEREIGN<br>
+            UPLINK: ACTIVE<br>
+            LOCATION: INDIA VECTORS
+        </div>
+    """, unsafe_allow_html=True)
+
+# 4. MAIN INTERFACE
+def draw_stat_card(label, value):
+    st.markdown(f"""
+        <div class="stat-card">
+            <p class="stat-label">{label}</p>
+            <p class="stat-value">{value}</p>
+        </div>
+    """, unsafe_allow_html=True)
+
 
 def save_script_to_vault(title, content):
     # This function now has a safety check
