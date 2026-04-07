@@ -1142,130 +1142,166 @@ FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 import streamlit as st
 
-# --- 1. CONFIG ---
-st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
+# --- VOID OS GATEKEEPER UI ENGINE ---
+st.set_page_config(page_title="VOID OS | GATEKEEPER", layout="wide", page_icon="🌑")
 
-if 'ui_mode' not in st.session_state: 
-    st.session_state.ui_mode = 'login'
-
-def switch_ui(mode):
-    st.session_state.ui_mode = mode
-
-# --- 2. KINETIC ENGINE (RADIAL + SLIDE) ---
-st.markdown(f"""
+# --- CUSTOM CSS: ESTABLISHING THE LAYOUT ---
+st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap');
-
-    .stApp {{ background-color: #020617; }}
-
-    /* THE MAIN BOX - FORCED ALIGNMENT */
-    .void-container {{
-        position: relative;
+    /* 1. Global Esthetic (Dark Noir) */
+    .stApp {
+        background-color: #030303;
+        color: #FFFFFF;
+    }
+    
+    /* 2. The Login/Register Container (The Glass Box) */
+    .void-gateway-container {
+        display: flex;
         width: 1000px;
         height: 600px;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(0, 212, 255, 0.2);
-        border-radius: 30px;
         margin: 50px auto;
+        border: 2px solid #00D4FF; /* Neon Cyan Border */
+        border-radius: 15px;
         overflow: hidden;
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.2); /* Exterior Glow */
+    }
+    
+    /* 3. The Diagonal Split (Blue Plane/Left) */
+    .void-left-plane {
+        flex: 1;
+        background: linear-gradient(135deg, #001A1F 0%, #00D4FF33 100%);
         display: flex;
-        backdrop-filter: blur(20px);
-        box-shadow: 0 0 80px rgba(0,0,0,0.8);
-    }}
-
-    /* CIRCULAR PIVOT PLANE */
-    .circular-plane {{
-        position: absolute;
-        width: 150%;
-        height: 150%;
-        background: linear-gradient(135deg, #00d4ff 0%, #005f73 100%);
-        z-index: 10;
-        transition: all 1.2s cubic-bezier(0.7, 0, 0.3, 1);
-        /* Radius Pivot Point: Bottom Left of the plane */
-        transform-origin: bottom right;
-        top: -25%;
-    }}
-
-    /* ROTATION STATES */
-    .mode-login .circular-plane {{ 
-        transform: rotate(0deg); 
-        right: -50%; 
-    }}
-    .mode-signup .circular-plane {{ 
-        transform: rotate(95deg); 
-        right: 50%; 
-    }}
-
-    /* BUTTON/INPUT SLIDE-IN ANIMATIONS */
-    @keyframes slideInRight {{
-        0% {{ transform: translateX(120%); opacity: 0; }}
-        100% {{ transform: translateX(0); opacity: 1; }}
-    }}
-    @keyframes slideInLeft {{
-        0% {{ transform: translateX(-120%); opacity: 0; }}
-        100% {{ transform: translateX(0); opacity: 1; }}
-    }}
-
-    .login-ui-active {{ animation: slideInLeft 0.8s ease-out 0.6s forwards; opacity: 0; }}
-    .signup-ui-active {{ animation: slideInRight 0.8s ease-out 0.6s forwards; opacity: 0; }}
-
-    /* CLEANUP */
-    div.block-container {{ padding-top: 2rem; }}
-    header, footer {{ visibility: hidden; }}
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+        clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+    }
+    
+    /* 4. Input Area (Right) */
+    .void-right-input {
+        flex: 1;
+        background-color: #000;
+        padding: 60px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    /* Typography Styles */
+    .welcome-text {
+        color: white;
+        font-size: 3em;
+        letter-spacing: 5px;
+        line-height: 1.1;
+    }
+    .welcome-span {
+        color: #00D4FF;
+    }
+    
+    /* Custom Input Styling */
+    .stTextInput input {
+        background-color: #0C0C0C !important;
+        color: #FFFFFF !important;
+        border: 1px solid #222 !important;
+        border-radius: 5px !important;
+    }
+    .stTextInput label {
+        color: #888 !important;
+        letter-spacing: 2px;
+    }
+    
+    /* Action Buttons (Glowing Neon) */
+    .stButton>button {
+        background: linear-gradient(90deg, #00D4FF, #005F73) !important;
+        color: white !important;
+        border: none !important;
+        letter-spacing: 4px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    
+    .stButton>button:hover {
+        box-shadow: 0 0 15px #00D4FF;
+        transform: scale(1.02);
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. UI ARCHITECTURE ---
-mode_class = f"mode-{st.session_state.ui_mode}"
+# --- UI LOGIC CONTROLLER ---
+if 'form_mode' not in st.session_state:
+    st.session_state.form_mode = 'login'
 
-# Start the Box
-st.markdown(f'<div class="void-container {mode_class}">', unsafe_allow_html=True)
-st.markdown('<div class="circular-plane"></div>', unsafe_allow_html=True)
-
-# Use Columns to force Streamlit components INSIDE the box
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.session_state.ui_mode == 'login':
-        st.markdown('<div class="login-ui-active" style="padding: 60px;">', unsafe_allow_html=True)
-        st.markdown("<h1 style='font-family:Orbitron; color:#00d4ff;'>VOID OS</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='color:#888;'>DIRECTOR UPLINK</p>", unsafe_allow_html=True)
-        
-        # Inputs locked inside the box
-        st.text_input("ACCESS ID", placeholder="Enter ID...")
-        st.text_input("PASSKEY", type="password", placeholder="••••••••")
-        
-        if st.button("INITIATE LOGIN", use_container_width=True):
-            st.success("Synchronizing...")
-            
-        st.markdown("<br><p style='font-size:0.8em;'>New Identity Required?</p>", unsafe_allow_html=True)
-        st.button("SIGN UP", on_click=switch_ui, args=('signup',), use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+def switch_form():
+    if st.session_state.form_mode == 'login':
+        st.session_state.form_mode = 'signup'
     else:
-        # Keep left side empty for the blue plane
-        st.write("")
+        st.session_state.form_mode = 'login'
 
-with col2:
-    if st.session_state.ui_mode == 'signup':
-        st.markdown('<div class="signup-ui-active" style="padding: 60px;">', unsafe_allow_html=True)
-        st.markdown("<h2 style='font-family:Orbitron; color:#00d4ff;'>REGISTER</h2>", unsafe_allow_html=True)
-        
-        # Registration Inputs
-        st.text_input("NAME", key="s_name")
-        st.text_input("EMAIL", key="s_email")
-        st.text_input("NEW PASSKEY", type="password")
-        
-        if st.button("GENERATE OTP", use_container_width=True):
-            st.info("OTP Dispatched to secure terminal.")
-            
-        st.markdown("<br><p style='font-size:0.8em;'>Existing Identity?</p>", unsafe_allow_html=True)
-        st.button("BACK TO LOGIN", on_click=switch_ui, args=('login',), use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-    else:
-        # Keep right side empty for the blue plane
-        st.write("")
+# --- MAIN RENDER LOOP ---
+# System Header
+st.markdown("<h1 style='text-align: center; color: #00D4FF; letter-spacing: 10px; margin-bottom: 0;'>VOID OS</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #555; font-size: 0.8em; margin-bottom: 30px;'>INTELLIGENCE ACCESS PROTOCOL v4.0</p>", unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True) # End the Box
+# The Container Start
+st.markdown('<div class="void-gateway-container">', unsafe_allow_html=True)
+
+if st.session_state.form_mode == 'login':
+    # --- LOGIN MODE LAYOUT ---
+    
+    # Left Plane (Welcome)
+    st.markdown("""
+        <div class="void-left-plane">
+            <h2 class="welcome-text">WELCOME<br><span class="welcome-span">BACK!</span></h2>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Right Input Area
+    st.markdown('<div class="void-right-input">', unsafe_allow_html=True)
+    st.markdown("<h3>LOGIN</h3><br>", unsafe_allow_html=True)
+    
+    # Streamlit components are injected into the HTML div
+    director_id = st.text_input("DIRECTOR ID", key="l_id").lower().strip()
+    passkey = st.text_input("PASSKEY", type="password", key="l_pass")
+    
+    if st.button("INITIATE UPLINK", use_container_width=True):
+        st.info("Synchronizing protocols...")
+        
+    st.markdown("<br><p style='font-size:0.8em;'>New Identity Required?</p>", unsafe_allow_html=True)
+    st.button("SIGN UP", on_click=switch_form, use_container_width=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True) # End Right Area
+
+else:
+    # --- REGISTER MODE LAYOUT (Flipped functionality) ---
+    
+    # Left Plane (Static)
+    st.markdown("""
+        <div class="void-left-plane">
+            <h2 class="welcome-text">INITIALIZE<br><span class="welcome-span">IDENTITY</span></h2>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Right Input Area (Register)
+    st.markdown('<div class="void-right-input">', unsafe_allow_html=True)
+    st.markdown("<h3>REGISTER</h3><br>", unsafe_allow_html=True)
+    
+    full_name = st.text_input("FULL NAME", key="r_name")
+    email = st.text_input("SECURE EMAIL", key="r_e")
+    new_pass = st.text_input("CREATE PASSKEY", type="password", key="r_p")
+    
+    terms = st.checkbox("I agree to the VOID-OS Deployment protocols.")
+    
+    if st.button("GENERATING OTP", use_container_width=True, disabled=not terms):
+        st.success("Verification dispatched.")
+        
+    st.markdown("<br><p style='font-size:0.8em;'>Access already established?</p>", unsafe_allow_html=True)
+    st.button("BACK TO LOGIN", on_click=switch_form, use_container_width=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True) # End Right Area
+
+st.markdown('</div>', unsafe_allow_html=True) # The Container End
+
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
