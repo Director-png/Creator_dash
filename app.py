@@ -1145,134 +1145,158 @@ import datetime
 import requests
 import pandas as pd
 
-# --- VOID OS CONFIGURATION ---
-st.set_page_config(page_title="VOID OS | GATEKEEPER", layout="wide")
+# --- 1. CONFIG & STATE ---
+st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 
-# --- CUSTOM VOID CSS (As seen in reference video) ---
+if 'logged_in' not in st.session_state: st.session_state.logged_in = False
+if 'ui_mode' not in st.session_state: st.session_state.ui_mode = 'login'
+if 'otp_sent' not in st.session_state: st.session_state.otp_sent = False
+
+# VOID TIER MAPPING
+TIER_MAP = {"Pro": "Operative", "Elite": "Director", "Core": "Agency", "Free": "Free"}
+
+# --- 2. THE KINETIC ENGINE (CSS) ---
 st.markdown("""
 <style>
-    /* Main background */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
+
+    /* BACKGROUND */
     .stApp {
-        background-color: #050505;
-        color: #ffffff;
+        background: radial-gradient(circle at center, #0a192f 0%, #020617 100%);
+        font-family: 'Inter', sans-serif;
     }
-    
-    /* Login/Register Container */
-    .void-container {
-        display: flex;
-        height: 80vh;
-        border: 2px solid #00d4ff;
-        border-radius: 15px;
+
+    /* THE MAIN CONTAINER */
+    .gatekeeper-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        width: 1000px;
+        height: 600px;
+        margin: 50px auto;
+        position: relative;
         overflow: hidden;
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-    }
-    
-    /* Diagonal Split Logic */
-    .void-left {
-        flex: 1;
-        background: linear-gradient(135deg, #001a1f 0%, #00d4ff33 100%);
         display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 40px;
-        clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+        box-shadow: 0 50px 100px rgba(0,0,0,0.5);
     }
-    
-    .void-right {
-        flex: 1;
-        background: #000;
-        padding: 40px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+
+    /* THE BLUE PLANE (DIAGONAL ANIMATION) */
+    .blue-plane {
+        position: absolute;
+        top: 0;
+        width: 150%;
+        height: 100%;
+        background: linear-gradient(135deg, #00d4ff 0%, #005f73 100%);
+        transition: all 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+        z-index: 10;
+        clip-path: polygon(15% 0%, 100% 0%, 85% 100%, 0% 100%);
     }
-    
-    /* Input Styling */
+
+    /* POSITIONING STATES */
+    .mode-login .blue-plane { left: 50%; transform: translateX(0); }
+    .mode-signup .blue-plane { left: -100%; transform: translateX(0); }
+
+    /* CONTENT SLIDE ANIMATIONS */
+    @keyframes slideFromRight {
+        0% { transform: translateX(100px); opacity: 0; }
+        100% { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideFromLeft {
+        0% { transform: translateX(-100px); opacity: 0; }
+        100% { transform: translateX(0); opacity: 1; }
+    }
+
+    .form-content {
+        padding: 60px;
+        width: 50%;
+        z-index: 5;
+    }
+
+    .mode-login .login-fields { animation: slideFromLeft 0.8s ease-out forwards; delay: 0.4s; }
+    .mode-signup .signup-fields { animation: slideFromRight 0.8s ease-out forwards; delay: 0.4s; }
+
+    /* INPUT STYLING */
     .stTextInput input {
-        background-color: #111 !important;
-        color: #00d4ff !important;
-        border: 1px solid #333 !important;
-        border-radius: 5px !important;
-    }
-    
-    /* Glow Buttons */
-    .stButton>button {
-        background: linear-gradient(90deg, #00d4ff, #005f73) !important;
+        background: rgba(255,255,255,0.05) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
         color: white !important;
+        border-radius: 8px !important;
+    }
+
+    /* BUTTONS */
+    div.stButton > button {
+        background: #00d4ff !important;
+        color: #000 !important;
         border: none !important;
-        letter-spacing: 2px;
-        font-weight: bold;
-        transition: 0.3s;
+        font-weight: 700 !important;
+        border-radius: 8px !important;
+        padding: 10px 20px !important;
     }
-    
-    .stButton>button:hover {
-        box-shadow: 0 0 15px #00d4ff;
-        transform: scale(1.02);
-    }
+
+    header, footer {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-# --- SESSION STATE ---
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
-if 'otp_sent' not in st.session_state:
-    st.session_state.otp_sent = False
+# --- 3. LOGIC CONTROLLER ---
+def toggle_mode(target):
+    st.session_state.ui_mode = target
+    st.rerun()
 
-# --- UI LOGIC ---
 if not st.session_state.logged_in:
+    # Applying the state class to the outer container
+    mode_class = f"mode-{st.session_state.ui_mode}"
     
-    # Header
-    st.markdown("<h1 style='text-align: center; color: #00d4ff; letter-spacing: 8px; margin-bottom: 0;'>VOID OS</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #555; font-size: 0.8em; margin-bottom: 30px;'>INTELLIGENCE ACCESS PROTOCOL v4.0</p>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="gatekeeper-card {mode_class}">
+        <div class="blue-plane">
+            <div style="padding: 100px; color: white; text-align: center;">
+                <h1 style="font-size: 3em; letter-spacing: 5px;">VOID OS</h1>
+                <p style="opacity: 0.8;">INTELLIGENCE ACCESS PROTOCOL</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
 
-    mode = st.radio("SELECT PROTOCOL", ["🔑 LOGIN", "🛡️ IDENTITY INITIALIZATION"], horizontal=True, label_visibility="collapsed")
-
-    if mode == "🔑 LOGIN":
-        # Split Layout Simulation
-        col1, col2 = st.columns([1.2, 1])
+    # --- LEFT SIDE: LOGIN CONTENT ---
+    if st.session_state.ui_mode == 'login':
+        st.markdown('<div class="form-content login-fields">', unsafe_allow_html=True)
+        st.subheader("Welcome Back, Director")
+        email_in = st.text_input("UPLINK EMAIL", key="l_email")
+        pw_in = st.text_input("PASSKEY", type="password", key="l_pw")
         
-        with col1:
-            st.markdown("<div style='height: 300px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #000, #002b36); border-radius: 20px; border-left: 5px solid #00d4ff;'>", unsafe_allow_html=True)
-            st.markdown("<h2 style='color: white; letter-spacing: 3px;'>WELCOME<br><span style='color: #00d4ff;'>BACK!</span></h2>", unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-            
-        with col2:
-            st.subheader("DIRECTOR UPLINK")
-            email_in = st.text_input("EMAIL", key="gate_login_email").lower().strip()
-            pw_in = st.text_input("PASSKEY", type="password", key="gate_login_pw")
-            
-            if st.button("INITIATE UPLINK", use_container_width=True):
-                # Your existing authentication logic goes here
-                st.info("System checking credentials...")
-
-    elif mode == "🛡️ IDENTITY INITIALIZATION":
-        col1, col2 = st.columns([0.8, 1.2])
+        if st.button("INITIATE UPLINK", use_container_width=True):
+            # Your auth logic here
+            st.success("Verifying...")
         
-        with col1:
-            st.markdown("<div style='height: 400px; display: flex; align-items: center; justify-content: center; background: linear-gradient(225deg, #000, #002b36); border-radius: 20px; border-right: 5px solid #00d4ff;'>", unsafe_allow_html=True)
-            st.markdown("<h2 style='color: white; letter-spacing: 3px;'>NEW<br><span style='color: #00d4ff;'>IDENTITY</span></h2>", unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("<p style='font-size:0.8em; margin-top:20px;'>New Identity required?</p>", unsafe_allow_html=True)
+        if st.button("Initialize Registration"):
+            toggle_mode('signup')
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        with col2:
-            st.subheader("DATA CAPTURE")
-            c1, c2 = st.columns(2)
-            with c1:
-                n = st.text_input("FULL NAME")
-                e = st.text_input("EMAIL")
-            with c2:
-                p = st.text_input("PASSKEY", type="password")
-                sa = st.text_input("SECURITY KEY")
-            
-            legal_check = st.checkbox("Accept VOID-OS Deployment Protocols")
-            
-            if st.button("⚔️ GENERATE SECURE OTP", use_container_width=True, disabled=not legal_check):
-                # Your existing registration/OTP logic goes here
-                st.success("OTP Dispatched to " + e)
+    # --- RIGHT SIDE: SIGNUP CONTENT ---
+    else:
+        # Space filler for the left side when signup is active
+        st.markdown('<div class="form-content"></div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="form-content signup-fields">', unsafe_allow_html=True)
+        st.subheader("Initialize Identity")
+        n = st.text_input("FULL NAME", key="r_n")
+        e = st.text_input("SECURE EMAIL", key="r_e")
+        p = st.text_input("CREATE PASSKEY", type="password", key="r_p")
+        
+        if st.button("⚔️ GENERATE OTP", use_container_width=True):
+            # Your registration logic here
+            st.info("OTP Transmitted.")
+        
+        st.markdown("<p style='font-size:0.8em; margin-top:20px;'>Already have access?</p>", unsafe_allow_html=True)
+        if st.button("Return to Login"):
+            toggle_mode('login')
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 else:
-    st.success(f"Director {st.session_state.get('user_name', 'Authorized')} Online.")
-
+    st.title("Welcome to the Neural Forge, Director.")
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
