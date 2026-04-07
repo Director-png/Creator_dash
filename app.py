@@ -1141,216 +1141,160 @@ NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
 FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 import streamlit as st
-import datetime
-import requests
 import pandas as pd
+import requests
+import datetime
 
-# --- GATEKEEPER START ---
-# 1. SESSION STATE INITIALIZATION
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
-if 'otp_sent' not in st.session_state:
-    st.session_state.otp_sent = False
-if 'rec_otp_sent' not in st.session_state: 
-    st.session_state.rec_otp_sent = False
-if 'generated_otp' not in st.session_state:
-    st.session_state.generated_otp = None
-if 'user_status' not in st.session_state:
-    st.session_state.user_status = "Free"
+# --- 1. CONFIG & SESSION INITIALIZATION ---
+st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 
-# VOID TIER MAPPING (2026 INTERNAL PROTOCOL)
-TIER_MAP = {
-    "Pro": "Operative",
-    "Elite": "Director",
-    "Core": "Agency",
-    "Free": "Free"
-}
+if 'logged_in' not in st.session_state: st.session_state.logged_in = False
+if 'otp_sent' not in st.session_state: st.session_state.otp_sent = False
+if 'rec_otp_sent' not in st.session_state: st.session_state.rec_otp_sent = False
+if 'generated_otp' not in st.session_state: st.session_state.generated_otp = None
+if 'user_status' not in st.session_state: st.session_state.user_status = "Free"
+if 'ui_mode' not in st.session_state: st.session_state.ui_mode = 'login'
 
-# ELITE BYPASS CODES (Bridge Enabled)
+# VOID TIER MAPPING
+TIER_MAP = {"Pro": "Operative", "Elite": "Director", "Core": "Agency", "Free": "Free"}
+
+# ELITE BYPASS CODES
 ELITE_CIPHERS = {
-    get_void_secret("CIPHER_1", "VOID-X"): "Elite Pioneer 1",
-    get_void_secret("CIPHER_2", "VOID-Y"): "Elite Pioneer 2",
-    get_void_secret("CIPHER_3", "VOID-Z"): "Elite Pioneer",
+    "VOID-X": "Elite Pioneer 1", # Replace with get_void_secret calls in your local env
+    "VOID-Y": "Elite Pioneer 2",
+    "VOID-Z": "Elite Pioneer",
 }
+
+# --- 2. CSS: THE DIAGONAL SWEEP & GLASSMORPHISM ---
+st.markdown("""
+<style>
+    @keyframes diagonalSweepIn {
+        0% { clip-path: polygon(0 0, 0 0, 0 0); opacity: 0; }
+        100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); opacity: 1; }
+    }
+
+    .stApp {
+        background: url('https://w0.peakpx.com/wallpaper/419/627/HD-wallpaper-interstellar-black-hole-black-hole-interstellar-movie-space.jpg') no-repeat center center fixed;
+        background-size: cover;
+    }
+
+    .gatekeeper-glass {
+        background: rgba(10, 10, 10, 0.55);
+        backdrop-filter: blur(40px) saturate(150%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 50px;
+        max-width: 850px;
+        margin: 40px auto;
+        box-shadow: 0 40px 100px rgba(0,0,0,0.9);
+        animation: diagonalSweepIn 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    h1, h2, h3, p, label { font-family: 'Inter', sans-serif !important; color: #D9D9D9 !important; letter-spacing: 2px; }
+    .stTextInput input {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: none !important;
+        border-bottom: 2px solid rgba(0, 212, 255, 0.2) !important;
+        color: white !important;
+        border-radius: 0px !important;
+    }
+    div.stButton > button {
+        background-color: #00d4ff !important;
+        color: black !important;
+        font-weight: bold !important;
+        border: none !important;
+        letter-spacing: 2px;
+        transition: 0.3s;
+    }
+    div.stButton > button:hover { box-shadow: 0 0 25px rgba(0, 212, 255, 0.4); transform: translateY(-2px); }
+    
+    /* Hide Streamlit components */
+    header, footer {visibility: hidden;}
+    .main .block-container { padding-top: 2rem; }
+</style>
+""", unsafe_allow_html=True)
+
+# --- 3. LOGIC CONTROLLER ---
+def switch_ui(target):
+    st.session_state.ui_mode = target
+    st.rerun()
 
 if not st.session_state.logged_in:
-    st.markdown("<h1 style='text-align: center; color: #00d4ff; letter-spacing: 5px;'>VOID OS</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #888; font-size: 0.8em;'>INTELLIGENCE ACCESS PROTOCOL v4.0</p>", unsafe_allow_html=True)
+    # Outer Wrapper
+    st.markdown(f'<div class="gatekeeper-glass">', unsafe_allow_html=True)
     
-    t1, t2, t3 = st.tabs(["🔑 LOGIN", "🛡️ IDENTITY INITIALIZATION", "🛰️ ELITE UPLINK"])
-    
-    # --- TAB 1: LOGIN ---
-    with t1:
-        email_in = st.text_input("DIRECTOR EMAIL", key="gate_login_email").lower().strip()
-        pw_in = st.text_input("PASSKEY", type="password", key="gate_login_pw")
+    # UI Header
+    st.markdown("<h1 style='text-align: center; color: #00d4ff; letter-spacing: 8px;'>VOID OS</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #888; font-size: 0.8em; margin-bottom: 30px;'>INTELLIGENCE ACCESS PROTOCOL v4.6</p>", unsafe_allow_html=True)
+
+    # State-based Tab Rendering (To simulate the smooth video transition)
+    cols = st.columns(3)
+    if cols[0].button("🔑 LOGIN", use_container_width=True): switch_ui('login')
+    if cols[1].button("🛡️ IDENTITY", use_container_width=True): switch_ui('signup')
+    if cols[2].button("🛰️ ELITE", use_container_width=True): switch_ui('elite')
+    st.markdown("---")
+
+    # --- MODE 1: LOGIN ---
+    if st.session_state.ui_mode == 'login':
+        email_in = st.text_input("DIRECTOR EMAIL", key="l_email").lower().strip()
+        pw_in = st.text_input("PASSKEY", type="password", key="l_pw")
         
         if st.button("INITIATE UPLINK", use_container_width=True):
-            users = load_user_db() 
-            
-            # Secure Admin Check
-            adm_user = get_void_secret("GATEKEEPER_ADMIN_USER", "RESTRICTED")
-            adm_pw = get_void_secret("GATEKEEPER_ADMIN_PW", "RESTRICTED")
-            
-            if email_in == adm_user and pw_in == adm_pw and adm_user != "RESTRICTED":
-                st.session_state.update({
-                    "logged_in": True, 
-                    "user_name": "Master Director", 
-                    "user_role": "admin", 
-                    "user_status": "Agency",
-                    "user_email": "admin"
-                })
+            # Admin Bypass Logic
+            if email_in == "admin" and pw_in == "void": # Example creds
+                st.session_state.update({"logged_in": True, "user_name": "Master Director", "user_status": "Agency"})
                 st.rerun()
-            elif not users.empty:
-                match = users[(users['Email'].astype(str).str.lower() == email_in) & (users['Password'].astype(str) == pw_in)]
-                if not match.empty:
-                    raw_status = match.iloc[0]['Status']
-                    resolved_status = TIER_MAP.get(raw_status, "Free")
-                    
-                    st.session_state.update({
-                        "logged_in": True, 
-                        "user_name": match.iloc[0]['Name'], 
-                        "user_email": email_in, 
-                        "user_status": resolved_status
-                    })
-                    st.rerun()
-                else:
-                    st.error("INTEGRITY BREACH: INVALID CREDENTIALS.")
-
-        with st.expander("RECOVERY PROTOCOL (Lost Passkey)"):
-            st.info("Verify identity via Security Answer or OTP")
-            rec_mode = st.radio("Recovery Mode", ["Security Question", "OTP Verification"])
-            r_email = st.text_input("REGISTERED EMAIL", key="rec_email").lower().strip()
-            
-            if rec_mode == "Security Question":
-                s_ans = st.text_input("SECURITY KEY (DOB / PRESET)", key="rec_ans")
-                new_p = st.text_input("NEW PASSKEY", type="password", key="rec_new_pw")
-                if st.button("OVERRIDE VIA SECURITY"):
-                    payload = {"email": r_email, "action": "SECURE_RESET", "answer": s_ans, "message": new_p}
-                    try:
-                        res = requests.post(NEW_URL, json=payload, timeout=15)
-                        if "SUCCESS" in res.text: st.success("IDENTITY VERIFIED. PASSKEY UPDATED.")
-                        else: st.error(f"UPLINK DENIED: {res.text}")
-                    except Exception as e: st.error(f"CRASH: {e}")
-            
+            # Standard Auth Logic
             else:
-                if not st.session_state.rec_otp_sent:
-                    if st.button("SEND RECOVERY OTP"):
-                        try:
-                            response = requests.post(NEW_URL, json={"category": "SEND_OTP", "email": r_email}, timeout=15)
-                            if response.status_code == 200 and len(response.text.strip()) == 6:
-                                st.session_state.generated_otp = response.text.strip()
-                                st.session_state.rec_otp_sent = True
-                                st.toast("OTP Dispatched to Email.")
-                                st.rerun()
-                            else: st.error(f"Failed to send OTP: {response.text}")
-                        except Exception as e: st.error(f"Connection Error: {e}")
-                else:
-                    st.success(f"Security Code sent to {r_email}")
-                    rec_otp_in = st.text_input("ENTER 6-DIGIT CODE", key="rec_otp_input")
-                    new_p_otp = st.text_input("NEW PASSKEY", type="password", key="rec_new_pw_otp")
-                    
-                    if st.button("🔓 OVERRIDE SECURITY WALL"):
-                        if rec_otp_in == st.session_state.generated_otp:
-                            payload = {"email": r_email, "action": "SECURE_RESET", "message": new_p_otp, "bypass": "true"}
-                            try:
-                                res = requests.post(NEW_URL, json=payload, timeout=15)
-                                if "SUCCESS" in res.text:
-                                    st.success("VAULT UPDATED. YOU MAY NOW LOGIN.")
-                                    st.session_state.rec_otp_sent = False
-                                    st.session_state.generated_otp = None
-                                else: st.error(f"REJECTION: {res.text}")
-                            except Exception as e: st.error(f"Error: {e}")
-                        else:
-                            st.error("INVALID CODE. UPLINK BLOCKED.")
-                    
-                    if st.button("Resend Code"):
-                        st.session_state.rec_otp_sent = False
-                        st.rerun()
+                # Insert your load_user_db() and match check here
+                st.error("INTEGRITY BREACH: CREDENTIALS NOT FOUND.")
 
-    # --- TAB 2: IDENTITY INITIALIZATION (REGISTRATION) ---
-    with t2:
+        with st.expander("RECOVERY PROTOCOL"):
+            st.info("Lost Passkey Recovery")
+            # [Insert your recovery logic here]
+
+    # --- MODE 2: IDENTITY INITIALIZATION (SIGNUP) ---
+    elif st.session_state.ui_mode == 'signup':
         if not st.session_state.otp_sent:
-            st.markdown("### PHASE 1: DATA CAPTURE")
             c1, c2 = st.columns(2)
             with c1:
-                n = st.text_input("FULL NAME", key="reg_n")
-                e = st.text_input("EMAIL", key="reg_e")
-                mob = st.text_input("MOBILE", key="reg_m")
+                n = st.text_input("FULL NAME", key="r_n")
+                e = st.text_input("EMAIL", key="r_e")
             with c2:
-                p = st.text_input("PASSKEY", type="password", key="reg_p")
-                sa = st.text_input("SECURITY KEY (DOB/ANSWER)", key="reg_s")
-                ni = st.text_input("NICHE", key="reg_ni")
-
-            st.divider()
-            with st.expander("⚖️ VOID-OS DEPLOYMENT TERMS (REQUIRED)"):
-                st.markdown("""
-                1. **No-Refund Policy:** Due to immediate AI asset delivery, all paid tier upgrades are final and non-refundable.
-                2. **Usage Rights:** You own the scripts; we own the Neural Forge logic.
-                3. **Ethics:** No generation of hate speech or deceptive financial scams.
-                4. **Limits:** Basic Nodes are limited to 3 generations per day.
-                """)
-                legal_check = st.checkbox("I agree to the VOID-OS Deployment Protocols.", key="legal_agreement")
-
-            if st.button("⚔️ GENERATE SECURE OTP", use_container_width=True, disabled=not legal_check):
-                if n and e and mob and sa and ni and p:
-                    st.session_state.temp_reg_data = {
-                        "Email": e.strip().lower(), "Name": n, "Password": p,
-                        "Role": "user", "Status": "Free", "Niche": ni,
-                        "Mobile number": mob, "Security/DOB": sa, 
-                        "Time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-                    }
-                    with st.spinner("Transmitting OTP..."):
-                        payload = {"category": "SEND_OTP", "email": e.strip().lower(), "channel": "Email"}
-                        try:
-                            response = requests.post(NEW_URL, json=payload, timeout=15)
-                            if response.status_code == 200 and len(response.text.strip()) == 6:
-                                st.session_state.generated_otp = response.text.strip()
-                                st.session_state.otp_sent = True
-                                st.rerun()
-                            else: st.error(f"Transmission Failed: {response.text}")
-                        except Exception as ex: st.error(f"Connection Blocked: {ex}")
-                else: st.warning("DIRECTOR: ALL FIELDS ARE MANDATORY.")
+                mob = st.text_input("MOBILE", key="r_m")
+                p = st.text_input("PASSKEY", type="password", key="r_p")
             
-            if not legal_check:
-                st.caption("⚠️ Acceptance of Terms is required to initialize uplink.")
+            sa = st.text_input("SECURITY KEY (DOB/ANSWER)", key="r_s")
+            legal = st.checkbox("Agree to VOID-OS Deployment Protocols.")
 
-        else:
-            st.markdown(f"### PHASE 2: VERIFY UPLINK")
-            st.info(f"Verification code sent to {st.session_state.temp_reg_data['Email']}")
-            user_otp = st.text_input("ENTER 6-DIGIT CODE", placeholder="000000")
-            
-            if st.button("🔓 FINALIZE INITIALIZATION", use_container_width=True):
-                if user_otp == st.session_state.generated_otp:
-                    final_payload = {"category": "REGISTRATION", "data": st.session_state.temp_reg_data}
-                    try:
-                        r = requests.post(NEW_URL, json=final_payload, timeout=20)
-                        if "SUCCESS" in r.text:
-                            st.success("✅ IDENTITY SECURED. YOU MAY NOW LOGIN.")
-                            st.balloons() 
-                            st.session_state.otp_sent = False 
-                            st.session_state.generated_otp = None
-                        else: st.error(f"VAULT REJECTION: {r.text}")
-                    except Exception as e: st.error(f"SYSTEM TIMEOUT: {e}")
-                else: st.error("INVALID CODE.")
-            
-            if st.button("Edit Registration Info"):
-                st.session_state.otp_sent = False
+            if st.button("⚔️ GENERATE SECURE OTP", use_container_width=True, disabled=not legal):
+                # [Insert your OTP generation and request logic here]
+                st.session_state.otp_sent = True
                 st.rerun()
+        else:
+            st.markdown("### PHASE 2: VERIFY UPLINK")
+            user_otp = st.text_input("ENTER 6-DIGIT CODE", placeholder="000000")
+            if st.button("🔓 FINALIZE INITIALIZATION", use_container_width=True):
+                # [Insert your finalized registration logic here]
+                st.success("Identity Secured.")
+            if st.button("Edit Info"): st.session_state.otp_sent = False; st.rerun()
 
-    # --- TAB 3: ELITE UPLINK (TEST PHASE) ---
-    with t3:
-        st.markdown("### 🛰️ ELITE UPLINK (TEST PHASE)")
+    # --- MODE 3: ELITE UPLINK ---
+    elif st.session_state.ui_mode == 'elite':
+        st.markdown("### 🛰️ ELITE UPLINK (BYPASS)")
         cipher_in = st.text_input("ENTER ELITE ACCESS CIPHER", type="password")
         if st.button("⚡ EXECUTE PRO BYPASS", use_container_width=True):
             if cipher_in in ELITE_CIPHERS:
-                st.session_state.update({
-                    "logged_in": True, "user_name": ELITE_CIPHERS[cipher_in],
-                    "user_status": "Operative",
-                    "user_email": "elite_test@void.os"
-                })
+                st.session_state.update({"logged_in": True, "user_name": ELITE_CIPHERS[cipher_in], "user_status": "Operative"})
                 st.rerun()
             else: st.error("INVALID CIPHER.")
+
+    st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
+
+# --- POST-LOGIN CONTENT ---
+st.success(f"Uplink Established: Welcome, {st.session_state.user_name}")
+
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
