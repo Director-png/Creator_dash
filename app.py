@@ -1142,125 +1142,128 @@ FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 import streamlit as st
 
-# --- 1. CORE ENGINE SETUP ---
-st.set_page_config(page_title="VOID OS", layout="wide")
+# --- 1. SESSION INITIALIZATION ---
+st.set_page_config(page_title="VOID OS", layout="centered") # 'centered' helps lock the box
 
 if 'ui_mode' not in st.session_state:
     st.session_state.ui_mode = 'login'
 
-def trigger_transition(target):
-    st.session_state.ui_mode = target
+def switch_view(mode):
+    st.session_state.ui_mode = mode
 
-# --- 2. THE DUAL-LAYER CSS (FORCING COMPONENTS INSIDE) ---
+# --- 2. DYNAMIC DIMENSION ENGINE (CSS) ---
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap');
 
-    .stApp {{ background-color: #010409; overflow: hidden; }}
+    .stApp {{ background-color: #010409; }}
 
-    /* THE BOX (LAYER 0) */
-    .void-shell {{
-        position: fixed;
-        width: 1000px;
-        height: 600px;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
+    /* THE ADAPTIVE BOX (Wraps around inputs) */
+    .void-box {{
+        position: relative;
+        max-width: 900px;
+        min-height: 550px;
+        margin: 40px auto;
         border: 2px solid #00d4ff;
         border-radius: 20px;
-        background: rgba(10, 25, 47, 0.6);
-        backdrop-filter: blur(25px);
+        background: rgba(10, 25, 47, 0.5);
+        backdrop-filter: blur(20px);
         overflow: hidden;
+        display: flex;
         z-index: 1;
-        box-shadow: 0 0 50px rgba(0, 212, 255, 0.2);
+        box-shadow: 0 0 40px rgba(0, 212, 255, 0.1);
     }}
 
-    /* THE INVERSE DIAGONAL PLANE (LAYER 1) */
-    .kinetic-plane {{
+    /* INVERSE CIRCULAR PLANE */
+    /* It is now relative to the .void-box only */
+    .shutter-plane {{
         position: absolute;
-        width: 200%;
-        height: 200%;
+        width: 150%;
+        height: 150%;
         background: linear-gradient(135deg, #00d4ff 0%, #005f73 100%);
-        transition: all 1.2s cubic-bezier(0.7, 0, 0.3, 1);
-        transform-origin: center center;
+        transition: all 1s cubic-bezier(0.7, 0, 0.3, 1);
         z-index: 2;
+        pointer-events: none;
     }}
 
-    /* ANIMATION LOGIC: Inverting the Diagonal toward the Left */
-    /* Login State: Plane is on the Right */
-    .mode-login .kinetic-plane {{ 
-        transform: rotate(0deg) skewX(-15deg); 
-        right: -110%; 
-        top: -50%; 
+    /* POSITIONING LOGIC */
+    /* Login: Plane is on the right, slanted left */
+    .mode-login .shutter-plane {{
+        top: -25%;
+        right: -85%;
+        transform: rotate(0deg) skewX(-10deg);
     }}
-    /* Signup State: Plane Inverts and covers the Left */
-    .mode-signup .kinetic-plane {{ 
-        transform: rotate(180deg) skewX(15deg); 
-        right: 10%; 
-        top: -50%; 
-    }}
-
-    /* THE INTERACTIVE GHOST (LAYER 2 - FORCING WIDGETS ON TOP) */
-    .widget-overlay {{
-        position: fixed;
-        width: 1000px;
-        height: 600px;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 10;
-        pointer-events: none; /* Allows transparency for non-button areas */
+    
+    /* Signup: Plane rotates and inverses to cover the left */
+    .mode-signup .shutter-plane {{
+        top: -25%;
+        right: 35%;
+        transform: rotate(180deg) skewX(10deg);
     }}
 
-    .form-box {{
-        pointer-events: auto; /* Re-enables clicks for inputs */
-        width: 450px;
-        padding: 60px;
+    /* ENSURING TEXT IS ON TOP */
+    .st-inside-fix {{
+        position: relative;
+        z-index: 10; /* Higher than shutter-plane */
+        padding: 40px;
+        width: 100%;
+    }}
+
+    /* Input Styling to match the photo */
+    .stTextInput input {{
+        background: rgba(0,0,0,0.3) !important;
+        border: 1px solid #333 !important;
+        color: white !important;
     }}
 
     header, footer {{ visibility: hidden; }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. RENDERING THE VISUAL SHELL ---
-st.markdown(f"""
-<div class="void-shell mode-{st.session_state.ui_mode}">
-    <div class="kinetic-plane"></div>
-</div>
-""", unsafe_allow_html=True)
+# --- 3. THE ARCHITECTURE ---
+mode_class = f"mode-{st.session_state.ui_mode}"
 
-# --- 4. RENDERING THE INTERACTIVE WIDGETS (FIXED POSITION) ---
-st.markdown('<div class="widget-overlay">', unsafe_allow_html=True)
+# Start the box wrapper
+st.markdown(f'<div class="void-box {mode_class}">', unsafe_allow_html=True)
+st.markdown('<div class="shutter-plane"></div>', unsafe_allow_html=True)
 
-col1, col2 = st.columns(2)
+# The Interactive content
+# We use standard columns which will now stay INSIDE the .void-box
+main_col1, main_col2 = st.columns(2)
 
-with col1:
+with main_col1:
     if st.session_state.ui_mode == 'login':
-        st.markdown('<div class="form-box">', unsafe_allow_html=True)
-        st.markdown("<h1 style='font-family:Orbitron; color:#00d4ff;'>LOGIN</h1>", unsafe_allow_html=True)
-        st.text_input("DIRECTOR ID", key="l_user", placeholder="Enter Identity...")
-        st.text_input("PASSKEY", key="l_pass", type="password", placeholder="••••••••")
-        if st.button("INITIATE UPLINK", use_container_width=True):
-            st.toast("Synchronizing...")
-        st.markdown("<p style='font-size:0.8em; margin-top:20px; color:#888;'>New identity required?</p>", unsafe_allow_html=True)
-        st.button("SIGN UP", on_click=trigger_transition, args=('signup',), use_container_width=True)
+        st.markdown('<div class="st-inside-fix">', unsafe_allow_html=True)
+        st.markdown("<h2 style='font-family:Orbitron; color:#00d4ff;'>UPLINK</h2>", unsafe_allow_html=True)
+        st.text_input("DIRECTOR ID", key="l_user")
+        st.text_input("PASSKEY", type="password", key="l_pass")
+        if st.button("INITIATE", use_container_width=True):
+            st.toast("Accessing...")
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.button("NEW IDENTITY?", on_click=switch_view, args=('signup',), use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.empty() # Space for the inverted plane
 
-with col2:
+with main_col2:
     if st.session_state.ui_mode == 'signup':
-        st.markdown('<div class="form-box">', unsafe_allow_html=True)
-        st.markdown("<h1 style='font-family:Orbitron; color:#00d4ff;'>REGISTER</h1>", unsafe_allow_html=True)
-        st.text_input("FULL NAME", key="r_name")
-        st.text_input("EMAIL", key="r_mail")
-        st.text_input("NEW PASSKEY", key="r_pass", type="password")
-        if st.button("GENERATE IDENTITY", use_container_width=True):
-            st.info("Protocol Initiated.")
-        st.markdown("<p style='font-size:0.8em; margin-top:20px; color:#888;'>Existing operative?</p>", unsafe_allow_html=True)
-        st.button("BACK TO LOGIN", on_click=trigger_transition, args=('login',), use_container_width=True)
+        st.markdown('<div class="st-inside-fix">', unsafe_allow_html=True)
+        st.markdown("<h2 style='font-family:Orbitron; color:#00d4ff;'>REGISTER</h2>", unsafe_allow_html=True)
+        st.text_input("NAME", key="r_name")
+        st.text_input("EMAIL", key="r_email")
+        st.text_input("PASSKEY", type="password", key="r_pass")
+        if st.button("CREATE", use_container_width=True):
+            st.info("Generating Identity...")
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.button("BACK TO LOGIN", on_click=switch_view, args=('login',), use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.empty() # Space for the plane in login mode
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True) # Close .void-box
 
+# --- 4. THE RULES (Floating Below the Box) ---
+st.markdown("<br><center style='color:#444; font-size:0.8em; letter-spacing:2px;'>VOID-OS SECURE PROTOCOL v8.0</center>", unsafe_allow_html=True)
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
