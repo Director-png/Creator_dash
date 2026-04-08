@@ -1150,141 +1150,128 @@ if 'ui_mode' not in st.session_state: st.session_state.ui_mode = 'login'
 def toggle_mode(target):
     st.session_state.ui_mode = target
 
-# --- 2. HUD INTERFACE (2026 CORE) ---
-st.markdown("""
+# --- 2. THE HORIZON ENGINE (CSS) ---
+st.markdown(f"""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Inter:wght@200;400;700&display=swap');
 
-    .stApp {
-        background-color: #00080f;
-        background-image: radial-gradient(circle at 50% 50%, #001a2e 0%, #000000 100%);
-        font-family: 'Share Tech Mono', monospace;
-    }
+    .stApp {{
+        background-color: #000;
+        font-family: 'Inter', sans-serif;
+    }}
 
-    /* THE HUD FRAME */
-    .hud-frame {
-        position: relative;
-        width: 800px;
-        height: 550px;
-        margin: 50px auto;
-        border: 1px solid rgba(0, 212, 255, 0.2);
-        background: rgba(0, 10, 20, 0.8);
-        border-radius: 4px;
-        overflow: hidden;
-        box-shadow: inset 0 0 30px rgba(0, 212, 255, 0.1);
-    }
+    /* BACKGROUND WATERMARK */
+    .bg-text {{
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        font-family: 'Orbitron', sans-serif;
+        font-size: 25vw;
+        color: rgba(0, 212, 255, 0.03);
+        z-index: 0;
+        pointer-events: none;
+        letter-spacing: 50px;
+    }}
 
-    /* THE SCANNER LINE ANIMATION */
-    .hud-frame::after {
-        content: "";
-        position: absolute;
-        top: -100%;
+    /* THE HORIZON LINE */
+    .horizon-line {{
+        position: fixed;
         left: 0;
         width: 100%;
-        height: 20%;
-        background: linear-gradient(to bottom, transparent, rgba(0, 212, 255, 0.2), transparent);
-        animation: scan 4s linear infinite;
+        height: 2px;
+        background: #00d4ff;
+        box-shadow: 0 0 20px #00d4ff, 0 0 40px #00d4ff;
+        transition: all 1s cubic-bezier(0.8, 0, 0.2, 1);
         z-index: 5;
-        pointer-events: none;
-    }
+    }}
 
-    @keyframes scan {
-        0% { top: -20%; }
-        100% { top: 120%; }
-    }
+    /* LINE POSITIONING BASED ON MODE */
+    .line-login {{ top: 30vh; }}
+    .line-signup {{ top: 70vh; }}
 
-    /* CORNER BRACKETS */
-    .corner {
-        position: absolute;
-        width: 30px; height: 30px;
-        border: 3px solid #00d4ff;
+    /* FORM POSITIONING */
+    .content-wrapper {{
+        position: relative;
         z-index: 10;
-    }
-    .top-l { top: 10px; left: 10px; border-right: none; border-bottom: none; }
-    .top-r { top: 10px; right: 10px; border-left: none; border-bottom: none; }
-    .bot-l { bottom: 10px; left: 10px; border-right: none; border-top: none; }
-    .bot-r { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+        padding-top: 10vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }}
 
-    /* HUD TYPOGRAPHY */
-    .hud-header {
-        font-family: 'Orbitron', sans-serif;
-        color: #00d4ff;
-        text-align: center;
-        letter-spacing: 12px;
-        margin-top: 40px;
-        text-shadow: 0 0 10px #00d4ff;
-    }
+    /* WIDGET REFINEMENT */
+    .stTextInput input {{
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 1px solid rgba(0, 212, 255, 0.3) !important;
+        color: white !important;
+        font-size: 1.5em !important;
+        text-align: center !important;
+        transition: 0.5s;
+    }}
+    .stTextInput input:focus {{
+        border-bottom: 1px solid #00d4ff !important;
+        box-shadow: none !important;
+    }}
 
-    /* WIDGET STYLING: HUD THEME */
-    .stTextInput input {
-        background: rgba(0, 212, 255, 0.05) !important;
-        border: 1px solid rgba(0, 212, 255, 0.3) !important;
-        color: #00d4ff !important;
-        border-radius: 0px !important;
-        text-transform: uppercase;
-    }
-
-    div.stButton > button {
+    div.stButton > button {{
         background: transparent !important;
         color: #00d4ff !important;
         border: 1px solid #00d4ff !important;
-        border-radius: 0px !important;
-        font-family: 'Orbitron', sans-serif !important;
-        transition: 0.3s;
-    }
+        font-family: 'Orbitron' !important;
+        letter-spacing: 3px !important;
+        padding: 15px 40px !important;
+        margin-top: 30px;
+    }}
     
-    div.stButton > button:hover {
-        background: rgba(0, 212, 255, 0.2) !important;
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
-    }
+    div.stButton > button:hover {{
+        background: #00d4ff !important;
+        color: black !important;
+        box-shadow: 0 0 30px #00d4ff;
+    }}
 
-    header, footer { visibility: hidden; }
+    header, footer {{ visibility: hidden; }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. THE HUB RENDERER ---
-st.markdown("""
-<div class="hud-frame">
-    <div class="corner top-l"></div>
-    <div class="corner top-r"></div>
-    <div class="corner bot-l"></div>
-    <div class="corner bot-r"></div>
-    <h1 class="hud-header">VOID-OS</h1>
-    <p style="text-align:center; color:#00d4ff; font-size:0.7em; letter-spacing:4px; opacity:0.5;">IDENTITY SCAN REQUIRED</p>
-""", unsafe_allow_html=True)
+# --- 3. THE INTERFACE ---
 
-# Using a standard Streamlit layout inside our HUD frame
+# Background & Horizon Line
+st.markdown('<div class="bg-text">VOID</div>', unsafe_allow_html=True)
+line_pos = "line-login" if st.session_state.ui_mode == 'login' else "line-signup"
+st.markdown(f'<div class="horizon-line {line_pos}"></div>', unsafe_allow_html=True)
+
+# Form Content
+st.markdown('<div class="content-wrapper">', unsafe_allow_html=True)
+
 col1, col2, col3 = st.columns([1, 2, 1])
 
 with col2:
-    st.write("##")
     if st.session_state.ui_mode == 'login':
-        st.markdown("<p style='color:#00d4ff; font-size:0.8em;'>[ SECURE_LOGIN_v2.6 ]</p>", unsafe_allow_html=True)
-        st.text_input("USER_ID", placeholder="DIRECTOR_01")
-        st.text_input("PASS_HASH", type="password", placeholder="********")
+        st.markdown("<h1 style='text-align:center; color:white; font-weight:200; letter-spacing:10px;'>UPLINK</h1>", unsafe_allow_html=True)
+        st.text_input("IDENTITY", placeholder="DIRECTOR_EMAIL", label_visibility="collapsed")
+        st.text_input("PASSKEY", type="password", placeholder="PASSWORD", label_visibility="collapsed")
         
-        if st.button("EXECUTE UPLINK", use_container_width=True):
-            st.toast("Accessing Neural Forge...")
+        if st.button("AUTHORIZE", use_container_width=True):
+            st.toast("Accessing...")
         
-        st.markdown("---")
-        st.button("INITIALIZE REGISTRATION", on_click=toggle_mode, args=('signup',), use_container_width=True)
-    
+        st.write("##")
+        st.button("NEW IDENTITY PROTOCOL", on_click=toggle_mode, args=('signup',), use_container_width=True)
+
     else:
-        st.markdown("<p style='color:#00d4ff; font-size:0.8em;'>[ IDENTITY_CREATION ]</p>", unsafe_allow_html=True)
-        st.text_input("FULL_NAME")
-        st.text_input("SECURE_EMAIL")
-        st.text_input("GENERATE_KEY", type="password")
+        st.write("###") # Shift down for signup
+        st.markdown("<h1 style='text-align:center; color:white; font-weight:200; letter-spacing:10px;'>INITIALIZE</h1>", unsafe_allow_html=True)
+        st.text_input("NAME", placeholder="FULL NAME", label_visibility="collapsed")
+        st.text_input("EMAIL", placeholder="SECURE EMAIL", label_visibility="collapsed")
+        st.text_input("KEY", type="password", placeholder="NEW PASSKEY", label_visibility="collapsed")
         
-        if st.button("CREATE SIGNATURE", use_container_width=True):
-            st.info("Identity Generated.")
+        if st.button("GENERATE SIGNATURE", use_container_width=True):
+            st.info("Protocol Initiated.")
             
-        st.markdown("---")
-        st.button("BACK TO UPLINK", on_click=toggle_mode, args=('login',), use_container_width=True)
+        st.write("##")
+        st.button("RETURN TO UPLINK", on_click=toggle_mode, args=('login',), use_container_width=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
-
-# Status Footer
-st.markdown("<p style='text-align:center; color:#00d4ff; font-family:monospace; font-size:0.7em; margin-top:20px;'>SYSTEM_STATUS: STABLE | ENCRYPTION: AES-256 | OPERATIVE: ACTIVE</p>", unsafe_allow_html=True)
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
