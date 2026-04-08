@@ -1142,88 +1142,98 @@ FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 import streamlit as st
 
-# --- 1. CONFIG & STATE ---
+# --- 1. CONFIG ---
 st.set_page_config(page_title="VOID OS", layout="wide")
 
 if 'ui_mode' not in st.session_state: st.session_state.ui_mode = 'login'
 
-def flip_vault(target):
+def toggle_mode(target):
     st.session_state.ui_mode = target
 
-# --- 2. MONOLITH ARCHITECTURE (CSS) ---
+# --- 2. THE 3D ENGINE (CSS) ---
 st.markdown(f"""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@200;400;700&family=Orbitron:wght@900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=JetBrains+Mono:wght@400;700&display=swap');
 
     .stApp {{
-        background: #000;
-        background-image: 
-            linear-gradient(rgba(0, 212, 255, 0.02) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 212, 255, 0.02) 1px, transparent 1px);
-        background-size: 50px 50px;
-        font-family: 'JetBrains Mono', monospace;
+        background: #020408;
+        background-image: radial-gradient(circle at 50% 50%, #001a2e 0%, #000000 100%);
+        overflow: hidden;
     }}
 
-    /* THE CENTER ANCHOR */
-    .monolith-wrapper {{
+    /* THE 3D PERSPECTIVE WRAPPER */
+    .perspective-stage {{
+        perspective: 1000px;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 85vh;
-        perspective: 1500px;
+        height: 90vh;
+        width: 100%;
     }}
 
-    /* THE 3D SERVER COLUMN */
-    .monolith {{
+    /* THE 3D SLAB */
+    .iso-slab {{
         position: relative;
-        width: 450px;
-        height: 650px;
-        background: #050505;
+        width: 500px;
+        background: #0a0a0a;
+        padding: 60px;
         border: 1px solid #111;
-        border-left: 4px solid #00d4ff;
-        box-shadow: -20px 0 50px rgba(0, 212, 255, 0.1);
-        padding: 40px;
-        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        flex-direction: column;
+        border-radius: 4px;
+        transform: rotateX(10deg) rotateY(-10deg);
+        box-shadow: 
+            20px 20px 60px rgba(0,0,0,0.8),
+            -1px -1px 0px rgba(0, 212, 255, 0.3),
+            5px 5px 15px rgba(0, 212, 255, 0.05);
+        transition: transform 0.6s cubic-bezier(0.2, 0, 0.2, 1);
     }}
 
-    /* MODE GLINT EFFECT */
-    .monolith::before {{
-        content: "";
+    .iso-slab:hover {{
+        transform: rotateX(0deg) rotateY(0deg) scale(1.02);
+        box-shadow: 0 40px 80px rgba(0,0,0,0.9);
+        border-color: rgba(0, 212, 255, 0.5);
+    }}
+
+    /* NEON INDICATORS */
+    .power-light {{
         position: absolute;
-        top: 0; left: -4px;
-        width: 4px; height: 100%;
+        top: 20px; right: 20px;
+        width: 8px; height: 8px;
         background: #00d4ff;
-        box-shadow: 0 0 20px #00d4ff;
-        opacity: 0.8;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #00d4ff;
     }}
 
-    /* 2026 TYPE STYLING */
-    .status-bit {{
-        color: #00d4ff;
-        font-size: 0.7em;
+    /* TERMINAL TYPOGRAPHY */
+    .stTextInput label {{ 
+        color: #00d4ff !important; 
+        font-family: 'JetBrains Mono' !important;
+        font-size: 0.8em !important;
         letter-spacing: 2px;
-        margin-bottom: 20px;
     }}
-
-    .stTextInput label {{ color: #444 !important; font-size: 0.7em !important; }}
     .stTextInput input {{
-        background: #0a0a0a !important;
-        border: 1px solid #111 !important;
-        color: #eee !important;
+        background: #000 !important;
+        border: 1px solid #222 !important;
+        color: #fff !important;
         border-radius: 0px !important;
         font-family: 'JetBrains Mono' !important;
     }}
 
     div.stButton > button {{
+        background: transparent !important;
+        color: #00d4ff !important;
+        border: 1px solid #00d4ff !important;
+        border-radius: 0px !important;
+        font-family: 'Orbitron' !important;
+        font-weight: 900 !important;
+        text-transform: uppercase;
+        margin-top: 20px;
+        width: 100%;
+    }}
+    
+    div.stButton > button:hover {{
         background: #00d4ff !important;
         color: #000 !important;
-        border-radius: 0px !important;
-        font-weight: 700 !important;
-        letter-spacing: 2px !important;
-        border: none !important;
-        margin-top: 20px;
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
     }}
 
     header, footer {{ visibility: hidden; }}
@@ -1232,49 +1242,42 @@ st.markdown(f"""
 
 # --- 3. THE INTERFACE ---
 
-st.markdown('<div class="monolith-wrapper">', unsafe_allow_html=True)
-st.markdown('<div class="monolith">', unsafe_allow_html=True)
+st.markdown('<div class="perspective-stage">', unsafe_allow_html=True)
 
-# Header Section
+# The 3D Slab
+st.markdown('<div class="iso-slab">', unsafe_allow_html=True)
+st.markdown('<div class="power-light"></div>', unsafe_allow_html=True)
+
+# Branding
 st.markdown(f"""
-    <div class="status-bit">SYSTEM: ACTIVE // MODE: {st.session_state.ui_mode.upper()}</div>
-    <h1 style='font-family:Orbitron; font-size:2.5em; color:white; margin:0;'>VOID</h1>
-    <p style='color:#333; font-size:0.8em; margin-bottom:40px;'>OPERATIVE_COMMAND_CENTER</p>
+    <h1 style='font-family:Orbitron; color:white; font-size:2.5em; margin:0; letter-spacing:8px;'>VOID</h1>
+    <p style='color:#333; font-family:monospace; font-size:0.7em; margin-bottom:40px;'>TERMINAL_ACCESS_POINT v.4</p>
 """, unsafe_allow_html=True)
 
-# Logic Blocks
+# Forms
 if st.session_state.ui_mode == 'login':
-    st.text_input("UPLINK_ID", placeholder="DIRECTOR_X")
-    st.text_input("PASSKEY", type="password")
+    st.text_input("UPLINK_USER")
+    st.text_input("SECURE_KEY", type="password")
     
-    if st.button("AUTHORIZE_SESSION", use_container_width=True):
-        st.toast("Handshake Initiated...")
+    if st.button("EXECUTE"):
+        st.toast("Handshake...")
     
     st.write("---")
-    st.button("INITIALIZE_NEW_ID", on_click=flip_vault, args=('signup',), use_container_width=True)
+    st.button("NEW_IDENTITY", on_click=toggle_mode, args=('signup',))
 
 else:
     st.text_input("SUBJECT_NAME")
-    st.text_input("CONTACT_UPLINK")
-    st.text_input("SECURE_KEY", type="password")
+    st.text_input("UPLINK_MAIL")
+    st.text_input("GEN_PASSKEY", type="password")
     
-    if st.button("GENERATE_IDENTITY", use_container_width=True):
-        st.info("Identity Matrix Synced.")
+    if st.button("INITIALIZE"):
+        st.info("Protocol Ready.")
         
     st.write("---")
-    st.button("RETURN_TO_UPLINK", on_click=flip_vault, args=('login',), use_container_width=True)
+    st.button("RETURN_TO_LOGIN", on_click=toggle_mode, args=('login',))
 
-st.markdown('</div>', unsafe_allow_html=True) # End Monolith
-st.markdown('</div>', unsafe_allow_html=True) # End Wrapper
-
-# Footer Data
-st.markdown("""
-    <div style='position:fixed; bottom:20px; left:20px; color:#222; font-size:0.6em; line-height:1.5;'>
-        LATENCY: 12ms<br>
-        ENCRYPTION: SH-512<br>
-        NODE: VOID_MAIN_GATE
-    </div>
-""", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True) # End Slab
+st.markdown('</div>', unsafe_allow_html=True) # End Stage
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
