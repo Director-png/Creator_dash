@@ -1141,143 +1141,133 @@ NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
 FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 import streamlit as st
-import time
 
-# --- 1. CORE ENGINE CONFIG ---
+# --- 1. CORE ENGINE ---
 st.set_page_config(page_title="VOID OS", layout="wide")
 
-# Persistent State Management
-if 'vault_mode' not in st.session_state:
-    st.session_state.vault_mode = 'login'
-if 'access_granted' not in st.session_state:
-    st.session_state.access_granted = False
+if 'ui_mode' not in st.session_state:
+    st.session_state.ui_mode = 'login'
 
-def update_vault(target):
-    st.session_state.vault_mode = target
+def trigger_gate(mode):
+    st.session_state.ui_mode = mode
 
-# --- 2. THE PRECISION ARCHITECTURE (CSS) ---
-# I have adjusted the blue panel dimensions to be narrower and more precise.
+# --- 2. THE HARD-WIRED ARCHITECTURE (CSS) ---
+# I have tightened the blue panel dimensions and locked the input coordinates.
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400&display=swap');
     
     .stApp {{ background-color: #010409; }}
 
-    /* MASTER VAULT - LOCKED COORDS */
-    .master-vault {{
+    /* THE VAULT - FIXED DIMENSIONS */
+    .vault-shell {{
         position: relative;
-        width: 850px;
-        height: 520px;
-        margin: 60px auto;
+        width: 800px;
+        height: 500px;
+        margin: 80px auto;
         border: 2px solid #00d4ff;
         border-radius: 20px;
-        background: rgba(10, 25, 47, 0.4);
-        backdrop-filter: blur(25px);
+        background: rgba(10, 25, 47, 0.5);
+        backdrop-filter: blur(20px);
         overflow: hidden;
         z-index: 1;
         box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
     }}
 
-    /* RECALIBRATED BLUE PANEL (Narrower & Focused) */
-    .blue-panel {{
+    /* THE BLUE PANEL (RESIZED & SHARPENED) */
+    .shutter-panel {{
         position: absolute;
-        width: 140%; /* Reduced width for sharper diagonal */
-        height: 140%;
+        width: 130%; /* Narrower for the specific diagonal look */
+        height: 130%;
         background: linear-gradient(135deg, #00d4ff 0%, #005f73 100%);
-        transition: all 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+        transition: all 1.1s cubic-bezier(0.7, 0, 0.3, 1);
         transform-origin: bottom right;
         z-index: 2;
         pointer-events: none;
     }}
 
-    /* KINETIC POSITIONING */
-    .mode-login .blue-panel {{ 
-        transform: rotate(0deg); 
-        right: -95%; /* Shifts more to the edge for better visibility */
-        top: -40%; 
-    }}
-    .mode-signup .blue-panel {{ 
-        transform: rotate(108deg); 
-        right: 48%; 
-        top: -40%; 
-    }}
+    /* KINETIC ROTATION */
+    .mode-login .shutter-panel {{ transform: rotate(0deg); right: -85%; top: -25%; }}
+    .mode-signup .shutter-panel {{ transform: rotate(105deg); right: 45%; top: -25%; }}
 
-    /* INPUT ANCHORING */
-    .interaction-zone {{
+    /* THE INPUT ANCHOR (FORCES EVERYTHING INSIDE) */
+    .interaction-overlay {{
         position: absolute;
         top: 0; left: 0;
         width: 100%; height: 100%;
         z-index: 10;
         display: flex;
-        padding: 40px;
     }}
 
-    .form-column {{
-        width: 50%;
+    /* We use fixed widths for the form columns to prevent spilling */
+    .form-box {{
+        width: 400px; /* Exactly half the vault-shell width */
+        padding: 50px;
         display: flex;
         flex-direction: column;
         justify-content: center;
     }}
 
-    /* VISUAL REFINEMENT */
     header, footer {{ visibility: hidden; }}
-    .stTextInput input {{ background: rgba(0,0,0,0.5) !important; color: white !important; border: 1px solid #222 !important; }}
-    .stButton>button {{
+    .stTextInput input {{ background: rgba(0,0,0,0.4) !important; color: white !important; border: 1px solid #222 !important; }}
+    
+    div.stButton > button {{
         background: linear-gradient(90deg, #00d4ff, #005f73) !important;
         color: white !important;
-        font-weight: bold !important;
         border: none !important;
         letter-spacing: 1px;
     }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. RENDERING ENGINE ---
-mode_class = f"mode-{st.session_state.vault_mode}"
+# --- 3. RENDERING THE VAULT ---
+mode_class = f"mode-{st.session_state.ui_mode}"
 
-# Base Shell & Blue Panel
-st.markdown(f"""
-<div class="master-vault {mode_class}">
-    <div class="blue-panel"></div>
-</div>
-""", unsafe_allow_html=True)
+# Root Container
+st.markdown(f'<div class="vault-shell {mode_class}">', unsafe_allow_html=True)
+st.markdown('<div class="shutter-panel"></div>', unsafe_allow_html=True)
 
-# Interaction Layer
-st.markdown('<div class="interaction-zone">', unsafe_allow_html=True)
+# The Interactive Overlay (Now hard-coded to stay inside)
+st.markdown('<div class="interaction-overlay">', unsafe_allow_html=True)
 
+# We use columns ONLY for spacing; the .form-box CSS handles the containment.
 col1, col2 = st.columns(2)
 
 with col1:
-    if st.session_state.vault_mode == 'login':
-        st.markdown("<h2 style='font-family:Orbitron; color:#00d4ff;'>LOGIN</h2>", unsafe_allow_html=True)
-        user = st.text_input("ID", key="l_id", placeholder="Director Identity...")
-        pw = st.text_input("PASS", type="password", key="l_pass")
+    if st.session_state.ui_mode == 'login':
+        st.markdown('<div class="form-box">', unsafe_allow_html=True)
+        st.markdown("<h2 style='font-family:Orbitron; color:#00d4ff; margin-bottom:0;'>LOGIN</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#777; font-size:0.7em; margin-bottom:20px;'>DIRECTOR ACCESS REQUIRED</p>", unsafe_allow_html=True)
         
-        # Fixing the "Refresh" feel: Logic happens without a full page hard-reset
-        if st.button("INITIATE"):
-            with st.spinner("Verifying..."):
-                time.sleep(1) # Simulated auth prevents the "flicker"
-                st.session_state.access_granted = True
-                st.toast("Uplink Established.")
+        st.text_input("ID", key="l_id", placeholder="Director Hash...")
+        st.text_input("KEY", type="password", key="l_key", placeholder="••••••••")
+        
+        if st.button("INITIATE UPLINK"):
+            st.toast("Verifying...")
         
         st.write("")
-        st.button("NEW IDENTITY?", on_click=update_vault, args=('signup',), use_container_width=True)
+        st.button("SIGN UP", on_click=trigger_gate, args=('signup',), use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    if st.session_state.vault_mode == 'signup':
-        st.markdown("<h2 style='font-family:Orbitron; color:#00d4ff;'>REGISTER</h2>", unsafe_allow_html=True)
+    if st.session_state.ui_mode == 'signup':
+        st.markdown('<div class="form-box">', unsafe_allow_html=True)
+        st.markdown("<h2 style='font-family:Orbitron; color:#00d4ff; margin-bottom:0;'>REGISTER</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#777; font-size:0.7em; margin-bottom:20px;'>IDENTITY CREATION PROTOCOL</p>", unsafe_allow_html=True)
+        
         st.text_input("NAME", key="r_name")
-        st.text_input("EMAIL", key="r_mail")
-        st.text_input("CREATE PASS", type="password", key="r_pass")
+        st.text_input("EMAIL", key="r_email")
+        st.text_input("KEY", type="password", key="r_key")
         
         if st.button("GENERATE"):
-            st.info("Identity Protocols Initialized.")
-        
+            st.info("Protocol Initiated.")
+            
         st.write("")
-        st.button("BACK TO LOGIN", on_click=update_vault, args=('login',), use_container_width=True)
+        st.button("BACK", on_click=trigger_gate, args=('login',), use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True) # End Interaction
-st.markdown('</div>', unsafe_allow_html=True) # End Master Vault
+st.markdown('</div>', unsafe_allow_html=True) # End overlay
+st.markdown('</div>', unsafe_allow_html=True) # End shell
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
