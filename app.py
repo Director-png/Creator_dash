@@ -1143,107 +1143,148 @@ FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 import streamlit as st
 
 # --- 1. CONFIG ---
-st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="centered")
+st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 
 if 'ui_mode' not in st.session_state: st.session_state.ui_mode = 'login'
 
-# --- 2. NEURAL INTERFACE (CSS) ---
+def toggle_mode(target):
+    st.session_state.ui_mode = target
+
+# --- 2. HUD INTERFACE (2026 CORE) ---
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@300;400&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
 
     .stApp {
-        background: radial-gradient(circle at top right, #001f3f 0%, #020617 100%);
-        font-family: 'Inter', sans-serif;
+        background-color: #00080f;
+        background-image: radial-gradient(circle at 50% 50%, #001a2e 0%, #000000 100%);
+        font-family: 'Share Tech Mono', monospace;
     }
 
-    /* THE HUB CARD */
-    .neural-card {
-        background: rgba(10, 25, 47, 0.7);
-        backdrop-filter: blur(20px);
-        border: 2px solid #00d4ff;
-        border-radius: 30px;
-        padding: 50px;
-        box-shadow: 0 0 50px rgba(0, 212, 255, 0.15), inset 0 0 20px rgba(0, 212, 255, 0.1);
-        text-align: center;
-        margin-top: 20px;
+    /* THE HUD FRAME */
+    .hud-frame {
+        position: relative;
+        width: 800px;
+        height: 550px;
+        margin: 50px auto;
+        border: 1px solid rgba(0, 212, 255, 0.2);
+        background: rgba(0, 10, 20, 0.8);
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: inset 0 0 30px rgba(0, 212, 255, 0.1);
     }
 
-    .logo-text {
+    /* THE SCANNER LINE ANIMATION */
+    .hud-frame::after {
+        content: "";
+        position: absolute;
+        top: -100%;
+        left: 0;
+        width: 100%;
+        height: 20%;
+        background: linear-gradient(to bottom, transparent, rgba(0, 212, 255, 0.2), transparent);
+        animation: scan 4s linear infinite;
+        z-index: 5;
+        pointer-events: none;
+    }
+
+    @keyframes scan {
+        0% { top: -20%; }
+        100% { top: 120%; }
+    }
+
+    /* CORNER BRACKETS */
+    .corner {
+        position: absolute;
+        width: 30px; height: 30px;
+        border: 3px solid #00d4ff;
+        z-index: 10;
+    }
+    .top-l { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+    .top-r { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+    .bot-l { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+    .bot-r { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+    /* HUD TYPOGRAPHY */
+    .hud-header {
         font-family: 'Orbitron', sans-serif;
-        font-size: 2.5em;
-        letter-spacing: 10px;
         color: #00d4ff;
-        text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
-        margin-bottom: 5px;
+        text-align: center;
+        letter-spacing: 12px;
+        margin-top: 40px;
+        text-shadow: 0 0 10px #00d4ff;
     }
 
-    /* WIDGET STYLING */
+    /* WIDGET STYLING: HUD THEME */
     .stTextInput input {
-        background: rgba(0, 0, 0, 0.4) !important;
-        border: 1px solid #1a3a5a !important;
-        color: white !important;
-        text-align: center !important;
-        border-radius: 12px !important;
+        background: rgba(0, 212, 255, 0.05) !important;
+        border: 1px solid rgba(0, 212, 255, 0.3) !important;
+        color: #00d4ff !important;
+        border-radius: 0px !important;
+        text-transform: uppercase;
     }
 
     div.stButton > button {
-        background: linear-gradient(90deg, #00d4ff, #005f73) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 12px !important;
-        padding: 10px 24px !important;
-        font-weight: 700 !important;
-        width: 100%;
-        transition: 0.4s ease;
+        background: transparent !important;
+        color: #00d4ff !important;
+        border: 1px solid #00d4ff !important;
+        border-radius: 0px !important;
+        font-family: 'Orbitron', sans-serif !important;
+        transition: 0.3s;
     }
     
     div.stButton > button:hover {
-        box-shadow: 0 0 25px #00d4ff;
-        transform: translateY(-2px);
+        background: rgba(0, 212, 255, 0.2) !important;
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
     }
 
     header, footer { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. THE HUB ENGINE ---
-def switch_mode(target):
-    st.session_state.ui_mode = target
+# --- 3. THE HUB RENDERER ---
+st.markdown("""
+<div class="hud-frame">
+    <div class="corner top-l"></div>
+    <div class="corner top-r"></div>
+    <div class="corner bot-l"></div>
+    <div class="corner bot-r"></div>
+    <h1 class="hud-header">VOID-OS</h1>
+    <p style="text-align:center; color:#00d4ff; font-size:0.7em; letter-spacing:4px; opacity:0.5;">IDENTITY SCAN REQUIRED</p>
+""", unsafe_allow_html=True)
 
-# Main Interface container
-with st.container():
-    # Visual Header
-    st.markdown('<div class="neural-card">', unsafe_allow_html=True)
-    st.markdown('<h1 class="logo-text">VOID-OS</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="color:#00d4ff; opacity:0.6; font-size:0.8em; letter-spacing:3px;">NEURAL GATEKEEPER v3.0</p>', unsafe_allow_html=True)
-    st.write("---")
+# Using a standard Streamlit layout inside our HUD frame
+col1, col2, col3 = st.columns([1, 2, 1])
 
-    # Content Area
+with col2:
+    st.write("##")
     if st.session_state.ui_mode == 'login':
-        st.subheader("Uplink Requested")
-        email = st.text_input("IDENTITY", placeholder="DIRECTOR@VOID.IO")
-        code = st.text_input("PASSKEY", type="password", placeholder="••••••••")
+        st.markdown("<p style='color:#00d4ff; font-size:0.8em;'>[ SECURE_LOGIN_v2.6 ]</p>", unsafe_allow_html=True)
+        st.text_input("USER_ID", placeholder="DIRECTOR_01")
+        st.text_input("PASS_HASH", type="password", placeholder="********")
         
-        col1, col2 = st.columns([2, 1])
-        with col1:
-            if st.button("INITIATE UPLINK"):
-                st.toast("Synchronizing...")
-        with col2:
-            st.button("NEW ID", on_click=switch_mode, args=('signup',))
-
+        if st.button("EXECUTE UPLINK", use_container_width=True):
+            st.toast("Accessing Neural Forge...")
+        
+        st.markdown("---")
+        st.button("INITIALIZE REGISTRATION", on_click=toggle_mode, args=('signup',), use_container_width=True)
+    
     else:
-        st.subheader("Initialize Identity")
-        name = st.text_input("FULL NAME")
-        mail = st.text_input("SECURE EMAIL")
-        key = st.text_input("CREATE PASSKEY", type="password")
+        st.markdown("<p style='color:#00d4ff; font-size:0.8em;'>[ IDENTITY_CREATION ]</p>", unsafe_allow_html=True)
+        st.text_input("FULL_NAME")
+        st.text_input("SECURE_EMAIL")
+        st.text_input("GENERATE_KEY", type="password")
         
-        if st.button("⚔️ GENERATE NEURAL SIGNATURE"):
-            st.info("Protocol Initiated.")
-        
-        st.button("BACK TO UPLINK", on_click=switch_mode, args=('login',))
+        if st.button("CREATE SIGNATURE", use_container_width=True):
+            st.info("Identity Generated.")
+            
+        st.markdown("---")
+        st.button("BACK TO UPLINK", on_click=toggle_mode, args=('login',), use_container_width=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Status Footer
+st.markdown("<p style='text-align:center; color:#00d4ff; font-family:monospace; font-size:0.7em; margin-top:20px;'>SYSTEM_STATUS: STABLE | ENCRYPTION: AES-256 | OPERATIVE: ACTIVE</p>", unsafe_allow_html=True)
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
