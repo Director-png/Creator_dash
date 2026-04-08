@@ -1147,83 +1147,99 @@ st.set_page_config(page_title="VOID OS", layout="wide")
 
 if 'ui_mode' not in st.session_state: st.session_state.ui_mode = 'login'
 
-def toggle_mode(target):
+def switch_mode(target):
     st.session_state.ui_mode = target
 
-# --- 2. THE TACTICAL ENGINE (CSS) ---
+# --- 2. LUXURY ENGINE (CSS) ---
 st.markdown(f"""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&family=Orbitron:wght@900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300&family=Montserrat:wght@100;400;700&display=swap');
 
     .stApp {{
-        background-color: #050505;
-        font-family: 'JetBrains Mono', monospace;
-    }}
-
-    /* THE MAIN GATE CONTAINER */
-    .gate-wrapper {{
-        display: flex;
-        width: 900px;
-        height: 550px;
-        margin: 60px auto;
-        border: 1px solid #111;
-        box-shadow: 0 0 40px rgba(0,0,0,0.9);
-        background: #080808;
-    }}
-
-    /* LEFT SIDEBAR: THE BRANDING SHARD */
-    .sidebar-shard {{
-        width: 300px;
         background: #000;
-        border-right: 2px solid #00d4ff;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 40px 30px;
-        box-shadow: 10px 0 30px rgba(0, 212, 255, 0.05);
+        background-image: radial-gradient(circle at 50% -20%, #0a192f 0%, #000 60%);
     }}
 
-    .system-label {{
-        color: #00d4ff;
-        font-size: 0.7rem;
-        letter-spacing: 3px;
-    }}
-
-    /* RIGHT PANE: THE INPUTS */
-    .input-pane {{
-        flex-grow: 1;
-        padding: 60px;
+    /* THE OBSIDIAN CONTAINER */
+    .gate-root {{
         display: flex;
-        flex-direction: column;
         justify-content: center;
+        align-items: center;
+        height: 90vh;
     }}
 
-    /* INPUT THEMING */
-    .stTextInput label {{ color: #444 !important; font-size: 0.8rem !important; }}
+    .obsidian-card {{
+        position: relative;
+        width: 500px;
+        padding: 80px 60px;
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(50px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 40px;
+        box-shadow: 
+            0 50px 100px rgba(0,0,0,0.9),
+            inset 0 0 20px rgba(255,255,255,0.02);
+        text-align: center;
+    }}
+
+    /* PREMIUM TYPOGRAPHY */
+    .brand-title {{
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 100;
+        letter-spacing: 25px;
+        color: #fff;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }}
+
+    .brand-subtitle {{
+        font-family: 'Cormorant Garamond', serif;
+        font-style: italic;
+        color: #d4af37; /* Champagne Gold */
+        font-size: 0.9em;
+        opacity: 0.8;
+        letter-spacing: 3px;
+        margin-bottom: 50px;
+    }}
+
+    /* LUXURY INPUTS */
     .stTextInput input {{
-        background: #000 !important;
-        border: 1px solid #1a1a1a !important;
-        border-left: 3px solid #00d4ff !important;
-        color: #fff !important;
-        border-radius: 0px !important;
-        padding: 12px !important;
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        color: white !important;
+        font-family: 'Montserrat', sans-serif !important;
+        font-weight: 400 !important;
+        text-align: center !important;
+        font-size: 1.1em !important;
+        padding: 15px 0 !important;
+        transition: 0.6s cubic-bezier(0.2, 0, 0.2, 1);
     }}
 
+    .stTextInput input:focus {{
+        border-bottom: 1px solid #d4af37 !important;
+        letter-spacing: 2px;
+    }}
+
+    /* BUTTONS: THE SIGNATURE ACTION */
     div.stButton > button {{
-        background: transparent !important;
-        color: #00d4ff !important;
-        border: 1px solid #00d4ff !important;
-        border-radius: 0px !important;
-        font-family: 'Orbitron' !important;
-        font-weight: 900 !important;
-        margin-top: 10px;
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #fff !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 100px !important;
+        font-family: 'Montserrat', sans-serif !important;
+        font-weight: 700 !important;
+        letter-spacing: 4px !important;
+        padding: 15px 0 !important;
         width: 100%;
-        transition: 0.3s;
+        margin-top: 40px;
+        transition: 0.5s;
     }}
 
     div.stButton > button:hover {{
-        background: rgba(0, 212, 255, 0.1) !important;
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        background: #fff !important;
+        color: #000 !important;
+        box-shadow: 0 0 40px rgba(255,255,255,0.2);
     }}
 
     header, footer {{ visibility: hidden; }}
@@ -1232,52 +1248,37 @@ st.markdown(f"""
 
 # --- 3. THE INTERFACE ---
 
-st.markdown('<div class="gate-wrapper">', unsafe_allow_html=True)
+st.markdown('<div class="gate-root">', unsafe_allow_html=True)
+st.markdown('<div class="obsidian-card">', unsafe_allow_html=True)
 
-# Side Shard
-st.markdown(f"""
-    <div class="sidebar-shard">
-        <div>
-            <div class="system-label">STATUS: ACTIVE</div>
-            <h1 style='font-family:Orbitron; color:white; font-size:3rem; margin:0;'>VOID</h1>
-            <p style='color:#333; font-size:0.7rem; margin-top:10px;'>OPERATIVE NODE 001</p>
-        </div>
-        <div style='color:#00d4ff; font-size:0.6rem; line-height:1.8; opacity:0.5;'>
-            ENCRYPTION: RSA-4096<br>
-            CORE: STABLE<br>
-            SESSION: {st.session_state.ui_mode.upper()}
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+# Branding Section
+st.markdown('<h1 class="brand-title">VOID</h1>', unsafe_allow_html=True)
+st.markdown('<p class="brand-subtitle">The Sovereign Operative OS</p>', unsafe_allow_html=True)
 
-# Input Pane
-st.markdown('<div class="input-pane">', unsafe_allow_html=True)
-
+# The Vault Logic
 if st.session_state.ui_mode == 'login':
-    st.markdown("<h2 style='color:white; font-weight:800; margin-bottom:30px;'>UPLINK</h2>", unsafe_allow_html=True)
-    st.text_input("DIRECTOR_ID")
-    st.text_input("PASSKEY", type="password")
+    st.text_input("UPLINK_IDENTITY", placeholder="ENTER IDENTIFIER", label_visibility="collapsed")
+    st.text_input("SECURE_ACCESS", type="password", placeholder="ENTER PASSKEY", label_visibility="collapsed")
     
-    if st.button("AUTHORIZE"):
-        st.toast("Accessing...")
+    if st.button("INITIALIZE"):
+        st.toast("Authenticating Signature...")
     
     st.write("---")
-    st.button("INITIALIZE REGISTRATION", on_click=toggle_mode, args=('signup',))
+    st.button("REQUEST NEW IDENTITY", on_click=switch_mode, args=('signup',))
 
 else:
-    st.markdown("<h2 style='color:white; font-weight:800; margin-bottom:30px;'>INITIALIZE</h2>", unsafe_allow_html=True)
-    st.text_input("FULL_NAME")
-    st.text_input("UPLINK_EMAIL")
-    st.text_input("SET_PASSKEY", type="password")
+    st.text_input("SUBJECT_NAME", placeholder="FULL NAME", label_visibility="collapsed")
+    st.text_input("UPLINK_MAIL", placeholder="SECURE EMAIL", label_visibility="collapsed")
+    st.text_input("SET_PASSKEY", type="password", placeholder="CREATE PASSKEY", label_visibility="collapsed")
     
-    if st.button("EXECUTE"):
+    if st.button("GENERATE"):
         st.info("Protocol Initiated.")
         
     st.write("---")
-    st.button("BACK TO UPLINK", on_click=toggle_mode, args=('login',))
+    st.button("RETURN TO UPLINK", on_click=switch_mode, args=('login',))
 
-st.markdown('</div>', unsafe_allow_html=True) # End Input Pane
-st.markdown('</div>', unsafe_allow_html=True) # End Wrapper
+st.markdown('</div>', unsafe_allow_html=True) # End Card
+st.markdown('</div>', unsafe_allow_html=True) # End Root
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
