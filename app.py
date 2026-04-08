@@ -1142,147 +1142,108 @@ FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 import streamlit as st
 
-# --- 1. CONFIG & STATE ---
-st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
+# --- 1. CONFIG ---
+st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="centered")
 
-if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 if 'ui_mode' not in st.session_state: st.session_state.ui_mode = 'login'
 
-# --- 2. THE KINETIC ENGINE (ADAPTIVE) ---
-st.markdown(f"""
+# --- 2. NEURAL INTERFACE (CSS) ---
+st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@300;400&display=swap');
 
-    .stApp {{
-        background: radial-gradient(circle at center, #0a192f 0%, #020617 100%);
+    .stApp {
+        background: radial-gradient(circle at top right, #001f3f 0%, #020617 100%);
         font-family: 'Inter', sans-serif;
-    }}
+    }
 
-    /* MASTER FLEX CONTAINER: Centers the box regardless of system resolution */
-    .master-container {{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 80vh;
+    /* THE HUB CARD */
+    .neural-card {
+        background: rgba(10, 25, 47, 0.7);
+        backdrop-filter: blur(20px);
+        border: 2px solid #00d4ff;
+        border-radius: 30px;
+        padding: 50px;
+        box-shadow: 0 0 50px rgba(0, 212, 255, 0.15), inset 0 0 20px rgba(0, 212, 255, 0.1);
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .logo-text {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2.5em;
+        letter-spacing: 10px;
+        color: #00d4ff;
+        text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        margin-bottom: 5px;
+    }
+
+    /* WIDGET STYLING */
+    .stTextInput input {
+        background: rgba(0, 0, 0, 0.4) !important;
+        border: 1px solid #1a3a5a !important;
+        color: white !important;
+        text-align: center !important;
+        border-radius: 12px !important;
+    }
+
+    div.stButton > button {
+        background: linear-gradient(90deg, #00d4ff, #005f73) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 10px 24px !important;
+        font-weight: 700 !important;
         width: 100%;
-    }}
-
-    /* THE ADAPTIVE VAULT: Uses % instead of px to scale */
-    .vault-anchor {{
-        position: relative;
-        width: 90vw;
-        max-width: 1000px;
-        height: 60vh;
-        max-height: 600px;
-        z-index: 1;
-    }}
-
-    .gatekeeper-card {{
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(25px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 24px;
-        overflow: hidden;
-        z-index: 2;
-        box-shadow: 0 50px 100px rgba(0,0,0,0.5);
-    }}
-
-    /* THE BLUE PLANE: Diagonal is locked to % of the box */
-    .blue-plane {{
-        position: absolute;
-        top: 0;
-        width: 150%; height: 100%;
-        background: linear-gradient(135deg, #00d4ff 0%, #005f73 100%);
-        transition: all 0.8s cubic-bezier(0.65, 0, 0.35, 1);
-        z-index: 3;
-        clip-path: polygon(15% 0%, 100% 0%, 85% 100%, 0% 100%);
-        pointer-events: none;
-    }}
-
-    /* RESPONSIVE KINETICS */
-    .mode-login .blue-plane {{ left: 50%; }}
-    .mode-signup .blue-plane {{ left: -100%; }}
-
-    .form-overlay {{
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        z-index: 10;
-        display: flex;
-    }}
-
-    .form-content {{
-        width: 50%;
-        padding: 5% 8%; /* Percentage padding scales with screen size */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }}
-
-    /* STREAMLIT WIDGET OVERRIDES */
-    .stTextInput input {{ background: rgba(0,0,0,0.4) !important; color: white !important; border: 1px solid rgba(0,212,255,0.2) !important; }}
-    div.stButton > button {{ background: #00d4ff !important; color: #000 !important; font-weight: 700 !important; width: 100%; }}
+        transition: 0.4s ease;
+    }
     
-    header, footer {{ visibility: hidden; }}
+    div.stButton > button:hover {
+        box-shadow: 0 0 25px #00d4ff;
+        transform: translateY(-2px);
+    }
+
+    header, footer { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
-def set_ui_mode(mode):
-    st.session_state.ui_mode = mode
+# --- 3. THE HUB ENGINE ---
+def switch_mode(target):
+    st.session_state.ui_mode = target
 
-# --- 3. RENDERER ---
-if not st.session_state.logged_in:
-    # Wrap everything in the master flexbox
-    st.markdown('<div class="master-container">', unsafe_allow_html=True)
-    
-    mode_class = f"mode-{st.session_state.ui_mode}"
-    st.markdown(f'<div class="vault-anchor {mode_class}">', unsafe_allow_html=True)
-    
-    # Visual Box
-    st.markdown(f"""
-        <div class="gatekeeper-card">
-            <div class="blue-plane">
-                <div style="padding: 15% 0; color: white; text-align: center;">
-                    <h1 style="font-size: clamp(1.5rem, 5vw, 3rem); letter-spacing: 5px;">VOID OS</h1>
-                    <p style="opacity: 0.6; font-size: 0.8rem;">INTELLIGENCE ACCESS</p>
-                </div>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+# Main Interface container
+with st.container():
+    # Visual Header
+    st.markdown('<div class="neural-card">', unsafe_allow_html=True)
+    st.markdown('<h1 class="logo-text">VOID-OS</h1>', unsafe_allow_html=True)
+    st.markdown('<p style="color:#00d4ff; opacity:0.6; font-size:0.8em; letter-spacing:3px;">NEURAL GATEKEEPER v3.0</p>', unsafe_allow_html=True)
+    st.write("---")
 
-    # Input Layer
-    st.markdown('<div class="form-overlay">', unsafe_allow_html=True)
-    
-    # Use st.columns(2) inside our relative overlay
-    col_l, col_r = st.columns(2)
+    # Content Area
+    if st.session_state.ui_mode == 'login':
+        st.subheader("Uplink Requested")
+        email = st.text_input("IDENTITY", placeholder="DIRECTOR@VOID.IO")
+        code = st.text_input("PASSKEY", type="password", placeholder="••••••••")
+        
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            if st.button("INITIATE UPLINK"):
+                st.toast("Synchronizing...")
+        with col2:
+            st.button("NEW ID", on_click=switch_mode, args=('signup',))
 
-    with col_l:
-        if st.session_state.ui_mode == 'login':
-            st.markdown('<div class="form-content">', unsafe_allow_html=True)
-            st.subheader("Welcome Back")
-            st.text_input("EMAIL", key="l_email")
-            st.text_input("PASS", type="password", key="l_pw")
-            if st.button("INITIATE"): st.toast("Connecting...")
-            st.button("New Identity?", on_click=set_ui_mode, args=('signup',))
-            st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.subheader("Initialize Identity")
+        name = st.text_input("FULL NAME")
+        mail = st.text_input("SECURE EMAIL")
+        key = st.text_input("CREATE PASSKEY", type="password")
+        
+        if st.button("⚔️ GENERATE NEURAL SIGNATURE"):
+            st.info("Protocol Initiated.")
+        
+        st.button("BACK TO UPLINK", on_click=switch_mode, args=('login',))
 
-    with col_r:
-        if st.session_state.ui_mode == 'signup':
-            st.markdown('<div class="form-content">', unsafe_allow_html=True)
-            st.subheader("Initialize")
-            st.text_input("NAME", key="r_n")
-            st.text_input("SECURE EMAIL", key="r_e")
-            st.text_input("CREATE PASS", type="password", key="r_p")
-            if st.button("⚔️ GENERATE"): st.info("OTP Sent.")
-            st.button("Return", on_click=set_ui_mode, args=('login',))
-            st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True) # End form-overlay
-    st.markdown('</div>', unsafe_allow_html=True) # End vault-anchor
-    st.markdown('</div>', unsafe_allow_html=True) # End master-container
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
