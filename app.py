@@ -1148,7 +1148,7 @@ st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 if 'ui_mode' not in st.session_state: st.session_state.ui_mode = 'login'
 
-# --- 2. THE KINETIC ENGINE (REFINED) ---
+# --- 2. THE KINETIC ENGINE (CSS) ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
@@ -1158,7 +1158,7 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
     }
 
-    /* THE MASTER ANCHOR: This forces widgets to stay in the box */
+    /* THE MASTER ANCHOR */
     .vault-anchor {
         position: relative;
         width: 1000px;
@@ -1181,7 +1181,7 @@ st.markdown("""
         box-shadow: 0 50px 100px rgba(0,0,0,0.5);
     }
 
-    /* THE BLUE PLANE (DIAGONAL) */
+    /* THE BLUE PLANE (DIAGONAL ANIMATION) */
     .blue-plane {
         position: absolute;
         top: 0;
@@ -1190,14 +1190,14 @@ st.markdown("""
         transition: all 0.8s cubic-bezier(0.65, 0, 0.35, 1);
         z-index: 3;
         clip-path: polygon(15% 0%, 100% 0%, 85% 100%, 0% 100%);
-        pointer-events: none; /* Allows clicks to pass through to widgets */
+        pointer-events: none;
     }
 
-    /* POSITIONING LOGIC */
+    /* POSITIONING STATES */
     .mode-login .blue-plane { left: 50%; transform: translateX(0); }
     .mode-signup .blue-plane { left: -100%; transform: translateX(0); }
 
-    /* WIDGET WRAPPER: Fixed positioning relative to the card */
+    /* WIDGET OVERLAY: Forcing inputs into the coordinate system */
     .form-overlay {
         position: absolute;
         top: 0; left: 0;
@@ -1215,36 +1215,35 @@ st.markdown("""
         justify-content: center;
     }
 
-    /* INPUT & BUTTON STYLING */
+    /* UI THEMING */
     .stTextInput input {
         background: rgba(255,255,255,0.05) !important;
         border: 1px solid rgba(255,255,255,0.1) !important;
         color: white !important;
-        border-radius: 8px !important;
     }
     div.stButton > button {
         background: #00d4ff !important;
         color: #000 !important;
         font-weight: 700 !important;
-        border-radius: 8px !important;
     }
 
     header, footer { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. LOGIC CONTROLLER ---
-def toggle_mode(target):
-    st.session_state.ui_mode = target
-    st.rerun()
+# --- 3. CALLBACKS (Simplified) ---
+def set_ui_mode(mode):
+    # Streamlit reruns automatically after this callback finishes
+    st.session_state.ui_mode = mode
 
+# --- 4. RENDERER ---
 if not st.session_state.logged_in:
     mode_class = f"mode-{st.session_state.ui_mode}"
     
-    # 1. Start the Master Anchor
+    # Root Anchor
     st.markdown(f'<div class="vault-anchor {mode_class}">', unsafe_allow_html=True)
     
-    # 2. Render the Visual Shell (Background + Blue Plane)
+    # Background Visuals
     st.markdown(f"""
         <div class="gatekeeper-card">
             <div class="blue-plane">
@@ -1256,24 +1255,25 @@ if not st.session_state.logged_in:
         </div>
     """, unsafe_allow_html=True)
 
-    # 3. Render the Widget Overlay (Captures Streamlit inputs)
+    # Input Layer (Physically locked inside the card)
     st.markdown('<div class="form-overlay">', unsafe_allow_html=True)
     
-    col_left, col_right = st.columns(2)
+    col_l, col_r = st.columns(2)
 
-    with col_left:
+    with col_l:
         if st.session_state.ui_mode == 'login':
             st.markdown('<div class="form-content">', unsafe_allow_html=True)
             st.subheader("Welcome Back, Director")
             st.text_input("UPLINK EMAIL", key="l_email")
             st.text_input("PASSKEY", type="password", key="l_pw")
             if st.button("INITIATE UPLINK", use_container_width=True):
-                st.toast("Verifying...")
+                st.success("Verifying...")
             st.markdown("<p style='font-size:0.8em; margin-top:20px;'>New Identity required?</p>", unsafe_allow_html=True)
-            st.button("Initialize Registration", on_click=toggle_mode, args=('signup',))
+            # Callback handles the state update and the rerun
+            st.button("Initialize Registration", on_click=set_ui_mode, args=('signup',))
             st.markdown('</div>', unsafe_allow_html=True)
 
-    with col_right:
+    with col_r:
         if st.session_state.ui_mode == 'signup':
             st.markdown('<div class="form-content">', unsafe_allow_html=True)
             st.subheader("Initialize Identity")
@@ -1281,16 +1281,17 @@ if not st.session_state.logged_in:
             st.text_input("SECURE EMAIL", key="r_e")
             st.text_input("CREATE PASSKEY", type="password", key="r_p")
             if st.button("⚔️ GENERATE OTP", use_container_width=True):
-                st.info("OTP Transmitted.")
+                st.info("OTP Sent.")
             st.markdown("<p style='font-size:0.8em; margin-top:20px;'>Already have access?</p>", unsafe_allow_html=True)
-            st.button("Return to Login", on_click=toggle_mode, args=('login',))
+            # Callback handles the state update and the rerun
+            st.button("Return to Login", on_click=set_ui_mode, args=('login',))
             st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True) # End form-overlay
-    st.markdown('</div>', unsafe_allow_html=True) # End vault-anchor
+    st.markdown('</div>', unsafe_allow_html=True) # Close form-overlay
+    st.markdown('</div>', unsafe_allow_html=True) # Close vault-anchor
 
 else:
-    st.title("Welcome to the Neural Forge, Director.")
+    st.title("Neural Forge Online.")
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
