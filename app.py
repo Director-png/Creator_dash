@@ -1142,136 +1142,137 @@ FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 import streamlit as st
 
-# --- 1. CONFIG & STATE ---
-st.set_page_config(page_title="VOID OS", layout="wide")
+# --- 1. CORE SETUP & SESSION STATE ---
+st.set_page_config(page_title="VOID OS", layout="centered") # 'centered' helps lock the box in the page middle
 
 if 'ui_mode' not in st.session_state:
     st.session_state.ui_mode = 'login'
 
-def switch_mode(mode):
-    st.session_state.ui_mode = mode
+def trigger_transition(target_mode):
+    st.session_state.ui_mode = target_mode
 
-# --- 2. THE PRECISION ENGINE (CSS) ---
+# --- 2. PRECISION KINETIC ENGINE (CSS) ---
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap');
 
-    /* Background Layer */
     .stApp {{ background-color: #010409; }}
 
-    /* THE VAULT BOX - FIXED DIMENSIONS */
-    .vault-shell {{
+    /* THE VAULT - FIXED DIMENSIONS */
+    .void-box {{
         position: relative;
-        width: 1000px; /* Exact Width */
-        height: 600px; /* Exact Height */
-        margin: 50px auto; /* Centered with top margin */
-        border: 2px solid #00d4ff;
+        max-width: 900px;
+        min-height: 550px;
+        margin: 40px auto;
+        border: 2px solid #00d4ff; /* The glowing neon cyan border from the photo */
         border-radius: 20px;
-        background: rgba(10, 25, 47, 0.4);
+        background: rgba(10, 25, 47, 0.5); /* Semi-transparent background */
         backdrop-filter: blur(20px);
         overflow: hidden;
+        display: flex;
         z-index: 1;
-        box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
+        box-shadow: 0 0 40px rgba(0, 212, 255, 0.1); /* Exterior glow from photo */
     }}
 
-    /* THE BLUE DIAGONAL PLANE */
+    /* INVERSE CIRCULAR PIVOT PLANE */
     .shutter-plane {{
         position: absolute;
-        width: 180%;
-        height: 180%;
+        width: 150%;
+        height: 150%;
         background: linear-gradient(135deg, #00d4ff 0%, #005f73 100%);
-        transition: all 1.2s cubic-bezier(0.7, 0, 0.3, 1);
-        transform-origin: bottom right;
+        transition: all 1.2s cubic-bezier(0.7, 0, 0.3, 1); /* cubic-bezier for high-end feel */
         z-index: 2;
+        pointer-events: none; /* Allows clicks to pass through to inputs */
     }}
 
-    /* ANIMATION STATES */
-    /* Login: Plane covers the right */
+    /* POSITIONING STATES (The Animation you requested) */
+    /* Login State: Blue is slanted on the Right */
     .mode-login .shutter-plane {{
-        transform: rotate(0deg);
+        top: -25%;
         right: -85%;
-        top: -40%;
+        transform: rotate(0deg) skewX(-10deg);
     }}
-    /* Signup: Plane rotates clockwise to cover the left */
+    
+    /* Signup State: Blue rotates and covers the Left */
     .mode-signup .shutter-plane {{
-        transform: rotate(105deg);
-        right: 45%;
-        top: -40%;
+        top: -25%;
+        right: 35%;
+        transform: rotate(180deg) skewX(10deg);
     }}
 
-    /* FORCING WIDGETS INSIDE */
-    .inner-vault-container {{
-        position: absolute;
-        width: 1000px;
-        height: 600px;
-        top: 0;
-        left: 0;
-        z-index: 10;
-        display: flex;
+    /* ENSURING TEXT IS ON TOP (Nesting components) */
+    .st-inside-fix {{
+        position: relative;
+        z-index: 10; /* Higher than shutter-plane, guaranteed clickability */
+        padding: 40px;
+        width: 100%;
     }}
 
-    .active-form-box {{
-        width: 500px;
-        padding: 60px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }}
-
-    /* UI CLEANUP */
+    /* Hiding Streamlit clutter to match the photo */
     header, footer {{ visibility: hidden; }}
-    .stButton>button {{
-        background: linear-gradient(90deg, #00d4ff, #0088aa) !important;
-        color: black !important;
-        font-weight: bold !important;
+    .stTextInput label {{ color: #777 !important; text-transform: uppercase; font-size: 0.7em; letter-spacing: 1px; }}
+    .stTextInput input {{ background: rgba(0,0,0,0.3) !important; color: white !important; border-radius: 5px !important; }}
+    
+    div.stButton > button {{
+        background: linear-gradient(90deg, #00d4ff, #005f73) !important;
+        color: white !important;
         border: none !important;
+        border-radius: 5px !important;
+        letter-spacing: 2px;
+        transition: 0.3s;
     }}
+    
+    div.stButton > button:hover {{ box-shadow: 0 0 15px #00d4ff !important; transform: scale(1.02); }}
+
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. RENDERING THE ARCHITECTURE ---
+# --- 3. UI ARCHITECTURE (THE VAULT RENDER) ---
 mode_class = f"mode-{st.session_state.ui_mode}"
 
-# Start the Visual Box
-st.markdown(f'<div class="vault-shell {mode_class}">', unsafe_allow_html=True)
-st.markdown('<div class="shutter-plane"></div>', unsafe_allow_html=True)
+# This Persistent HTML block stays on the screen
+st.markdown(f"""
+<div class="void-box {mode_class}">
+    <div class="shutter-plane"></div>
+</div>
+""", unsafe_allow_html=True)
 
-# Start the Widget Container (Nested inside the box)
-st.markdown('<div class="inner-vault-container">', unsafe_allow_html=True)
-
+# THE INTERACTIVE WIDGET OVERLAY (Teleportation)
+# Standard Streamlit columns are used inside the CSS container.
 col1, col2 = st.columns(2)
 
 with col1:
     if st.session_state.ui_mode == 'login':
-        st.markdown('<div class="active-form-box">', unsafe_allow_html=True)
-        st.markdown("<h1 style='font-family:Orbitron; color:#00d4ff;'>UPLINK</h1>", unsafe_allow_html=True)
-        st.text_input("DIRECTOR ID", key="l_user", placeholder="Identity hash...")
+        st.markdown('<div class="st-inside-fix">', unsafe_allow_html=True)
+        st.markdown("<h2 style='font-family:Orbitron; color:#00d4ff;'>UPLINK</h2>", unsafe_allow_html=True)
+        st.text_input("DIRECTOR ID", key="l_user", placeholder="Enter Identity Hash...")
         st.text_input("PASSKEY", type="password", key="l_pass", placeholder="••••••••")
-        if st.button("INITIATE", use_container_width=True):
-            st.toast("Verifying...")
+        if st.button("INITIATE UPLINK", use_container_width=True):
+            st.toast("Synchronizing protocols...")
         st.write("")
-        st.button("SIGN UP", on_click=switch_mode, args=('signup',), use_container_width=True)
+        st.button("NEW IDENTITY?", on_click=trigger_transition, args=('signup',), use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
     else:
-        st.empty()
+        st.empty() # Spacer for right side split in Signup mode
 
 with col2:
     if st.session_state.ui_mode == 'signup':
-        st.markdown('<div class="active-form-box">', unsafe_allow_html=True)
-        st.markdown("<h1 style='font-family:Orbitron; color:#00d4ff;'>REGISTER</h1>", unsafe_allow_html=True)
-        st.text_input("NAME", key="r_name")
+        # Align content to the right edge of col2 for Register mode
+        st.markdown('<div class="st-inside-fix register-ui">', unsafe_allow_html=True)
+        st.markdown("<h2 style='font-family:Orbitron; color:#00d4ff;'>REGISTER</h2>", unsafe_allow_html=True)
+        st.text_input("FULL NAME", key="r_name")
         st.text_input("EMAIL", key="r_mail")
         st.text_input("PASSKEY", type="password", key="r_pass")
-        if st.button("GENERATE", use_container_width=True):
-            st.info("Protocol Dispatched.")
+        if st.button("CREATE IDENTITY", use_container_width=True):
+            st.info("Protocol Initiated.")
         st.write("")
-        st.button("BACK TO LOGIN", on_click=switch_mode, args=('login',), use_container_width=True)
+        st.button("BACK TO UPLINK", on_click=trigger_transition, args=('login',), use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
     else:
-        st.empty()
+        st.empty() # Spacer for left side split in Login mode
 
-st.markdown('</div>', unsafe_allow_html=True) # End Widget Container
-st.markdown('</div>', unsafe_allow_html=True) # End Vault Shell
+# THE VAULT END
+st.markdown('</div>', unsafe_allow_html=True)
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
