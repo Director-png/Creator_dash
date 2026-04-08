@@ -1141,192 +1141,169 @@ NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
 FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 import streamlit as st
-import pandas as pd
-import requests
-import datetime
 
-# --- 1. SESSION INITIALIZATION & SETUP ---
-st.set_page_config(page_title="VOID OS", layout="wide", page_icon="🌑")
+# --- VOID OS GATEKEEPER UI ENGINE ---
+st.set_page_config(page_title="VOID OS | GATEKEEPER", layout="wide", page_icon="🌑")
 
-if 'ui_mode' not in st.session_state: st.session_state.ui_mode = 'login'
-if 'logged_in' not in st.session_state: st.session_state.logged_in = False
-if 'otp_sent' not in st.session_state: st.session_state.otp_sent = False
-
-def switch_vault_mode(mode):
-    st.session_state.ui_mode = mode
-    st.session_state.otp_sent = False # Reset registration state
-
-# Helper (Placeholder) for user DB check
-def load_user_db(): return pd.DataFrame(columns=['Email', 'Password', 'Name', 'Status'])
-
-# --- 2. THE KINETIC VAULT ENGINE (CSS) ---
-st.markdown(f"""
+# --- CUSTOM CSS: ESTABLISHING THE LAYOUT ---
+st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap');
-
-    /* Global Noir Theme */
-    .stApp {{ background-color: #010409; color: #FFFFFF; font-family: 'Inter', sans-serif; overflow: hidden; }}
-
-    /* THE VAULT CONTAINER (Dimensions & 3D Effect) */
-    .void-vault {{
-        position: relative;
-        width: 750px; /* Precise Dimensions from Screenshot */
-        height: 450px;
-        margin: 80px auto;
-        border: 2px solid #00D4FF; /* Neon Cyan Border */
-        border-radius: 20px;
-        overflow: hidden;
-        display: flex;
-        box-shadow: 0 0 30px rgba(0, 212, 255, 0.2), 0 50px 100px rgba(0,0,0,0.8);
-        perspective: 1500px; /* 3D Depth Anchor */
-    }}
-
-    /* THE DIAGONAL PLANE (Welcome/Register Split) */
-    .kinetic-plane {{
-        position: absolute;
-        width: 150%;
-        height: 150%;
-        background: linear-gradient(135deg, #001A1F 0%, #00D4FF33 100%);
-        transition: all 1s cubic-bezier(0.65, 0, 0.35, 1); /* Professional cubic sweep */
-        transform-origin: center center;
-        z-index: 2;
-    }}
-
-    /* POSITIONING STATES (The Video Sweep) */
-    /* Login: Blue is on the Right */
-    .mode-login .kinetic-plane {{ 
-        transform: rotate(0deg) skewX(-15deg); 
-        right: -95%; 
-        top: -25%; 
-    }}
-    /* Register: Blue pivots and inversions to the Left */
-    .mode-signup .kinetic-plane {{ 
-        transform: rotate(180deg) skewX(15deg); 
-        right: 45%; 
-        top: -25%; 
-    }}
-
-    /* CONTENT NESTING (FORCING COMPONENTS INSIDE) */
-    .vault-content-nest {{
-        position: relative;
-        width: 50%;
-        height: 100%;
-        padding: 40px;
-        z-index: 10; /* Above the blue plane */
+    /* 1. Global Esthetic (Dark Noir) */
+    .stApp {{
+        background-color: #030303;
         color: #FFFFFF;
+        font-family: 'Inter', sans-serif;
+    }}
+    
+    /* 2. The Login/Register Container (The Glass Box) */
+    .void-gateway-container {{
+        position: relative;
+        display: flex;
+        width: 1000px;
+        height: 600px;
+        margin: 50px auto;
+        border: 2px solid #00D4FF; /* Neon Cyan Border */
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.2); /* Exterior Glow */
+    }}
+    
+    /* 3. The Diagonal Split (Blue Plane/Left) */
+    .void-left-plane {{
+        flex: 1;
+        background: linear-gradient(135deg, #001A1F 0%, #00D4FF33 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+        clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+    }}
+    
+    /* 4. Input Area (Right) */
+    .void-right-input {{
+        flex: 1;
+        background-color: #000;
+        padding: 60px;
         display: flex;
         flex-direction: column;
         justify-content: center;
     }}
-
-    /* Content Placement Control */
-    .login-ui {{ text-align: left; }}
-    .register-ui {{ text-align: right; margin-left: auto; }}
-
-    /* TYPOGRAPHY */
-    .void-vault-title {{ font-family: 'Orbitron', sans-serif; font-size: 2.2em; letter-spacing: 5px; color: #00D4FF; margin-bottom: 0.5rem; }}
-    .vault-sub {{ color: #888; letter-spacing: 2px; text-transform: uppercase; font-size: 0.7em; margin-bottom: 2rem; }}
-
-    /* INPUTS (Noir Minimal) */
-    .stTextInput input {{
-        background-color: rgba(255,255,255,0.03) !important;
-        border: 1px solid rgba(255,255,255,0.08) !important;
-        color: #FFFFFF !important;
-        border-radius: 8px !important;
+    
+    /* Typography Styles */
+    .welcome-text {{
+        color: white;
+        font-size: 3em;
+        letter-spacing: 5px;
+        line-height: 1.1;
     }}
-    .stTextInput label {{ color: #555 !important; text-transform: uppercase; font-size: 0.7em; letter-spacing: 1px; }}
-
-    /* NEON BUTTONS */
-    div.stButton > button {{
+    .welcome-span {{
+        color: #00D4FF;
+    }}
+    
+    /* Custom Input Styling */
+    .stTextInput input {{
+        background-color: #0C0C0C !important;
+        color: #FFFFFF !important;
+        border: 1px solid #222 !important;
+        border-radius: 5px !important;
+    }}
+    .stTextInput label {{
+        color: #888 !important;
+        letter-spacing: 2px;
+    }}
+    
+    /* Action Buttons (Glowing Neon) */
+    .stButton>button {{
         background: linear-gradient(90deg, #00D4FF, #005F73) !important;
-        color: #000 !important;
-        border-radius: 8px !important;
+        color: white !important;
         border: none !important;
-        font-weight: 700 !important;
-        letter-spacing: 3px;
+        letter-spacing: 4px;
+        font-weight: bold;
         transition: 0.3s;
     }}
-    div.stButton > button:hover {{ box-shadow: 0 0 20px rgba(0, 212, 255, 0.5) !important; transform: scale(1.02); }}
-
-    /* CLEANUP */
-    header, footer {{ visibility: hidden; }}
-    div.block-container {{ padding-top: 2rem; }}
+    
+    .stButton>button:hover {{
+        box-shadow: 0 0 15px #00D4FF;
+        transform: scale(1.02);
+    }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. THE ARCHITECTURE (MAIN RENDER) ---
-st.markdown("<h1 style='text-align: center; color: #00D4FF; letter-spacing: 10px;'>VOID OS</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #444; font-size: 0.8em; margin-bottom: 30px;'>VAULT PROTOCOL v9.0</p>", unsafe_allow_html=True)
+# --- UI LOGIC CONTROLLER ---
+if 'form_mode' not in st.session_state:
+    st.session_state.form_mode = 'login'
 
-# Vault State Class
-mode_class = f"mode-{st.session_state.ui_mode}"
-
-# Start Vault Div (Visually establishes the 750x450 center box)
-st.markdown(f'<div class="void-vault {mode_class}">', unsafe_allow_html=True)
-# The Diagonal Plane Shutter
-st.markdown('<div class="kinetic-plane"></div>', unsafe_allow_html=True)
-
-# --- NESTED STREAMLIT COLUMNS (Inside the Vault Div) ---
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.session_state.ui_mode == 'login':
-        st.markdown('<div class="vault-content-nest login-ui">', unsafe_allow_html=True)
-        st.markdown('<h2 class="void-vault-title">UPLINK</h2>', unsafe_allow_html=True)
-        st.markdown('<p class="vault-sub">Intelligence Access Protocol</p>', unsafe_allow_html=True)
-        
-        # Inputs locked inside the vault
-        id_in = st.text_input("DIRECTOR ID", key="v_l_id").strip()
-        pass_in = st.text_input("PASSKEY", type="password", key="v_l_pass")
-        
-        if st.button("INITIATE UPLINK", use_container_width=True):
-            st.toast("Synchronizing protocols...")
-            # Insert auth logic here
-        
-        st.markdown("<br><p style='font-size:0.8em; text-transform:uppercase; color:#555;'>Lost Identity?</p>", unsafe_allow_html=True)
-        # Using Streamlit direct callback for mode switching
-        st.button("SIGN UP", on_click=switch_vault_mode, args=('signup',), use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+def switch_form():
+    if st.session_state.form_mode == 'login':
+        st.session_state.form_mode = 'signup'
     else:
-        st.empty() # Spacer for right side split
+        st.session_state.form_mode = 'login'
 
-with col2:
-    if st.session_state.ui_mode == 'signup':
-        # Align content to the right edge of col2 for Register mode
-        st.markdown('<div class="vault-content-nest register-ui">', unsafe_allow_html=True)
-        st.markdown('<h2 class="void-vault-title">REGISTER</h2>', unsafe_allow_html=True)
-        st.markdown('<p class="vault-sub">Initialize Operative Identity</p>', unsafe_allow_html=True)
+# --- MAIN RENDER LOOP ---
+# System Header
+st.markdown("<h1 style='text-align: center; color: #00D4FF; letter-spacing: 10px; margin-bottom: 0;'>VOID OS</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #555; font-size: 0.8em; margin-bottom: 30px;'>INTELLIGENCE ACCESS PROTOCOL v4.0</p>", unsafe_allow_html=True)
+
+# The Container Start
+st.markdown('<div class="void-gateway-container">', unsafe_allow_html=True)
+
+if st.session_state.form_mode == 'login':
+    # --- LOGIN MODE LAYOUT ---
+    
+    # Left Plane (Welcome)
+    st.markdown("""
+        <div class="void-left-plane">
+            <h2 class="welcome-text">WELCOME<br><span class="welcome-span">BACK!</span></h2>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Right Input Area
+    st.markdown('<div class="void-right-input">', unsafe_allow_html=True)
+    st.markdown("<h3>LOGIN</h3><br>", unsafe_allow_html=True)
+    
+    # Streamlit components are injected into the HTML div
+    director_id = st.text_input("DIRECTOR ID", key="l_id").lower().strip()
+    passkey = st.text_input("PASSKEY", type="password", key="l_pass")
+    
+    if st.button("INITIATE UPLINK", use_container_width=True):
+        st.info("Synchronizing protocols...")
         
-        if not st.session_state.otp_sent:
-            name = st.text_input("FULL NAME", key="v_r_n")
-            email = st.text_input("SECURE EMAIL", key="v_r_e")
-            pass_create = st.text_input("NEW PASSKEY", type="password", key="v_r_p")
-            
-            legal = st.checkbox("Accept VOID-OS Deployment protocols.")
-            
-            if st.button("GENERATING OTP", use_container_width=True, disabled=not legal):
-                if name and email and pass_create:
-                    # Insert your SEND_OTP API call here
-                    st.info("Verification Dispatched.")
-                    st.session_state.otp_sent = True
-                    st.rerun()
-                else: st.warning("All data required.")
-        else:
-            st.markdown("### PHASE 2: VERIFY SIGNAL")
-            user_otp = st.text_input("ENTER 6-DIGIT CODE", placeholder="000000")
-            if st.button("🔓 FINALIZE IDENTITY", use_container_width=True):
-                # Insert Finalize registration logic
-                st.success("Identity Secured.")
-            if st.button("Edit Registration Info", type="secondary"): st.session_state.otp_sent=False; st.rerun()
+    st.markdown("<br><p style='font-size:0.8em;'>New Identity Required?</p>", unsafe_allow_html=True)
+    st.button("SIGN UP", on_click=switch_form, use_container_width=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True) # End Right Area
 
-        st.markdown("<br><p style='font-size:0.8em; text-transform:uppercase; color:#555;'>Access established?</p>", unsafe_allow_html=True)
-        st.button("RETURN TO UPLINK", on_click=switch_vault_mode, args=('login',), use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-    else:
-        st.empty() # Spacer for left side split
+else:
+    # --- REGISTER MODE LAYOUT (Flipped functionality) ---
+    
+    # Left Plane (Static)
+    st.markdown("""
+        <div class="void-left-plane">
+            <h2 class="welcome-text">INITIALIZE<br><span class="welcome-span">IDENTITY</span></h2>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Right Input Area (Register)
+    st.markdown('<div class="void-right-input">', unsafe_allow_html=True)
+    st.markdown("<h3>REGISTER</h3><br>", unsafe_allow_html=True)
+    
+    full_name = st.text_input("FULL NAME", key="r_name")
+    email = st.text_input("SECURE EMAIL", key="r_e")
+    new_pass = st.text_input("CREATE PASSKEY", type="password", key="r_p")
+    
+    terms = st.checkbox("I agree to the VOID-OS Deployment protocols.")
+    
+    if st.button("GENERATING OTP", use_container_width=True, disabled=not terms):
+        st.success("Verification dispatched.")
+        
+    st.markdown("<br><p style='font-size:0.8em;'>Access already established?</p>", unsafe_allow_html=True)
+    st.button("BACK TO LOGIN", on_click=switch_form, use_container_width=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True) # End Right Area
 
-# End Vault Div
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True) # The Container End
+
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
