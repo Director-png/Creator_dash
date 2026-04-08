@@ -1148,41 +1148,50 @@ st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 if 'ui_mode' not in st.session_state: st.session_state.ui_mode = 'login'
 
-# --- 2. THE KINETIC ENGINE (CSS) ---
-st.markdown("""
+# --- 2. THE KINETIC ENGINE (ADAPTIVE) ---
+st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
 
-    .stApp {
+    .stApp {{
         background: radial-gradient(circle at center, #0a192f 0%, #020617 100%);
         font-family: 'Inter', sans-serif;
-    }
+    }}
 
-    /* THE MASTER ANCHOR */
-    .vault-anchor {
+    /* MASTER FLEX CONTAINER: Centers the box regardless of system resolution */
+    .master-container {{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        width: 100%;
+    }}
+
+    /* THE ADAPTIVE VAULT: Uses % instead of px to scale */
+    .vault-anchor {{
         position: relative;
-        width: 1000px;
-        height: 600px;
-        margin: 50px auto;
+        width: 90vw;
+        max-width: 1000px;
+        height: 60vh;
+        max-height: 600px;
         z-index: 1;
-    }
+    }}
 
-    /* THE VISUAL CARD */
-    .gatekeeper-card {
+    .gatekeeper-card {{
         position: absolute;
         top: 0; left: 0;
         width: 100%; height: 100%;
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(25px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 24px;
         overflow: hidden;
         z-index: 2;
         box-shadow: 0 50px 100px rgba(0,0,0,0.5);
-    }
+    }}
 
-    /* THE BLUE PLANE (DIAGONAL ANIMATION) */
-    .blue-plane {
+    /* THE BLUE PLANE: Diagonal is locked to % of the box */
+    .blue-plane {{
         position: absolute;
         top: 0;
         width: 150%; height: 100%;
@@ -1191,107 +1200,89 @@ st.markdown("""
         z-index: 3;
         clip-path: polygon(15% 0%, 100% 0%, 85% 100%, 0% 100%);
         pointer-events: none;
-    }
+    }}
 
-    /* POSITIONING STATES */
-    .mode-login .blue-plane { left: 50%; transform: translateX(0); }
-    .mode-signup .blue-plane { left: -100%; transform: translateX(0); }
+    /* RESPONSIVE KINETICS */
+    .mode-login .blue-plane {{ left: 50%; }}
+    .mode-signup .blue-plane {{ left: -100%; }}
 
-    /* WIDGET OVERLAY: Forcing inputs into the coordinate system */
-    .form-overlay {
+    .form-overlay {{
         position: absolute;
         top: 0; left: 0;
         width: 100%; height: 100%;
         z-index: 10;
         display: flex;
-        pointer-events: auto;
-    }
+    }}
 
-    .form-content {
+    .form-content {{
         width: 50%;
-        padding: 60px;
+        padding: 5% 8%; /* Percentage padding scales with screen size */
         display: flex;
         flex-direction: column;
         justify-content: center;
-    }
+    }}
 
-    /* UI THEMING */
-    .stTextInput input {
-        background: rgba(255,255,255,0.05) !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
-        color: white !important;
-    }
-    div.stButton > button {
-        background: #00d4ff !important;
-        color: #000 !important;
-        font-weight: 700 !important;
-    }
-
-    header, footer { visibility: hidden; }
+    /* STREAMLIT WIDGET OVERRIDES */
+    .stTextInput input {{ background: rgba(0,0,0,0.4) !important; color: white !important; border: 1px solid rgba(0,212,255,0.2) !important; }}
+    div.stButton > button {{ background: #00d4ff !important; color: #000 !important; font-weight: 700 !important; width: 100%; }}
+    
+    header, footer {{ visibility: hidden; }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. CALLBACKS (Simplified) ---
 def set_ui_mode(mode):
-    # Streamlit reruns automatically after this callback finishes
     st.session_state.ui_mode = mode
 
-# --- 4. RENDERER ---
+# --- 3. RENDERER ---
 if not st.session_state.logged_in:
-    mode_class = f"mode-{st.session_state.ui_mode}"
+    # Wrap everything in the master flexbox
+    st.markdown('<div class="master-container">', unsafe_allow_html=True)
     
-    # Root Anchor
+    mode_class = f"mode-{st.session_state.ui_mode}"
     st.markdown(f'<div class="vault-anchor {mode_class}">', unsafe_allow_html=True)
     
-    # Background Visuals
+    # Visual Box
     st.markdown(f"""
         <div class="gatekeeper-card">
             <div class="blue-plane">
-                <div style="padding: 100px; color: white; text-align: center;">
-                    <h1 style="font-size: 3em; letter-spacing: 5px;">VOID OS</h1>
-                    <p style="opacity: 0.8;">INTELLIGENCE ACCESS PROTOCOL</p>
+                <div style="padding: 15% 0; color: white; text-align: center;">
+                    <h1 style="font-size: clamp(1.5rem, 5vw, 3rem); letter-spacing: 5px;">VOID OS</h1>
+                    <p style="opacity: 0.6; font-size: 0.8rem;">INTELLIGENCE ACCESS</p>
                 </div>
             </div>
         </div>
     """, unsafe_allow_html=True)
 
-    # Input Layer (Physically locked inside the card)
+    # Input Layer
     st.markdown('<div class="form-overlay">', unsafe_allow_html=True)
     
+    # Use st.columns(2) inside our relative overlay
     col_l, col_r = st.columns(2)
 
     with col_l:
         if st.session_state.ui_mode == 'login':
             st.markdown('<div class="form-content">', unsafe_allow_html=True)
-            st.subheader("Welcome Back, Director")
-            st.text_input("UPLINK EMAIL", key="l_email")
-            st.text_input("PASSKEY", type="password", key="l_pw")
-            if st.button("INITIATE UPLINK", use_container_width=True):
-                st.success("Verifying...")
-            st.markdown("<p style='font-size:0.8em; margin-top:20px;'>New Identity required?</p>", unsafe_allow_html=True)
-            # Callback handles the state update and the rerun
-            st.button("Initialize Registration", on_click=set_ui_mode, args=('signup',))
+            st.subheader("Welcome Back")
+            st.text_input("EMAIL", key="l_email")
+            st.text_input("PASS", type="password", key="l_pw")
+            if st.button("INITIATE"): st.toast("Connecting...")
+            st.button("New Identity?", on_click=set_ui_mode, args=('signup',))
             st.markdown('</div>', unsafe_allow_html=True)
 
     with col_r:
         if st.session_state.ui_mode == 'signup':
             st.markdown('<div class="form-content">', unsafe_allow_html=True)
-            st.subheader("Initialize Identity")
-            st.text_input("FULL NAME", key="r_n")
+            st.subheader("Initialize")
+            st.text_input("NAME", key="r_n")
             st.text_input("SECURE EMAIL", key="r_e")
-            st.text_input("CREATE PASSKEY", type="password", key="r_p")
-            if st.button("⚔️ GENERATE OTP", use_container_width=True):
-                st.info("OTP Sent.")
-            st.markdown("<p style='font-size:0.8em; margin-top:20px;'>Already have access?</p>", unsafe_allow_html=True)
-            # Callback handles the state update and the rerun
-            st.button("Return to Login", on_click=set_ui_mode, args=('login',))
+            st.text_input("CREATE PASS", type="password", key="r_p")
+            if st.button("⚔️ GENERATE"): st.info("OTP Sent.")
+            st.button("Return", on_click=set_ui_mode, args=('login',))
             st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True) # Close form-overlay
-    st.markdown('</div>', unsafe_allow_html=True) # Close vault-anchor
-
-else:
-    st.title("Neural Forge Online.")
+    st.markdown('</div>', unsafe_allow_html=True) # End form-overlay
+    st.markdown('</div>', unsafe_allow_html=True) # End vault-anchor
+    st.markdown('</div>', unsafe_allow_html=True) # End master-container
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
