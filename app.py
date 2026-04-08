@@ -1142,8 +1142,8 @@ FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 import streamlit as st
 
-# --- 1. CORE CONFIG ---
-st.set_page_config(page_title="VOID OS", layout="wide", page_icon="🌑")
+# --- 1. CONFIG & STATE ---
+st.set_page_config(page_title="VOID OS", layout="wide")
 
 if 'ui_mode' not in st.session_state:
     st.session_state.ui_mode = 'login'
@@ -1151,28 +1151,27 @@ if 'ui_mode' not in st.session_state:
 def switch_mode(mode):
     st.session_state.ui_mode = mode
 
-# --- 2. THE ENGINE (CSS) ---
+# --- 2. THE PRECISION ENGINE (CSS) ---
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap');
 
+    /* Background Layer */
     .stApp {{ background-color: #010409; }}
 
-    /* THE VAULT - FIXED POSITIONING */
-    .vault-wrapper {{
-        position: fixed;
-        width: 1000px;
-        height: 600px;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
+    /* THE VAULT BOX - FIXED DIMENSIONS */
+    .vault-shell {{
+        position: relative;
+        width: 1000px; /* Exact Width */
+        height: 600px; /* Exact Height */
+        margin: 50px auto; /* Centered with top margin */
         border: 2px solid #00d4ff;
         border-radius: 20px;
-        background: rgba(10, 25, 47, 0.6);
-        backdrop-filter: blur(25px);
+        background: rgba(10, 25, 47, 0.4);
+        backdrop-filter: blur(20px);
         overflow: hidden;
-        z-index: 0;
-        box-shadow: 0 0 50px rgba(0, 212, 255, 0.2);
+        z-index: 1;
+        box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
     }}
 
     /* THE BLUE DIAGONAL PLANE */
@@ -1183,59 +1182,74 @@ st.markdown(f"""
         background: linear-gradient(135deg, #00d4ff 0%, #005f73 100%);
         transition: all 1.2s cubic-bezier(0.7, 0, 0.3, 1);
         transform-origin: bottom right;
-        z-index: 1;
+        z-index: 2;
     }}
 
     /* ANIMATION STATES */
-    .mode-login .shutter-plane {{ transform: rotate(0deg); right: -90%; top: -40%; }}
-    .mode-signup .shutter-plane {{ transform: rotate(100deg); right: 40%; top: -40%; }}
+    /* Login: Plane covers the right */
+    .mode-login .shutter-plane {{
+        transform: rotate(0deg);
+        right: -85%;
+        top: -40%;
+    }}
+    /* Signup: Plane rotates clockwise to cover the left */
+    .mode-signup .shutter-plane {{
+        transform: rotate(105deg);
+        right: 45%;
+        top: -40%;
+    }}
 
-    /* FORCING STREAMLIT COMPONENTS ON TOP */
-    .st-widget-layer {{
-        position: fixed;
+    /* FORCING WIDGETS INSIDE */
+    .inner-vault-container {{
+        position: absolute;
         width: 1000px;
         height: 600px;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
+        top: 0;
+        left: 0;
         z-index: 10;
-        pointer-events: none;
         display: flex;
     }}
 
-    .active-column {{
-        flex: 1;
+    .active-form-box {{
+        width: 500px;
         padding: 60px;
-        pointer-events: auto; /* Makes buttons clickable again */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }}
 
+    /* UI CLEANUP */
     header, footer {{ visibility: hidden; }}
+    .stButton>button {{
+        background: linear-gradient(90deg, #00d4ff, #0088aa) !important;
+        color: black !important;
+        font-weight: bold !important;
+        border: none !important;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. RENDERING THE VISUALS ---
+# --- 3. RENDERING THE ARCHITECTURE ---
 mode_class = f"mode-{st.session_state.ui_mode}"
-st.markdown(f"""
-<div class="vault-wrapper {mode_class}">
-    <div class="shutter-plane"></div>
-</div>
-""", unsafe_allow_html=True)
 
-# --- 4. RENDERING THE WIDGETS (The Interactive Overlay) ---
-# We use columns inside the fixed widget layer to align with the box
-st.markdown('<div class="st-widget-layer">', unsafe_allow_html=True)
+# Start the Visual Box
+st.markdown(f'<div class="vault-shell {mode_class}">', unsafe_allow_html=True)
+st.markdown('<div class="shutter-plane"></div>', unsafe_allow_html=True)
+
+# Start the Widget Container (Nested inside the box)
+st.markdown('<div class="inner-vault-container">', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
     if st.session_state.ui_mode == 'login':
-        st.markdown('<div class="active-column">', unsafe_allow_html=True)
+        st.markdown('<div class="active-form-box">', unsafe_allow_html=True)
         st.markdown("<h1 style='font-family:Orbitron; color:#00d4ff;'>UPLINK</h1>", unsafe_allow_html=True)
-        st.text_input("DIRECTOR ID", key="l_id", placeholder="Enter ID...")
+        st.text_input("DIRECTOR ID", key="l_user", placeholder="Identity hash...")
         st.text_input("PASSKEY", type="password", key="l_pass", placeholder="••••••••")
         if st.button("INITIATE", use_container_width=True):
-            st.toast("Syncing protocols...")
-        st.markdown("<br>", unsafe_allow_html=True)
+            st.toast("Verifying...")
+        st.write("")
         st.button("SIGN UP", on_click=switch_mode, args=('signup',), use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
     else:
@@ -1243,20 +1257,21 @@ with col1:
 
 with col2:
     if st.session_state.ui_mode == 'signup':
-        st.markdown('<div class="active-column">', unsafe_allow_html=True)
+        st.markdown('<div class="active-form-box">', unsafe_allow_html=True)
         st.markdown("<h1 style='font-family:Orbitron; color:#00d4ff;'>REGISTER</h1>", unsafe_allow_html=True)
         st.text_input("NAME", key="r_name")
-        st.text_input("EMAIL", key="r_email")
+        st.text_input("EMAIL", key="r_mail")
         st.text_input("PASSKEY", type="password", key="r_pass")
-        if st.button("CREATE", use_container_width=True):
-            st.info("Generating Identity...")
-        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("GENERATE", use_container_width=True):
+            st.info("Protocol Dispatched.")
+        st.write("")
         st.button("BACK TO LOGIN", on_click=switch_mode, args=('login',), use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
     else:
         st.empty()
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True) # End Widget Container
+st.markdown('</div>', unsafe_allow_html=True) # End Vault Shell
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
