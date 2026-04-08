@@ -1142,134 +1142,161 @@ FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 import streamlit as st
 
-# --- 1. CORE CONFIG ---
-st.set_page_config(page_title="VOID OS", layout="wide")
+# --- 1. CORE SYSTEM CONFIG ---
+st.set_page_config(page_title="VOID OS | GATEKEEPER", layout="wide")
 
 if 'gate_mode' not in st.session_state:
     st.session_state.gate_mode = 'login'
 
-def switch_ui(target):
+def switch_gate(target):
     st.session_state.gate_mode = target
 
-# --- 2. THE VAULT ENGINE (CSS) ---
+# --- 2. THE VAULT ARCHITECTURE (CSS) ---
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap');
 
     .stApp {{ background-color: #010409; }}
 
-    /* THE VAULT CONTAINER - LOCKED DIMENSIONS */
-    .master-vault {{
+    /* THE VAULT MASTER CONTAINER - DIMENSION LOCK */
+    .master-vault-anchor {{
         position: relative;
-        width: 1000px;
-        height: 600px;
-        margin: 40px auto;
-        border: 2px solid #00d4ff; /* Neon border from photo */
-        border-radius: 25px;
-        background: rgba(10, 25, 47, 0.4);
-        backdrop-filter: blur(25px);
-        overflow: hidden;
+        width: 900px;
+        height: 550px;
+        margin: 50px auto; /* Centered in the browser */
         z-index: 1;
-        box-shadow: 0 0 50px rgba(0, 212, 255, 0.2);
     }}
 
-    /* THE BLUE DIAGONAL PLANE */
-    .blue-shutter {{
-        position: absolute;
-        width: 180%;
-        height: 180%;
-        background: linear-gradient(135deg, #00d4ff 0%, #005f73 100%);
-        transition: all 1.2s cubic-bezier(0.7, 0, 0.3, 1);
-        transform-origin: bottom right;
-        z-index: 2; /* Sits between the box and the text */
-        pointer-events: none;
-    }}
-
-    /* ANIMATION LOGIC */
-    .mode-login .blue-shutter {{ transform: rotate(0deg); right: -90%; top: -40%; }}
-    .mode-signup .blue-shutter {{ transform: rotate(105deg); right: 40%; top: -40%; }}
-
-    /* FORCING STREAMLIT INSIDE THE BOX */
-    .widget-container {{
+    /* THE GLOWING SHELL (The Box from your photos) */
+    .vault-shell {{
         position: absolute;
         top: 0; left: 0;
         width: 100%;
         height: 100%;
-        z-index: 10; /* Ensures visibility over the blue panel */
-        display: flex;
-        padding: 50px;
+        border: 2px solid #00d4ff;
+        border-radius: 20px;
+        background: rgba(10, 25, 47, 0.4);
+        backdrop-filter: blur(25px);
+        overflow: hidden;
+        z-index: 2;
+        box-shadow: 0 0 50px rgba(0, 212, 255, 0.2);
     }}
 
-    .form-section {{
+    /* THE DYNAMIC BLUE PANEL (The Shutter) */
+    .blue-shutter {{
+        position: absolute;
+        width: 150%;
+        height: 150%;
+        background: linear-gradient(135deg, #00d4ff 0%, #005f73 100%);
+        transition: all 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+        transform-origin: bottom right; /* Radius pivot anchor */
+        z-index: 3;
+        pointer-events: none; /* Allows clicks to pass through to buttons */
+    }}
+
+    /* KINETIC STATES: BLUE PANEL ROTATION */
+    /* Login State: Blue Panel on the Right Side */
+    .mode-login .blue-shutter {{ 
+        transform: rotate(0deg); 
+        right: -75%; 
+        top: -25%; 
+    }}
+    /* Register State: Blue Panel Rotates Clockwise to the Left Side */
+    .mode-signup .blue-shutter {{ 
+        transform: rotate(115deg); 
+        right: 45%; 
+        top: -25%; 
+    }}
+
+    /* THE WIDGET LAYER: Forces Inputs inside the Box */
+    .widget-layer {{
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10; /* Highest priority: ensures text is on top */
+        display: flex;
+        padding: 40px;
+    }}
+
+    .active-column {{
         width: 50%;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        padding: 20px;
     }}
 
-    /* UI CLEANUP TO MATCH SCREENSHOT */
+    /* INTERFACE REFINEMENT (Matches your Screenshots) */
     header, footer {{ visibility: hidden; }}
-    .stTextInput input {{ background: rgba(0,0,0,0.4) !important; color: white !important; border: 1px solid #222 !important; }}
+    .stTextInput input {{ background: rgba(0,0,0,0.5) !important; color: white !important; border: 1px solid #333 !important; }}
     .stButton>button {{
         background: linear-gradient(90deg, #00d4ff, #005f73) !important;
         color: white !important;
         font-weight: bold !important;
-        letter-spacing: 2px;
         border: none !important;
+        letter-spacing: 2px;
     }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. RENDERING THE ARCHITECTURE ---
+# --- 3. RENDERING THE VAULT GATE ---
 mode_class = f"mode-{st.session_state.gate_mode}"
 
-# This main div creates the BOX and the BLUE PANEL first
-st.markdown(f"""
-<div class="master-vault {mode_class}">
-    <div class="blue-shutter"></div>
-</div>
-""", unsafe_allow_html=True)
+# Root Container Start
+st.markdown(f'<div class="master-vault-anchor {mode_class}">', unsafe_allow_html=True)
 
-# This container overlays the Streamlit parts DIRECTLY ON TOP of the box coordinates
-st.markdown('<div class="widget-container">', unsafe_allow_html=True)
+# Background Visuals (Box + Shutter)
+st.markdown('<div class="vault-shell">', unsafe_allow_html=True)
+st.markdown('<div class="blue-shutter"></div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Foreground Interactive Layer (Teleports inputs into the box)
+st.markdown('<div class="widget-layer">', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
     if st.session_state.gate_mode == 'login':
-        st.markdown('<div class="form-section">', unsafe_allow_html=True)
-        st.markdown("<h1 style='font-family:Orbitron; color:#00d4ff; margin-bottom:0;'>LOGIN</h1>", unsafe_allow_html=True)
+        st.markdown('<div class="active-column">', unsafe_allow_html=True)
+        st.markdown("<h2 style='font-family:Orbitron; color:#00d4ff; margin-bottom:0;'>LOGIN</h2>", unsafe_allow_html=True)
         st.markdown("<p style='color:#777; font-size:0.8em; margin-bottom:20px;'>DIRECTOR ACCESS REQUIRED</p>", unsafe_allow_html=True)
         
-        st.text_input("USERNAME", key="l_id", placeholder="Enter ID...")
+        st.text_input("USERNAME", key="l_id", placeholder="Enter Identity...")
         st.text_input("PASSWORD", type="password", key="l_pass", placeholder="••••••••")
         
-        if st.button("LOGIN", use_container_width=True):
-            st.toast("Verifying...")
+        if st.button("INITIATE LOGIN", use_container_width=True):
+            st.toast("Verifying protocols...")
         
-        st.markdown("<br><p style='font-size:0.8em; color:#555;'>Don't have an account?</p>", unsafe_allow_html=True)
-        st.button("SIGN UP", on_click=switch_ui, args=('signup',), use_container_width=True)
+        st.markdown("<br><p style='font-size:0.8em; color:#555;'>No Identity Hash?</p>", unsafe_allow_html=True)
+        st.button("SIGN UP", on_click=switch_gate, args=('signup',), use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        # Spacer for the blue panel when it rotates to the left side
+        st.empty()
 
 with col2:
     if st.session_state.gate_mode == 'signup':
-        st.markdown('<div class="form-section">', unsafe_allow_html=True)
-        st.markdown("<h1 style='font-family:Orbitron; color:#00d4ff; margin-bottom:0;'>REGISTER</h1>", unsafe_allow_html=True)
+        st.markdown('<div class="active-column">', unsafe_allow_html=True)
+        st.markdown("<h2 style='font-family:Orbitron; color:#00d4ff; margin-bottom:0;'>REGISTER</h2>", unsafe_allow_html=True)
         st.markdown("<p style='color:#777; font-size:0.8em; margin-bottom:20px;'>INITIALIZE NEW IDENTITY</p>", unsafe_allow_html=True)
         
-        st.text_input("NAME", key="r_name")
-        st.text_input("EMAIL", key="r_mail")
-        st.text_input("PASSWORD", type="password", key="r_pass")
+        st.text_input("FULL NAME", key="r_name")
+        st.text_input("SECURE EMAIL", key="r_mail")
+        st.text_input("CREATE PASSWORD", type="password", key="r_pass")
         
-        if st.button("REGISTER", use_container_width=True):
-            st.info("Identity created.")
+        if st.button("CREATE IDENTITY", use_container_width=True):
+            st.info("Generating Identity Protocols...")
             
-        st.markdown("<br><p style='font-size:0.8em; color:#555;'>Already have an account?</p>", unsafe_allow_html=True)
-        st.button("SIGN IN", on_click=switch_ui, args=('login',), use_container_width=True)
+        st.markdown("<br><p style='font-size:0.8em; color:#555;'>Already established?</p>", unsafe_allow_html=True)
+        st.button("SIGN IN", on_click=switch_gate, args=('login',), use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        # Spacer for the blue panel when it stays on the right side
+        st.empty()
 
-st.markdown('</div>', unsafe_allow_html=True) # End widget-container
-st.markdown('</div>', unsafe_allow_html=True) # End master-vault
+st.markdown('</div>', unsafe_allow_html=True) # End widget-layer
+st.markdown('</div>', unsafe_allow_html=True) # End master-vault-anchor
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
