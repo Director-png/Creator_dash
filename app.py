@@ -1141,159 +1141,162 @@ NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
 FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 import streamlit as st
-import pandas as pd
-import requests
 import datetime
+import requests
+import pandas as pd
 
-# --- 1. CONFIG & SESSION INITIALIZATION ---
+# --- 1. CONFIG & STATE ---
 st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
 
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
-if 'otp_sent' not in st.session_state: st.session_state.otp_sent = False
-if 'rec_otp_sent' not in st.session_state: st.session_state.rec_otp_sent = False
-if 'generated_otp' not in st.session_state: st.session_state.generated_otp = None
-if 'user_status' not in st.session_state: st.session_state.user_status = "Free"
 if 'ui_mode' not in st.session_state: st.session_state.ui_mode = 'login'
+if 'otp_sent' not in st.session_state: st.session_state.otp_sent = False
 
 # VOID TIER MAPPING
 TIER_MAP = {"Pro": "Operative", "Elite": "Director", "Core": "Agency", "Free": "Free"}
 
-# ELITE BYPASS CODES
-ELITE_CIPHERS = {
-    "VOID-X": "Elite Pioneer 1", # Replace with get_void_secret calls in your local env
-    "VOID-Y": "Elite Pioneer 2",
-    "VOID-Z": "Elite Pioneer",
-}
-
-# --- 2. CSS: THE DIAGONAL SWEEP & GLASSMORPHISM ---
+# --- 2. THE KINETIC ENGINE (CSS) ---
 st.markdown("""
 <style>
-    @keyframes diagonalSweepIn {
-        0% { clip-path: polygon(0 0, 0 0, 0 0); opacity: 0; }
-        100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); opacity: 1; }
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
 
+    /* BACKGROUND */
     .stApp {
-        background: url('https://w0.peakpx.com/wallpaper/419/627/HD-wallpaper-interstellar-black-hole-black-hole-interstellar-movie-space.jpg') no-repeat center center fixed;
-        background-size: cover;
+        background: radial-gradient(circle at center, #0a192f 0%, #020617 100%);
+        font-family: 'Inter', sans-serif;
     }
 
-    .gatekeeper-glass {
-        background: rgba(10, 10, 10, 0.55);
-        backdrop-filter: blur(40px) saturate(150%);
+    /* THE MAIN CONTAINER */
+    .gatekeeper-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        padding: 50px;
-        max-width: 850px;
-        margin: 40px auto;
-        box-shadow: 0 40px 100px rgba(0,0,0,0.9);
-        animation: diagonalSweepIn 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+        border-radius: 24px;
+        width: 1000px;
+        height: 600px;
+        margin: 50px auto;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        box-shadow: 0 50px 100px rgba(0,0,0,0.5);
     }
 
-    h1, h2, h3, p, label { font-family: 'Inter', sans-serif !important; color: #D9D9D9 !important; letter-spacing: 2px; }
+    /* THE BLUE PLANE (DIAGONAL ANIMATION) */
+    .blue-plane {
+        position: absolute;
+        top: 0;
+        width: 150%;
+        height: 100%;
+        background: linear-gradient(135deg, #00d4ff 0%, #005f73 100%);
+        transition: all 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+        z-index: 10;
+        clip-path: polygon(15% 0%, 100% 0%, 85% 100%, 0% 100%);
+    }
+
+    /* POSITIONING STATES */
+    .mode-login .blue-plane { left: 50%; transform: translateX(0); }
+    .mode-signup .blue-plane { left: -100%; transform: translateX(0); }
+
+    /* CONTENT SLIDE ANIMATIONS */
+    @keyframes slideFromRight {
+        0% { transform: translateX(100px); opacity: 0; }
+        100% { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideFromLeft {
+        0% { transform: translateX(-100px); opacity: 0; }
+        100% { transform: translateX(0); opacity: 1; }
+    }
+
+    .form-content {
+        padding: 60px;
+        width: 50%;
+        z-index: 5;
+    }
+
+    .mode-login .login-fields { animation: slideFromLeft 0.8s ease-out forwards; delay: 0.4s; }
+    .mode-signup .signup-fields { animation: slideFromRight 0.8s ease-out forwards; delay: 0.4s; }
+
+    /* INPUT STYLING */
     .stTextInput input {
-        background: rgba(255, 255, 255, 0.05) !important;
-        border: none !important;
-        border-bottom: 2px solid rgba(0, 212, 255, 0.2) !important;
+        background: rgba(255,255,255,0.05) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
         color: white !important;
-        border-radius: 0px !important;
+        border-radius: 8px !important;
     }
+
+    /* BUTTONS */
     div.stButton > button {
-        background-color: #00d4ff !important;
-        color: black !important;
-        font-weight: bold !important;
+        background: #00d4ff !important;
+        color: #000 !important;
         border: none !important;
-        letter-spacing: 2px;
-        transition: 0.3s;
+        font-weight: 700 !important;
+        border-radius: 8px !important;
+        padding: 10px 20px !important;
     }
-    div.stButton > button:hover { box-shadow: 0 0 25px rgba(0, 212, 255, 0.4); transform: translateY(-2px); }
-    
-    /* Hide Streamlit components */
+
     header, footer {visibility: hidden;}
-    .main .block-container { padding-top: 2rem; }
 </style>
 """, unsafe_allow_html=True)
 
 # --- 3. LOGIC CONTROLLER ---
-def switch_ui(target):
+def toggle_mode(target):
     st.session_state.ui_mode = target
     st.rerun()
 
 if not st.session_state.logged_in:
-    # Outer Wrapper
-    st.markdown(f'<div class="gatekeeper-glass">', unsafe_allow_html=True)
+    # Applying the state class to the outer container
+    mode_class = f"mode-{st.session_state.ui_mode}"
     
-    # UI Header
-    st.markdown("<h1 style='text-align: center; color: #00d4ff; letter-spacing: 8px;'>VOID OS</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #888; font-size: 0.8em; margin-bottom: 30px;'>INTELLIGENCE ACCESS PROTOCOL v4.6</p>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="gatekeeper-card {mode_class}">
+        <div class="blue-plane">
+            <div style="padding: 100px; color: white; text-align: center;">
+                <h1 style="font-size: 3em; letter-spacing: 5px;">VOID OS</h1>
+                <p style="opacity: 0.8;">INTELLIGENCE ACCESS PROTOCOL</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
 
-    # State-based Tab Rendering (To simulate the smooth video transition)
-    cols = st.columns(3)
-    if cols[0].button("🔑 LOGIN", use_container_width=True): switch_ui('login')
-    if cols[1].button("🛡️ IDENTITY", use_container_width=True): switch_ui('signup')
-    if cols[2].button("🛰️ ELITE", use_container_width=True): switch_ui('elite')
-    st.markdown("---")
-
-    # --- MODE 1: LOGIN ---
+    # --- LEFT SIDE: LOGIN CONTENT ---
     if st.session_state.ui_mode == 'login':
-        email_in = st.text_input("DIRECTOR EMAIL", key="l_email").lower().strip()
+        st.markdown('<div class="form-content login-fields">', unsafe_allow_html=True)
+        st.subheader("Welcome Back, Director")
+        email_in = st.text_input("UPLINK EMAIL", key="l_email")
         pw_in = st.text_input("PASSKEY", type="password", key="l_pw")
         
         if st.button("INITIATE UPLINK", use_container_width=True):
-            # Admin Bypass Logic
-            if email_in == "admin" and pw_in == "void": # Example creds
-                st.session_state.update({"logged_in": True, "user_name": "Master Director", "user_status": "Agency"})
-                st.rerun()
-            # Standard Auth Logic
-            else:
-                # Insert your load_user_db() and match check here
-                st.error("INTEGRITY BREACH: CREDENTIALS NOT FOUND.")
+            # Your auth logic here
+            st.success("Verifying...")
+        
+        st.markdown("<p style='font-size:0.8em; margin-top:20px;'>New Identity required?</p>", unsafe_allow_html=True)
+        if st.button("Initialize Registration"):
+            toggle_mode('signup')
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        with st.expander("RECOVERY PROTOCOL"):
-            st.info("Lost Passkey Recovery")
-            # [Insert your recovery logic here]
-
-    # --- MODE 2: IDENTITY INITIALIZATION (SIGNUP) ---
-    elif st.session_state.ui_mode == 'signup':
-        if not st.session_state.otp_sent:
-            c1, c2 = st.columns(2)
-            with c1:
-                n = st.text_input("FULL NAME", key="r_n")
-                e = st.text_input("EMAIL", key="r_e")
-            with c2:
-                mob = st.text_input("MOBILE", key="r_m")
-                p = st.text_input("PASSKEY", type="password", key="r_p")
-            
-            sa = st.text_input("SECURITY KEY (DOB/ANSWER)", key="r_s")
-            legal = st.checkbox("Agree to VOID-OS Deployment Protocols.")
-
-            if st.button("⚔️ GENERATE SECURE OTP", use_container_width=True, disabled=not legal):
-                # [Insert your OTP generation and request logic here]
-                st.session_state.otp_sent = True
-                st.rerun()
-        else:
-            st.markdown("### PHASE 2: VERIFY UPLINK")
-            user_otp = st.text_input("ENTER 6-DIGIT CODE", placeholder="000000")
-            if st.button("🔓 FINALIZE INITIALIZATION", use_container_width=True):
-                # [Insert your finalized registration logic here]
-                st.success("Identity Secured.")
-            if st.button("Edit Info"): st.session_state.otp_sent = False; st.rerun()
-
-    # --- MODE 3: ELITE UPLINK ---
-    elif st.session_state.ui_mode == 'elite':
-        st.markdown("### 🛰️ ELITE UPLINK (BYPASS)")
-        cipher_in = st.text_input("ENTER ELITE ACCESS CIPHER", type="password")
-        if st.button("⚡ EXECUTE PRO BYPASS", use_container_width=True):
-            if cipher_in in ELITE_CIPHERS:
-                st.session_state.update({"logged_in": True, "user_name": ELITE_CIPHERS[cipher_in], "user_status": "Operative"})
-                st.rerun()
-            else: st.error("INVALID CIPHER.")
+    # --- RIGHT SIDE: SIGNUP CONTENT ---
+    else:
+        # Space filler for the left side when signup is active
+        st.markdown('<div class="form-content"></div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="form-content signup-fields">', unsafe_allow_html=True)
+        st.subheader("Initialize Identity")
+        n = st.text_input("FULL NAME", key="r_n")
+        e = st.text_input("SECURE EMAIL", key="r_e")
+        p = st.text_input("CREATE PASSKEY", type="password", key="r_p")
+        
+        if st.button("⚔️ GENERATE OTP", use_container_width=True):
+            # Your registration logic here
+            st.info("OTP Transmitted.")
+        
+        st.markdown("<p style='font-size:0.8em; margin-top:20px;'>Already have access?</p>", unsafe_allow_html=True)
+        if st.button("Return to Login"):
+            toggle_mode('login')
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
-    st.stop()
 
-# --- POST-LOGIN CONTENT ---
-st.success(f"Uplink Established: Welcome, {st.session_state.user_name}")
+else:
+    st.title("Welcome to the Neural Forge, Director.")
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
