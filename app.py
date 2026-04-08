@@ -1127,19 +1127,6 @@ is_admin = str(user_role_raw).lower() == 'admin' or st.session_state.get('admin_
 is_paid = "paid" in str(user_status_raw).lower() or "pro" in str(user_status_raw).lower()
 
 
-# --- EMERGENCY DIAGNOSTIC ---
-if st.sidebar.checkbox("🔍 Debug Node Mapping"):
-    users_test = load_user_db()
-    if not users_test.empty:
-        st.write("Current Columns:", users_test.columns.tolist())
-        st.write("Top Row Sample:", users_test.iloc[0].values.tolist())
-    else:
-        st.error("Sheet is empty or URL is invalid.")
-# --- CONFIGURATION (Ensure these are defined) ---
-# Pulling from the secret vault we just set up
-NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
-FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
-
 # --- GATEKEEPER START ---
 # 1. SESSION STATE INITIALIZATION
 if 'logged_in' not in st.session_state:
