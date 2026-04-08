@@ -1141,120 +1141,110 @@ NEW_URL = get_void_secret("NEW_URL", "RESTRICTED")
 FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 import streamlit as st
+import streamlit.components.v1 as components
 
-# --- 1. CORE SYSTEM CONFIG ---
 st.set_page_config(page_title="VOID OS", layout="wide")
 
-if 'ui_mode' not in st.session_state:
-    st.session_state.ui_mode = 'login'
+# This is the "State Machine" that handles the logic
+if 'mode' not in st.session_state:
+    st.session_state.mode = 'login'
 
-def switch_vault(mode):
-    st.session_state.ui_mode = mode
+# --- THE CSS & HTML ARCHITECTURE ---
+# We build the box, the blue panel, and the inputs in ONE BLOCK.
+html_code = f"""
+<div id="vault-root" class="vault-container {st.session_state.mode}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400&display=swap');
+        
+        body {{ margin: 0; background: #010409; font-family: 'Inter', sans-serif; }}
+        
+        .vault-container {{
+            position: relative;
+            width: 800px;
+            height: 500px;
+            margin: 100px auto;
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            background: rgba(10, 25, 47, 0.6);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+        }}
 
-# --- 2. THE NESTED BOX ENGINE (CSS) ---
-st.markdown(f"""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap');
+        /* THE BLUE SHUTTER - FIXED ANCHOR */
+        .shutter {{
+            position: absolute;
+            width: 150%; height: 150%;
+            background: linear-gradient(135deg, #00d4ff 0%, #005f73 100%);
+            transition: all 1s cubic-bezier(0.7, 0, 0.3, 1);
+            transform-origin: bottom right;
+            z-index: 2;
+        }}
 
-    .stApp {{ background-color: #010409; }}
+        /* ROTATION LOGIC */
+        .login .shutter {{ transform: rotate(0deg); right: -85%; top: -30%; }}
+        .signup .shutter {{ transform: rotate(110deg); right: 40%; top: -30%; }}
 
-    /* BIG BOX (The Master Frame) */
-    .master-frame {{
-        position: relative;
-        width: 950px;
-        height: 550px;
-        margin: 50px auto;
-        border: 2px solid #00d4ff;
-        border-radius: 20px;
-        background: rgba(10, 25, 47, 0.4);
-        backdrop-filter: blur(20px);
-        overflow: hidden;
-        z-index: 1;
-    }}
+        /* THE INPUT BOXES (Locked Inside) */
+        .content-layer {{
+            position: absolute;
+            width: 100%; height: 100%;
+            display: flex;
+            z-index: 10;
+        }}
 
-    /* THE BLUE PANEL (The Shutter) */
-    .shutter {{
-        position: absolute;
-        width: 150%;
-        height: 150%;
-        background: linear-gradient(135deg, #00d4ff 0%, #005f73 100%);
-        transition: all 1.2s cubic-bezier(0.7, 0, 0.3, 1);
-        transform-origin: bottom right;
-        z-index: 2;
-        pointer-events: none;
-    }}
+        .side {{
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 50px;
+        }}
 
-    /* ANIMATION LOGIC */
-    .mode-login .shutter {{ transform: rotate(0deg); right: -80%; top: -30%; }}
-    .mode-signup .shutter {{ transform: rotate(115deg); right: 45%; top: -30%; }}
+        h2 {{ font-family: 'Orbitron'; color: #00d4ff; margin: 0; }}
+        input {{
+            background: rgba(0,0,0,0.4);
+            border: 1px solid #333;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            width: 90%;
+        }}
+        
+        button {{
+            background: linear-gradient(90deg, #00d4ff, #005f73);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }}
+    </style>
 
-    /* SMALL BOX (The Inner Container) */
-    .inner-box-anchor {{
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 10;
-        display: flex;
-        padding: 40px;
-    }}
+    <div class="shutter"></div>
+    
+    <div class="content-layer">
+        <div class="side" id="form-side">
+            {"<h2>LOGIN</h2><input placeholder='ID'><input type='password' placeholder='PASS'><button onclick='parent.window.location.reload()'>INITIATE</button>" if st.session_state.mode == 'login' else ""}
+            {"<h2>REGISTER</h2><input placeholder='NAME'><input placeholder='EMAIL'><input type='password' placeholder='PASS'><button onclick='parent.window.location.reload()'>GENERATE</button>" if st.session_state.mode == 'signup' else ""}
+        </div>
+        <div class="side">
+            </div>
+    </div>
+</div>
+"""
 
-    /* The actual "Small Box" styling you requested */
-    .small-login-box {{
-        width: 400px;
-        height: 450px;
-        padding: 30px;
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(0, 212, 255, 0.3);
-        border-radius: 15px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }}
+# Render the custom component
+st.components.v1.html(html_code, height=700)
 
-    header, footer {{ visibility: hidden; }}
-</style>
-""", unsafe_allow_html=True)
-
-# --- 3. RENDERING THE NESTED STRUCTURE ---
-mode_class = f"mode-{st.session_state.ui_mode}"
-
-# Start Master Frame
-st.markdown(f'<div class="master-frame {mode_class}">', unsafe_allow_html=True)
-st.markdown('<div class="shutter"></div>', unsafe_allow_html=True)
-
-# Start Anchor Layer
-st.markdown('<div class="inner-box-anchor">', unsafe_allow_html=True)
-
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.session_state.ui_mode == 'login':
-        st.markdown('<div class="small-login-box">', unsafe_allow_html=True)
-        st.markdown("<h2 style='font-family:Orbitron; color:#00d4ff;'>UPLINK</h2>", unsafe_allow_html=True)
-        st.text_input("ID", key="l_id", placeholder="Director Hash...")
-        st.text_input("KEY", type="password", key="l_key")
-        if st.button("INITIATE", use_container_width=True):
-            st.toast("Syncing...")
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.button("SIGN UP", on_click=switch_vault, args=('signup',), use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-with col2:
-    if st.session_state.ui_mode == 'signup':
-        st.markdown('<div class="small-login-box">', unsafe_allow_html=True)
-        st.markdown("<h2 style='font-family:Orbitron; color:#00d4ff;'>REGISTER</h2>", unsafe_allow_html=True)
-        st.text_input("NAME", key="r_name")
-        st.text_input("EMAIL", key="r_email")
-        st.text_input("KEY", type="password", key="r_key")
-        if st.button("CREATE", use_container_width=True):
-            st.info("Identity generated.")
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.button("BACK", on_click=switch_vault, args=('login',), use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True) # End Anchor Layer
-st.markdown('</div>', unsafe_allow_html=True) # End Master Frame
+# Streamlit Buttons (outside the box for now to control the switch)
+st.write("---")
+if st.button("TOGGLE VAULT MODE"):
+    st.session_state.mode = 'signup' if st.session_state.mode == 'login' else 'login'
+    st.rerun()
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
