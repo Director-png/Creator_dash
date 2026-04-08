@@ -1142,92 +1142,88 @@ FORM_POST_URL = get_void_secret("FORM_POST_URL", "RESTRICTED")
 
 import streamlit as st
 
-# --- 1. CONFIG ---
-st.set_page_config(page_title="VOID OS", page_icon="🌑", layout="wide")
+# --- 1. CONFIG & STATE ---
+st.set_page_config(page_title="VOID OS", layout="wide")
 
 if 'ui_mode' not in st.session_state: st.session_state.ui_mode = 'login'
 
-def toggle_mode(target):
+def flip_vault(target):
     st.session_state.ui_mode = target
 
-# --- 2. THE HORIZON ENGINE (CSS) ---
+# --- 2. MONOLITH ARCHITECTURE (CSS) ---
 st.markdown(f"""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Inter:wght@200;400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@200;400;700&family=Orbitron:wght@900&display=swap');
 
     .stApp {{
-        background-color: #000;
-        font-family: 'Inter', sans-serif;
+        background: #000;
+        background-image: 
+            linear-gradient(rgba(0, 212, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 212, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        font-family: 'JetBrains Mono', monospace;
     }}
 
-    /* BACKGROUND WATERMARK */
-    .bg-text {{
-        position: fixed;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        font-family: 'Orbitron', sans-serif;
-        font-size: 25vw;
-        color: rgba(0, 212, 255, 0.03);
-        z-index: 0;
-        pointer-events: none;
-        letter-spacing: 50px;
+    /* THE CENTER ANCHOR */
+    .monolith-wrapper {{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 85vh;
+        perspective: 1500px;
     }}
 
-    /* THE HORIZON LINE */
-    .horizon-line {{
-        position: fixed;
-        left: 0;
-        width: 100%;
-        height: 2px;
-        background: #00d4ff;
-        box-shadow: 0 0 20px #00d4ff, 0 0 40px #00d4ff;
-        transition: all 1s cubic-bezier(0.8, 0, 0.2, 1);
-        z-index: 5;
-    }}
-
-    /* LINE POSITIONING BASED ON MODE */
-    .line-login {{ top: 30vh; }}
-    .line-signup {{ top: 70vh; }}
-
-    /* FORM POSITIONING */
-    .content-wrapper {{
+    /* THE 3D SERVER COLUMN */
+    .monolith {{
         position: relative;
-        z-index: 10;
-        padding-top: 10vh;
+        width: 450px;
+        height: 650px;
+        background: #050505;
+        border: 1px solid #111;
+        border-left: 4px solid #00d4ff;
+        box-shadow: -20px 0 50px rgba(0, 212, 255, 0.1);
+        padding: 40px;
+        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
         flex-direction: column;
-        align-items: center;
     }}
 
-    /* WIDGET REFINEMENT */
-    .stTextInput input {{
-        background: transparent !important;
-        border: none !important;
-        border-bottom: 1px solid rgba(0, 212, 255, 0.3) !important;
-        color: white !important;
-        font-size: 1.5em !important;
-        text-align: center !important;
-        transition: 0.5s;
+    /* MODE GLINT EFFECT */
+    .monolith::before {{
+        content: "";
+        position: absolute;
+        top: 0; left: -4px;
+        width: 4px; height: 100%;
+        background: #00d4ff;
+        box-shadow: 0 0 20px #00d4ff;
+        opacity: 0.8;
     }}
-    .stTextInput input:focus {{
-        border-bottom: 1px solid #00d4ff !important;
-        box-shadow: none !important;
+
+    /* 2026 TYPE STYLING */
+    .status-bit {{
+        color: #00d4ff;
+        font-size: 0.7em;
+        letter-spacing: 2px;
+        margin-bottom: 20px;
+    }}
+
+    .stTextInput label {{ color: #444 !important; font-size: 0.7em !important; }}
+    .stTextInput input {{
+        background: #0a0a0a !important;
+        border: 1px solid #111 !important;
+        color: #eee !important;
+        border-radius: 0px !important;
+        font-family: 'JetBrains Mono' !important;
     }}
 
     div.stButton > button {{
-        background: transparent !important;
-        color: #00d4ff !important;
-        border: 1px solid #00d4ff !important;
-        font-family: 'Orbitron' !important;
-        letter-spacing: 3px !important;
-        padding: 15px 40px !important;
-        margin-top: 30px;
-    }}
-    
-    div.stButton > button:hover {{
         background: #00d4ff !important;
-        color: black !important;
-        box-shadow: 0 0 30px #00d4ff;
+        color: #000 !important;
+        border-radius: 0px !important;
+        font-weight: 700 !important;
+        letter-spacing: 2px !important;
+        border: none !important;
+        margin-top: 20px;
     }}
 
     header, footer {{ visibility: hidden; }}
@@ -1236,42 +1232,49 @@ st.markdown(f"""
 
 # --- 3. THE INTERFACE ---
 
-# Background & Horizon Line
-st.markdown('<div class="bg-text">VOID</div>', unsafe_allow_html=True)
-line_pos = "line-login" if st.session_state.ui_mode == 'login' else "line-signup"
-st.markdown(f'<div class="horizon-line {line_pos}"></div>', unsafe_allow_html=True)
+st.markdown('<div class="monolith-wrapper">', unsafe_allow_html=True)
+st.markdown('<div class="monolith">', unsafe_allow_html=True)
 
-# Form Content
-st.markdown('<div class="content-wrapper">', unsafe_allow_html=True)
+# Header Section
+st.markdown(f"""
+    <div class="status-bit">SYSTEM: ACTIVE // MODE: {st.session_state.ui_mode.upper()}</div>
+    <h1 style='font-family:Orbitron; font-size:2.5em; color:white; margin:0;'>VOID</h1>
+    <p style='color:#333; font-size:0.8em; margin-bottom:40px;'>OPERATIVE_COMMAND_CENTER</p>
+""", unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns([1, 2, 1])
+# Logic Blocks
+if st.session_state.ui_mode == 'login':
+    st.text_input("UPLINK_ID", placeholder="DIRECTOR_X")
+    st.text_input("PASSKEY", type="password")
+    
+    if st.button("AUTHORIZE_SESSION", use_container_width=True):
+        st.toast("Handshake Initiated...")
+    
+    st.write("---")
+    st.button("INITIALIZE_NEW_ID", on_click=flip_vault, args=('signup',), use_container_width=True)
 
-with col2:
-    if st.session_state.ui_mode == 'login':
-        st.markdown("<h1 style='text-align:center; color:white; font-weight:200; letter-spacing:10px;'>UPLINK</h1>", unsafe_allow_html=True)
-        st.text_input("IDENTITY", placeholder="DIRECTOR_EMAIL", label_visibility="collapsed")
-        st.text_input("PASSKEY", type="password", placeholder="PASSWORD", label_visibility="collapsed")
+else:
+    st.text_input("SUBJECT_NAME")
+    st.text_input("CONTACT_UPLINK")
+    st.text_input("SECURE_KEY", type="password")
+    
+    if st.button("GENERATE_IDENTITY", use_container_width=True):
+        st.info("Identity Matrix Synced.")
         
-        if st.button("AUTHORIZE", use_container_width=True):
-            st.toast("Accessing...")
-        
-        st.write("##")
-        st.button("NEW IDENTITY PROTOCOL", on_click=toggle_mode, args=('signup',), use_container_width=True)
+    st.write("---")
+    st.button("RETURN_TO_UPLINK", on_click=flip_vault, args=('login',), use_container_width=True)
 
-    else:
-        st.write("###") # Shift down for signup
-        st.markdown("<h1 style='text-align:center; color:white; font-weight:200; letter-spacing:10px;'>INITIALIZE</h1>", unsafe_allow_html=True)
-        st.text_input("NAME", placeholder="FULL NAME", label_visibility="collapsed")
-        st.text_input("EMAIL", placeholder="SECURE EMAIL", label_visibility="collapsed")
-        st.text_input("KEY", type="password", placeholder="NEW PASSKEY", label_visibility="collapsed")
-        
-        if st.button("GENERATE SIGNATURE", use_container_width=True):
-            st.info("Protocol Initiated.")
-            
-        st.write("##")
-        st.button("RETURN TO UPLINK", on_click=toggle_mode, args=('login',), use_container_width=True)
+st.markdown('</div>', unsafe_allow_html=True) # End Monolith
+st.markdown('</div>', unsafe_allow_html=True) # End Wrapper
 
-st.markdown('</div>', unsafe_allow_html=True)
+# Footer Data
+st.markdown("""
+    <div style='position:fixed; bottom:20px; left:20px; color:#222; font-size:0.6em; line-height:1.5;'>
+        LATENCY: 12ms<br>
+        ENCRYPTION: SH-512<br>
+        NODE: VOID_MAIN_GATE
+    </div>
+""", unsafe_allow_html=True)
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
