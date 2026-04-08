@@ -1150,72 +1150,63 @@ if 'ui_mode' not in st.session_state: st.session_state.ui_mode = 'login'
 def toggle_mode(target):
     st.session_state.ui_mode = target
 
-# --- 2. THE 3D ENGINE (CSS) ---
+# --- 2. THE TACTICAL ENGINE (CSS) ---
 st.markdown(f"""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=JetBrains+Mono:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&family=Orbitron:wght@900&display=swap');
 
     .stApp {{
-        background: #020408;
-        background-image: radial-gradient(circle at 50% 50%, #001a2e 0%, #000000 100%);
-        overflow: hidden;
+        background-color: #050505;
+        font-family: 'JetBrains Mono', monospace;
     }}
 
-    /* THE 3D PERSPECTIVE WRAPPER */
-    .perspective-stage {{
-        perspective: 1000px;
+    /* THE MAIN GATE CONTAINER */
+    .gate-wrapper {{
         display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 90vh;
-        width: 100%;
-    }}
-
-    /* THE 3D SLAB */
-    .iso-slab {{
-        position: relative;
-        width: 500px;
-        background: #0a0a0a;
-        padding: 60px;
+        width: 900px;
+        height: 550px;
+        margin: 60px auto;
         border: 1px solid #111;
-        border-radius: 4px;
-        transform: rotateX(10deg) rotateY(-10deg);
-        box-shadow: 
-            20px 20px 60px rgba(0,0,0,0.8),
-            -1px -1px 0px rgba(0, 212, 255, 0.3),
-            5px 5px 15px rgba(0, 212, 255, 0.05);
-        transition: transform 0.6s cubic-bezier(0.2, 0, 0.2, 1);
+        box-shadow: 0 0 40px rgba(0,0,0,0.9);
+        background: #080808;
     }}
 
-    .iso-slab:hover {{
-        transform: rotateX(0deg) rotateY(0deg) scale(1.02);
-        box-shadow: 0 40px 80px rgba(0,0,0,0.9);
-        border-color: rgba(0, 212, 255, 0.5);
+    /* LEFT SIDEBAR: THE BRANDING SHARD */
+    .sidebar-shard {{
+        width: 300px;
+        background: #000;
+        border-right: 2px solid #00d4ff;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 40px 30px;
+        box-shadow: 10px 0 30px rgba(0, 212, 255, 0.05);
     }}
 
-    /* NEON INDICATORS */
-    .power-light {{
-        position: absolute;
-        top: 20px; right: 20px;
-        width: 8px; height: 8px;
-        background: #00d4ff;
-        border-radius: 50%;
-        box-shadow: 0 0 10px #00d4ff;
+    .system-label {{
+        color: #00d4ff;
+        font-size: 0.7rem;
+        letter-spacing: 3px;
     }}
 
-    /* TERMINAL TYPOGRAPHY */
-    .stTextInput label {{ 
-        color: #00d4ff !important; 
-        font-family: 'JetBrains Mono' !important;
-        font-size: 0.8em !important;
-        letter-spacing: 2px;
+    /* RIGHT PANE: THE INPUTS */
+    .input-pane {{
+        flex-grow: 1;
+        padding: 60px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }}
+
+    /* INPUT THEMING */
+    .stTextInput label {{ color: #444 !important; font-size: 0.8rem !important; }}
     .stTextInput input {{
         background: #000 !important;
-        border: 1px solid #222 !important;
+        border: 1px solid #1a1a1a !important;
+        border-left: 3px solid #00d4ff !important;
         color: #fff !important;
         border-radius: 0px !important;
-        font-family: 'JetBrains Mono' !important;
+        padding: 12px !important;
     }}
 
     div.stButton > button {{
@@ -1225,15 +1216,14 @@ st.markdown(f"""
         border-radius: 0px !important;
         font-family: 'Orbitron' !important;
         font-weight: 900 !important;
-        text-transform: uppercase;
-        margin-top: 20px;
+        margin-top: 10px;
         width: 100%;
+        transition: 0.3s;
     }}
-    
+
     div.stButton > button:hover {{
-        background: #00d4ff !important;
-        color: #000 !important;
-        box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+        background: rgba(0, 212, 255, 0.1) !important;
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
     }}
 
     header, footer {{ visibility: hidden; }}
@@ -1242,42 +1232,52 @@ st.markdown(f"""
 
 # --- 3. THE INTERFACE ---
 
-st.markdown('<div class="perspective-stage">', unsafe_allow_html=True)
+st.markdown('<div class="gate-wrapper">', unsafe_allow_html=True)
 
-# The 3D Slab
-st.markdown('<div class="iso-slab">', unsafe_allow_html=True)
-st.markdown('<div class="power-light"></div>', unsafe_allow_html=True)
-
-# Branding
+# Side Shard
 st.markdown(f"""
-    <h1 style='font-family:Orbitron; color:white; font-size:2.5em; margin:0; letter-spacing:8px;'>VOID</h1>
-    <p style='color:#333; font-family:monospace; font-size:0.7em; margin-bottom:40px;'>TERMINAL_ACCESS_POINT v.4</p>
+    <div class="sidebar-shard">
+        <div>
+            <div class="system-label">STATUS: ACTIVE</div>
+            <h1 style='font-family:Orbitron; color:white; font-size:3rem; margin:0;'>VOID</h1>
+            <p style='color:#333; font-size:0.7rem; margin-top:10px;'>OPERATIVE NODE 001</p>
+        </div>
+        <div style='color:#00d4ff; font-size:0.6rem; line-height:1.8; opacity:0.5;'>
+            ENCRYPTION: RSA-4096<br>
+            CORE: STABLE<br>
+            SESSION: {st.session_state.ui_mode.upper()}
+        </div>
+    </div>
 """, unsafe_allow_html=True)
 
-# Forms
+# Input Pane
+st.markdown('<div class="input-pane">', unsafe_allow_html=True)
+
 if st.session_state.ui_mode == 'login':
-    st.text_input("UPLINK_USER")
-    st.text_input("SECURE_KEY", type="password")
+    st.markdown("<h2 style='color:white; font-weight:800; margin-bottom:30px;'>UPLINK</h2>", unsafe_allow_html=True)
+    st.text_input("DIRECTOR_ID")
+    st.text_input("PASSKEY", type="password")
     
-    if st.button("EXECUTE"):
-        st.toast("Handshake...")
+    if st.button("AUTHORIZE"):
+        st.toast("Accessing...")
     
     st.write("---")
-    st.button("NEW_IDENTITY", on_click=toggle_mode, args=('signup',))
+    st.button("INITIALIZE REGISTRATION", on_click=toggle_mode, args=('signup',))
 
 else:
-    st.text_input("SUBJECT_NAME")
-    st.text_input("UPLINK_MAIL")
-    st.text_input("GEN_PASSKEY", type="password")
+    st.markdown("<h2 style='color:white; font-weight:800; margin-bottom:30px;'>INITIALIZE</h2>", unsafe_allow_html=True)
+    st.text_input("FULL_NAME")
+    st.text_input("UPLINK_EMAIL")
+    st.text_input("SET_PASSKEY", type="password")
     
-    if st.button("INITIALIZE"):
-        st.info("Protocol Ready.")
+    if st.button("EXECUTE"):
+        st.info("Protocol Initiated.")
         
     st.write("---")
-    st.button("RETURN_TO_LOGIN", on_click=toggle_mode, args=('login',))
+    st.button("BACK TO UPLINK", on_click=toggle_mode, args=('login',))
 
-st.markdown('</div>', unsafe_allow_html=True) # End Slab
-st.markdown('</div>', unsafe_allow_html=True) # End Stage
+st.markdown('</div>', unsafe_allow_html=True) # End Input Pane
+st.markdown('</div>', unsafe_allow_html=True) # End Wrapper
 
 # 1. INITIALIZE PAGE STATE (Prevents NameError)
 if 'page' not in st.session_state:
